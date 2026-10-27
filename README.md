@@ -42,8 +42,6 @@ tools are not required. Installing them improves detection on some systems:
     Fedora): names the apps using the microphone or camera. Without it,
     microphone usage falls back to ALSA, which names the sound server instead
     of the app.
-  - `playerctl`: reads what's playing and controls it. Without it, the Media
-    module is empty and media controls do nothing.
   - `zenity`: shows the confirmation before **Quit** or **Hide system tray**.
     Without it, those actions can't be confirmed, so they don't run.
   - `libpulse` (`pulseaudio-utils` on Ubuntu and Fedora): `pactl` and `paplay`
@@ -53,8 +51,6 @@ tools are not required. Installing them improves detection on some systems:
   - `bluez`: Bluetooth devices and controls.
   - `ddcutil`: brightness and power for external monitors over DDC/CI. Needs
     access to `/dev/i2c-*`, usually by being in the `i2c` group.
-  - `xdotool`: on X11, a title for media playing in a browser that `playerctl`
-    can't see.
 
   Install with pacman (`sudo pacman -S pciutils lm_sensors ddcutil`) or apt
   (`sudo apt install pciutils lm-sensors ddcutil`).

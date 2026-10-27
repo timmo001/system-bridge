@@ -215,9 +215,6 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	mediaTicker := time.NewTicker(mediaInterval)
 	defer mediaTicker.Stop()
 
-	// Start platform-specific listeners (e.g., playerctl on Linux) to trigger updates
-	StartPlayerctlListener(dataStore)
-
 	// Run continuously
 	for {
 		select {

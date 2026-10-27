@@ -3,6 +3,7 @@
 package media
 
 import (
+	"context"
 	"encoding/json"
 	"os/exec"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
+func getMediaData(_ context.Context, mediaData types.MediaData) (types.MediaData, error) {
 	// On macOS, we'll use osascript to get media information
 	cmd := exec.Command("osascript", "-e", `
 		tell application "System Events"

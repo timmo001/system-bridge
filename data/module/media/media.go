@@ -1,13 +1,14 @@
 package media
 
 import (
+	"context"
 	"time"
 
 	"github.com/timmo001/system-bridge/types"
 )
 
 // GetMediaData gets media information from the system
-func GetMediaData() (types.MediaData, error) {
+func GetMediaData(ctx context.Context) (types.MediaData, error) {
 	// Get current timestamp
 	now := float64(time.Now().Unix())
 
@@ -17,5 +18,5 @@ func GetMediaData() (types.MediaData, error) {
 	}
 
 	// Get platform-specific media data
-	return getMediaData(mediaData)
+	return getMediaData(ctx, mediaData)
 }

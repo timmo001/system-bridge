@@ -4,6 +4,7 @@ package media
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -51,7 +52,7 @@ func locateNowPlayingExe() (string, error) {
 	return "", errors.New("NowPlaying.exe not found")
 }
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
+func getMediaData(_ context.Context, mediaData types.MediaData) (types.MediaData, error) {
 	exePath, err := locateNowPlayingExe()
 	if err != nil {
 		// Fail quietly and keep defaults

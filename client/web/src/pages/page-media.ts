@@ -563,8 +563,7 @@ export class PageMedia extends SbPage {
                           ${
                             result.success
                               ? nothing
-                              : html`Check a player is running and supports it.
-                                  On Linux this needs <code>playerctl</code>.`
+                              : html`Check a player is running and supports it.`
                           }</span
                         >
                       </span>`

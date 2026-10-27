@@ -8,7 +8,9 @@
 # data/module/audio and data/module/system) and the Wayland protocols the
 # desktop and system modules speak (wlr-foreign-toplevel-management,
 # ext-workspace, ext-idle-notify) are released on GitLab, which the tool can't
-# follow, so check those by hand.
+# follow, so check those by hand. The media module speaks the MPRIS D-Bus
+# spec (data/module/media), which freedesktop.org changes rarely and doesn't
+# release.
 assignee: timmo001
 dispatch:
   - lint-general.yml
@@ -22,9 +24,6 @@ tools:
   - repo: hyprwm/Hyprland
     reviewed: v0.56.2
     review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers. Also check the Hyprland tools the command prefabs run in utils/handlers/command/prefab/prefab.go (hyprctl dispatch exit, grimblast save screen, active and area, and hyprshot's window and region modes).
-  - repo: altdesktop/playerctl
-    reviewed: v2.4.1
-    review: Check the Linux media handling against changed flags, format template variables and status values. data/module/media/media_linux.go reads metadata --all-players --format with title, artist, album, mpris:length, position, status, playerName, volume, shuffle, loopStatus and mpris:artUrl, and takes the length and position as microseconds. data/playerctl_linux.go follows status with -a metadata --format -F. utils/handlers/media/media_linux.go picks a player from playerInstance and status, then sends commands with --player.
   - repo: OpenAsar/arrpc
     reviewed: 3.7.0
     review: A proxy for Discord's local RPC over IPC, which has no releases of its own. Read the arRPC release notes, then Discord's RPC page (developers/topics/rpc.mdx in discord/discord-api-docs) for anything changed since the last review, and check discord/ (ipc.go and dial_*.go for the socket and framing, discord.go for AUTHORIZE, AUTHENTICATE, SUBSCRIBE and the GET_* commands and events it decodes, control.go for SET_VOICE_SETTINGS, auth.go for the OAuth2 token exchange) against changed commands, events, fields and scopes.

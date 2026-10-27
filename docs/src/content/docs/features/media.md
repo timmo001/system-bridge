@@ -11,10 +11,10 @@ The `media` module reports the title, artist, album, artwork, position, length, 
 
 | Platform | Where it comes from |
 | --- | --- |
-| Linux | Any player that supports MPRIS, such as Spotify, VLC, mpv and most browsers, through `playerctl`. Install `playerctl` with your package manager. |
+| Linux | Any player that supports MPRIS, such as Spotify, VLC, mpv and most browsers. System Bridge reads them over D-Bus, so nothing needs installing. |
 | Windows | The current Windows media session, read by the `NowPlaying` helper that comes with System Bridge. |
 
-With several players open on Linux, System Bridge shows the first one playing, then the first one paused.
+With several players open on Linux, System Bridge shows the first one playing, then the first one paused, preferring one with a track loaded.
 
 ## Controlling playback
 
@@ -38,7 +38,7 @@ A button is greyed out when the player says it can't do that, such as skipping o
 
 | Platform | How |
 | --- | --- |
-| Linux | `playerctl` controls the player the Media module shows. Volume up and down change it by 5%, and mute sets it to 0. |
+| Linux | System Bridge controls the player the Media module shows over MPRIS. Volume up and down change its volume by 5%. Mute sets it to 0, or back to where it was when it's already muted. Some players, such as Chromium, ignore volume changes. |
 | Windows | System Bridge presses the media keys, so it controls whichever app responds to them. |
 
 ## Sharing media folders

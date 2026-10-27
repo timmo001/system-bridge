@@ -3,10 +3,7 @@
 package media
 
 import (
-	"encoding/json"
-	"os"
-	"os/exec"
-	"strconv"
+	"context"
 	"strings"
 
 	"log/slog"
@@ -14,203 +11,86 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
-	// On Linux, we'll use playerctl to get media information
-	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","playerInstance":"{{playerInstance}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}","artUrl":"{{mpris:artUrl}}"}`, "--all-players")
-	output, err := cmd.Output()
+// loopStatuses maps MPRIS's LoopStatus to the repeat values clients expect
+var loopStatuses = map[string]string{
+	"None":     "NONE",
+	"Track":    "TRACK",
+	"Playlist": "LIST",
+}
+
+func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaData, error) {
+	players, err := listPlayers(ctx)
 	if err != nil {
-		// Info logging for playerctl errors (expected when no media player running)
-		slog.Info("playerctl unavailable or no players", "error", err.Error())
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			slog.Debug("playerctl stderr:", "stderr", string(exitErr.Stderr))
-		}
-		slog.Debug("ENV: DBUS_SESSION_BUS_ADDRESS=", "address", os.Getenv("DBUS_SESSION_BUS_ADDRESS"))
-		slog.Debug("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
-		slog.Debug("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
-	} else {
-		slog.Debug("playerctl output:", "output", string(output))
+		slog.Info("Failed to list media players", "error", err)
+		return mediaData, nil
+	}
+	player := pickPlayer(players)
+	if player == nil {
+		return mediaData, nil
 	}
 
-	if err == nil {
-		// playerctl --all-players may emit multiple JSON objects separated by newlines.
-		// Parse one or many lines and select the most relevant (prefer Playing, then Paused, else first).
-		type playerMetadata struct {
-			Title      string `json:"title"`
-			Artist     string `json:"artist"`
-			Album      string `json:"album"`
-			Duration   string `json:"duration"`
-			Position   string `json:"position"`
-			Status     string `json:"status"`
-			PlayerName string `json:"playerName"`
-			Instance   string `json:"playerInstance"`
-			Volume     string `json:"volume"`
-			Shuffle    string `json:"shuffle"`
-			LoopStatus string `json:"loopStatus"`
-			ArtURL     string `json:"artUrl"`
-		}
+	title := player.title()
+	artist := player.text("xesam:artist")
+	album := player.text("xesam:album")
+	name := player.name()
+	mediaData.Title = &title
+	mediaData.Artist = &artist
+	mediaData.AlbumTitle = &album
+	mediaData.Type = &name
+	if albumArtist := player.text("xesam:albumArtist"); albumArtist != "" {
+		mediaData.AlbumArtist = &albumArtist
+	}
+	if trackNumber, ok := player.metadata["xesam:trackNumber"].Value().(int32); ok {
+		number := int(trackNumber)
+		mediaData.TrackNumber = &number
+	}
 
-		parseSingle := func(b []byte) (*playerMetadata, error) {
-			var m playerMetadata
-			if err := json.Unmarshal(b, &m); err != nil {
-				return nil, err
-			}
-			return &m, nil
-		}
+	// Only art a client can load itself: a web or data URL. A file URL points
+	// at this machine's disk
+	if artURL := player.text("mpris:artUrl"); strings.HasPrefix(artURL, "https://") ||
+		strings.HasPrefix(artURL, "http://") ||
+		strings.HasPrefix(artURL, "data:image/") {
+		mediaData.Thumbnail = &artURL
+	}
 
-		// Try single JSON first
-		chosen, singleErr := parseSingle(output)
-		if singleErr != nil {
-			// Fall back to multi-line parsing
-			lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-			var candidates []playerMetadata
-			for _, line := range lines {
-				line = strings.TrimSpace(line)
-				if line == "" {
-					continue
-				}
-				if m, err := parseSingle([]byte(line)); err == nil {
-					candidates = append(candidates, *m)
-				}
-			}
+	status := strings.ToUpper(player.status())
+	if status != "PLAYING" && status != "PAUSED" {
+		status = "STOPPED"
+	}
+	mediaData.Status = &status
 
-			if len(candidates) == 0 {
-				// Keep previous warning behavior with raw output to aid debugging
-				slog.Warn("JSON unmarshal error:", "error", singleErr.Error(), "raw_output", string(output))
-				return mediaData, nil
-			}
-
-			// Select preferred candidate
-			var selected *playerMetadata
-			// Prefer Playing
-			for i := range candidates {
-				if strings.EqualFold(candidates[i].Status, "playing") {
-					selected = &candidates[i]
-					break
-				}
-			}
-			// Then Paused
-			if selected == nil {
-				for i := range candidates {
-					if strings.EqualFold(candidates[i].Status, "paused") {
-						selected = &candidates[i]
-						break
-					}
-				}
-			}
-			// Else first
-			if selected == nil {
-				selected = &candidates[0]
-			}
-			chosen = selected
-		}
-
-		// Apply chosen metadata to mediaData
-		if chosen != nil {
-			mediaData.Title = &chosen.Title
-			mediaData.Artist = &chosen.Artist
-			mediaData.AlbumTitle = &chosen.Album
-
-			// Only art a client can load itself: a web or data URL. A file
-			// URL points at this machine's disk
-			if strings.HasPrefix(chosen.ArtURL, "https://") ||
-				strings.HasPrefix(chosen.ArtURL, "http://") ||
-				strings.HasPrefix(chosen.ArtURL, "data:image/") {
-				mediaData.Thumbnail = &chosen.ArtURL
-			}
-
-			// Normalize status to HA-expected constants
-			if chosen.Status != "" {
-				s := strings.ToUpper(chosen.Status)
-				switch s {
-				case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
-					// ok
-				default:
-					// best-effort mapping
-					if strings.EqualFold(chosen.Status, "play") || strings.EqualFold(chosen.Status, "playing") {
-						s = "PLAYING"
-					} else if strings.EqualFold(chosen.Status, "pause") || strings.EqualFold(chosen.Status, "paused") {
-						s = "PAUSED"
-					} else if strings.EqualFold(chosen.Status, "stop") || strings.EqualFold(chosen.Status, "stopped") {
-						s = "STOPPED"
-					} else {
-						s = "STOPPED"
-					}
-				}
-				mediaData.Status = &s
-			}
-			mediaData.Type = &chosen.PlayerName
-
-			// Convert duration and position to float64 (duration is in microseconds)
-			if duration, err := strconv.ParseFloat(chosen.Duration, 64); err == nil {
-				dur := duration / 1e6 // convert microseconds to seconds
-				mediaData.Duration = &dur
-			}
-			if position, err := strconv.ParseFloat(chosen.Position, 64); err == nil {
-				pos := position / 1e6 // convert microseconds to seconds
-				mediaData.Position = &pos
-			}
-
-			// Parse volume string to float64 if not empty
-			if chosen.Volume != "" {
-				if vol, err := strconv.ParseFloat(chosen.Volume, 64); err == nil {
-					mediaData.Volume = &vol
-				}
-			}
-
-			// Set control states based on status, and on what the player says it
-			// can do when it can be asked
-			isPlaying := strings.ToLower(chosen.Status) == "playing"
-			canPlay, canPause := true, true
-			if capabilities, err := readCapabilities(chosen.Instance); err == nil {
-				canPlay, canPause = capabilities.play, capabilities.pause
-				mediaData.IsNextEnabled = &capabilities.next
-				mediaData.IsPreviousEnabled = &capabilities.previous
-			} else {
-				slog.Debug("Failed to read the media player's capabilities", "player", chosen.Instance, "error", err)
-			}
-			mediaData.IsPlayEnabled = &[]bool{canPlay && !isPlaying}[0]
-			mediaData.IsPauseEnabled = &[]bool{canPause && isPlaying}[0]
-			mediaData.IsStopEnabled = &[]bool{true}[0]
-
-			// Set shuffle and repeat states
-			if chosen.Shuffle != "" {
-				isShuffle := strings.ToLower(chosen.Shuffle) == "on"
-				mediaData.Shuffle = &isShuffle
-			}
-			if chosen.LoopStatus != "" {
-				// Normalize repeat to HA-expected constants: NONE/TRACK/LIST
-				ls := strings.ToUpper(chosen.LoopStatus)
-				switch ls {
-				case "NONE":
-					// ok
-				case "TRACK", "ONE":
-					ls = "TRACK"
-				case "LIST", "ALL", "PLAYLIST", "ALBUM":
-					ls = "LIST"
-				default:
-					ls = "NONE"
-				}
-				mediaData.Repeat = &ls
-			}
+	if duration, ok := microseconds(player.metadata["mpris:length"]); ok {
+		mediaData.Duration = &duration
+	}
+	if position, ok := microseconds(player.properties["Position"]); ok {
+		mediaData.Position = &position
+	}
+	if volume, ok := player.properties["Volume"].Value().(float64); ok {
+		mediaData.Volume = &volume
+	}
+	if rate, ok := player.properties["Rate"].Value().(float64); ok {
+		mediaData.PlaybackRate = &rate
+	}
+	if shuffle, ok := player.properties["Shuffle"].Value().(bool); ok {
+		mediaData.Shuffle = &shuffle
+	}
+	if loopStatus, ok := player.properties["LoopStatus"].Value().(string); ok {
+		if repeat, known := loopStatuses[loopStatus]; known {
+			mediaData.Repeat = &repeat
 		}
 	}
 
-	// If playerctl fails or no media is playing, check for browser media
-	if mediaData.Title == nil {
-		cmd = exec.Command("xdotool", "search", "--name", "YouTube|Netflix|Spotify|VLC", "getwindowname")
-		output, err = cmd.Output()
-		if err == nil {
-			title := strings.TrimSpace(string(output))
-			if title != "" {
-				mediaData.Title = &title
-				mediaData.Type = &[]string{"browser"}[0]
-				mediaData.Status = &[]string{"playing"}[0]
-				mediaData.IsPlayEnabled = &[]bool{true}[0]
-				mediaData.IsPauseEnabled = &[]bool{true}[0]
-				mediaData.IsStopEnabled = &[]bool{true}[0]
-			}
-		}
-	}
+	isPlaying := status == "PLAYING"
+	canPlay := player.can("CanPlay") && !isPlaying
+	canPause := player.can("CanPause") && isPlaying
+	canStop := player.flag("CanControl")
+	canNext := player.can("CanGoNext")
+	canPrevious := player.can("CanGoPrevious")
+	mediaData.IsPlayEnabled = &canPlay
+	mediaData.IsPauseEnabled = &canPause
+	mediaData.IsStopEnabled = &canStop
+	mediaData.IsNextEnabled = &canNext
+	mediaData.IsPreviousEnabled = &canPrevious
 
 	return mediaData, nil
 }
