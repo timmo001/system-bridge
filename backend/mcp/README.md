@@ -84,6 +84,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_hyprland_reload_config` reloads Hyprland's config.
 - `system_bridge_hyprland_run_global_shortcut` triggers a global shortcut an
   app registered with Hyprland.
+- `system_bridge_hyprland_set_submap` switches Hyprland's binds to a submap,
+  or back to the default.
 - `system_bridge_hyprland_set_window` floats or tiles, and pins or unpins, a
   window on Hyprland.
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with

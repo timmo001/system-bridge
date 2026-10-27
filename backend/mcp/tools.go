@@ -198,6 +198,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[hyprlandGlobalShortcutInput](handlers, event.EventHyprlandRunGlobalShortcut))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_set_submap",
+		Description: "Switch Hyprland's binds to a submap, or back to the default. Submaps are the binds' submap in the desktop module's hyprland.binds.",
+		InputSchema: objectSchema(map[string]any{
+			"name": map[string]any{"type": "string", "description": "Submap name. Leave out for the default."},
+		}, []string{}),
+	}, eventTool[hyprlandSubmapInput](handlers, event.EventHyprlandSetSubmap))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_window",
 		Description: "Float or tile a window on Hyprland, and pin or unpin it. Leave out a setting to keep it.",
 		InputSchema: objectSchema(map[string]any{

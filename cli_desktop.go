@@ -153,6 +153,14 @@ func hyprlandCommand() *cli.Command {
 				},
 			},
 			{
+				Name:      "submap",
+				Usage:     "Switch binds to a submap, or back to the default with no name",
+				ArgsUsage: "[name]",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					return client.Send(cmdCtx, event.EventHyprlandSetSubmap, map[string]any{"name": cmd.Args().First()})
+				},
+			},
+			{
 				Name:      "shortcut",
 				Usage:     "Trigger a global shortcut an app registered",
 				ArgsUsage: "<name>",

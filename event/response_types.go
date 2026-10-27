@@ -41,6 +41,7 @@ const (
 	ResponseTypeHyprlandDispatched        ResponseType = "HYPRLAND_DISPATCHED"
 	ResponseTypeHyprlandEvent             ResponseType = "HYPRLAND_EVENT"
 	ResponseTypeHyprlandGlobalShortcutRun ResponseType = "HYPRLAND_GLOBAL_SHORTCUT_RUN"
+	ResponseTypeHyprlandSubmapSet         ResponseType = "HYPRLAND_SUBMAP_SET"
 	ResponseTypeHyprlandWindowMoved       ResponseType = "HYPRLAND_WINDOW_MOVED"
 	ResponseTypeHyprlandWindowSet         ResponseType = "HYPRLAND_WINDOW_SET"
 	ResponseTypeKeyboardKeyPressed        ResponseType = "KEYBOARD_KEY_PRESSED"

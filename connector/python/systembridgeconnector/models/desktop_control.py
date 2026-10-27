@@ -125,6 +125,17 @@ class HyprlandSetWindowRequest:
 
 
 @dataclass(slots=True)
+class HyprlandSubmapRequest:
+    """Hyprland Submap Request.
+
+    Switches binds to a submap the desktop module's hyprland.binds are in, or
+    back to the default when name is None.
+    """
+
+    name: str | None = None
+
+
+@dataclass(slots=True)
 class OmarchyMenuRequest:
     """Omarchy Menu Request.
 

@@ -46,6 +46,10 @@ type HyprlandGlobalShortcutRequestData struct {
 	Name string `json:"name" mapstructure:"name"`
 }
 
+type HyprlandSubmapRequestData struct {
+	Name string `json:"name" mapstructure:"name"`
+}
+
 type HyprlandDispatchRequestData struct {
 	Dispatcher types.HyprlandDispatcher `json:"dispatcher" mapstructure:"dispatcher"`
 	Direction  types.HyprlandDirection  `json:"direction" mapstructure:"direction"`
@@ -136,6 +140,11 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		},
 		func(ctx context.Context, request HyprlandGlobalShortcutRequestData) error {
 			return desktop.HyprlandRunGlobalShortcut(ctx, request.Name)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetSubmap, event.ResponseTypeHyprlandSubmapSet, "Submap set",
+		func(HyprlandSubmapRequestData) string { return "" },
+		func(ctx context.Context, request HyprlandSubmapRequestData) error {
+			return desktop.HyprlandSetSubmap(ctx, request.Name)
 		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetWindow, event.ResponseTypeHyprlandWindowSet, "Window set",
 		func(request HyprlandSetWindowRequestData) string {

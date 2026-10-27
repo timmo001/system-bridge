@@ -233,6 +233,12 @@ Trigger a global shortcut an app registered with Hyprland, such as one that open
 
 - `name` (required): A `name` from the `desktop` module's `hyprland.global_shortcuts`.
 
+### `system_bridge_hyprland_set_submap`
+
+Switch Hyprland's binds to a submap, such as a resize mode, or back to the default.
+
+- `name` (optional): A submap one of the `desktop` module's `hyprland.binds` is in. Leave it out for the default.
+
 ### `system_bridge_hyprland_set_window`
 
 Float or tile a window on Hyprland, and pin or unpin it. Pinning a tiled window floats it first.

@@ -175,7 +175,7 @@ The response type is `DISPLAY_CONTROLLED`, and the displays module updates strai
 
 ## Hyprland control
 
-On Hyprland, float, pin and move windows, run dispatchers on the focused window, trigger global shortcuts, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+On Hyprland, float, pin and move windows, run dispatchers on the focused window, trigger global shortcuts, switch the submap, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
 
 | Event | Data | Response |
 | --- | --- | --- |
@@ -183,6 +183,7 @@ On Hyprland, float, pin and move windows, run dispatchers on the focused window,
 | `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
 | `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
 | `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
+| `HYPRLAND_SET_SUBMAP` | `name`, a submap the `binds` in the [`desktop`](/api/data/#desktop) data's `hyprland` are in, or none for the default | `HYPRLAND_SUBMAP_SET` |
 | `HYPRLAND_SET_WINDOW` | `id`, and either or both of `floating` and `pinned` as `true` or `false` | `HYPRLAND_WINDOW_SET` |
 
 Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. Only the global shortcuts apps have registered and the dispatchers below can run, and there's no way to send Hyprland any other command.

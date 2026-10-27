@@ -40,6 +40,7 @@ export const EventType = Schema.Literals([
   "HYPRLAND_MOVE_WINDOW",
   "HYPRLAND_RELOAD_CONFIG",
   "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+  "HYPRLAND_SET_SUBMAP",
   "HYPRLAND_SET_WINDOW",
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
@@ -101,6 +102,7 @@ export const ResponseType = Schema.Literals([
   "HYPRLAND_DISPATCHED",
   "HYPRLAND_EVENT",
   "HYPRLAND_GLOBAL_SHORTCUT_RUN",
+  "HYPRLAND_SUBMAP_SET",
   "HYPRLAND_WINDOW_MOVED",
   "HYPRLAND_WINDOW_SET",
   "KEYBOARD_KEY_PRESSED",
@@ -540,6 +542,16 @@ export const HyprlandSetWindowRequest = Schema.Struct({
 
 export interface HyprlandSetWindowRequest extends Schema.Schema.Type<
   typeof HyprlandSetWindowRequest
+> {}
+
+/** Switches binds to a submap, or back to the default when `name` is left out. */
+export const HyprlandSubmapRequest = Schema.Struct({
+  /** A submap the desktop module's `hyprland.binds` are in. */
+  name: Schema.optionalKey(Schema.String),
+});
+
+export interface HyprlandSubmapRequest extends Schema.Schema.Type<
+  typeof HyprlandSubmapRequest
 > {}
 
 /**

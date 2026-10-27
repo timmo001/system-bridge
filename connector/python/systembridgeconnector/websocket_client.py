@@ -34,6 +34,7 @@ from .models.desktop_control import (
     HyprlandGlobalShortcutRequest,
     HyprlandMoveWindowRequest,
     HyprlandSetWindowRequest,
+    HyprlandSubmapRequest,
     OmarchyMenuRequest,
     OmarchyPanelRequest,
 )
@@ -842,6 +843,19 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.HYPRLAND_SET_WINDOW,
             EventType.HYPRLAND_WINDOW_SET,
+            model,
+            request_id,
+        )
+
+    async def hyprland_set_submap(
+        self,
+        model: HyprlandSubmapRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Switch binds to a submap, or back to the default."""
+        return await self._action(
+            EventType.HYPRLAND_SET_SUBMAP,
+            EventType.HYPRLAND_SUBMAP_SET,
             model,
             request_id,
         )

@@ -86,6 +86,10 @@ type hyprlandMoveWindowInput struct {
 	Workspace string `json:"workspace"`
 }
 
+type hyprlandSubmapInput struct {
+	Name string `json:"name,omitempty"`
+}
+
 type hyprlandSetWindowInput struct {
 	ID       string `json:"id"`
 	Floating *bool  `json:"floating,omitempty"`

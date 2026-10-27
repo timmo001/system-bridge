@@ -36,6 +36,7 @@ const (
 	EventHyprlandMoveWindow        EventType = "HYPRLAND_MOVE_WINDOW"
 	EventHyprlandReloadConfig      EventType = "HYPRLAND_RELOAD_CONFIG"
 	EventHyprlandRunGlobalShortcut EventType = "HYPRLAND_RUN_GLOBAL_SHORTCUT"
+	EventHyprlandSetSubmap         EventType = "HYPRLAND_SET_SUBMAP"
 	EventHyprlandSetWindow         EventType = "HYPRLAND_SET_WINDOW"
 	EventKeyboardKeypress          EventType = "KEYBOARD_KEYPRESS"
 	EventKeyboardText              EventType = "KEYBOARD_TEXT"

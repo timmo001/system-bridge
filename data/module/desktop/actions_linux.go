@@ -299,6 +299,28 @@ func HyprlandRunGlobalShortcut(ctx context.Context, name string) error {
 	})
 }
 
+// HyprlandSetSubmap switches binds to a submap one of them names, or back to
+// the default with an empty name
+func HyprlandSetSubmap(ctx context.Context, name string) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	target := "reset"
+	if name != "" {
+		if !slices.ContainsFunc(data.Hyprland.Binds, func(bind types.HyprlandBind) bool {
+			return bind.Submap != nil && *bind.Submap == name
+		}) {
+			return fmt.Errorf("submap %q: %w", name, ErrNotFound)
+		}
+		target = name
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.submap(" + luaString(target) + ")",
+		classic: "submap " + target,
+	})
+}
+
 // HyprlandReloadConfig reloads Hyprland's config
 func HyprlandReloadConfig(ctx context.Context) error {
 	if _, err := hyprlandCurrent(ctx); err != nil {

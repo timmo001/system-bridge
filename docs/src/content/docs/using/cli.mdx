@@ -136,17 +136,18 @@ The id is the display's `id` from the [`displays`](/api/data/#displays) data. Th
 
 ## Hyprland
 
-On Hyprland, float or pin a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, or reload the config:
+On Hyprland, float or pin a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, switch the submap, or reload the config:
 
 ```bash
 system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
 system-bridge client hyprland move 0x555dbf21c9e0 2
 system-bridge client hyprland dispatch swap_window right
 system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
+system-bridge client hyprland submap resize
 system-bridge client hyprland reload
 ```
 
-`set` takes `--floating` and `--pinned`, each turned off with `=false`. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `move_focus`, `swap_window`, `toggle_group` or `toggle_split`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`.
+`set` takes `--floating` and `--pinned`, each turned off with `=false`. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `move_focus`, `swap_window`, `toggle_group` or `toggle_split`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`. `submap` with no name goes back to the default.
 
 ## Omarchy
 

@@ -92,6 +92,7 @@ var handlerPairs = map[string]pairing{
 	"HyprlandGlobalShortcutRequestData": {[]string{"HyprlandGlobalShortcutRequest"}, []string{"HyprlandGlobalShortcutRequest"}},
 	"HyprlandMoveWindowRequestData":     {[]string{"HyprlandMoveWindowRequest"}, []string{"HyprlandMoveWindowRequest"}},
 	"HyprlandSetWindowRequestData":      {[]string{"HyprlandSetWindowRequest"}, []string{"HyprlandSetWindowRequest"}},
+	"HyprlandSubmapRequestData":         {[]string{"HyprlandSubmapRequest"}, []string{"HyprlandSubmapRequest"}},
 	"KeyboardTextRequestData":           {[]string{"KeyboardText"}, []string{"KeyboardText"}},
 	"MediaControlRequestData":           {[]string{"MediaControl"}, []string{"MediaControl"}},
 	"OmarchyRequestData":                {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},

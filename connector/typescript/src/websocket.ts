@@ -62,6 +62,7 @@ import {
   HyprlandGlobalShortcutRequest,
   HyprlandMoveWindowRequest,
   HyprlandSetWindowRequest,
+  HyprlandSubmapRequest,
   KeyboardKeypress,
   KeyboardText,
   type MediaAction,
@@ -247,6 +248,10 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly hyprlandSetWindow: (
     settings: HyprlandSetWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Switches binds to a submap, or back to the default. */
+  readonly hyprlandSetSubmap: (
+    submap: HyprlandSubmapRequest,
   ) => Effect.Effect<void, WebSocketError>;
   readonly mediaControl: (
     action: MediaAction,
@@ -1117,6 +1122,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const hyprlandSetSubmap = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandSetSubmap",
+  )(function* (submap: HyprlandSubmapRequest) {
+    yield* call(
+      "HYPRLAND_SET_SUBMAP",
+      "HYPRLAND_SUBMAP_SET",
+      HyprlandSubmapRequest,
+      submap,
+      ignoreReply,
+    );
+  });
+
   const mediaControl = Effect.fn("SystemBridgeWebSocket.mediaControl")(
     function* (action: MediaAction) {
       yield* call(
@@ -1227,6 +1244,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     hyprlandReloadConfig,
     hyprlandRunGlobalShortcut,
     hyprlandSetWindow,
+    hyprlandSetSubmap,
     mediaControl,
     sendNotification,
     omarchyMenu,
