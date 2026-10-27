@@ -271,8 +271,9 @@ export interface Interface {
   readonly hyprlandSetSubmap: (
     submap: HyprlandSubmapRequest,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Controls media: an action for the player the module reports, or a full request. */
   readonly mediaControl: (
-    action: MediaAction,
+    control: MediaAction | MediaControl,
   ) => Effect.Effect<void, WebSocketError>;
   readonly sendNotification: (
     notification: Notification,
@@ -1205,12 +1206,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   });
 
   const mediaControl = Effect.fn("SystemBridgeWebSocket.mediaControl")(
-    function* (action: MediaAction) {
+    function* (control: MediaAction | MediaControl) {
       yield* call(
         "MEDIA_CONTROL",
         "MEDIA_CONTROLLED",
         MediaControl,
-        { action },
+        typeof control === "string" ? { action: control } : control,
         ignoreReply,
       );
     },

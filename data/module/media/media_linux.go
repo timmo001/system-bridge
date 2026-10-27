@@ -24,10 +24,20 @@ func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaDa
 		slog.Info("Failed to list media players", "error", err)
 		return mediaData, nil
 	}
+	for _, player := range players {
+		mediaData.Players = append(mediaData.Players, types.MediaPlayer{
+			ID:     player.instance,
+			Name:   player.name(),
+			Status: player.state(),
+			Title:  player.title(),
+			Artist: player.text("xesam:artist"),
+		})
+	}
 	player := pickPlayer(players)
 	if player == nil {
 		return mediaData, nil
 	}
+	mediaData.Player = &player.instance
 
 	title := player.title()
 	artist := player.text("xesam:artist")
@@ -53,10 +63,7 @@ func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaDa
 		mediaData.Thumbnail = &artURL
 	}
 
-	status := strings.ToUpper(player.status())
-	if status != "PLAYING" && status != "PAUSED" {
-		status = "STOPPED"
-	}
+	status := player.state()
 	mediaData.Status = &status
 
 	if duration, ok := microseconds(player.metadata["mpris:length"]); ok {
@@ -86,6 +93,9 @@ func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaDa
 	canStop := player.flag("CanControl")
 	canNext := player.can("CanGoNext")
 	canPrevious := player.can("CanGoPrevious")
+	_, hasTrack := player.trackID()
+	canSeek := player.can("CanSeek") && hasTrack && mediaData.Duration != nil
+	mediaData.IsSeekEnabled = &canSeek
 	mediaData.IsPlayEnabled = &canPlay
 	mediaData.IsPauseEnabled = &canPause
 	mediaData.IsStopEnabled = &canStop

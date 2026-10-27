@@ -263,10 +263,10 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	media := schemaMap(t, byName["system_bridge_media_control"])
 	assert.Equal(t, []any{"action"}, media["required"])
 	mediaProperties := media["properties"].(map[string]any)
-	assert.ElementsMatch(t, []string{"action"}, mapKeys(mediaProperties))
+	assert.ElementsMatch(t, []string{"action", "player", "position", "volume", "shuffle", "repeat"}, mapKeys(mediaProperties))
 	action := mediaProperties["action"].(map[string]any)
 	assert.Equal(t, "string", action["type"])
-	assert.Equal(t, []any{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"}, action["enum"])
+	assert.Equal(t, []any{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE", "SEEK", "SET_VOLUME", "SET_SHUFFLE", "SET_REPEAT"}, action["enum"])
 }
 
 func TestTypedEventHandlers(t *testing.T) {
@@ -320,9 +320,10 @@ func TestTypedEventHandlers(t *testing.T) {
 			responseType: event.ResponseTypeMediaControlled,
 			responseText: "media controlled",
 			invoke: func() (*sdkmcp.CallToolResult, any, error) {
-				return handlers.handleMediaControl(t.Context(), nil, mediaControlInput{Action: "PLAY"})
+				position := 30.5
+				return eventTool[mediaControlInput](handlers, event.EventMediaControl)(t.Context(), nil, mediaControlInput{Action: "SEEK", Player: "vlc", Position: &position})
 			},
-			wantData: map[string]any{"action": "PLAY"},
+			wantData: map[string]any{"action": "SEEK", "player": "vlc", "position": 30.5},
 		},
 		{
 			name:         "notification",

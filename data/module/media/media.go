@@ -15,6 +15,7 @@ func GetMediaData(ctx context.Context) (types.MediaData, error) {
 	// Initialize media data with default values
 	mediaData := types.MediaData{
 		UpdatedAt: &now,
+		Players:   []types.MediaPlayer{},
 	}
 
 	// Get platform-specific media data

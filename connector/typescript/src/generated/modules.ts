@@ -881,6 +881,16 @@ export interface HyprlandEvent extends Schema.Schema.Type<
   typeof HyprlandEvent
 > {}
 
+export const MediaPlayer = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  status: Schema.String,
+  title: Schema.String,
+  artist: Schema.String,
+});
+
+export interface MediaPlayer extends Schema.Schema.Type<typeof MediaPlayer> {}
+
 export const MediaData = Schema.Struct({
   album_artist: Schema.NullOr(Schema.String),
   album_title: Schema.NullOr(Schema.String),
@@ -892,8 +902,11 @@ export const MediaData = Schema.Struct({
   is_play_enabled: Schema.NullOr(Schema.Boolean),
   is_previous_enabled: Schema.NullOr(Schema.Boolean),
   is_rewind_enabled: Schema.NullOr(Schema.Boolean),
+  is_seek_enabled: Schema.NullOr(Schema.Boolean),
   is_stop_enabled: Schema.NullOr(Schema.Boolean),
   playback_rate: Schema.NullOr(Schema.Finite),
+  player: Schema.NullOr(Schema.String),
+  players: Schema.Array(MediaPlayer),
   position: Schema.NullOr(Schema.Finite),
   repeat: Schema.NullOr(Schema.String),
   shuffle: Schema.NullOr(Schema.Boolean),

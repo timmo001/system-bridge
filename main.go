@@ -624,13 +624,46 @@ func main() {
 					{
 						Name:      "media",
 						Usage:     "Control media playback",
-						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute>",
+						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute|seek <seconds>|set_volume <0-1>|set_shuffle <true|false>|set_repeat <none|track|list>>",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:  "player",
+								Usage: "A player's id from the media module's players. Defaults to the player it reports.",
+							},
+						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							action := strings.ToUpper(cmd.Args().First())
 							if action == "" {
 								return fmt.Errorf("a media action is required")
 							}
-							return client.Send(cmdCtx, event.EventMediaControl, map[string]string{"action": action})
+							request := map[string]any{"action": action}
+							if player := cmd.String("player"); player != "" {
+								request["player"] = player
+							}
+							value := cmd.Args().Get(1)
+							switch action {
+							case "SEEK":
+								position, err := strconv.ParseFloat(value, 64)
+								if err != nil {
+									return fmt.Errorf("seek needs a position in seconds")
+								}
+								request["position"] = position
+							case "SET_VOLUME":
+								volume, err := strconv.ParseFloat(value, 64)
+								if err != nil {
+									return fmt.Errorf("set_volume needs a volume from 0 to 1")
+								}
+								request["volume"] = volume
+							case "SET_SHUFFLE":
+								shuffle, err := strconv.ParseBool(value)
+								if err != nil {
+									return fmt.Errorf("set_shuffle needs true or false")
+								}
+								request["shuffle"] = shuffle
+							case "SET_REPEAT":
+								request["repeat"] = strings.ToUpper(value)
+							}
+							return client.Send(cmdCtx, event.EventMediaControl, request)
 						},
 					},
 					{

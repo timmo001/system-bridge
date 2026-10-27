@@ -102,7 +102,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
-  `PREVIOUS`, `STOP`, `VOLUME_DOWN`, or `VOLUME_UP`.
+  `PREVIOUS`, `STOP`, `VOLUME_DOWN`, `VOLUME_UP`, `SEEK`, `SET_VOLUME`,
+  `SET_SHUFFLE` or `SET_REPEAT`, on the reported player or the one in `player`.
 - `system_bridge_omarchy_menu` opens, closes or toggles the Omarchy menu.
 - `system_bridge_omarchy_panel` opens, closes or toggles an Omarchy shell panel.
 - `system_bridge_run_command` runs a command from the allowlist and waits for

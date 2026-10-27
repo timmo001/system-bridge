@@ -294,9 +294,14 @@ List the [commands](/features/commands/) you've allowed System Bridge to run, wi
 
 ### `system_bridge_media_control`
 
-Control playback of the system's current media session.
+Control playback of the system's current media session, or another player.
 
 - `action` (required): The action to perform. Must be uppercase.
+- `player`: A player's `id` from the `media` module's `players`. Leave it out for the player the module reports.
+- `position`: Seconds from the start of the track, for `SEEK`.
+- `volume`: 0-1, for `SET_VOLUME`.
+- `shuffle`: `true` or `false`, for `SET_SHUFFLE`.
+- `repeat`: `NONE`, `TRACK` or `LIST`, for `SET_REPEAT`.
 
 Available actions:
 
@@ -310,11 +315,21 @@ Available actions:
 | `STOP` | Stop playback. |
 | `VOLUME_DOWN` | Lower the volume. |
 | `VOLUME_UP` | Raise the volume. |
+| `SEEK` | Move to `position`. |
+| `SET_VOLUME` | Set the player's volume to `volume`. |
+| `SET_SHUFFLE` | Turn shuffle on or off. |
+| `SET_REPEAT` | Set what repeats. |
+
+On Windows, only the actions up to `VOLUME_UP` work, and not with `player`.
 
 Example arguments:
 
 ```json
 { "action": "PAUSE" }
+```
+
+```json
+{ "action": "SEEK", "player": "vlc", "position": 90 }
 ```
 
 ### `system_bridge_omarchy_menu`

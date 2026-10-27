@@ -285,15 +285,24 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_media_control",
-		Description: "Control media playback on the system",
+		Description: "Control media playback on the system. SEEK needs position, SET_VOLUME volume, SET_SHUFFLE shuffle and SET_REPEAT repeat. Get player ids from the media module's players; on Windows only the actions up to MUTE work, and not with a player.",
 		InputSchema: objectSchema(map[string]any{
 			"action": map[string]any{
 				"type":        "string",
 				"description": "Media control action to perform (must be uppercase)",
-				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"},
+				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE", "SEEK", "SET_VOLUME", "SET_SHUFFLE", "SET_REPEAT"},
+			},
+			"player":   map[string]any{"type": "string", "description": "A player's id from the media module's players. Leave it out for the player the module reports."},
+			"position": map[string]any{"type": "number", "minimum": 0, "description": "Seconds from the start of the track, for SEEK"},
+			"volume":   map[string]any{"type": "number", "minimum": 0, "maximum": 1, "description": "The player's volume from 0 to 1, for SET_VOLUME"},
+			"shuffle":  boolean("Whether to shuffle, for SET_SHUFFLE"),
+			"repeat": map[string]any{
+				"type":        "string",
+				"description": "What to repeat, for SET_REPEAT",
+				"enum":        []string{"NONE", "TRACK", "LIST"},
 			},
 		}, []string{"action"}),
-	}, handlers.handleMediaControl)
+	}, eventTool[mediaControlInput](handlers, event.EventMediaControl))
 
 	omarchyAction := map[string]any{
 		"type":        "string",

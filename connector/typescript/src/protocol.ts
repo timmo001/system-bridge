@@ -367,11 +367,32 @@ export const MediaAction = Schema.Literals([
   "VOLUME_UP",
   "VOLUME_DOWN",
   "MUTE",
+  "SEEK",
+  "SET_VOLUME",
+  "SET_SHUFFLE",
+  "SET_REPEAT",
 ]);
 
 export type MediaAction = typeof MediaAction.Type;
 
-export const MediaControl = Schema.Struct({ action: MediaAction });
+/**
+ * Controls a media player. SEEK needs `position`, SET_VOLUME `volume`,
+ * SET_SHUFFLE `shuffle` and SET_REPEAT `repeat`. On Windows only the actions
+ * up to MUTE work, and not with `player`.
+ */
+export const MediaControl = Schema.Struct({
+  action: MediaAction,
+  /** A player's `id` from the media module's `players`. Leave it out for the player the module reports. */
+  player: Schema.optionalKey(Schema.String),
+  /** Seconds from the start of the track. */
+  position: Schema.optionalKey(Schema.Finite),
+  /** 0 to 1. */
+  volume: Schema.optionalKey(Schema.Finite),
+  shuffle: Schema.optionalKey(Schema.Boolean),
+  repeat: Schema.optionalKey(Schema.Literals(["NONE", "TRACK", "LIST"])),
+});
+
+export interface MediaControl extends Schema.Schema.Type<typeof MediaControl> {}
 
 /** Sets an output's or input's volume or mute state, or makes it the default. */
 export const AudioControl = Schema.Struct({

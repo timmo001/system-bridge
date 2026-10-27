@@ -4,6 +4,7 @@ package media
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -36,6 +37,24 @@ func (p mprisPlayer) name() string {
 func (p mprisPlayer) status() string {
 	status, _ := p.properties["PlaybackStatus"].Value().(string)
 	return status
+}
+
+// state is the player's status as clients expect it: PLAYING, PAUSED or
+// STOPPED
+func (p mprisPlayer) state() string {
+	switch p.status() {
+	case "Playing":
+		return "PLAYING"
+	case "Paused":
+		return "PAUSED"
+	}
+	return "STOPPED"
+}
+
+// trackID is the current track's ID, which SetPosition needs
+func (p mprisPlayer) trackID() (dbus.ObjectPath, bool) {
+	id, ok := p.metadata["mpris:trackid"].Value().(dbus.ObjectPath)
+	return id, ok
 }
 
 func (p mprisPlayer) flag(name string) bool {
@@ -156,6 +175,23 @@ func pickPlayer(players []mprisPlayer) *mprisPlayer {
 		}
 	}
 	return nil
+}
+
+// findPlayer is the player with this ID, or the one pickPlayer chooses when
+// the ID is empty
+func findPlayer(players []mprisPlayer, id string) (*mprisPlayer, error) {
+	if id == "" {
+		if player := pickPlayer(players); player != nil {
+			return player, nil
+		}
+		return nil, errors.New("no media player is running")
+	}
+	for i := range players {
+		if players[i].instance == id {
+			return &players[i], nil
+		}
+	}
+	return nil, fmt.Errorf("no media player %q is running", id)
 }
 
 // callPlayer calls one of the player's methods, such as PlayPause

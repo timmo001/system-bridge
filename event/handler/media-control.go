@@ -12,6 +12,13 @@ import (
 
 type MediaControlRequestData struct {
 	Action string `json:"action" mapstructure:"action"`
+	// A player's id from the media module's players. Leave it out for the
+	// player the module reports.
+	Player   string   `json:"player,omitempty" mapstructure:"player"`
+	Position *float64 `json:"position,omitempty" mapstructure:"position"` // Seconds, for SEEK
+	Volume   *float64 `json:"volume,omitempty" mapstructure:"volume"`     // 0 to 1, for SET_VOLUME
+	Shuffle  *bool    `json:"shuffle,omitempty" mapstructure:"shuffle"`   // For SET_SHUFFLE
+	Repeat   string   `json:"repeat,omitempty" mapstructure:"repeat"`     // NONE, TRACK or LIST, for SET_REPEAT
 }
 
 func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.DataStore) {
@@ -41,14 +48,21 @@ func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.Da
 			}
 		}
 
-		err = media.Control(media.MediaAction(data.Action))
+		err = media.Control(media.Request{
+			Action:   media.MediaAction(data.Action),
+			Player:   data.Player,
+			Position: data.Position,
+			Volume:   data.Volume,
+			Shuffle:  data.Shuffle,
+			Repeat:   data.Repeat,
+		})
 		if err != nil {
 			slog.Error("Failed to control media", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeNone,
-				Message: "Failed to control media",
+				Message: "Failed to control media: " + err.Error(),
 			}
 		}
 

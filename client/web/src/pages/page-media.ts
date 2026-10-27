@@ -45,6 +45,10 @@ const actionLabels: Readonly<Record<MediaAction, string>> = {
   VOLUME_UP: "Volume up",
   VOLUME_DOWN: "Volume down",
   MUTE: "Mute",
+  SEEK: "Seek",
+  SET_VOLUME: "Volume",
+  SET_SHUFFLE: "Shuffle",
+  SET_REPEAT: "Repeat",
 };
 
 const placeholder = html`<span

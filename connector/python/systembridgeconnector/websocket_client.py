@@ -921,14 +921,12 @@ class WebSocketClient(Base):
         model: MediaControl,
         request_id: str | None = None,
     ) -> Response:
-        """Media control."""
-        self._logger.info("Media control: %s", model)
-        return await self.send_message(
+        """Control a media player, by default the one the media module reports."""
+        return await self._action(
             EventType.MEDIA_CONTROL,
+            EventType.MEDIA_CONTROLLED,
+            model,
             request_id,
-            asdict(model),
-            wait_for_response=True,
-            response_type=EventType.MEDIA_CONTROLLED,
         )
 
     async def send_notification(

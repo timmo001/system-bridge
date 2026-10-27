@@ -172,9 +172,11 @@ Control what's playing on the backend's system:
 
 ```bash
 system-bridge client media pause
+system-bridge client media seek 90
+system-bridge client media set_volume 0.5 --player vlc
 ```
 
-The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`.
+The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`. On Linux, it can also be `seek` with seconds, `set_volume` with 0-1, `set_shuffle` with `true` or `false`, or `set_repeat` with `none`, `track` or `list`. `--player` takes a player's `id` from the [`media`](/api/data/#media) data's `players`; without it, the action goes to the player the data describes.
 
 ## Processes
 

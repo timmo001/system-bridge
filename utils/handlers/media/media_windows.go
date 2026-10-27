@@ -9,10 +9,16 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 )
 
-func control(action MediaAction) error {
+// control presses the media keys, so it can't pick a player or do more than
+// the keys do
+func control(request Request) error {
+	if request.Player != "" {
+		return fmt.Errorf("picking a media player isn't supported on Windows")
+	}
+
 	var script string
 
-	switch action {
+	switch action := request.Action; action {
 	case MediaActionPlay, MediaActionPause:
 		script = "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"
 	case MediaActionNext:

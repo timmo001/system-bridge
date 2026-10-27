@@ -122,7 +122,12 @@ type processKillInput struct {
 }
 
 type mediaControlInput struct {
-	Action string `json:"action"`
+	Action   string   `json:"action"`
+	Player   string   `json:"player,omitempty"`
+	Position *float64 `json:"position,omitempty"`
+	Volume   *float64 `json:"volume,omitempty"`
+	Shuffle  *bool    `json:"shuffle,omitempty"`
+	Repeat   string   `json:"repeat,omitempty"`
 }
 
 type notificationInput struct {
@@ -270,25 +275,6 @@ func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRe
 
 func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, any, error) {
 	return formatToolResult(prefab.List())
-}
-
-func (h toolHandlers) handleMediaControl(_ context.Context, _ *sdkmcp.CallToolRequest, input mediaControlInput) (*sdkmcp.CallToolResult, any, error) {
-	arguments := map[string]interface{}{"action": input.Action}
-	message := event.Message{
-		ID:    generateID(),
-		Event: event.EventMediaControl,
-		Data:  arguments,
-	}
-
-	response := h.eventRouter.HandleMessage("mcp", message)
-	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
-	}
-
-	return formatToolResult(map[string]interface{}{
-		"success": true,
-		"message": response.Message,
-	})
 }
 
 func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRequest, input notificationInput) (*sdkmcp.CallToolResult, any, error) {

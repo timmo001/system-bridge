@@ -14,7 +14,7 @@ The `media` module reports the title, artist, album, artwork, position, length, 
 | Linux | Any player that supports MPRIS, such as Spotify, VLC, mpv and most browsers. System Bridge reads them over D-Bus, so nothing needs installing. |
 | Windows | The current Windows media session, read by the `NowPlaying` helper that comes with System Bridge. |
 
-With several players open on Linux, System Bridge shows the first one playing, then the first one paused, preferring one with a track loaded.
+With several players open on Linux, System Bridge shows the first one playing, then the first one paused, preferring one with a track loaded. It also lists every player in `players`, so clients can show and control the others.
 
 ## Controlling playback
 
@@ -31,8 +31,9 @@ A button is greyed out when the player says it can't do that, such as skipping o
 ### Elsewhere
 
 - **Home Assistant**: the integration's media player shows and controls what's playing, for machines running Windows. See [Home Assistant](/using/home-assistant/#media-player).
-- **API**: send [`MEDIA_CONTROL`](/api/websocket/control/#media-control) with `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN` or `MUTE`.
+- **API**: send [`MEDIA_CONTROL`](/api/websocket/control/#media-control) with `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN` or `MUTE`. On Linux, it also takes `SEEK`, `SET_VOLUME`, `SET_SHUFFLE` and `SET_REPEAT`, and a `player` to control a player other than the one shown.
 - **Agents**: the [MCP server](/api/mcp/)'s `system_bridge_media_control` tool takes the same actions.
+- **CLI**: `system-bridge client media pause`, or `system-bridge client media seek 90 --player vlc`.
 
 ### How each platform controls it
 

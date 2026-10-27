@@ -7,7 +7,7 @@ Control playback, Discord, displays, windows and workspaces, send notifications,
 
 ## Media control
 
-Send the `MEDIA_CONTROL` event with an `action` to control media playback.
+Send the `MEDIA_CONTROL` event with an `action` to control media playback. It controls the player the [`media`](/api/data/#media) data describes, unless you set `player` to another player's `id` from its `players`.
 
 Available actions:
 
@@ -16,9 +16,14 @@ Available actions:
 - `STOP`
 - `NEXT`
 - `PREVIOUS`
-- `VOLUME_UP`
-- `VOLUME_DOWN`
-- `MUTE`
+- `VOLUME_UP`, `VOLUME_DOWN`: change the player's volume by 5%.
+- `MUTE`: set the player's volume to 0, or back to where it was when it's already muted.
+- `SEEK`: set `position` to the seconds from the start of the track. Check `is_seek_enabled` first.
+- `SET_VOLUME`: set `volume` to 0-1.
+- `SET_SHUFFLE`: set `shuffle` to `true` or `false`.
+- `SET_REPEAT`: set `repeat` to `NONE`, `TRACK` or `LIST`.
+
+On Windows, only the actions up to `MUTE` work, and not with `player`. System Bridge presses the media keys there, so the actions reach whichever app responds to them.
 
 ```json title="Request"
 {
@@ -27,6 +32,19 @@ Available actions:
     "event": "MEDIA_CONTROL",
     "data": {
         "action": "PAUSE"
+    }
+}
+```
+
+```json title="Seek a particular player"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "MEDIA_CONTROL",
+    "data": {
+        "action": "SEEK",
+        "player": "vlc",
+        "position": 90
     }
 }
 ```

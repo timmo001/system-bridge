@@ -15,19 +15,40 @@ const volumeStep = 0.05
 // muting again can put it back
 var mutedVolumes sync.Map
 
-// Control acts on the player the module reports. action is one of PLAY,
-// PAUSE, NEXT, PREVIOUS, STOP, VOLUME_UP, VOLUME_DOWN or MUTE.
-func Control(ctx context.Context, action string) error {
+// repeatStatuses maps the repeat values clients send to MPRIS's LoopStatus
+var repeatStatuses = map[string]string{
+	"NONE":  "None",
+	"TRACK": "Track",
+	"LIST":  "Playlist",
+}
+
+// ControlRequest is one media control. Player is a player's ID from the
+// module's players, or empty for the player the module reports. Position,
+// Volume, Shuffle and Repeat are the values SEEK, SET_VOLUME, SET_SHUFFLE and
+// SET_REPEAT need.
+type ControlRequest struct {
+	Action   string
+	Player   string
+	Position *float64 // Seconds from the start of the track
+	Volume   *float64 // 0 to 1
+	Shuffle  *bool
+	Repeat   string // NONE, TRACK or LIST
+}
+
+// Control acts on a player. Action is one of PLAY, PAUSE, NEXT, PREVIOUS,
+// STOP, VOLUME_UP, VOLUME_DOWN, MUTE, SEEK, SET_VOLUME, SET_SHUFFLE or
+// SET_REPEAT.
+func Control(ctx context.Context, request ControlRequest) error {
 	players, err := listPlayers(ctx)
 	if err != nil {
 		return err
 	}
-	player := pickPlayer(players)
-	if player == nil {
-		return errors.New("no media player is running")
+	player, err := findPlayer(players, request.Player)
+	if err != nil {
+		return err
 	}
 
-	switch action {
+	switch request.Action {
 	case "PLAY":
 		return callPlayer(ctx, player.instance, "Play")
 	case "PAUSE":
@@ -43,9 +64,44 @@ func Control(ctx context.Context, action string) error {
 		if !ok {
 			return fmt.Errorf("%s doesn't report its volume", player.instance)
 		}
-		return setPlayer(ctx, player.instance, "Volume", nextVolume(player.instance, action, volume))
+		return setPlayer(ctx, player.instance, "Volume", nextVolume(player.instance, request.Action, volume))
+	case "SEEK":
+		if request.Position == nil || *request.Position < 0 {
+			return errors.New("SEEK needs a position of 0 or more seconds")
+		}
+		if !player.can("CanSeek") {
+			return fmt.Errorf("%s can't seek", player.instance)
+		}
+		track, ok := player.trackID()
+		if !ok {
+			return fmt.Errorf("%s isn't playing a track it can seek in", player.instance)
+		}
+		return callPlayer(ctx, player.instance, "SetPosition", track, int64(*request.Position*1e6))
+	case "SET_VOLUME":
+		if request.Volume == nil || *request.Volume < 0 || *request.Volume > 1 {
+			return errors.New("SET_VOLUME needs a volume from 0 to 1")
+		}
+		mutedVolumes.Delete(player.instance)
+		return setPlayer(ctx, player.instance, "Volume", *request.Volume)
+	case "SET_SHUFFLE":
+		if request.Shuffle == nil {
+			return errors.New("SET_SHUFFLE needs shuffle")
+		}
+		if _, ok := player.properties["Shuffle"]; !ok {
+			return fmt.Errorf("%s doesn't support shuffle", player.instance)
+		}
+		return setPlayer(ctx, player.instance, "Shuffle", *request.Shuffle)
+	case "SET_REPEAT":
+		loopStatus, ok := repeatStatuses[request.Repeat]
+		if !ok {
+			return errors.New("SET_REPEAT needs repeat as NONE, TRACK or LIST")
+		}
+		if _, ok := player.properties["LoopStatus"]; !ok {
+			return fmt.Errorf("%s doesn't support repeat", player.instance)
+		}
+		return setPlayer(ctx, player.instance, "LoopStatus", loopStatus)
 	default:
-		return fmt.Errorf("unsupported media action: %s", action)
+		return fmt.Errorf("unsupported media action: %s", request.Action)
 	}
 }
 
