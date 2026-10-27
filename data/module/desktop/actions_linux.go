@@ -163,15 +163,24 @@ func SetKeyboardLayout(ctx context.Context, layout string) error {
 	if err != nil {
 		return err
 	}
-	if data.Compositor != types.DesktopCompositorHyprland {
+	index := slices.Index(data.Keyboard.Layouts, layout)
+	if data.Compositor == types.DesktopCompositorHyprland {
+		if index == -1 {
+			return fmt.Errorf("keyboard layout %q: %w", layout, ErrNotFound)
+		}
+		// A request rather than a dispatcher, so the same with either config
+		return hyprlandSend(ctx, "switchxkblayout current "+strconv.Itoa(index))
+	}
+
+	// Sway and niri, through their own IPC
+	ipc := compositorLayouts()
+	if ipc == nil {
 		return fmt.Errorf("switching keyboard layouts: %w", ErrUnsupported)
 	}
-	index := slices.Index(data.Keyboard.Layouts, layout)
 	if index == -1 {
 		return fmt.Errorf("keyboard layout %q: %w", layout, ErrNotFound)
 	}
-	// A request rather than a dispatcher, so the same with either config
-	return hyprlandSend(ctx, "switchxkblayout current "+strconv.Itoa(index))
+	return ipc.switchTo(ctx, index)
 }
 
 // hyprlandDirections are Hyprland's names for each direction

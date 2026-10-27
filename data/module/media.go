@@ -13,5 +13,5 @@ type MediaModule struct{}
 func (mm MediaModule) Name() types.ModuleName { return types.ModuleMedia }
 func (mm MediaModule) Update(ctx context.Context) (any, error) {
 	slog.Debug("Getting media data")
-	return media.GetMediaData()
+	return media.GetMediaData(ctx)
 }

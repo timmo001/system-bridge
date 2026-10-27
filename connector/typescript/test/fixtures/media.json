@@ -1,25 +1,43 @@
 {
   "album_artist": null,
-  "album_title": null,
-  "artist": null,
-  "duration": null,
+  "album_title": "",
+  "artist": "Artist",
+  "duration": 72.901,
   "is_fast_forward_enabled": null,
-  "is_next_enabled": null,
-  "is_pause_enabled": null,
-  "is_play_enabled": null,
-  "is_previous_enabled": null,
+  "is_next_enabled": false,
+  "is_pause_enabled": true,
+  "is_play_enabled": false,
+  "is_previous_enabled": false,
   "is_rewind_enabled": null,
-  "is_stop_enabled": null,
-  "playback_rate": null,
-  "position": null,
+  "is_seek_enabled": true,
+  "is_stop_enabled": true,
+  "playback_rate": 1,
+  "player": "chromium.instance2377451",
+  "players": [
+    {
+      "id": "chromium.instance2377451",
+      "name": "chromium",
+      "status": "PLAYING",
+      "title": "Title",
+      "artist": "Artist"
+    },
+    {
+      "id": "kdeconnect.mpris_34ff83e617fd4bdfa0b23667e8ad34f8",
+      "name": "kdeconnect",
+      "status": "PAUSED",
+      "title": "",
+      "artist": ""
+    }
+  ],
+  "position": 4.358959,
   "repeat": null,
   "shuffle": null,
-  "status": null,
+  "status": "PLAYING",
   "subtitle": null,
   "thumbnail": null,
-  "title": null,
+  "title": "Title",
   "track_number": null,
-  "type": null,
-  "updated_at": 1791579884,
-  "volume": null
+  "type": "chromium",
+  "updated_at": 1793126834,
+  "volume": 1
 }

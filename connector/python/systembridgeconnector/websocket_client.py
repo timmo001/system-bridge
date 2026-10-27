@@ -21,6 +21,7 @@ from .exceptions import (
 )
 from .models.audio_control import AudioControl
 from .models.bluetooth_control import BluetoothDeviceRequest, BluetoothPowerRequest
+from .models.clipboard import ClipboardTextRequest
 from .models.command_execute import ExecuteRequest
 from .models.command_prefab import CommandPrefab
 from .models.command_result import ExecuteResult
@@ -54,13 +55,18 @@ from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.modules import GetData, Module, ModulesData, RegisterDataListener
 from .models.modules.disks import DiskMounts
-from .models.notification import Notification
+from .models.notification import (
+    Notification,
+    NotificationDismissRequest,
+    NotificationEvent,
+)
 from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
 from .models.process_control import ProcessKillRequest
 from .models.request import Request
 from .models.response import Response
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
+from .models.system_control import KeepAwakeRequest, PowerProfileRequest
 
 # The backend allows 30 seconds for a Bluetooth device to connect
 BLUETOOTH_TIMEOUT = 35.0
@@ -921,14 +927,51 @@ class WebSocketClient(Base):
         model: MediaControl,
         request_id: str | None = None,
     ) -> Response:
-        """Media control."""
-        self._logger.info("Media control: %s", model)
-        return await self.send_message(
+        """Control a media player, by default the one the media module reports."""
+        return await self._action(
             EventType.MEDIA_CONTROL,
+            EventType.MEDIA_CONTROLLED,
+            model,
             request_id,
-            asdict(model),
-            wait_for_response=True,
-            response_type=EventType.MEDIA_CONTROLLED,
+        )
+
+    async def set_clipboard(
+        self,
+        model: ClipboardTextRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Put text on the clipboard. Linux only."""
+        return await self._action(
+            EventType.CLIPBOARD_SET_TEXT,
+            EventType.CLIPBOARD_TEXT_SET,
+            model,
+            request_id,
+        )
+
+    async def set_power_profile(
+        self,
+        model: PowerProfileRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Switch the power profile. Linux with power-profiles-daemon only."""
+        return await self._action(
+            EventType.SYSTEM_SET_POWER_PROFILE,
+            EventType.SYSTEM_POWER_PROFILE_SET,
+            model,
+            request_id,
+        )
+
+    async def set_keep_awake(
+        self,
+        model: KeepAwakeRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Keep the system from idling, or let it idle again. Linux only."""
+        return await self._action(
+            EventType.SYSTEM_SET_KEEP_AWAKE,
+            EventType.SYSTEM_KEEP_AWAKE_SET,
+            model,
+            request_id,
         )
 
     async def send_notification(
@@ -936,7 +979,11 @@ class WebSocketClient(Base):
         model: Notification,
         request_id: str | None = None,
     ) -> Response:
-        """Send notification."""
+        """Send notification.
+
+        The response's data has the notification's id, for
+        dismiss_notification and matching its events.
+        """
         self._logger.info("Send notification: %s", model)
         return await self.send_message(
             EventType.NOTIFICATION,
@@ -944,6 +991,19 @@ class WebSocketClient(Base):
             model.to_payload(),
             wait_for_response=True,
             response_type=EventType.NOTIFICATION_SENT,
+        )
+
+    async def dismiss_notification(
+        self,
+        model: NotificationDismissRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Close a notification System Bridge sent. Linux only."""
+        return await self._action(
+            EventType.NOTIFICATION_DISMISS,
+            EventType.NOTIFICATION_DISMISSED,
+            model,
+            request_id,
         )
 
     async def omarchy_menu(
@@ -1234,6 +1294,8 @@ class WebSocketClient(Base):
         no_data_callback: Callable[[str], Awaitable[None]] | None = None,
         hyprland_event_callback: Callable[[HyprlandEvent], Awaitable[None]]
         | None = None,
+        notification_event_callback: Callable[[NotificationEvent], Awaitable[None]]
+        | None = None,
     ) -> None:
         """Listen for messages and map to modules.
 
@@ -1241,6 +1303,8 @@ class WebSocketClient(Base):
         no_data_callback gets a module's name when the backend answers for it
         with no data. hyprland_event_callback gets each custom event from
         Hyprland, once listening for the desktop module.
+        notification_event_callback gets each click on, or close of, a
+        notification System Bridge sent, from any client. Linux only.
         """
 
         async def _callback_message(message: dict) -> None:
@@ -1370,6 +1434,21 @@ class WebSocketClient(Base):
                 self._logger.debug("[%s] Hyprland event", name)
                 await hyprland_event_callback(
                     HyprlandEvent(data=message[EventKey.DATA].get("data", ""))
+                )
+            elif (
+                message[EventKey.TYPE]
+                in (EventType.NOTIFICATION_ACTION, EventType.NOTIFICATION_CLOSED)
+                and notification_event_callback is not None
+                and isinstance(message.get(EventKey.DATA), dict)
+            ):
+                self._logger.debug("[%s] Notification event", name)
+                data = message[EventKey.DATA]
+                await notification_event_callback(
+                    NotificationEvent(
+                        id=data["id"],
+                        action=data.get("action"),
+                        reason=data.get("reason"),
+                    )
                 )
             else:
                 self._logger.debug(

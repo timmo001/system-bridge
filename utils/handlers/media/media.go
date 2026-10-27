@@ -20,9 +20,30 @@ const (
 	MediaActionVolumeDown MediaAction = "VOLUME_DOWN"
 	// MediaActionMute represents the mute action
 	MediaActionMute MediaAction = "MUTE"
+	// MediaActionSeek moves to Request.Position
+	MediaActionSeek MediaAction = "SEEK"
+	// MediaActionSetVolume sets the player's volume to Request.Volume
+	MediaActionSetVolume MediaAction = "SET_VOLUME"
+	// MediaActionSetShuffle turns shuffle on or off, from Request.Shuffle
+	MediaActionSetShuffle MediaAction = "SET_SHUFFLE"
+	// MediaActionSetRepeat sets repeat to Request.Repeat
+	MediaActionSetRepeat MediaAction = "SET_REPEAT"
 )
 
+// Request is one media control. Player is a player's ID from the media
+// module's players, or empty for the player the module reports. Position,
+// Volume, Shuffle and Repeat are the values SEEK, SET_VOLUME, SET_SHUFFLE and
+// SET_REPEAT need.
+type Request struct {
+	Action   MediaAction
+	Player   string
+	Position *float64 // Seconds from the start of the track
+	Volume   *float64 // 0 to 1
+	Shuffle  *bool
+	Repeat   string // NONE, TRACK or LIST
+}
+
 // Control sends a media control command
-func Control(action MediaAction) error {
-	return control(action)
+func Control(request Request) error {
+	return control(request)
 }

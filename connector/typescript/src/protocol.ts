@@ -13,6 +13,7 @@ export const EventType = Schema.Literals([
   "BLUETOOTH_DISCONNECT",
   "BLUETOOTH_FORGET",
   "BLUETOOTH_SET_POWER",
+  "CLIPBOARD_SET_TEXT",
   "COMMAND_ADD",
   "COMMAND_EXECUTE",
   "COMMAND_REMOVE",
@@ -50,6 +51,7 @@ export const EventType = Schema.Literals([
   "KEYBOARD_TEXT",
   "MEDIA_CONTROL",
   "NOTIFICATION",
+  "NOTIFICATION_DISMISS",
   "OMARCHY_MENU",
   "OMARCHY_PANEL",
   "OPEN",
@@ -61,6 +63,8 @@ export const EventType = Schema.Literals([
   "POWER_SLEEP",
   "PROCESS_KILL",
   "REGISTER_DATA_LISTENER",
+  "SYSTEM_SET_KEEP_AWAKE",
+  "SYSTEM_SET_POWER_PROFILE",
   "UNREGISTER_DATA_LISTENER",
   "UPDATE_DISCORD_SETUP",
   "UPDATE_SETTINGS",
@@ -76,6 +80,7 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_DISCONNECTED",
   "BLUETOOTH_FORGOTTEN",
   "BLUETOOTH_POWER_SET",
+  "CLIPBOARD_TEXT_SET",
   "COMMAND_ADDED",
   "COMMAND_COMPLETED",
   "COMMAND_EXECUTING",
@@ -117,6 +122,9 @@ export const ResponseType = Schema.Literals([
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
+  "NOTIFICATION_ACTION",
+  "NOTIFICATION_CLOSED",
+  "NOTIFICATION_DISMISSED",
   "NOTIFICATION_SENT",
   "OMARCHY_MENU_CHANGED",
   "OMARCHY_PANEL_CHANGED",
@@ -131,6 +139,8 @@ export const ResponseType = Schema.Literals([
   "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
+  "SYSTEM_KEEP_AWAKE_SET",
+  "SYSTEM_POWER_PROFILE_SET",
 ]);
 
 export type ResponseType = typeof ResponseType.Type;
@@ -326,6 +336,17 @@ export interface CommandResult extends Schema.Schema.Type<
   typeof CommandResult
 > {}
 
+/** A button on a notification. Pressing it sends a `NOTIFICATION_ACTION` event with its `id`. */
+export const NotificationButton = Schema.Struct({
+  /** Anything but `default`, which is clicking the notification itself. */
+  id: Schema.String,
+  label: Schema.String,
+});
+
+export interface NotificationButton extends Schema.Schema.Type<
+  typeof NotificationButton
+> {}
+
 export const Notification = Schema.Struct({
   title: Schema.String,
   message: Schema.String,
@@ -335,9 +356,39 @@ export const Notification = Schema.Struct({
   actionUrl: Schema.optionalKey(Schema.String),
   actionPath: Schema.optionalKey(Schema.String),
   sound: Schema.optionalKey(Schema.String),
+  /** Critical ones stay until dismissed. Linux only. */
+  urgency: Schema.optionalKey(Schema.Literals(["low", "normal", "critical"])),
+  /** Up to 3 buttons. Linux only. */
+  buttons: Schema.optionalKey(Schema.Array(NotificationButton)),
 });
 
 export interface Notification extends Schema.Schema.Type<typeof Notification> {}
+
+/** `NOTIFICATION_SENT`'s reply: what was sent, and its `id`. */
+export const NotificationSent = Schema.Struct({
+  /** For `NOTIFICATION_DISMISS` and matching its events. 0 where it can't be followed. */
+  id: Schema.Int,
+});
+
+/** Closes a notification System Bridge sent. Linux only. */
+export const NotificationDismissRequest = Schema.Struct({ id: Schema.Int });
+
+export interface NotificationDismissRequest extends Schema.Schema.Type<
+  typeof NotificationDismissRequest
+> {}
+
+/** A notification System Bridge sent was clicked, or closed. */
+export const NotificationEvent = Schema.Struct({
+  id: Schema.Int,
+  /** The button's `id`, or `default` for the notification itself. Missing when it closed. */
+  action: Schema.optionalKey(Schema.String),
+  /** `expired`, `dismissed` or `closed`. Missing when it was clicked. */
+  reason: Schema.optionalKey(Schema.String),
+});
+
+export interface NotificationEvent extends Schema.Schema.Type<
+  typeof NotificationEvent
+> {}
 
 export const KeyboardKeypress = Schema.Struct({
   key: Schema.String,
@@ -358,6 +409,13 @@ export const KeyboardText = Schema.Struct({
 
 export interface KeyboardText extends Schema.Schema.Type<typeof KeyboardText> {}
 
+/** Text to put on the clipboard. Linux only. */
+export const ClipboardTextRequest = Schema.Struct({ text: Schema.String });
+
+export interface ClipboardTextRequest extends Schema.Schema.Type<
+  typeof ClipboardTextRequest
+> {}
+
 export const MediaAction = Schema.Literals([
   "PLAY",
   "PAUSE",
@@ -367,21 +425,68 @@ export const MediaAction = Schema.Literals([
   "VOLUME_UP",
   "VOLUME_DOWN",
   "MUTE",
+  "SEEK",
+  "SET_VOLUME",
+  "SET_SHUFFLE",
+  "SET_REPEAT",
 ]);
 
 export type MediaAction = typeof MediaAction.Type;
 
-export const MediaControl = Schema.Struct({ action: MediaAction });
+/**
+ * Controls a media player. SEEK needs `position`, SET_VOLUME `volume`,
+ * SET_SHUFFLE `shuffle` and SET_REPEAT `repeat`. On Windows only the actions
+ * up to MUTE work, and not with `player`.
+ */
+export const MediaControl = Schema.Struct({
+  action: MediaAction,
+  /** A player's `id` from the media module's `players`. Leave it out for the player the module reports. */
+  player: Schema.optionalKey(Schema.String),
+  /** Seconds from the start of the track. */
+  position: Schema.optionalKey(Schema.Finite),
+  /** 0 to 1. */
+  volume: Schema.optionalKey(Schema.Finite),
+  shuffle: Schema.optionalKey(Schema.Boolean),
+  repeat: Schema.optionalKey(Schema.Literals(["NONE", "TRACK", "LIST"])),
+});
 
-/** Sets an output's or input's volume or mute state, or makes it the default. */
+export interface MediaControl extends Schema.Schema.Type<typeof MediaControl> {}
+
+/** Switches the power profile. Linux with power-profiles-daemon only. */
+export const PowerProfileRequest = Schema.Struct({
+  /** One of the system module's `power_profiles`, such as `balanced`. */
+  profile: Schema.String,
+});
+
+export interface PowerProfileRequest extends Schema.Schema.Type<
+  typeof PowerProfileRequest
+> {}
+
+/** Keeps the system from idling, or lets it idle again. Linux only. */
+export const KeepAwakeRequest = Schema.Struct({
+  enabled: Schema.Boolean,
+  /** Seconds until the system may idle again. Leave it out to keep it awake until told otherwise. */
+  duration: Schema.optionalKey(Schema.Int),
+});
+
+export interface KeepAwakeRequest extends Schema.Schema.Type<
+  typeof KeepAwakeRequest
+> {}
+
+/**
+ * Sets an output's, input's or app's volume or mute state, makes an output or
+ * input the default, or moves an app to another output.
+ */
 export const AudioControl = Schema.Struct({
-  /** The device's `id` from the audio module. */
+  /** An `id` from the audio module's `outputs`, `inputs` or `apps`. */
   id: Schema.String,
   /** Percent, 0-100. */
   volume: Schema.optionalKey(Schema.Finite),
   muted: Schema.optionalKey(Schema.Boolean),
   /** Makes it the default output or input. */
   default: Schema.optionalKey(Schema.Boolean),
+  /** An output's `id`, to move an app's sound to it. Linux only. */
+  output: Schema.optionalKey(Schema.String),
 });
 
 export interface AudioControl extends Schema.Schema.Type<typeof AudioControl> {}

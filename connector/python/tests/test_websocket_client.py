@@ -21,6 +21,7 @@ from systembridgeconnector.exceptions import (
 )
 from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
+from systembridgeconnector.models.clipboard import ClipboardTextRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_prefab import CommandPrefab
 from systembridgeconnector.models.command_result import ExecuteResult
@@ -52,7 +53,10 @@ from systembridgeconnector.models.modules.disks import (
     DiskMounts,
     DiskUsage,
 )
-from systembridgeconnector.models.notification import Notification
+from systembridgeconnector.models.notification import (
+    Notification,
+    NotificationDismissRequest,
+)
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
 from systembridgeconnector.models.response import Response
@@ -60,6 +64,10 @@ from systembridgeconnector.models.settings import (
     Settings,
     SettingsCommandDefinition,
     SettingsCommands,
+)
+from systembridgeconnector.models.system_control import (
+    KeepAwakeRequest,
+    PowerProfileRequest,
 )
 from systembridgeconnector.websocket_client import WebSocketClient
 
@@ -583,6 +591,59 @@ async def test_bluetooth_set_power(
     assert response.type == EventType.BLUETOOTH_POWER_SET
     # Turning it off is sent, not left out as unset
     assert response.data == {"powered": False}
+
+
+@pytest.mark.asyncio
+async def test_dismiss_notification(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.dismiss_notification(
+        NotificationDismissRequest(id=42),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.NOTIFICATION_DISMISSED
+    assert response.data == {"id": 42}
+
+
+@pytest.mark.asyncio
+async def test_set_clipboard(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_clipboard(
+        ClipboardTextRequest(text="Hello"),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.CLIPBOARD_TEXT_SET
+    assert response.data == {"text": "Hello"}
+
+
+@pytest.mark.asyncio
+async def test_set_power_profile(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_power_profile(
+        PowerProfileRequest(profile="performance"),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.SYSTEM_POWER_PROFILE_SET
+    assert response.data == {"profile": "performance"}
+
+
+@pytest.mark.asyncio
+async def test_set_keep_awake(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_keep_awake(
+        KeepAwakeRequest(enabled=False),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.SYSTEM_KEEP_AWAKE_SET
+    # Turning it off is sent, and no duration is
+    assert response.data == {"enabled": False}
 
 
 @pytest.mark.asyncio

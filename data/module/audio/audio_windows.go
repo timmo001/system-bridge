@@ -32,7 +32,7 @@ func GetAudioData(context.Context) (types.AudioData, error) {
 		if err != nil {
 			return err
 		}
-		data = types.AudioData{Outputs: outputs, Inputs: inputs}
+		data = types.AudioData{Outputs: outputs, Inputs: inputs, Apps: []types.AudioApp{}}
 		return nil
 	})
 	return data, err

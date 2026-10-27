@@ -28,6 +28,7 @@ type audioControlInput struct {
 	Volume  *float64 `json:"volume,omitempty"`
 	Muted   *bool    `json:"muted,omitempty"`
 	Default bool     `json:"default,omitempty"`
+	Output  string   `json:"output,omitempty"`
 }
 
 type bluetoothDeviceInput struct {
@@ -122,13 +123,58 @@ type processKillInput struct {
 }
 
 type mediaControlInput struct {
-	Action string `json:"action"`
+	Action   string   `json:"action"`
+	Player   string   `json:"player,omitempty"`
+	Position *float64 `json:"position,omitempty"`
+	Volume   *float64 `json:"volume,omitempty"`
+	Shuffle  *bool    `json:"shuffle,omitempty"`
+	Repeat   string   `json:"repeat,omitempty"`
+}
+
+type openInput struct {
+	URL  string `json:"url,omitempty"`
+	Path string `json:"path,omitempty"`
+}
+
+type keypressInput struct {
+	Key       string   `json:"key"`
+	Modifiers []string `json:"modifiers,omitempty"`
+	Delay     int      `json:"delay,omitempty"`
+}
+
+type keyboardTextInput struct {
+	Text  string `json:"text"`
+	Delay int    `json:"delay,omitempty"`
+}
+
+type discordControlInput struct {
+	Action    string   `json:"action"`
+	ChannelID string   `json:"channel_id,omitempty"`
+	UserID    string   `json:"user_id,omitempty"`
+	SoundID   string   `json:"sound_id,omitempty"`
+	DeviceID  string   `json:"device_id,omitempty"`
+	Mode      string   `json:"mode,omitempty"`
+	Value     *float64 `json:"value,omitempty"`
+}
+
+type clipboardTextInput struct {
+	Text string `json:"text"`
+}
+
+type powerProfileInput struct {
+	Profile string `json:"profile"`
+}
+
+type keepAwakeInput struct {
+	Enabled  bool `json:"enabled"`
+	Duration *int `json:"duration,omitempty"`
 }
 
 type notificationInput struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
 	Icon    string `json:"icon,omitempty"`
+	Urgency string `json:"urgency,omitempty"`
 }
 
 type omarchyInput struct {
@@ -150,6 +196,9 @@ func (h toolHandlers) handleAudioControl(_ context.Context, _ *sdkmcp.CallToolRe
 	}
 	if input.Default {
 		arguments["default"] = true
+	}
+	if input.Output != "" {
+		arguments["output"] = input.Output
 	}
 	message := event.Message{
 		ID:    generateID(),
@@ -272,29 +321,13 @@ func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.Call
 	return formatToolResult(prefab.List())
 }
 
-func (h toolHandlers) handleMediaControl(_ context.Context, _ *sdkmcp.CallToolRequest, input mediaControlInput) (*sdkmcp.CallToolResult, any, error) {
-	arguments := map[string]interface{}{"action": input.Action}
-	message := event.Message{
-		ID:    generateID(),
-		Event: event.EventMediaControl,
-		Data:  arguments,
-	}
-
-	response := h.eventRouter.HandleMessage("mcp", message)
-	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
-	}
-
-	return formatToolResult(map[string]interface{}{
-		"success": true,
-		"message": response.Message,
-	})
-}
-
 func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRequest, input notificationInput) (*sdkmcp.CallToolResult, any, error) {
 	arguments := map[string]interface{}{"title": input.Title, "message": input.Message}
 	if input.Icon != "" {
 		arguments["icon"] = input.Icon
+	}
+	if input.Urgency != "" {
+		arguments["urgency"] = input.Urgency
 	}
 	message := event.Message{
 		ID:    generateID(),

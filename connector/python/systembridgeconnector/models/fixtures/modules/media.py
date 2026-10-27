@@ -1,6 +1,6 @@
 """Fixtures for media models."""
 
-from systembridgeconnector.models.modules.media import Media
+from systembridgeconnector.models.modules.media import Media, MediaPlayer
 
 FIXTURE_MEDIA = Media(
     album_artist="Album Artist",
@@ -13,8 +13,19 @@ FIXTURE_MEDIA = Media(
     is_play_enabled=True,
     is_previous_enabled=True,
     is_rewind_enabled=True,
+    is_seek_enabled=True,
     is_stop_enabled=True,
     playback_rate=1.0,
+    player="vlc",
+    players=[
+        MediaPlayer(
+            id="vlc",
+            name="vlc",
+            status="PLAYING",
+            title="title",
+            artist="Artist",
+        )
+    ],
     position=100,
     repeat="repeat",
     shuffle=True,

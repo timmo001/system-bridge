@@ -4,6 +4,7 @@ package media
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -51,7 +52,7 @@ func locateNowPlayingExe() (string, error) {
 	return "", errors.New("NowPlaying.exe not found")
 }
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
+func getMediaData(_ context.Context, mediaData types.MediaData) (types.MediaData, error) {
 	exePath, err := locateNowPlayingExe()
 	if err != nil {
 		// Fail quietly and keep defaults
@@ -175,9 +176,14 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	canPause := isPlaying
 	canStop := isPlaying || isPaused
 
+	// Next and previous press the media keys, which always send
+	canSkip := true
+
 	mediaData.IsPlayEnabled = &canPlay
 	mediaData.IsPauseEnabled = &canPause
 	mediaData.IsStopEnabled = &canStop
+	mediaData.IsNextEnabled = &canSkip
+	mediaData.IsPreviousEnabled = &canSkip
 
 	// Volume is not exposed by the helper; leave as nil to keep defaults
 	return mediaData, nil

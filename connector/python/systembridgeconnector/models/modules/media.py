@@ -1,14 +1,27 @@
 """Media."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import cast
 
 from systembridgeconnector.models.helpers import filter_unexpected_fields
 
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class MediaPlayer:
+    """A media player, which MediaControl can pick by its id."""
+
+    id: str
+    name: str
+    status: str
+    title: str = ""
+    artist: str = ""
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class Media:
-    """Media Info."""
+    """Media Info, for the player in player."""
 
     album_artist: str | None = None
     album_title: str | None = None
@@ -20,8 +33,11 @@ class Media:
     is_play_enabled: bool | None = None
     is_previous_enabled: bool | None = None
     is_rewind_enabled: bool | None = None
+    is_seek_enabled: bool | None = None
     is_stop_enabled: bool | None = None
     playback_rate: float | None = None
+    player: str | None = None
+    players: list[MediaPlayer] = field(default_factory=list)
     position: float | None = None
     repeat: str | None = None
     shuffle: bool | None = None
@@ -33,3 +49,10 @@ class Media:
     type: str | None = None
     updated_at: float | None = None
     volume: float | None = None
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.players = [
+            MediaPlayer(**cast(dict, p)) if isinstance(p, dict) else p
+            for p in self.players or []
+        ]

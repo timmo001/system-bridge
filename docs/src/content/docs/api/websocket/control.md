@@ -1,13 +1,13 @@
 ---
 title: Control
-description: Control media, Discord, displays, windows and workspaces, send notifications, open files and URLs, and change the power state over the WebSocket API.
+description: Control media, Discord, displays, windows and workspaces, send notifications, open files and URLs, and change the power state or profile over the WebSocket API.
 ---
 
-Control playback, Discord, displays, windows and workspaces, send notifications, open files and URLs, and manage system power state.
+Control playback, Discord, displays, windows and workspaces, send notifications, open files and URLs, and manage the system's power state and profile.
 
 ## Media control
 
-Send the `MEDIA_CONTROL` event with an `action` to control media playback.
+Send the `MEDIA_CONTROL` event with an `action` to control media playback. It controls the player the [`media`](/api/data/#media) data describes, unless you set `player` to another player's `id` from its `players`.
 
 Available actions:
 
@@ -16,9 +16,14 @@ Available actions:
 - `STOP`
 - `NEXT`
 - `PREVIOUS`
-- `VOLUME_UP`
-- `VOLUME_DOWN`
-- `MUTE`
+- `VOLUME_UP`, `VOLUME_DOWN`: change the player's volume by 5%.
+- `MUTE`: set the player's volume to 0, or back to where it was when it's already muted.
+- `SEEK`: set `position` to the seconds from the start of the track. Check `is_seek_enabled` first.
+- `SET_VOLUME`: set `volume` to 0-1.
+- `SET_SHUFFLE`: set `shuffle` to `true` or `false`.
+- `SET_REPEAT`: set `repeat` to `NONE`, `TRACK` or `LIST`.
+
+On Windows, only the actions up to `MUTE` work, and not with `player`. System Bridge presses the media keys there, so the actions reach whichever app responds to them.
 
 ```json title="Request"
 {
@@ -27,6 +32,19 @@ Available actions:
     "event": "MEDIA_CONTROL",
     "data": {
         "action": "PAUSE"
+    }
+}
+```
+
+```json title="Seek a particular player"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "MEDIA_CONTROL",
+    "data": {
+        "action": "SEEK",
+        "player": "vlc",
+        "position": 90
     }
 }
 ```
@@ -75,12 +93,13 @@ The response type is `DISCORD_CONTROLLED`. If Discord is not connected, the resp
 
 ## Audio control
 
-Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mute state, or to make it the default. Set any of them together. See [audio](/features/remote-control/#audio) for what's supported.
+Send the `AUDIO_CONTROL` event to set an audio output's, input's or app's volume or mute state, to make an output or input the default, or to move an app to another output. Set any of them together. See [audio](/features/remote-control/#audio) for what's supported.
 
-- `id` (required): The device's `id` from the [`audio`](/api/data/#audio) data's `outputs` or `inputs`.
+- `id` (required): An `id` from the [`audio`](/api/data/#audio) data's `outputs`, `inputs` or `apps`.
 - `volume` (optional): Volume in percent, 0-100.
 - `muted` (optional): `true` to mute, `false` to unmute.
 - `default` (optional): `true` to make it the default output or input.
+- `output` (optional): An output's `id`, to move an app's sound to it. Linux only.
 
 ```json title="Request"
 {
@@ -95,7 +114,7 @@ Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mut
 }
 ```
 
-The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id` gets an `ERROR` with the subtype `BAD_REQUEST`, and a platform that can't control audio gets `INVALID_ACTION`.
+The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id`, or something that doesn't apply to it, such as making an app the default, gets an `ERROR` with the subtype `BAD_REQUEST`. A platform that can't control audio gets `INVALID_ACTION`.
 
 ## Bluetooth control
 
@@ -122,6 +141,32 @@ Forgetting a device unpairs it, so it has to be paired again before it can conne
 ```
 
 The response comes once the device has connected, which can take up to 30 seconds, and the bluetooth module updates straight after. An unknown address gets an `ERROR` with the subtype `BAD_REQUEST`, and something the platform can't do gets `INVALID_ACTION`.
+
+## System control
+
+Change system settings. Linux only.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `SYSTEM_SET_POWER_PROFILE` | `profile`, one of the [`system`](/api/data/#system) data's `power_profiles` | `SYSTEM_POWER_PROFILE_SET` |
+| `SYSTEM_SET_KEEP_AWAKE` | `enabled`, `true` or `false`, and optionally `duration` in seconds | `SYSTEM_KEEP_AWAKE_SET` |
+
+Switching the power profile needs power-profiles-daemon, or tuned-ppd on Fedora.
+
+Keeping awake stops the system idling, so it doesn't lock, blank the screen or sleep for being left alone. With a `duration`, it lets the system idle again after that many seconds. On Omarchy it turns on the bar's stay awake switch. Elsewhere it holds a logind idle inhibitor, which most desktops and idle daemons, such as hypridle, follow, until it's turned off or System Bridge stops.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "SYSTEM_SET_POWER_PROFILE",
+    "data": {
+        "profile": "performance"
+    }
+}
+```
+
+The system module updates straight after. A profile that isn't in `power_profiles` gets an `ERROR`.
 
 ## Desktop control
 
@@ -297,6 +342,53 @@ Available fields:
 - `actionUrl` (optional): A URL to open when the notification is clicked.
 - `actionPath` (optional): A file or folder path to open when the notification is clicked.
 - `sound` (optional): Path to a sound file to play with the notification.
+- `urgency` (optional): `low`, `normal` or `critical`. Critical notifications stay until they're dismissed. Linux only.
+- `buttons` (optional): Up to 3 buttons, each with an `id` and a `label`. The `id` can be anything but `default`. Linux only.
+
+The response type is `NOTIFICATION_SENT`, and its data is what was sent with the notification's `id` added. Use the `id` to dismiss it, and to match the events about it. It's `0` where the notification can't be followed, such as on Windows.
+
+```json title="A notification with buttons"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "NOTIFICATION",
+    "data": {
+        "title": "Washing machine",
+        "message": "The wash has finished",
+        "urgency": "critical",
+        "buttons": [
+            { "id": "snooze", "label": "Remind me in 10 minutes" },
+            { "id": "done", "label": "Done" }
+        ]
+    }
+}
+```
+
+### Notification events
+
+On Linux, every connected client is sent an event when a notification System Bridge sent is clicked or closes, whichever client sent it:
+
+| Type | Data |
+| --- | --- |
+| `NOTIFICATION_ACTION` | `id`, and `action`: the button's `id`, or `default` when the notification itself was clicked |
+| `NOTIFICATION_CLOSED` | `id`, and `reason`: `expired`, `dismissed` (by you) or `closed` (with `NOTIFICATION_DISMISS`) |
+
+These come with the `id` `system`, as they don't answer a request.
+
+### Dismiss notification
+
+Send the `NOTIFICATION_DISMISS` event with a notification's `id` to close it. The response type is `NOTIFICATION_DISMISSED`. Linux only, and only for notifications System Bridge sent.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "NOTIFICATION_DISMISS",
+    "data": {
+        "id": 47
+    }
+}
+```
 
 ## Open a path
 

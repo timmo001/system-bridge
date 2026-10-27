@@ -2,9 +2,13 @@
 
 package system
 
-import "context"
+import (
+	"context"
 
-// countPackageUpdates isn't supported on this platform
-func countPackageUpdates(context.Context) (int, bool) {
-	return 0, false
+	"github.com/timmo001/system-bridge/types"
+)
+
+// listPackageUpdates isn't supported on this platform
+func listPackageUpdates(context.Context) ([]types.SystemPackageUpdate, bool) {
+	return nil, false
 }

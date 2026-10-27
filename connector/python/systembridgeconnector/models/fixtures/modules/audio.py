@@ -1,6 +1,6 @@
 """Fixture for audio module."""
 
-from systembridgeconnector.models.modules.audio import Audio, AudioDevice
+from systembridgeconnector.models.modules.audio import Audio, AudioApp, AudioDevice
 
 FIXTURE_AUDIO = Audio(
     outputs=[
@@ -25,6 +25,17 @@ FIXTURE_AUDIO = Audio(
             volume=80,
             muted=False,
             default=True,
+        ),
+    ],
+    apps=[
+        AudioApp(
+            id="app:120",
+            name="Firefox",
+            title="Playback",
+            volume=75,
+            muted=False,
+            playing=True,
+            output="alsa_output.usb-Generic_USB_Audio-00.HiFi__Speaker__sink",
         ),
     ],
 )

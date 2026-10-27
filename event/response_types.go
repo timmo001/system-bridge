@@ -10,6 +10,7 @@ const (
 	ResponseTypeBluetoothDisconnected     ResponseType = "BLUETOOTH_DISCONNECTED"
 	ResponseTypeBluetoothForgotten        ResponseType = "BLUETOOTH_FORGOTTEN"
 	ResponseTypeBluetoothPowerSet         ResponseType = "BLUETOOTH_POWER_SET"
+	ResponseTypeClipboardTextSet          ResponseType = "CLIPBOARD_TEXT_SET"
 	ResponseTypeCommandAdded              ResponseType = "COMMAND_ADDED"
 	ResponseTypeCommandCompleted          ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeCommandExecuting          ResponseType = "COMMAND_EXECUTING"
@@ -51,6 +52,9 @@ const (
 	ResponseTypeKeyboardKeyPressed        ResponseType = "KEYBOARD_KEY_PRESSED"
 	ResponseTypeKeyboardTextSent          ResponseType = "KEYBOARD_TEXT_SENT"
 	ResponseTypeMediaControlled           ResponseType = "MEDIA_CONTROLLED"
+	ResponseTypeNotificationAction        ResponseType = "NOTIFICATION_ACTION"
+	ResponseTypeNotificationClosed        ResponseType = "NOTIFICATION_CLOSED"
+	ResponseTypeNotificationDismissed     ResponseType = "NOTIFICATION_DISMISSED"
 	ResponseTypeNotificationSent          ResponseType = "NOTIFICATION_SENT"
 	ResponseTypeOmarchyMenuChanged        ResponseType = "OMARCHY_MENU_CHANGED"
 	ResponseTypeOmarchyPanelChanged       ResponseType = "OMARCHY_PANEL_CHANGED"
@@ -65,6 +69,8 @@ const (
 	ResponseTypeSettingsChanged           ResponseType = "SETTINGS_CHANGED"
 	ResponseTypeSettingsResult            ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated           ResponseType = "SETTINGS_UPDATED"
+	ResponseTypeSystemKeepAwakeSet        ResponseType = "SYSTEM_KEEP_AWAKE_SET"
+	ResponseTypeSystemPowerProfileSet     ResponseType = "SYSTEM_POWER_PROFILE_SET"
 )
 
 type ResponseSubtype string

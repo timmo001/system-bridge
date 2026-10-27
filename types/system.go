@@ -43,34 +43,56 @@ type SystemFailedUnit struct {
 	Since *int64 `json:"since" mapstructure:"since"`
 }
 
+// SystemPackageUpdate is a package with an update waiting
+type SystemPackageUpdate struct {
+	Name string `json:"name" mapstructure:"name"`
+	// Version is the version waiting to be installed
+	Version string `json:"version" mapstructure:"version"`
+	// CurrentVersion is the installed version, where the package manager says
+	CurrentVersion *string `json:"current_version" mapstructure:"current_version"`
+}
+
 // SystemData represents system information
 type SystemData struct {
-	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
-	FQDN                  string       `json:"fqdn" mapstructure:"fqdn"`
-	Hostname              string       `json:"hostname" mapstructure:"hostname"`
-	KernelVersion         string       `json:"kernel_version" mapstructure:"kernel_version"`
-	IPAddress4            string       `json:"ip_address_4" mapstructure:"ip_address_4"`
-	MACAddress            string       `json:"mac_address" mapstructure:"mac_address"`
-	PlatformVersion       string       `json:"platform_version" mapstructure:"platform_version"`
-	Platform              string       `json:"platform" mapstructure:"platform"`
-	PowerUsage            *float64     `json:"power_usage" mapstructure:"power_usage"`
-	Uptime                uint64       `json:"uptime" mapstructure:"uptime"`
-	Users                 []SystemUser `json:"users" mapstructure:"users"`
-	UUID                  string       `json:"uuid" mapstructure:"uuid"`
-	Version               string       `json:"version" mapstructure:"version"`
-	CameraUsage           []string     `json:"camera_usage" mapstructure:"camera_usage"`
-	MicrophoneUsage       []string     `json:"microphone_usage" mapstructure:"microphone_usage"`
-	IPAddress6            string       `json:"ip_address_6" mapstructure:"ip_address_6"`
-	PendingReboot         *bool        `json:"pending_reboot" mapstructure:"pending_reboot"`
-	PackageUpdates        *int         `json:"package_updates" mapstructure:"package_updates"`
-	RunMode               RunMode      `json:"run_mode" mapstructure:"run_mode"`
-	VersionLatestURL      *string      `json:"version_latest_url" mapstructure:"version_latest_url"`
-	VersionLatest         *string      `json:"version_latest" mapstructure:"version_latest"`
-	VersionNewerAvailable *bool        `json:"version_newer_available" mapstructure:"version_newer_available"`
-	DeviceInfo            *DeviceInfo  `json:"device_info" mapstructure:"device_info"`
+	BootTime        uint64       `json:"boot_time" mapstructure:"boot_time"`
+	FQDN            string       `json:"fqdn" mapstructure:"fqdn"`
+	Hostname        string       `json:"hostname" mapstructure:"hostname"`
+	KernelVersion   string       `json:"kernel_version" mapstructure:"kernel_version"`
+	IPAddress4      string       `json:"ip_address_4" mapstructure:"ip_address_4"`
+	MACAddress      string       `json:"mac_address" mapstructure:"mac_address"`
+	PlatformVersion string       `json:"platform_version" mapstructure:"platform_version"`
+	Platform        string       `json:"platform" mapstructure:"platform"`
+	PowerUsage      *float64     `json:"power_usage" mapstructure:"power_usage"`
+	Uptime          uint64       `json:"uptime" mapstructure:"uptime"`
+	Users           []SystemUser `json:"users" mapstructure:"users"`
+	UUID            string       `json:"uuid" mapstructure:"uuid"`
+	Version         string       `json:"version" mapstructure:"version"`
+	CameraUsage     []string     `json:"camera_usage" mapstructure:"camera_usage"`
+	MicrophoneUsage []string     `json:"microphone_usage" mapstructure:"microphone_usage"`
+	IPAddress6      string       `json:"ip_address_6" mapstructure:"ip_address_6"`
+	PendingReboot   *bool        `json:"pending_reboot" mapstructure:"pending_reboot"`
+	PackageUpdates  *int         `json:"package_updates" mapstructure:"package_updates"`
+	// PackageUpdateList is each update package_updates counts, or nil when it is
+	PackageUpdateList     *[]SystemPackageUpdate `json:"package_update_list" mapstructure:"package_update_list"`
+	RunMode               RunMode                `json:"run_mode" mapstructure:"run_mode"`
+	VersionLatestURL      *string                `json:"version_latest_url" mapstructure:"version_latest_url"`
+	VersionLatest         *string                `json:"version_latest" mapstructure:"version_latest"`
+	VersionNewerAvailable *bool                  `json:"version_newer_available" mapstructure:"version_newer_available"`
+	DeviceInfo            *DeviceInfo            `json:"device_info" mapstructure:"device_info"`
 	// FailedUnits are the failed systemd units, or nil without systemd
 	FailedUnits *[]SystemFailedUnit `json:"failed_units" mapstructure:"failed_units"`
 	// IdleTime is the seconds since the user's last input
 	IdleTime *uint64 `json:"idle_time" mapstructure:"idle_time"`
 	Locked   *bool   `json:"locked" mapstructure:"locked"`
+	// PowerProfile is the active power profile, such as balanced, or nil
+	// without power-profiles-daemon
+	PowerProfile *string `json:"power_profile" mapstructure:"power_profile"`
+	// PowerProfiles are the profiles SYSTEM_SET_POWER_PROFILE can switch to
+	PowerProfiles []string `json:"power_profiles" mapstructure:"power_profiles"`
+	// KeepAwake is whether the system is kept from idling, or nil where
+	// that's not supported
+	KeepAwake *bool `json:"keep_awake" mapstructure:"keep_awake"`
+	// KeepAwakeUntil is when keeping awake ends, in Unix seconds, if it was
+	// set with a duration
+	KeepAwakeUntil *int64 `json:"keep_awake_until" mapstructure:"keep_awake_until"`
 }

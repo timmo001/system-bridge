@@ -7,10 +7,14 @@ import (
 	"os/exec"
 )
 
-func control(action MediaAction) error {
+func control(request Request) error {
+	if request.Player != "" {
+		return fmt.Errorf("picking a media player isn't supported on macOS")
+	}
+
 	var script string
 
-	switch action {
+	switch action := request.Action; action {
 	case MediaActionPlay, MediaActionPause:
 		script = "tell application \"System Events\" to key code 49" // Space
 	case MediaActionNext:

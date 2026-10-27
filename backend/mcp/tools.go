@@ -3,6 +3,7 @@ package mcp
 import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -12,9 +13,9 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_audio_control",
-		Description: "Set an audio output's or input's volume or mute state, or make it the default. Get device ids from the audio module.",
+		Description: "Set an audio output's, input's or app's volume or mute state, make an output or input the default, or move an app to another output. Get ids from the audio module.",
 		InputSchema: objectSchema(map[string]any{
-			"id": map[string]any{"type": "string", "description": "Device id from the audio module's outputs or inputs"},
+			"id": map[string]any{"type": "string", "description": "Id from the audio module's outputs, inputs or apps"},
 			"volume": map[string]any{
 				"type":        "number",
 				"description": "Volume in percent",
@@ -23,6 +24,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 			"muted":   map[string]any{"type": "boolean", "description": "Whether to mute the device"},
 			"default": map[string]any{"type": "boolean", "description": "Make the device the default output or input"},
+			"output":  map[string]any{"type": "string", "description": "An output's id, to move an app's sound to it. Linux only."},
 		}, []string{"id"}),
 	}, handlers.handleAudioControl)
 
@@ -285,15 +287,119 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_media_control",
-		Description: "Control media playback on the system",
+		Description: "Control media playback on the system. SEEK needs position, SET_VOLUME volume, SET_SHUFFLE shuffle and SET_REPEAT repeat. Get player ids from the media module's players; on Windows only the actions up to MUTE work, and not with a player.",
 		InputSchema: objectSchema(map[string]any{
 			"action": map[string]any{
 				"type":        "string",
 				"description": "Media control action to perform (must be uppercase)",
-				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"},
+				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE", "SEEK", "SET_VOLUME", "SET_SHUFFLE", "SET_REPEAT"},
+			},
+			"player":   map[string]any{"type": "string", "description": "A player's id from the media module's players. Leave it out for the player the module reports."},
+			"position": map[string]any{"type": "number", "minimum": 0, "description": "Seconds from the start of the track, for SEEK"},
+			"volume":   map[string]any{"type": "number", "minimum": 0, "maximum": 1, "description": "The player's volume from 0 to 1, for SET_VOLUME"},
+			"shuffle":  boolean("Whether to shuffle, for SET_SHUFFLE"),
+			"repeat": map[string]any{
+				"type":        "string",
+				"description": "What to repeat, for SET_REPEAT",
+				"enum":        []string{"NONE", "TRACK", "LIST"},
 			},
 		}, []string{"action"}),
-	}, handlers.handleMediaControl)
+	}, eventTool[mediaControlInput](handlers, event.EventMediaControl))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_open",
+		Description: "Open a URL in the default browser, or a file or folder with its default app, on the system. Give url or path.",
+		InputSchema: objectSchema(map[string]any{
+			"url":  map[string]any{"type": "string", "description": "A URL to open, such as https://example.com"},
+			"path": map[string]any{"type": "string", "description": "A file or folder to open"},
+		}, []string{}),
+	}, eventTool[openInput](handlers, event.EventOpen))
+
+	delay := map[string]any{"type": "integer", "minimum": 0, "description": "Milliseconds to wait first, such as for a window to open"}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_keyboard_keypress",
+		Description: "Press a key, optionally holding modifiers, in whichever window has focus. For example space to pause a video, or l with ctrl to focus a browser's address bar.",
+		InputSchema: objectSchema(map[string]any{
+			"key": map[string]any{"type": "string", "description": "The key to press, such as a, enter, space, f5 or audio_play"},
+			"modifiers": map[string]any{
+				"type":        "array",
+				"description": "Modifier keys to hold while pressing it",
+				"items":       map[string]any{"type": "string", "enum": []string{"shift", "ctrl", "alt", "cmd"}},
+			},
+			"delay": delay,
+		}, []string{"key"}),
+	}, eventTool[keypressInput](handlers, event.EventKeyboardKeypress))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_keyboard_text",
+		Description: "Type text in whichever window has focus, as if on the system's own keyboard",
+		InputSchema: objectSchema(map[string]any{
+			"text":  map[string]any{"type": "string", "description": "The text to type"},
+			"delay": delay,
+		}, []string{"text"}),
+	}, eventTool[keyboardTextInput](handlers, event.EventKeyboardText))
+
+	discordActions := []string{}
+	for _, action := range []discord.Action{
+		discord.ActionJoinVoiceChannel, discord.ActionLeaveVoiceChannel, discord.ActionOpenTextChannel,
+		discord.ActionMute, discord.ActionUnmute, discord.ActionToggleMute,
+		discord.ActionDeafen, discord.ActionUndeafen, discord.ActionToggleDeafen,
+		discord.ActionSetInputVolume, discord.ActionSetInputDevice, discord.ActionSetOutputVolume, discord.ActionSetOutputDevice,
+		discord.ActionSetVoiceMode, discord.ActionSetVoiceThreshold, discord.ActionSetPushToTalkDelay,
+		discord.ActionEnableQoS, discord.ActionDisableQoS, discord.ActionToggleQoS,
+		discord.ActionEnableSilenceWarn, discord.ActionDisableSilenceWarn, discord.ActionToggleSilenceWarn,
+		discord.ActionMuteUser, discord.ActionUnmuteUser, discord.ActionToggleUserMute, discord.ActionSetUserVolume,
+		discord.ActionToggleVideo, discord.ActionToggleScreenshare, discord.ActionPlaySound,
+	} {
+		discordActions = append(discordActions, string(action))
+	}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_discord_control",
+		Description: "Control Discord: join or leave a voice channel, open a text channel, mute, deafen, change voice settings, mute or set the volume of another user for you only, toggle your camera or screenshare, or play a soundboard sound. Get channel, user, device and sound ids from the discord module. Discord must be set up in System Bridge first.",
+		InputSchema: objectSchema(map[string]any{
+			"action":     map[string]any{"type": "string", "description": "What to do", "enum": discordActions},
+			"channel_id": map[string]any{"type": "string", "description": "A channel's id, for JOIN_VOICE_CHANNEL and OPEN_TEXT_CHANNEL"},
+			"user_id":    map[string]any{"type": "string", "description": "A user's id, for the *_USER actions"},
+			"sound_id":   map[string]any{"type": "string", "description": "A sound's id from the discord module's sounds, for PLAY_SOUND"},
+			"device_id":  map[string]any{"type": "string", "description": "A device's id, for SET_INPUT_DEVICE and SET_OUTPUT_DEVICE"},
+			"mode":       map[string]any{"type": "string", "description": "For SET_VOICE_MODE", "enum": []string{"VOICE_ACTIVITY", "PUSH_TO_TALK"}},
+			"value": map[string]any{
+				"type":        "number",
+				"description": "Input volume 0-100, output and user volume 0-200, voice threshold -100 to 0 dB, or push to talk delay 0-2000 ms",
+			},
+		}, []string{"action"}),
+	}, eventTool[discordControlInput](handlers, event.EventDiscordControl))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_lock",
+		Description: "Lock the system's screen",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, eventTool[struct{}](handlers, event.EventPowerLock))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_clipboard",
+		Description: "Put text on the system's clipboard, so it can be pasted there. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"text": map[string]any{"type": "string", "description": "The text to put on the clipboard"},
+		}, []string{"text"}),
+	}, eventTool[clipboardTextInput](handlers, event.EventClipboardSetText))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_power_profile",
+		Description: "Switch the power profile, such as to power-saver or performance. Get the profiles from the system module's power_profiles. Linux with power-profiles-daemon only.",
+		InputSchema: objectSchema(map[string]any{
+			"profile": map[string]any{"type": "string", "description": "One of the system module's power_profiles, such as balanced"},
+		}, []string{"profile"}),
+	}, eventTool[powerProfileInput](handlers, event.EventSystemSetPowerProfile))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_keep_awake",
+		Description: "Keep the system from idling, so it doesn't lock, blank the screen or sleep for being idle, or let it idle again. On Omarchy this is the bar's stay awake switch. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"enabled":  boolean("Whether to keep the system awake"),
+			"duration": map[string]any{"type": "integer", "minimum": 0, "description": "Seconds until the system may idle again. Leave it out to keep it awake until told otherwise."},
+		}, []string{"enabled"}),
+	}, eventTool[keepAwakeInput](handlers, event.EventSystemSetKeepAwake))
 
 	omarchyAction := map[string]any{
 		"type":        "string",
@@ -333,6 +439,11 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			"title":   map[string]any{"type": "string", "description": "Notification title"},
 			"message": map[string]any{"type": "string", "description": "Notification message body"},
 			"icon":    map[string]any{"type": "string", "description": "Icon name (optional)"},
+			"urgency": map[string]any{
+				"type":        "string",
+				"description": "How urgent it is. Critical notifications stay until dismissed. Linux only.",
+				"enum":        []string{"low", "normal", "critical"},
+			},
 		}, []string{"title", "message"}),
 	}, handlers.handleNotification)
 }

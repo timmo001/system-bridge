@@ -23,6 +23,7 @@
       source='/home/user/notification.wav',
       volume=100,
     ),
+    buttons=None,
     duration=1500,
     icon='https://www.example.com/icon.png',
     image='https://www.example.com/image.png',
@@ -30,6 +31,7 @@
     sound='/home/user/custom-notification.wav',
     timeout=1000,
     title='Title',
+    urgency=None,
   )
 # ---
 # name: test_notification_dict
@@ -56,6 +58,7 @@
       'source': '/home/user/notification.wav',
       'volume': 100,
     }),
+    'buttons': None,
     'duration': 1500,
     'icon': 'https://www.example.com/icon.png',
     'image': 'https://www.example.com/image.png',
@@ -63,6 +66,7 @@
     'sound': '/home/user/custom-notification.wav',
     'timeout': 1000,
     'title': 'Title',
+    'urgency': None,
   })
 # ---
 # name: test_notification_dict[notification-dict-converted]
@@ -89,6 +93,7 @@
       source='/home/user/notification.wav',
       volume=100,
     ),
+    buttons=None,
     duration=1500,
     icon='https://www.example.com/icon.png',
     image='https://www.example.com/image.png',
@@ -96,6 +101,7 @@
     sound='/home/user/custom-notification.wav',
     timeout=1000,
     title='Title',
+    urgency=None,
   )
 # ---
 # name: test_notification_payload

@@ -23,6 +23,7 @@ import (
 	"github.com/timmo001/system-bridge/data/module/bluetooth"
 	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/data/module/displays"
+	"github.com/timmo001/system-bridge/data/module/media"
 	"github.com/timmo001/system-bridge/data/module/networks"
 	"github.com/timmo001/system-bridge/data/module/system"
 	"github.com/timmo001/system-bridge/discord"
@@ -33,6 +34,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
+	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -129,6 +131,13 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 	})
 
+	// Every client hears when a notification System Bridge sent is clicked or
+	// closes, as it may have sent it
+	notification.OnEvent(func(e notification.Event) {
+		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
+	})
+	defer notification.OnEvent(nil)
+
 	// These modules follow changes on the system, so they update as soon as
 	// one happens rather than on their next refresh
 	for module, watch := range map[types.ModuleName]func(context.Context, func()){
@@ -137,6 +146,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		types.ModuleBluetooth: bluetooth.Watch,
 		types.ModuleDesktop:   desktop.Watch,
 		types.ModuleDisplays:  displays.Watch,
+		types.ModuleMedia:     media.Watch,
 		types.ModuleNetworks:  networks.Watch,
 		types.ModuleSystem:    system.Watch,
 	} {

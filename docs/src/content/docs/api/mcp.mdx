@@ -75,12 +75,13 @@ Configure the client to launch `websocat` with the WebSocket URL as its argument
 
 ### `system_bridge_audio_control`
 
-Set an audio output's or input's volume or mute state, or make it the default. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
+Set an audio output's, input's or app's volume or mute state, make an output or input the default, or move an app to another output. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
 
-- `id` (required): The device's `id` from the `audio` module's `outputs` or `inputs`.
+- `id` (required): An `id` from the `audio` module's `outputs`, `inputs` or `apps`.
 - `volume` (optional): Volume in percent, 0-100.
-- `muted` (optional): `true` to mute the device, `false` to unmute it.
+- `muted` (optional): `true` to mute it, `false` to unmute it.
 - `default` (optional): `true` to make it the default output or input.
+- `output` (optional): An output's `id`, to move an app's sound to it. Linux only.
 
 Example arguments:
 
@@ -149,6 +150,19 @@ Example arguments:
 
 ```json
 { "id": "0x555dbf21c9e0", "fullscreen": true }
+```
+
+### `system_bridge_discord_control`
+
+Control Discord, which must be [set up](/features/discord/) first. It takes the same actions and fields as [Discord control](/api/websocket/control/#discord-control).
+
+- `action` (required): What to do, such as `JOIN_VOICE_CHANNEL`, `TOGGLE_MUTE` or `PLAY_SOUND`.
+- `channel_id`, `user_id`, `sound_id`, `device_id`, `mode` and `value` (optional): What the action needs, with ids from the `discord` module.
+
+Example arguments:
+
+```json
+{ "action": "TOGGLE_MUTE" }
 ```
 
 ### `system_bridge_display_control`
@@ -277,6 +291,21 @@ Kill a window's app on Hyprland without asking it to close, so anything unsaved 
 
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 
+### `system_bridge_keyboard_keypress`
+
+Press a key in whichever window has focus. See [keyboard keypress](/api/websocket/input/#keyboard-keypress).
+
+- `key` (required): The key to press, such as `a`, `enter` or `space`.
+- `modifiers` (optional): Keys to hold while pressing it: `shift`, `ctrl`, `alt` or `cmd`.
+- `delay` (optional): Milliseconds to wait first.
+
+### `system_bridge_keyboard_text`
+
+Type text in whichever window has focus. See [keyboard text](/api/websocket/input/#keyboard-text).
+
+- `text` (required): The text to type.
+- `delay` (optional): Milliseconds to wait first.
+
 ### `system_bridge_kill_process`
 
 End a process. See [process control](/api/websocket/control/#process-control).
@@ -292,11 +321,20 @@ List the [prefab commands](/features/commands/#prefab-commands), with whether ea
 
 List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments`, `workingDir` and `prefab`. It takes no arguments.
 
+### `system_bridge_lock`
+
+Lock the screen. It takes no arguments.
+
 ### `system_bridge_media_control`
 
-Control playback of the system's current media session.
+Control playback of the system's current media session, or another player.
 
 - `action` (required): The action to perform. Must be uppercase.
+- `player`: A player's `id` from the `media` module's `players`. Leave it out for the player the module reports.
+- `position`: Seconds from the start of the track, for `SEEK`.
+- `volume`: 0-1, for `SET_VOLUME`.
+- `shuffle`: `true` or `false`, for `SET_SHUFFLE`.
+- `repeat`: `NONE`, `TRACK` or `LIST`, for `SET_REPEAT`.
 
 Available actions:
 
@@ -310,11 +348,21 @@ Available actions:
 | `STOP` | Stop playback. |
 | `VOLUME_DOWN` | Lower the volume. |
 | `VOLUME_UP` | Raise the volume. |
+| `SEEK` | Move to `position`. |
+| `SET_VOLUME` | Set the player's volume to `volume`. |
+| `SET_SHUFFLE` | Turn shuffle on or off. |
+| `SET_REPEAT` | Set what repeats. |
+
+On Windows, only the actions up to `VOLUME_UP` work, and not with `player`.
 
 Example arguments:
 
 ```json
 { "action": "PAUSE" }
+```
+
+```json
+{ "action": "SEEK", "player": "vlc", "position": 90 }
 ```
 
 ### `system_bridge_omarchy_menu`
@@ -331,6 +379,15 @@ Open, close or toggle a panel or overlay of an Omarchy shell plugin.
 - `action` (required): `open`, `close` or `toggle`.
 - `id` (required): A panel `id` from the `desktop` module's `omarchy.panels`, such as `omarchy.audio`.
 
+### `system_bridge_open`
+
+Open a URL in the default browser, or a file or folder with its default app. See [open a path](/api/websocket/control/#open-a-path).
+
+- `url` (optional): A URL to open.
+- `path` (optional): A file or folder to open.
+
+Give one of them.
+
 ### `system_bridge_run_command`
 
 Run a command from the allowlist and wait for it to finish. It returns the command's `exitCode`, `stdout` and `stderr`, and `error` when it couldn't run or timed out. Commands time out after 5 minutes.
@@ -343,7 +400,7 @@ Example arguments:
 { "id": "backup" }
 ```
 
-Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake.
+Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake. Locking is, with `system_bridge_lock`, as it loses nothing.
 
 ### `system_bridge_send_notification`
 
@@ -352,12 +409,32 @@ Send a desktop notification to the machine running System Bridge.
 - `title` (required): The notification title.
 - `message` (required): The notification body text.
 - `icon` (optional): An icon name to display with the notification.
+- `urgency` (optional): `low`, `normal` or `critical`. Critical notifications stay until dismissed. Linux only.
 
 Example arguments:
 
 ```json
 { "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
 ```
+
+### `system_bridge_set_clipboard`
+
+Put text on the clipboard, ready to paste. Linux only, with wl-clipboard, xclip or xsel. See [clipboard](/api/websocket/input/#clipboard).
+
+- `text` (required): The text to put on the clipboard.
+
+### `system_bridge_set_power_profile`
+
+Switch the power profile. Linux with power-profiles-daemon or tuned-ppd only. See [system control](/api/websocket/control/#system-control).
+
+- `profile` (required): One of the `system` module's `power_profiles`, such as `power-saver`, `balanced` or `performance`.
+
+### `system_bridge_set_keep_awake`
+
+Keep the system from idling, so it doesn't lock, blank the screen or sleep for being left alone, or let it idle again. On Omarchy this is the bar's stay awake switch. Linux only.
+
+- `enabled` (required): `true` to keep it awake, `false` to let it idle.
+- `duration` (optional): Seconds until it may idle again.
 
 ## Troubleshooting
 

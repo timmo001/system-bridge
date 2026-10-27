@@ -18,7 +18,7 @@ func TestGetMediaDataWindows(t *testing.T) {
 	t.Log("Please ensure some media is playing for a comprehensive test.")
 
 	// Initialize with some default data
-	initialData, err := GetMediaData()
+	initialData, err := GetMediaData(t.Context())
 	assert.NoError(t, err, "GetMediaData should not produce an error even if no media is playing.")
 
 	// The result can be empty if nothing is playing, which is a valid scenario.

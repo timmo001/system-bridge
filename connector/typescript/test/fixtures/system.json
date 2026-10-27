@@ -51,5 +51,16 @@
     }
   ],
   "idle_time": 120,
-  "locked": false
+  "locked": false,
+  "power_profile": "balanced",
+  "power_profiles": ["power-saver", "balanced", "performance"],
+  "package_update_list": [
+    {
+      "name": "linux",
+      "version": "6.11.6.arch1-1",
+      "current_version": "6.11.5.arch1-1"
+    }
+  ],
+  "keep_awake": true,
+  "keep_awake_until": 1793130000
 }

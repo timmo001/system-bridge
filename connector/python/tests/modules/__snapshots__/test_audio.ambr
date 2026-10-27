@@ -1,6 +1,17 @@
 # serializer version: 1
 # name: test_audio
   Audio(
+    apps=list([
+      AudioApp(
+        id='app:120',
+        muted=False,
+        name='Firefox',
+        output='alsa_output.usb-Generic_USB_Audio-00.HiFi__Speaker__sink',
+        playing=True,
+        title='Playback',
+        volume=75,
+      ),
+    ]),
     inputs=list([
       AudioDevice(
         default=True,

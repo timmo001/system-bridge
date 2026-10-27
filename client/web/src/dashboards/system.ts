@@ -53,6 +53,7 @@ import "~/components/sb-action-button";
 import "~/components/sb-hyprland-events";
 import "~/components/sb-hyprland-option";
 import "~/components/sb-select";
+import "~/components/sb-system-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-omarchy-actions";
 import "~/components/sb-process-actions";
@@ -102,6 +103,20 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
   const device = system.device_info;
   const failedUnits = system.failed_units ?? [];
   const power = powerSeries(data, history);
+
+  const updates = (system.package_update_list ?? []).map(
+    (update) =>
+      html`<li>
+        <span class="spacer truncate"><strong>${update.name}</strong></span>
+        <span class="muted xsmall mono"
+          >${
+            update.current_version === null
+              ? update.version
+              : `${update.current_version} → ${update.version}`
+          }</span
+        >
+      </li>`,
+  );
 
   const users = system.users.map(
     (user) =>
@@ -206,6 +221,13 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               width: "full",
             })
       }
+      ${
+        system.power_profile === null && system.keep_awake === null
+          ? nothing
+          : html`<sb-card class="half" heading="Power">
+              <sb-system-power .system=${system}></sb-system-power>
+            </sb-card>`
+      }
       <sb-card class="third" heading="Software">
         ${facts([
           ["System Bridge", system.version],
@@ -247,6 +269,19 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               ])
         }
       </sb-card>
+      ${
+        updates.length === 0
+          ? nothing
+          : html`<sb-card
+              class="half"
+              heading="Package updates"
+              subheading=${`${updates.length} waiting`}
+            >
+              <ul class="list">
+                ${updates}
+              </ul>
+            </sb-card>`
+      }
       <sb-card class="half" heading="Users" subheading="Signed in now">
         ${
           users.length === 0

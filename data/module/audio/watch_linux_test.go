@@ -13,7 +13,7 @@ func TestRelevantEvent(t *testing.T) {
 		{"Event 'change' on source #7", true},
 		{"Event 'new' on card #3", true},
 		{"Event 'change' on server #4294967295", true},
-		{"Event 'change' on sink-input #120", false},
+		{"Event 'change' on sink-input #120", true},
 		{"Event 'remove' on source-output #9", false},
 		{"Event 'new' on client #300", false},
 		{"", false},

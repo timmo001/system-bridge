@@ -30,6 +30,17 @@ Home Assistant and the API can type text and press keys, as if on the machine's 
 
 Both take an optional `delay` in milliseconds before they start, which helps when something else has to open first.
 
+## Clipboard
+
+On Linux, put text on the clipboard, ready to paste, with [`CLIPBOARD_SET_TEXT`](/api/websocket/input/#clipboard), the MCP server's `system_bridge_set_clipboard` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client clipboard set "Some text"
+echo "Some text" | system-bridge client clipboard set
+```
+
+It needs wl-clipboard on Wayland, or xclip or xsel on X11. To read the clipboard, add the **Get the clipboard** [command prefab](/features/commands/#prefab-commands).
+
 ## Power
 
 Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assistant or the [API](/api/websocket/control/#power-control). System Bridge doesn't ask for confirmation, so these happen straight away.
@@ -45,9 +56,19 @@ Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assi
 
 On Linux, hibernating needs swap set up for it. Depending on your distribution's polkit rules, suspending or shutting down may ask for a password when System Bridge runs as a service.
 
+### Power profiles
+
+On Linux with power-profiles-daemon, or tuned-ppd on Fedora, the system data reports the active `power_profile` and the `power_profiles` available, usually `power-saver`, `balanced` and `performance`. Switch between them from the **Power** card on the [web client](/using/web-client/)'s **System** page, with [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_power_profile` tool, or `system-bridge client system power-profile`. A change made anywhere else, such as from your desktop's power menu, shows up straight away.
+
+### Keeping awake
+
+On Linux, the **Power** card on the web client's **System** page, [`SYSTEM_SET_KEEP_AWAKE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_keep_awake` tool, or `system-bridge client system keep-awake on` stop the system idling, so it doesn't lock, blank the screen or sleep while you're away. Give it a duration to let it idle again after that long. The system data's `keep_awake` and `keep_awake_until` show whether it's on and when it ends.
+
+On Omarchy, this is the bar's stay awake switch, so turning either on shows in both. On other desktops System Bridge holds a logind idle inhibitor, which GNOME, KDE and idle daemons such as hypridle follow.
+
 ## Audio
 
-Set an output's or input's volume, mute or unmute it, or make it the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:
+Set an output's, input's or app's volume, mute or unmute it, or make a device the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:
 
 ```bash title="Terminal"
 system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --volume 40
@@ -56,6 +77,13 @@ system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --default
 ```
 
 The id is the device's `id` from the [`audio`](/api/data/#audio) data, which reports each device's `volume`, `muted` and `default`.
+
+On Linux, each app playing sound is listed too, in the data's `apps` and in an **Apps** card on the **Audio** page. Turn one up, down or mute it on its own, or move it to another output, by its id:
+
+```bash title="Terminal"
+system-bridge client audio app:120 --volume 50
+system-bridge client audio app:120 --output alsa_output.pci-0000_00_1f.3.hdmi-stereo
+```
 
 - **Linux** uses `pactl`, so it needs PulseAudio or PipeWire with `pipewire-pulse`.
 - **Windows** uses the system's audio endpoints.
@@ -106,7 +134,9 @@ The ids are the window and workspace `id`s from the [`desktop`](/api/data/#deskt
 | Maximise | Yes | Yes | Yes |
 | Minimise | No | Yes | Yes |
 | Show a workspace | Yes | Yes | No |
-| Switch keyboard layout | Yes | No | Yes |
+| Switch keyboard layout | Yes | Sway and niri | Yes |
+
+Wayland has no standard way to read or switch keyboard layouts, so on other Wayland desktops they come from the compositor's own IPC, which Sway and niri have. There, layouts are named as xkb describes them, such as `English (UK)`, rather than by their codes.
 
 ### Hyprland
 

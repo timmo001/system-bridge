@@ -393,18 +393,23 @@ var waylandSource = &waylandDesktop{}
 func (w *waylandDesktop) get(titles bool) (*types.DesktopData, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if w.state != nil {
-		return w.refresh(titles), nil
-	}
 
-	state, err := waylandRead()
-	if errors.Is(err, errNoToplevels) {
-		return nil, nil
+	var data types.DesktopData
+	if w.state != nil {
+		data = *w.refresh(titles)
+	} else {
+		state, err := waylandRead()
+		if errors.Is(err, errNoToplevels) {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		data = state.build(titles)
 	}
-	if err != nil {
-		return nil, err
-	}
-	data := state.build(titles)
+	// Read each time rather than kept, as layout changes come from the
+	// compositor's IPC rather than the Wayland connection
+	data.Keyboard = compositorKeyboard()
 	return &data, nil
 }
 
@@ -512,6 +517,16 @@ func (w *waylandDesktop) follow(ctx context.Context, changed func()) error {
 	}
 	trigger, stopDebounce := watch.Debounce(watchDebounce, check)
 	defer stopDebounce()
+
+	// Keyboard layouts change over the compositor's own IPC, so follow that
+	// too while the Wayland connection lasts
+	if ipc := compositorLayouts(); ipc != nil {
+		layoutsCtx, stopLayouts := context.WithCancel(ctx)
+		defer stopLayouts()
+		go watch.Retry(layoutsCtx, watchRetry, "keyboard layouts", func(ctx context.Context) error {
+			return ipc.follow(ctx, changed)
+		})
+	}
 
 	for {
 		object, opcode, body, err := wayland.ReadMessage(conn.Reader)

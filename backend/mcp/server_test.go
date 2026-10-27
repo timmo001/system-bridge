@@ -180,7 +180,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 31)
+	require.Len(t, tools.Tools, 39)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
@@ -196,6 +196,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_desktop_focus_workspace",
 		"system_bridge_desktop_set_keyboard_layout",
 		"system_bridge_desktop_set_window_state",
+		"system_bridge_discord_control",
 		"system_bridge_display_control",
 		"system_bridge_get_data",
 		"system_bridge_get_history",
@@ -209,14 +210,21 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_hyprland_set_option",
 		"system_bridge_hyprland_set_submap",
 		"system_bridge_hyprland_set_window",
+		"system_bridge_keyboard_keypress",
+		"system_bridge_keyboard_text",
 		"system_bridge_kill_process",
 		"system_bridge_list_command_prefabs",
 		"system_bridge_list_commands",
+		"system_bridge_lock",
 		"system_bridge_media_control",
 		"system_bridge_omarchy_menu",
 		"system_bridge_omarchy_panel",
+		"system_bridge_open",
 		"system_bridge_run_command",
 		"system_bridge_send_notification",
+		"system_bridge_set_clipboard",
+		"system_bridge_set_keep_awake",
+		"system_bridge_set_power_profile",
 	}, names)
 	assertToolSchemas(t, tools.Tools)
 
@@ -255,7 +263,7 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	notification := schemaMap(t, byName["system_bridge_send_notification"])
 	assert.Equal(t, []any{"title", "message"}, notification["required"])
 	notificationProperties := notification["properties"].(map[string]any)
-	assert.ElementsMatch(t, []string{"title", "message", "icon"}, mapKeys(notificationProperties))
+	assert.ElementsMatch(t, []string{"title", "message", "icon", "urgency"}, mapKeys(notificationProperties))
 	for _, name := range []string{"title", "message", "icon"} {
 		assert.Equal(t, "string", notificationProperties[name].(map[string]any)["type"])
 	}
@@ -263,10 +271,10 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	media := schemaMap(t, byName["system_bridge_media_control"])
 	assert.Equal(t, []any{"action"}, media["required"])
 	mediaProperties := media["properties"].(map[string]any)
-	assert.ElementsMatch(t, []string{"action"}, mapKeys(mediaProperties))
+	assert.ElementsMatch(t, []string{"action", "player", "position", "volume", "shuffle", "repeat"}, mapKeys(mediaProperties))
 	action := mediaProperties["action"].(map[string]any)
 	assert.Equal(t, "string", action["type"])
-	assert.Equal(t, []any{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"}, action["enum"])
+	assert.Equal(t, []any{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE", "SEEK", "SET_VOLUME", "SET_SHUFFLE", "SET_REPEAT"}, action["enum"])
 }
 
 func TestTypedEventHandlers(t *testing.T) {
@@ -320,9 +328,10 @@ func TestTypedEventHandlers(t *testing.T) {
 			responseType: event.ResponseTypeMediaControlled,
 			responseText: "media controlled",
 			invoke: func() (*sdkmcp.CallToolResult, any, error) {
-				return handlers.handleMediaControl(t.Context(), nil, mediaControlInput{Action: "PLAY"})
+				position := 30.5
+				return eventTool[mediaControlInput](handlers, event.EventMediaControl)(t.Context(), nil, mediaControlInput{Action: "SEEK", Player: "vlc", Position: &position})
 			},
-			wantData: map[string]any{"action": "PLAY"},
+			wantData: map[string]any{"action": "SEEK", "player": "vlc", "position": 30.5},
 		},
 		{
 			name:         "notification",

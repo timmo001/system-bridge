@@ -21,8 +21,8 @@ const watchDebounce = 150 * time.Millisecond
 // exits, such as when the sound server restarts.
 const watchRetry = 5 * time.Second
 
-// Watch calls changed whenever an output, an input or the defaults change,
-// until ctx is done. It follows pactl subscribe.
+// Watch calls changed whenever an output, an input, an app's stream or the
+// defaults change, until ctx is done. It follows pactl subscribe.
 func Watch(ctx context.Context, changed func()) {
 	trigger, stop := watch.Debounce(watchDebounce, changed)
 	defer stop()
@@ -53,8 +53,9 @@ func subscribe(ctx context.Context, trigger func()) error {
 }
 
 // relevantEvent reports whether a pactl subscribe line, such as
-// "Event 'change' on sink #42", is about an output, an input, a card or the
-// server's defaults, rather than a stream or client.
+// "Event 'change' on sink #42", is about an output, an input, an app's
+// playback stream, a card or the server's defaults, rather than a recording
+// stream or client.
 func relevantEvent(line string) bool {
 	_, facility, ok := strings.Cut(line, "' on ")
 	if !ok {
@@ -62,7 +63,7 @@ func relevantEvent(line string) bool {
 	}
 	facility, _, _ = strings.Cut(facility, " #")
 	switch facility {
-	case "sink", "source", "card", "server":
+	case "sink", "source", "sink-input", "card", "server":
 		return true
 	}
 	return false

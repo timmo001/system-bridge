@@ -118,6 +118,18 @@ export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
 
+export const AudioApp = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  title: Schema.NullOr(Schema.String),
+  volume: Schema.NullOr(Schema.Finite),
+  muted: Schema.NullOr(Schema.Boolean),
+  playing: Schema.Boolean,
+  output: Schema.NullOr(Schema.String),
+});
+
+export interface AudioApp extends Schema.Schema.Type<typeof AudioApp> {}
+
 export const AudioDevice = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -131,6 +143,7 @@ export interface AudioDevice extends Schema.Schema.Type<typeof AudioDevice> {}
 export const AudioData = Schema.Struct({
   outputs: Schema.Array(AudioDevice),
   inputs: Schema.Array(AudioDevice),
+  apps: Schema.Array(AudioApp),
 });
 
 export interface AudioData extends Schema.Schema.Type<typeof AudioData> {}
@@ -881,6 +894,16 @@ export interface HyprlandEvent extends Schema.Schema.Type<
   typeof HyprlandEvent
 > {}
 
+export const MediaPlayer = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  status: Schema.String,
+  title: Schema.String,
+  artist: Schema.String,
+});
+
+export interface MediaPlayer extends Schema.Schema.Type<typeof MediaPlayer> {}
+
 export const MediaData = Schema.Struct({
   album_artist: Schema.NullOr(Schema.String),
   album_title: Schema.NullOr(Schema.String),
@@ -892,8 +915,11 @@ export const MediaData = Schema.Struct({
   is_play_enabled: Schema.NullOr(Schema.Boolean),
   is_previous_enabled: Schema.NullOr(Schema.Boolean),
   is_rewind_enabled: Schema.NullOr(Schema.Boolean),
+  is_seek_enabled: Schema.NullOr(Schema.Boolean),
   is_stop_enabled: Schema.NullOr(Schema.Boolean),
   playback_rate: Schema.NullOr(Schema.Finite),
+  player: Schema.NullOr(Schema.String),
+  players: Schema.Array(MediaPlayer),
   position: Schema.NullOr(Schema.Finite),
   repeat: Schema.NullOr(Schema.String),
   shuffle: Schema.NullOr(Schema.Boolean),
@@ -1230,6 +1256,16 @@ export const SystemUser = Schema.Struct({
 
 export interface SystemUser extends Schema.Schema.Type<typeof SystemUser> {}
 
+export const SystemPackageUpdate = Schema.Struct({
+  name: Schema.String,
+  version: Schema.String,
+  current_version: Schema.NullOr(Schema.String),
+});
+
+export interface SystemPackageUpdate extends Schema.Schema.Type<
+  typeof SystemPackageUpdate
+> {}
+
 export const SystemFailedUnit = Schema.Struct({
   name: Schema.String,
   description: Schema.String,
@@ -1262,6 +1298,7 @@ export const SystemData = Schema.Struct({
   ip_address_6: Schema.String,
   pending_reboot: Schema.NullOr(Schema.Boolean),
   package_updates: Schema.NullOr(Schema.Finite),
+  package_update_list: Schema.NullOr(Schema.Array(SystemPackageUpdate)),
   run_mode: RunMode,
   version_latest_url: Schema.NullOr(Schema.String),
   version_latest: Schema.NullOr(Schema.String),
@@ -1270,6 +1307,10 @@ export const SystemData = Schema.Struct({
   failed_units: Schema.NullOr(Schema.Array(SystemFailedUnit)),
   idle_time: Schema.NullOr(Schema.Finite),
   locked: Schema.NullOr(Schema.Boolean),
+  power_profile: Schema.NullOr(Schema.String),
+  power_profiles: Schema.Array(Schema.String),
+  keep_awake: Schema.NullOr(Schema.Boolean),
+  keep_awake_until: Schema.NullOr(Schema.Finite),
 });
 
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}

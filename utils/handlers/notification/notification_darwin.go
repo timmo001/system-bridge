@@ -24,6 +24,11 @@ func (n *darwinNotifier) notify(data NotificationData) (uint32, error) {
 	return 0, errNotImplemented
 }
 
+// dismiss isn't supported on macOS
+func (n *darwinNotifier) dismiss(uint32) error {
+	return errNotImplemented
+}
+
 // close is a no-op on macOS
 func (n *darwinNotifier) close() error {
 	return nil

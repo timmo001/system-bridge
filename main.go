@@ -237,12 +237,13 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "audio",
-						Usage:     "Set an audio output's or input's volume or mute, or make it the default",
-						ArgsUsage: "<device id>",
+						Usage:     "Set an audio output's, input's or app's volume or mute, make a device the default, or move an app to another output",
+						ArgsUsage: "<device or app id>",
 						Flags: []cli.Flag{
 							&cli.FloatFlag{Name: "volume", Usage: "Volume in percent"},
-							&cli.BoolFlag{Name: "mute", Usage: "Mute the device, or unmute it with --mute=false"},
+							&cli.BoolFlag{Name: "mute", Usage: "Mute the device or app, or unmute it with --mute=false"},
 							&cli.BoolFlag{Name: "default", Usage: "Make the device the default output or input"},
+							&cli.StringFlag{Name: "output", Usage: "Move an app's sound to this output"},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							id := cmd.Args().First()
@@ -259,13 +260,18 @@ func main() {
 							if cmd.Bool("default") {
 								data["default"] = true
 							}
+							if output := cmd.String("output"); output != "" {
+								data["output"] = output
+							}
 							if len(data) == 1 {
-								return fmt.Errorf("set --volume, --mute or --default")
+								return fmt.Errorf("set --volume, --mute, --default or --output")
 							}
 							return client.SendWithin(cmdCtx, client.SlowSendTimeout, event.EventAudioControl, data)
 						},
 					},
 					bluetoothCommand(),
+					clipboardCommand(),
+					systemCommand(),
 					commandCommand(),
 					{
 						Name:    "data",
@@ -624,13 +630,46 @@ func main() {
 					{
 						Name:      "media",
 						Usage:     "Control media playback",
-						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute>",
+						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute|seek <seconds>|set_volume <0-1>|set_shuffle <true|false>|set_repeat <none|track|list>>",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:  "player",
+								Usage: "A player's id from the media module's players. Defaults to the player it reports.",
+							},
+						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							action := strings.ToUpper(cmd.Args().First())
 							if action == "" {
 								return fmt.Errorf("a media action is required")
 							}
-							return client.Send(cmdCtx, event.EventMediaControl, map[string]string{"action": action})
+							request := map[string]any{"action": action}
+							if player := cmd.String("player"); player != "" {
+								request["player"] = player
+							}
+							value := cmd.Args().Get(1)
+							switch action {
+							case "SEEK":
+								position, err := strconv.ParseFloat(value, 64)
+								if err != nil {
+									return fmt.Errorf("seek needs a position in seconds")
+								}
+								request["position"] = position
+							case "SET_VOLUME":
+								volume, err := strconv.ParseFloat(value, 64)
+								if err != nil {
+									return fmt.Errorf("set_volume needs a volume from 0 to 1")
+								}
+								request["volume"] = volume
+							case "SET_SHUFFLE":
+								shuffle, err := strconv.ParseBool(value)
+								if err != nil {
+									return fmt.Errorf("set_shuffle needs true or false")
+								}
+								request["shuffle"] = shuffle
+							case "SET_REPEAT":
+								request["repeat"] = strings.ToUpper(value)
+							}
+							return client.Send(cmdCtx, event.EventMediaControl, request)
 						},
 					},
 					{

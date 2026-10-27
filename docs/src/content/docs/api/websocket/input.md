@@ -1,9 +1,9 @@
 ---
 title: Input
-description: Press keys and type text on the machine running System Bridge over the WebSocket API.
+description: Press keys, type text and set the clipboard on the machine running System Bridge over the WebSocket API.
 ---
 
-Simulate keyboard input on the host machine.
+Simulate keyboard input on the host machine, or put text on its clipboard.
 
 ## Keyboard keypress
 
@@ -50,3 +50,20 @@ Available fields:
 
 - `text` (required): The text to type.
 - `delay` (optional): Time to wait before typing, in milliseconds.
+
+## Clipboard
+
+Send the `CLIPBOARD_SET_TEXT` event with a `text` string to put it on the clipboard, ready to paste. It responds with the `CLIPBOARD_TEXT_SET` type. Linux only.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "CLIPBOARD_SET_TEXT",
+    "data": {
+        "text": "hello"
+    }
+}
+```
+
+It uses `wl-copy` from wl-clipboard on Wayland, or `xclip` or `xsel` on X11, so one of those needs to be installed. To read the clipboard, add the **Get the clipboard** [command prefab](/features/commands/#prefab-commands).

@@ -4,6 +4,11 @@ import {
   mdiMusicNote,
   mdiPause,
   mdiPlay,
+  mdiRepeat,
+  mdiRepeatOff,
+  mdiRepeatOnce,
+  mdiShuffle,
+  mdiShuffleDisabled,
   mdiSkipNext,
   mdiSkipPrevious,
   mdiStop,
@@ -11,10 +16,15 @@ import {
   mdiVolumeOff,
   mdiVolumePlus,
 } from "@mdi/js";
-import { MediaAction } from "@timmo001/effect-system-bridge";
+import {
+  MediaAction,
+  type MediaControl,
+  type MediaPlayer,
+} from "@timmo001/effect-system-bridge";
 import { Schema } from "effect";
 import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { live } from "lit/directives/live.js";
 
 import "~/components/sb-card";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
@@ -30,6 +40,7 @@ import {
   formatDuration,
   formatPercent,
   formatPlayerStatus as statusLabel,
+  formatQuantity,
 } from "~/lib/format";
 
 import { SbPage } from "./sb-page";
@@ -45,7 +56,28 @@ const actionLabels: Readonly<Record<MediaAction, string>> = {
   VOLUME_UP: "Volume up",
   VOLUME_DOWN: "Volume down",
   MUTE: "Mute",
+  SEEK: "Seek",
+  SET_VOLUME: "Volume",
+  SET_SHUFFLE: "Shuffle",
+  SET_REPEAT: "Repeat",
 };
+
+type Repeat = NonNullable<MediaControl["repeat"]>;
+
+/** Each repeat setting, and the one a press moves on to. */
+const repeatModes: Readonly<
+  Record<
+    Repeat,
+    { readonly label: string; readonly icon: string; readonly next: Repeat }
+  >
+> = {
+  NONE: { label: "Repeat off", icon: mdiRepeatOff, next: "LIST" },
+  LIST: { label: "Repeat all", icon: mdiRepeat, next: "TRACK" },
+  TRACK: { label: "Repeat one", icon: mdiRepeatOnce, next: "NONE" },
+};
+
+const isRepeat = (value: string | null | undefined): value is Repeat =>
+  value === "NONE" || value === "LIST" || value === "TRACK";
 
 const placeholder = html`<span
   class="skeleton"
@@ -119,6 +151,39 @@ export class PageMedia extends SbPage {
       .progress .times {
         display: flex;
         justify-content: space-between;
+      }
+
+      .progress .seek {
+        width: 100%;
+        margin: 0;
+        accent-color: var(--sb-color-accent);
+      }
+
+      /* Shuffle or repeat that's on */
+      .controls .button.pressed {
+        color: var(--sb-color-accent);
+      }
+
+      .players {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sb-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .players li {
+        display: flex;
+        align-items: center;
+        gap: var(--sb-space-3);
+      }
+
+      .players .details {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
       }
 
       .art {
@@ -331,7 +396,10 @@ export class PageMedia extends SbPage {
 
   readonly #control = new AtomController(this, () => mediaControl);
 
-  @state() private sent: MediaAction | null = null;
+  @state() private sent: MediaControl | null = null;
+
+  /** Where the position slider is while it's dragged, before it's sent. */
+  @state() private seekingTo: number | null = null;
 
   protected readonly pageTitle = "Media controls";
 
@@ -357,17 +425,49 @@ export class PageMedia extends SbPage {
     this.#tick = undefined;
   }
 
-  #send(action: MediaAction) {
-    this.sent = action;
-    registry.set(mediaControl, action);
+  #send(control: MediaControl) {
+    this.sent = control;
+    registry.set(mediaControl, control);
   }
 
   #onControlClick = (event: MouseEvent) => {
     if (!(event.currentTarget instanceof HTMLButtonElement)) return;
 
-    const action = event.currentTarget.dataset.action;
+    const { action, player } = event.currentTarget.dataset;
 
-    if (isMediaAction(action)) this.#send(action);
+    if (!isMediaAction(action)) return;
+
+    this.#send(player ? { action, player } : { action });
+  };
+
+  #onShuffleClick = () => {
+    this.#send({
+      action: "SET_SHUFFLE",
+      shuffle: this.#data.value.media?.shuffle !== true,
+    });
+  };
+
+  #onRepeatClick = () => {
+    const repeat = this.#data.value.media?.repeat;
+
+    this.#send({
+      action: "SET_REPEAT",
+      repeat: repeatModes[isRepeat(repeat) ? repeat : "NONE"].next,
+    });
+  };
+
+  #onSeekInput = (event: Event) => {
+    if (event.currentTarget instanceof HTMLInputElement) {
+      this.seekingTo = event.currentTarget.valueAsNumber;
+    }
+  };
+
+  /** Sends once let go, not on every step. */
+  #onSeek = (event: Event) => {
+    if (!(event.currentTarget instanceof HTMLInputElement)) return;
+
+    this.#send({ action: "SEEK", position: event.currentTarget.valueAsNumber });
+    this.seekingTo = null;
   };
 
   #button(
@@ -377,23 +477,57 @@ export class PageMedia extends SbPage {
       readonly disabled?: boolean;
       readonly main?: boolean;
       readonly small?: boolean;
+      /** Another player's id, to control it rather than the one shown. */
+      readonly player?: string;
+      readonly label?: string;
     } = {},
   ) {
-    const pending = this.#control.value.waiting && this.sent === action;
+    const pending =
+      this.#control.value.waiting &&
+      this.sent?.action === action &&
+      this.sent.player === options.player;
 
     // With no player there's nothing to control
     const disabled =
-      options.disabled === true || pending || !this.#data.value.media?.title;
+      options.disabled === true ||
+      pending ||
+      (options.player === undefined && !this.#data.value.media?.title);
+
+    const label = options.label ?? actionLabels[action];
 
     // A main button that can't be used is greyed, like the others
     return html`<button
       class="button round icon-only ${options.small ? "" : "large"} ${options.main ? "main" : ""} ${options.main && !disabled ? "filled" : "plain"}"
       type="button"
-      aria-label=${actionLabels[action]}
-      title=${actionLabels[action]}
+      aria-label=${label}
+      title=${label}
       ?disabled=${disabled}
       data-action=${action}
+      data-player=${options.player ?? ""}
       @click=${this.#onControlClick}
+    >
+      ${icon(path)}
+    </button>`;
+  }
+
+  /** A button that turns shuffle on or off, or moves repeat on. */
+  #toggle(
+    label: string,
+    path: string,
+    pressed: boolean,
+    action: MediaAction,
+    onClick: () => void,
+  ) {
+    const pending = this.#control.value.waiting && this.sent?.action === action;
+
+    return html`<button
+      class="button round icon-only plain ${pressed ? "pressed" : ""}"
+      type="button"
+      aria-label=${label}
+      aria-pressed=${pressed ? "true" : "false"}
+      title=${label}
+      ?disabled=${pending}
+      @click=${onClick}
     >
       ${icon(path)}
     </button>`;
@@ -419,10 +553,15 @@ export class PageMedia extends SbPage {
         ? null
         : Math.min(100, (position / duration) * 100);
 
+    // While the slider's dragged, the times follow it
+    const shown = this.seekingTo ?? position;
+
     const result = actionResult(
       this.#control.value,
-      `${this.sent === null ? "Action" : actionLabels[this.sent]} sent.`,
+      `${this.sent === null ? "Action" : actionLabels[this.sent.action]} sent.`,
     );
+
+    const repeat = isRepeat(media?.repeat) ? repeatModes[media.repeat] : null;
 
     return html`
       <sb-card>
@@ -455,25 +594,39 @@ export class PageMedia extends SbPage {
               >${media?.album_title || " "}</span
             >
             <div class="progress">
-              <div
-                class="bar"
-                role="progressbar"
-                aria-label="Position"
-                aria-valuemin="0"
-                aria-valuemax=${duration ?? 0}
-                aria-valuenow=${Math.round(position ?? 0)}
-                aria-valuetext=${
-                  position === null || duration === null
-                    ? "Nothing playing"
-                    : `${formatDuration(position)} of ${formatDuration(duration)}`
-                }
-              >
-                <span style="width: ${progress ?? 0}%"></span>
-              </div>
+              ${
+                media?.is_seek_enabled && duration
+                  ? html`<input
+                      class="seek"
+                      type="range"
+                      min="0"
+                      max=${Math.floor(duration)}
+                      step="1"
+                      aria-label="Position"
+                      aria-valuetext=${`${formatDuration(shown ?? 0)} of ${formatDuration(duration)}`}
+                      .value=${live(String(Math.round(shown ?? 0)))}
+                      ?disabled=${this.#control.value.waiting && this.sent?.action === "SEEK"}
+                      @input=${this.#onSeekInput}
+                      @change=${this.#onSeek}
+                    />`
+                  : html`<div
+                      class="bar"
+                      role="progressbar"
+                      aria-label="Position"
+                      aria-valuemin="0"
+                      aria-valuemax=${duration ?? 0}
+                      aria-valuenow=${Math.round(position ?? 0)}
+                      aria-valuetext=${
+                        position === null || duration === null
+                          ? "Nothing playing"
+                          : `${formatDuration(position)} of ${formatDuration(duration)}`
+                      }
+                    >
+                      <span style="width: ${progress ?? 0}%"></span>
+                    </div>`
+              }
               <span class="times muted xsmall tabular" aria-hidden="true">
-                <span
-                  >${position === null ? "-:--" : formatDuration(position)}</span
-                >
+                <span>${shown === null ? "-:--" : formatDuration(shown)}</span>
                 <span
                   >${duration === null ? "-:--" : formatDuration(duration)}</span
                 >
@@ -484,6 +637,28 @@ export class PageMedia extends SbPage {
                 ${this.#button("STOP", mdiStop, {
                   disabled: media?.is_stop_enabled === false,
                 })}
+                ${
+                  media?.shuffle === null || media?.shuffle === undefined
+                    ? nothing
+                    : this.#toggle(
+                        media.shuffle ? "Shuffle on" : "Shuffle off",
+                        media.shuffle ? mdiShuffle : mdiShuffleDisabled,
+                        media.shuffle,
+                        "SET_SHUFFLE",
+                        this.#onShuffleClick,
+                      )
+                }
+                ${
+                  repeat === null
+                    ? nothing
+                    : this.#toggle(
+                        repeat.label,
+                        repeat.icon,
+                        media?.repeat !== "NONE",
+                        "SET_REPEAT",
+                        this.#onRepeatClick,
+                      )
+                }
               </span>
               <span class="group transport" role="group" aria-label="Playback">
                 ${this.#button("PREVIOUS", mdiSkipPrevious, {
@@ -563,8 +738,7 @@ export class PageMedia extends SbPage {
                           ${
                             result.success
                               ? nothing
-                              : html`Check a player is running and supports it.
-                                  On Linux this needs <code>playerctl</code>.`
+                              : html`Check a player is running and supports it.`
                           }</span
                         >
                       </span>`
@@ -577,12 +751,65 @@ export class PageMedia extends SbPage {
     `;
   }
 
+  /** The players other than the one shown, each with play or pause. */
+  #renderOtherPlayers() {
+    const media = this.#data.value.media;
+
+    const others = (media?.players ?? []).filter(
+      (player) => player.id !== media?.player,
+    );
+
+    if (others.length === 0) return nothing;
+
+    const items = others.map((player) => this.#renderOtherPlayer(player));
+
+    return html`
+      <sb-card
+        heading="Other players"
+        subheading=${formatQuantity(others.length, "player")}
+      >
+        <ul class="players">
+          ${items}
+        </ul>
+      </sb-card>
+    `;
+  }
+
+  #renderOtherPlayer(player: MediaPlayer) {
+    const playing = player.status === "PLAYING";
+    const name = player.title || player.name;
+
+    return html`<li>
+      <span class="details">
+        <span class="truncate">${name}</span>
+        <span class="muted small truncate"
+          >${
+            [player.artist, player.title ? player.name : ""]
+              .filter(Boolean)
+              .join(" · ") || " "
+          }</span
+        >
+      </span>
+      <span class="chip ${playing ? "success" : ""}"
+        >${statusLabel(player.status)}</span
+      >
+      ${this.#button(playing ? "PAUSE" : "PLAY", playing ? mdiPause : mdiPlay, {
+        small: true,
+        player: player.id,
+        label: `${playing ? "Pause" : "Play"} ${name}`,
+      })}
+    </li>`;
+  }
+
   override render() {
     return html`
       <div class="page narrow">
         <!-- On the Media page, the player sits right under its heading, so it
           needs none of its own -->
-        ${this.gate(() => this.#renderPlayer(), placeholder)}
+        ${this.gate(
+          () => html`${this.#renderPlayer()} ${this.#renderOtherPlayers()}`,
+          placeholder,
+        )}
       </div>
     `;
   }

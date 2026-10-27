@@ -14,10 +14,13 @@ import (
 )
 
 type AudioControlRequestData struct {
+	// An output's, input's or app's id from the audio module
 	ID      string   `json:"id" mapstructure:"id"`
 	Volume  *float64 `json:"volume" mapstructure:"volume"`
 	Muted   *bool    `json:"muted" mapstructure:"muted"`
 	Default bool     `json:"default" mapstructure:"default"`
+	// An output's id, to move an app to it
+	Output string `json:"output,omitempty" mapstructure:"output"`
 }
 
 func RegisterAudioControlHandler(router *event.MessageRouter, dataStore *data.DataStore) {
@@ -47,8 +50,8 @@ func RegisterAudioControlHandler(router *event.MessageRouter, dataStore *data.Da
 		if data.ID == "" {
 			return errorResponse(event.ResponseSubtypeBadRequest, "No audio device id provided")
 		}
-		if data.Volume == nil && data.Muted == nil && !data.Default {
-			return errorResponse(event.ResponseSubtypeMissingValue, "Provide a volume, a mute state or default")
+		if data.Volume == nil && data.Muted == nil && !data.Default && data.Output == "" {
+			return errorResponse(event.ResponseSubtypeMissingValue, "Provide a volume, a mute state, default or an output")
 		}
 		if data.Volume != nil && (*data.Volume < 0 || *data.Volume > 100) {
 			return errorResponse(event.ResponseSubtypeBadRequest, "Volume must be between 0 and 100")
@@ -75,6 +78,12 @@ func RegisterAudioControlHandler(router *event.MessageRouter, dataStore *data.Da
 				return audioControlError(message.ID, err, "Failed to set the default audio device: "+err.Error())
 			}
 		}
+		if data.Output != "" {
+			if err := audio.MoveApp(ctx, data.ID, data.Output); err != nil {
+				slog.Error("Failed to move the app to another output", "app", data.ID, "output", data.Output, "error", err)
+				return audioControlError(message.ID, err, "Failed to move the app to another output: "+err.Error())
+			}
+		}
 
 		if dataStore != nil {
 			if err := dataStore.TriggerModuleUpdate(types.ModuleAudio); err != nil {
@@ -97,7 +106,7 @@ func audioControlError(id string, err error, msg string) event.MessageResponse {
 	switch {
 	case errors.Is(err, audio.ErrUnsupported):
 		subtype = event.ResponseSubtypeInvalidAction
-	case errors.Is(err, audio.ErrUnknownDevice):
+	case errors.Is(err, audio.ErrUnknownDevice), errors.Is(err, audio.ErrWrongKind):
 		subtype = event.ResponseSubtypeBadRequest
 	}
 	return event.MessageResponse{

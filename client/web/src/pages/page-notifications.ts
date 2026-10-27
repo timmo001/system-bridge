@@ -4,6 +4,8 @@ import { Option, Schema } from "effect";
 import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import "~/components/sb-segmented";
+import type { SegmentOption } from "~/components/sb-segmented";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, registry, sendNotification } from "~/lib/atoms";
@@ -71,6 +73,12 @@ const fields: readonly Field[] = [
   },
 ];
 
+const urgencyOptions: readonly SegmentOption[] = [
+  { value: "low", label: "Low" },
+  { value: "normal", label: "Normal" },
+  { value: "critical", label: "Critical" },
+];
+
 const decodeNotification = Schema.decodeUnknownOption(Notification);
 
 const isFieldKey = (name: string): name is FieldKey =>
@@ -82,6 +90,9 @@ export class PageNotifications extends SbPage {
   readonly #send = new AtomController(this, () => sendNotification);
 
   @state() private form: NotificationForm = emptyForm;
+
+  /** Sent only when it isn't normal, which is the default. */
+  @state() private urgency = "normal";
 
   protected readonly pageTitle = "Notifications";
 
@@ -100,6 +111,11 @@ export class PageNotifications extends SbPage {
 
   #clear = () => {
     this.form = emptyForm;
+    this.urgency = "normal";
+  };
+
+  #onUrgency = (event: CustomEvent<{ readonly value: string }>) => {
+    this.urgency = event.detail.value;
   };
 
   #onSubmit = (event: SubmitEvent) => {
@@ -112,10 +128,16 @@ export class PageNotifications extends SbPage {
       return value === "" ? [] : [[key, value] as const];
     });
 
-    Option.match(decodeNotification(Object.fromEntries(filled)), {
-      onNone: () => undefined,
-      onSome: (notification) => registry.set(sendNotification, notification),
-    });
+    const urgency =
+      this.urgency === "normal" ? [] : [["urgency", this.urgency] as const];
+
+    Option.match(
+      decodeNotification(Object.fromEntries([...filled, ...urgency])),
+      {
+        onNone: () => undefined,
+        onSome: (notification) => registry.set(sendNotification, notification),
+      },
+    );
   };
 
   #renderField(field: Field, sending: boolean) {
@@ -173,6 +195,19 @@ export class PageNotifications extends SbPage {
     return html`
       <form class="card" @submit=${this.#onSubmit}>
         ${inputs}
+        <div class="field">
+          <span>Urgency</span>
+          <sb-segmented
+            label="Urgency"
+            .options=${urgencyOptions}
+            .value=${this.urgency}
+            @value-changed=${this.#onUrgency}
+          ></sb-segmented>
+          <span class="hint"
+            >Critical notifications stay until they're dismissed. Linux
+            only.</span
+          >
+        </div>
         <div class="row" style="justify-content: flex-end">
           <button
             class="button plain"

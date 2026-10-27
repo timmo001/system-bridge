@@ -88,6 +88,17 @@ system-bridge client bluetooth power on
 
 The address is the device's `address` from the [`bluetooth`](/api/data/#bluetooth) data. See [Bluetooth](/features/remote-control/#bluetooth) for what each platform supports.
 
+## Clipboard
+
+Put text on the backend system's clipboard, as an argument or piped in:
+
+```bash
+system-bridge client clipboard set "Some text"
+echo "Some text" | system-bridge client clipboard set
+```
+
+It needs wl-clipboard on Wayland, or xclip or xsel on X11. Linux only.
+
 ## Commands
 
 List the [commands](/features/commands/) on your list and the prefabs, and run one by its ID:
@@ -172,9 +183,11 @@ Control what's playing on the backend's system:
 
 ```bash
 system-bridge client media pause
+system-bridge client media seek 90
+system-bridge client media set_volume 0.5 --player vlc
 ```
 
-The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`.
+The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`. On Linux, it can also be `seek` with seconds, `set_volume` with 0-1, `set_shuffle` with `true` or `false`, or `set_repeat` with `none`, `track` or `list`. `--player` takes a player's `id` from the [`media`](/api/data/#media) data's `players`; without it, the action goes to the player the data describes.
 
 ## Processes
 
@@ -186,6 +199,25 @@ system-bridge client process kill 12345 --force
 ```
 
 It's asked to stop, so it can save first. `--force` ends it straight away.
+
+## System
+
+Switch the power profile to one of the [`system`](/api/data/#system) data's `power_profiles`:
+
+```bash
+system-bridge client system power-profile performance
+```
+
+This needs power-profiles-daemon, or tuned-ppd on Fedora. Linux only.
+
+Keep the system from idling, for a while or until you turn it off:
+
+```bash
+system-bridge client system keep-awake on --for 2h
+system-bridge client system keep-awake off
+```
+
+On Omarchy this is the bar's stay awake switch. Linux only.
 
 ## Discovery
 

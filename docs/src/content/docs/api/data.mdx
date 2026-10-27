@@ -48,6 +48,7 @@ The same payloads are pushed over the WebSocket API as [`DATA_UPDATE`](/api/webs
 | --- | --- | --- |
 | `outputs` | array | Output devices, such as speakers and headphones. |
 | `inputs` | array | Input devices, such as microphones. |
+| `apps` | array | Apps playing sound, each of which can be turned up, down or muted on its own. Linux only, and empty elsewhere. |
 
 Each device has:
 
@@ -59,7 +60,19 @@ Each device has:
 | `muted` | boolean | Whether the device is muted. |
 | `default` | boolean | Whether it's the default output or input. |
 
-On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. Monitor sources, which capture an output, aren't listed as inputs. On macOS both lists are empty.
+Each app has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | The app's id, such as `app:120`. It changes when the app stops and starts playing again. |
+| `name` | string | The app's name, such as `Firefox`. |
+| `title` | string | What the app says it's playing, such as a track, or `null`. |
+| `volume` | number | The app's own volume as a percentage, averaged over its channels. |
+| `muted` | boolean | Whether the app is muted. |
+| `playing` | boolean | `false` while the app has paused its sound. |
+| `output` | string | The `id` of the output it plays to. |
+
+On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. Monitor sources, which capture an output, aren't listed as inputs, and filters such as an equaliser aren't listed as apps. On macOS all three lists are empty.
 
 ### `battery`
 
@@ -179,7 +192,7 @@ The open windows, workspaces and keyboard layout, from Hyprland, another Wayland
 | `focused_window` | string | The focused window's `id`, or `null`. |
 | `focused_workspace` | string | The focused workspace's `id`, or `null`. |
 | `focused_display` | string | The focused display's id from the [`displays`](#displays) module, or `null`. Hyprland only. |
-| `keyboard` | object | `layout` (the active layout, such as `gb`), `name` (such as `English (UK)`) and `layouts` (every installed layout). |
+| `keyboard` | object | `layout` (the active layout, such as `gb`), `name` (such as `English (UK)`) and `layouts` (every installed layout). On Sway and niri, the layouts are named rather than coded, so `layout` and `name` are both the name, such as `English (UK)`. Empty on other Wayland desktops. |
 | `windows` | array | The open windows. See below. |
 | `workspaces` | array | The workspaces. Empty on Windows. See below. |
 | `hyprland` | object | What only Hyprland reports, or `null` elsewhere. See below. |
@@ -264,7 +277,9 @@ Returns an array of objects, one per GPU. Full metrics require an NVIDIA GPU; ot
 
 ### `media`
 
-Details of the current media session: `title`, `artist`, `album_title`, `album_artist`, `subtitle`, `type`, and `status`; playback state `position`, `duration`, `playback_rate`, `volume`, `shuffle`, `repeat`, and `track_number`; capability flags `is_play_enabled`, `is_pause_enabled`, `is_stop_enabled`, `is_next_enabled`, `is_previous_enabled`, `is_fast_forward_enabled`, and `is_rewind_enabled`; a `thumbnail`; and `updated_at`. Available fields vary by operating system and media player.
+Details of the current media session: `title`, `artist`, `album_title`, `album_artist`, `subtitle`, `type`, and `status`; playback state `position`, `duration`, `playback_rate`, `volume`, `shuffle`, `repeat`, and `track_number`; capability flags `is_play_enabled`, `is_pause_enabled`, `is_stop_enabled`, `is_next_enabled`, `is_previous_enabled`, `is_seek_enabled`, `is_fast_forward_enabled`, and `is_rewind_enabled`; a `thumbnail`; and `updated_at`. Available fields vary by operating system and media player.
+
+On Linux, `players` lists every media player, each with an `id`, `name`, `status` (`PLAYING`, `PAUSED` or `STOPPED`), `title` and `artist`. `player` is the `id` of the one the other fields describe, and [`MEDIA_CONTROL`](/api/websocket/control/#media-control) takes an `id` to control another. On Windows, `players` is empty and `player` is `null`.
 
 ### `memory`
 
@@ -335,8 +350,13 @@ Returns an array of objects, one per process.
 | `microphone_usage` | array | Apps using the microphone. Linux only. |
 | `pending_reboot` | boolean | Whether a reboot is pending. Linux only. |
 | `package_updates` | integer | How many package updates are waiting, from `checkupdates` on Arch, apt on Debian and Ubuntu, dnf on Fedora, or winget on Windows. Checked in the background about once an hour, so it's null until the first check finishes or when no supported package manager is found. Linux and Windows only. |
+| `package_update_list` | array | Each update `package_updates` counts, with its `name`, the `version` waiting and the `current_version` installed. dnf doesn't say the installed version, so it's `null` there. `null` when `package_updates` is. |
 | `failed_units` | array | The systemd units that failed, from the system manager and, when System Bridge runs in your session, your user manager. Each has `name`, `description`, `scope` (`system` or `user`), `load_state`, `result` (why it failed, such as `exit-code`, `signal`, `timeout` or `oom-kill`) and `since` (when it failed, in Unix seconds). Empty when nothing has failed, and `null` without systemd. Linux only. |
 | `power_usage` | number | System power draw in watts. Linux only. |
+| `power_profile` | string | The active power profile, such as `power-saver`, `balanced` or `performance`, from power-profiles-daemon or tuned-ppd. `null` without either. Linux only. |
+| `power_profiles` | array | The profiles [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control) can switch to. Empty without power-profiles-daemon. Linux only. |
+| `keep_awake` | boolean | Whether the system is kept from idling, with [`SYSTEM_SET_KEEP_AWAKE`](/api/websocket/control/#system-control). On Omarchy this is the bar's stay awake switch, so it's also `true` when you turned that on. `null` on Windows and macOS. |
+| `keep_awake_until` | number | When keeping awake ends, as a Unix timestamp, if it was given a `duration`. Otherwise `null`. |
 | `run_mode` | string | How the backend is running. |
 | `idle_time` | number | Seconds since the user's last keyboard or mouse input. On Linux this comes from the Wayland compositor where it supports `ext-idle-notify-v1` (such as Hyprland, sway, niri and KDE), otherwise from logind's idle hint. `null` when neither is available. |
 | `locked` | boolean | Whether the user's session is locked. On Linux this is logind's `LockedHint`, which GNOME and KDE set but some desktops, such as Omarchy, don't. `null` on macOS. |

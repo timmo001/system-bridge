@@ -11,10 +11,10 @@ The `media` module reports the title, artist, album, artwork, position, length, 
 
 | Platform | Where it comes from |
 | --- | --- |
-| Linux | Any player that supports MPRIS, such as Spotify, VLC, mpv and most browsers, through `playerctl`. Install `playerctl` with your package manager. |
+| Linux | Any player that supports MPRIS, such as Spotify, VLC, mpv and most browsers. System Bridge reads them over D-Bus, so nothing needs installing. |
 | Windows | The current Windows media session, read by the `NowPlaying` helper that comes with System Bridge. |
 
-With several players open on Linux, System Bridge shows the first one playing, then the first one paused.
+With several players open on Linux, System Bridge shows the first one playing, then the first one paused, preferring one with a track loaded. It also lists every player in `players`, so clients can show and control the others.
 
 ## Controlling playback
 
@@ -23,22 +23,26 @@ With several players open on Linux, System Bridge shows the first one playing, t
 Open the **Media** page in the [web client](/using/web-client/). The player at the top shows what's playing, with:
 
 - Previous, play or pause, and next in the middle.
-- Stop on the left.
+- Stop on the left, with shuffle and repeat beside it when the player has them. Repeat moves from off to all to one.
 - The volume on the right. Hover over it, or focus it with the keyboard, to show volume down, mute and volume up. On a touch screen they're always shown.
+- The position, which you can drag to seek when the player supports it.
 
 A button is greyed out when the player says it can't do that, such as skipping on the last track.
+
+On Linux, any other players are listed under **Other players**, each with play or pause.
 
 ### Elsewhere
 
 - **Home Assistant**: the integration's media player shows and controls what's playing, for machines running Windows. See [Home Assistant](/using/home-assistant/#media-player).
-- **API**: send [`MEDIA_CONTROL`](/api/websocket/control/#media-control) with `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN` or `MUTE`.
+- **API**: send [`MEDIA_CONTROL`](/api/websocket/control/#media-control) with `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN` or `MUTE`. On Linux, it also takes `SEEK`, `SET_VOLUME`, `SET_SHUFFLE` and `SET_REPEAT`, and a `player` to control a player other than the one shown.
 - **Agents**: the [MCP server](/api/mcp/)'s `system_bridge_media_control` tool takes the same actions.
+- **CLI**: `system-bridge client media pause`, or `system-bridge client media seek 90 --player vlc`.
 
 ### How each platform controls it
 
 | Platform | How |
 | --- | --- |
-| Linux | `playerctl` controls the player the Media module shows. Volume up and down change it by 5%, and mute sets it to 0. |
+| Linux | System Bridge controls the player the Media module shows over MPRIS. Volume up and down change its volume by 5%. Mute sets it to 0, or back to where it was when it's already muted. Some players, such as Chromium, ignore volume changes. |
 | Windows | System Bridge presses the media keys, so it controls whichever app responds to them. |
 
 ## Sharing media folders

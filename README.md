@@ -42,15 +42,22 @@ tools are not required. Installing them improves detection on some systems:
     Fedora): names the apps using the microphone or camera. Without it,
     microphone usage falls back to ALSA, which names the sound server instead
     of the app.
-  - `playerctl`: reads what's playing and controls it. Without it, the Media
-    module is empty and media controls do nothing.
   - `zenity`: shows the confirmation before **Quit** or **Hide system tray**.
     Without it, those actions can't be confirmed, so they don't run.
+  - `libpulse` (`pulseaudio-utils` on Ubuntu and Fedora): `pactl` and `paplay`
+    for audio devices, audio controls and notification sounds. Needs
+    PulseAudio 16 or later, or PipeWire with `pipewire-pulse`.
+  - `alsa-utils` (`aplay`): notification sounds when `paplay` isn't installed.
+  - `bluez`: Bluetooth devices and controls.
+  - `ddcutil`: brightness and power for external monitors over DDC/CI. Needs
+    access to `/dev/i2c-*`, usually by being in the `i2c` group.
 
-  Install with pacman (`sudo pacman -S pciutils lm_sensors`) or apt
-  (`sudo apt install pciutils lm-sensors`).
+  Install with pacman (`sudo pacman -S pciutils lm_sensors ddcutil`) or apt
+  (`sudo apt install pciutils lm-sensors ddcutil`).
 
-- **Windows / macOS**: no optional tools are needed.
+- **Windows**: the waiting package update count needs `winget`, which Windows
+  11 includes. Nothing else is needed.
+- **macOS**: no optional tools are needed.
 
 ## Desktop controls
 
