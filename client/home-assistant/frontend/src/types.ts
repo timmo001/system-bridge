@@ -2,8 +2,11 @@
 export interface HomeAssistant {
   config: { version: string };
   states: Record<string, HassEntity | undefined>;
-  /** Only compared by identity, to tell when the entity registry changed. */
-  entities: Record<string, { entity_id: string } | undefined>;
+  /** Compared by identity to tell when the registry changed, and counted per device. */
+  entities: Record<
+    string,
+    { entity_id: string; device_id?: string } | undefined
+  >;
   devices: Record<string, DeviceRegistryEntry | undefined>;
   connection: {
     sendMessagePromise<T>(message: { type: string }): Promise<T>;

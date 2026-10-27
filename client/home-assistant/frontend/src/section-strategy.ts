@@ -9,17 +9,19 @@ import "./editor";
 import type { SectionRef } from "./pages";
 import {
   type DeviceResult,
+  findDevices,
   getSystemBridgeEntities,
   resolveDevice,
   type SystemBridgeEntities,
 } from "./registry";
-import { MINIMUM_RELEASE } from "./release";
+import { isAtLeast, MINIMUM_RELEASE } from "./release";
 import { isSectionName, SECTIONS } from "./sections";
-import type {
-  HomeAssistant,
-  LovelaceSectionConfig,
-  SectionOptions,
-  SectionStrategyConfig,
+import {
+  type HomeAssistant,
+  type LovelaceSectionConfig,
+  type SectionOptions,
+  type SectionStrategyConfig,
+  STRATEGY_TYPE,
 } from "./types";
 
 export const REGISTRY_DEPENDENCIES = ["entities", "devices"] as const;
@@ -90,6 +92,30 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
 
   static getConfigElement() {
     return document.createElement("system-bridge-strategy-editor");
+  }
+
+  // The new section and its preview when it's added from the section picker,
+  // on the device with the most entities, as a leftover device may have none
+  static getStubConfig(hass: HomeAssistant): SectionStrategyConfig | undefined {
+    if (!isAtLeast(hass.config.version, MINIMUM_RELEASE)) {
+      return undefined;
+    }
+
+    const counts = new Map<string, number>();
+
+    for (const entry of Object.values(hass.entities)) {
+      if (entry?.device_id) {
+        counts.set(entry.device_id, (counts.get(entry.device_id) ?? 0) + 1);
+      }
+    }
+
+    const [device] = findDevices(hass).sort(
+      (a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0),
+    );
+
+    return device
+      ? { type: STRATEGY_TYPE, device_id: device.id, section: "overview-load" }
+      : undefined;
   }
 }
 
