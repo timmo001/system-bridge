@@ -2,6 +2,7 @@ import {
   mdiClose,
   mdiCursorDefaultClickOutline,
   mdiDotsHorizontal,
+  mdiSkullOutline,
 } from "@mdi/js";
 import type {
   DesktopCompositor,
@@ -38,7 +39,7 @@ const stateLabels = new Map([
 
 /**
  * A menu of a window's actions: focus or close it, change its state and, on
- * Hyprland, float, pin or move it.
+ * Hyprland, kill, float, pin or move it.
  */
 @customElement("sb-window-actions")
 export class SbWindowActions extends LitElement {
@@ -100,6 +101,9 @@ export class SbWindowActions extends LitElement {
       case "focus":
         this.#run({ _tag: "focus" });
         break;
+      case "kill":
+        this.#run({ _tag: "kill" });
+        break;
       default:
         this.#run({
           _tag: "move",
@@ -135,6 +139,13 @@ export class SbWindowActions extends LitElement {
     );
 
     if (this.compositor !== "hyprland") return [...actions, ...states];
+
+    actions.push({
+      value: "kill",
+      label: "Kill",
+      description: "Ends its app without asking",
+      icon: mdiSkullOutline,
+    });
 
     const settings: MenuItem[] = [
       {

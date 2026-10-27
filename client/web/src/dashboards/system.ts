@@ -7,16 +7,21 @@ import {
   mdiArrowRightBoldBoxOutline,
   mdiArrowSplitVertical,
   mdiArrowUp,
+  mdiChevronLeft,
+  mdiChevronRight,
   mdiClose,
-  mdiEyeOutline,
   mdiHeadset,
   mdiImageFilterCenterFocus,
   mdiKeyboardOutline,
+  mdiLockOpenVariantOutline,
+  mdiLockOutline,
+  mdiMenuOpen,
   mdiMicrophone,
   mdiMonitorShare,
   mdiPlay,
   mdiReload,
   mdiTab,
+  mdiViewQuiltOutline,
   mdiWebcam,
 } from "@mdi/js";
 import type {
@@ -27,6 +32,7 @@ import type {
   HyprlandBind,
   HyprlandData,
   HyprlandDisplay,
+  HyprlandDispatcher,
   HyprlandGlobalShortcut,
   HyprlandReserved,
   HyprlandScreencast,
@@ -40,23 +46,29 @@ import type {
   Process,
   SystemFailedUnit,
 } from "@timmo001/effect-system-bridge";
-import { html, nothing } from "lit";
+import { html, nothing, type TemplateResult } from "lit";
 
 import "~/components/sb-action-alert";
 import "~/components/sb-action-button";
+import "~/components/sb-hyprland-events";
+import "~/components/sb-hyprland-option";
+import "~/components/sb-select";
 import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-omarchy-actions";
+import "~/components/sb-process-actions";
 import "~/components/sb-window-actions";
+import "~/components/sb-workspace-actions";
 import { icon } from "~/components/shared-styles";
 import {
   closeOmarchyMenu,
   desktopFailures,
-  focusWorkspace,
   type HyprlandDirectionalDispatcher,
   hyprlandDispatch,
   hyprlandDispatchTowards,
+  registry,
   reloadHyprlandConfig,
   runGlobalShortcut,
+  setHyprlandSubmap,
   setKeyboardLayout,
 } from "~/lib/atoms";
 import {
@@ -373,6 +385,14 @@ const processColumns = (() => {
       header: "User",
     }),
     column.accessor((row) => row.path ?? "", { id: "path", header: "Path" }),
+    column.display({
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) =>
+        html`<sb-process-actions
+          .process=${row.original}
+        ></sb-process-actions>`,
+    }),
   ]);
 })();
 
@@ -607,8 +627,11 @@ const windowId = (row: WindowRow) => row.window.id;
 interface WorkspaceRow {
   readonly workspace: DesktopWorkspace;
   readonly extra: HyprlandWorkspace | undefined;
-  /** Windows can't switch workspaces for you. */
-  readonly focusable: boolean;
+  /** The app of the window last focused on it, on Hyprland. */
+  readonly lastApp: string;
+  readonly compositor: DesktopCompositor;
+  /** Where it can be moved to, on Hyprland. */
+  readonly displays: readonly string[];
 }
 
 const workspaceColumns = (() => {
@@ -640,6 +663,7 @@ const workspaceColumns = (() => {
       id: "layout",
       header: "Layout",
     }),
+    column.accessor("lastApp", { header: "Last window" }),
     column.display({
       id: "state",
       header: "State",
@@ -655,19 +679,13 @@ const workspaceColumns = (() => {
     }),
     column.display({
       id: "actions",
-      header: "Action",
-      cell: ({ row }) => {
-        const { workspace, focusable } = row.original;
-
-        return workspace.focused || !focusable
-          ? nothing
-          : html`<sb-action-button
-              icon-only
-              label="Show ${workspace.name ?? workspace.id}"
-              .icon=${mdiEyeOutline}
-              .atom=${focusWorkspace(workspace.id)}
-            ></sb-action-button>`;
-      },
+      header: "Actions",
+      cell: ({ row }) =>
+        html`<sb-workspace-actions
+          .workspace=${row.original.workspace}
+          .compositor=${row.original.compositor}
+          .displays=${row.original.displays}
+        ></sb-workspace-actions>`,
     }),
   ]);
 })();
@@ -1033,16 +1051,34 @@ const dispatcherButtons = [
   ["toggle_split", "Toggle split", mdiArrowSplitVertical],
 ] as const;
 
+const groupButtons = [
+  ["group_previous", "Previous", mdiChevronLeft],
+  ["group_next", "Next", mdiChevronRight],
+  ["lock_group", "Lock", mdiLockOutline],
+  ["unlock_group", "Unlock", mdiLockOpenVariantOutline],
+] as const;
+
+const allGroupButtons = [
+  ["lock_groups", "Lock all", mdiLockOutline],
+  ["unlock_groups", "Unlock all", mdiLockOpenVariantOutline],
+] as const;
+
+const dispatcherButton = ([dispatcher, label, path]: readonly [
+  HyprlandDispatcher,
+  string,
+  string,
+]) =>
+  html`<sb-action-button
+    quiet
+    label=${label}
+    .icon=${path}
+    .atom=${hyprlandDispatch(dispatcher)}
+  ></sb-action-button>`;
+
 const dispatcherCard = () => {
-  const buttons = dispatcherButtons.map(
-    ([dispatcher, label, path]) =>
-      html`<sb-action-button
-        quiet
-        label=${label}
-        .icon=${path}
-        .atom=${hyprlandDispatch(dispatcher)}
-      ></sb-action-button>`,
-  );
+  const buttons = dispatcherButtons.map(dispatcherButton);
+  const group = groupButtons.map(dispatcherButton);
+  const allGroups = allGroupButtons.map(dispatcherButton);
 
   return html`
     <sb-card class="half" heading="Focused window" subheading="Dispatchers">
@@ -1059,6 +1095,8 @@ const dispatcherCard = () => {
             ${directionButtons("swap_window", "Swap")}
           </div>`,
         ],
+        ["Group", html`<div class="row wrap">${group}</div>`],
+        ["All groups", html`<div class="row wrap">${allGroups}</div>`],
       ])}
       <div class="row wrap">${buttons}</div>
     </sb-card>
@@ -1156,8 +1194,37 @@ const omarchyTableState = {
 // By route, which groups them by where they sit in the menu
 const omarchyMenuTableState = { ...omarchyTableState, sort: "id" };
 
+/**
+ * Cards only one desktop has, under their own heading, so the cards every
+ * desktop has read the same everywhere.
+ */
+const dashboardSection = (section: {
+  readonly id: string;
+  readonly heading: string;
+  readonly description: string;
+  readonly icon: string;
+  readonly actions?: TemplateResult;
+  readonly cards: TemplateResult;
+}) => html`
+  <section class="dashboard-section" id=${section.id}>
+    <header class="page-header">
+      <span class="tile">${icon(section.icon)}</span>
+      <div class="titles">
+        <h2>${section.heading}</h2>
+        <p class="description">${section.description}</p>
+      </div>
+      ${
+        section.actions === undefined
+          ? nothing
+          : html`<div class="actions">${section.actions}</div>`
+      }
+    </header>
+    <div class="dashboard">${section.cards}</div>
+  </section>
+`;
+
 const omarchyCards = (omarchy: OmarchyData) => html`
-  <sb-card heading="Omarchy menus" subheading="${omarchy.menus.length} routes">
+  <sb-card heading="Menus" subheading="${omarchy.menus.length} routes">
     <sb-action-button
       slot="actions"
       quiet
@@ -1177,7 +1244,7 @@ const omarchyCards = (omarchy: OmarchyData) => html`
     ></sb-data-table>
   </sb-card>
   <sb-card
-    heading="Omarchy panels"
+    heading="Panels"
     subheading="${omarchy.panels.length} from enabled plugins"
   >
     <sb-data-table
@@ -1190,10 +1257,7 @@ const omarchyCards = (omarchy: OmarchyData) => html`
       .state=${omarchyTableState}
     ></sb-data-table>
   </sb-card>
-  <sb-card
-    heading="Omarchy shell IPC"
-    subheading="${omarchy.targets.length} targets"
-  >
+  <sb-card heading="Shell IPC" subheading="${omarchy.targets.length} targets">
     <sb-data-table
       local
       label="Omarchy shell IPC targets"
@@ -1207,6 +1271,10 @@ const omarchyCards = (omarchy: OmarchyData) => html`
   </sb-card>
 `;
 
+const onSubmap = (event: CustomEvent<{ readonly value: string }>) => {
+  registry.set(setHyprlandSubmap, event.detail.value);
+};
+
 const hyprlandCards = (hyprland: HyprlandData) => {
   const displays = Object.entries(hyprland.displays).map(([id, display]) => ({
     id,
@@ -1217,15 +1285,20 @@ const hyprlandCards = (hyprland: HyprlandData) => {
 
   const shortcuts = shortcutRows(hyprland);
 
+  const submaps = [
+    ...new Set(hyprland.binds.flatMap((bind) => bind.submap ?? [])),
+  ].map((submap) => ({ value: submap, label: submap }));
+
+  const options = hyprland.options.map(
+    (option) =>
+      [
+        option.name,
+        html`<sb-hyprland-option .option=${option}></sb-hyprland-option>`,
+      ] as const,
+  );
+
   return html`
-    <sb-card class="half" heading="Hyprland">
-      <sb-action-button
-        slot="actions"
-        quiet
-        label="Reload config"
-        .icon=${mdiReload}
-        .atom=${reloadHyprlandConfig}
-      ></sb-action-button>
+    <sb-card class="half" heading="Details">
       ${facts([
         ["Version", hyprland.version.version],
         [
@@ -1237,11 +1310,35 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         ["Branch", hyprland.version.branch],
         ["Config", hyprland.version.config_provider],
         ["Backend", hyprland.version.backend],
-        ["Submap", hyprland.submap ?? "Default"],
+        [
+          "Submap",
+          submaps.length === 0
+            ? (hyprland.submap ?? "Default")
+            : html`<sb-select
+                label="Submap"
+                .options=${[{ value: "", label: "Default" }, ...submaps]}
+                .value=${hyprland.submap ?? ""}
+                @value-changed=${onSubmap}
+              ></sb-select>`,
+        ],
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}
     </sb-card>
     ${dispatcherCard()}
+    ${
+      options.length === 0
+        ? nothing
+        : html`<sb-card
+            class="half"
+            heading="Options"
+            subheading="Until the config reloads"
+          >
+            ${facts(options)}
+          </sb-card>`
+    }
+    <sb-card class="half" heading="Custom events" subheading="Sent by binds">
+      <sb-hyprland-events></sb-hyprland-events>
+    </sb-card>
     <sb-card heading="Displays" subheading="As Hyprland sees them">
       <sb-data-table
         local
@@ -1353,11 +1450,23 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     .map((screencast) => screencastLabel(screencast, desktop.windows))
     .join(", ");
 
-  const workspaces = desktop.workspaces.map((workspace): WorkspaceRow => ({
-    workspace,
-    extra: hyprland?.workspaces[workspace.id],
-    focusable: desktop.compositor !== "windows",
-  }));
+  const apps = new Map(
+    desktop.windows.map((window) => [window.id, window.app ?? ""]),
+  );
+
+  const displays = Object.keys(hyprland?.displays ?? {});
+
+  const workspaces = desktop.workspaces.map((workspace): WorkspaceRow => {
+    const extra = hyprland?.workspaces[workspace.id];
+
+    return {
+      workspace,
+      extra,
+      lastApp: apps.get(extra?.last_window ?? "") ?? "",
+      compositor: desktop.compositor,
+      displays,
+    };
+  });
 
   const failures = desktopFailures(
     [
@@ -1430,6 +1539,7 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
               : (workspaceNames.get(desktop.focused_workspace) ??
                   desktop.focused_workspace),
           )}
+          ${desktop.focused_display === null ? nothing : stat("Display", desktop.focused_display)}
           ${stat("Keyboard", desktop.keyboard.name ?? desktop.keyboard.layout ?? "")}
           ${stat("Windows", String(desktop.windows.length))}
           ${stat("Workspaces", desktop.workspaces.length === 0 ? "" : String(desktop.workspaces.length))}
@@ -1482,9 +1592,35 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
               </div>`
         }
       </sb-card>
-      ${hyprland === null ? nothing : hyprlandCards(hyprland)}
-      ${desktop.omarchy === null ? nothing : omarchyCards(desktop.omarchy)}
     </div>
+    ${
+      hyprland === null
+        ? nothing
+        : dashboardSection({
+            id: "hyprland",
+            heading: "Hyprland",
+            description: "What only Hyprland reports, and its controls",
+            icon: mdiViewQuiltOutline,
+            actions: html`<sb-action-button
+              quiet
+              label="Reload config"
+              .icon=${mdiReload}
+              .atom=${reloadHyprlandConfig}
+            ></sb-action-button>`,
+            cards: hyprlandCards(hyprland),
+          })
+    }
+    ${
+      desktop.omarchy === null
+        ? nothing
+        : dashboardSection({
+            id: "omarchy",
+            heading: "Omarchy",
+            description: "The Omarchy shell's menus, panels and IPC",
+            icon: mdiMenuOpen,
+            cards: omarchyCards(desktop.omarchy),
+          })
+    }
   `;
 };
 

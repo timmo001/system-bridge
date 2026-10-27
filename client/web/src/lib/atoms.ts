@@ -10,6 +10,7 @@ import {
   type DisplayControl,
   HyprlandDirection,
   HyprlandDispatcher,
+  type HyprlandEvent,
   type HyprlandSetWindowRequest,
   type MediaAction,
   ModuleDataUpdate,
@@ -535,6 +536,7 @@ export const mediaControl = Atom.fn((action: MediaAction, get) =>
 export type WindowAction =
   | { readonly _tag: "close" }
   | { readonly _tag: "focus" }
+  | { readonly _tag: "kill" }
   | { readonly _tag: "move"; readonly workspace: string }
   | {
       readonly _tag: "set";
@@ -555,6 +557,8 @@ export const windowAction = Atom.family((id: string) =>
             return bridge.desktopCloseWindow({ id });
           case "focus":
             return bridge.desktopFocusWindow({ id });
+          case "kill":
+            return bridge.hyprlandKillWindow({ id });
           case "move":
             return bridge.hyprlandMoveWindow({
               id,
@@ -575,6 +579,78 @@ export const focusWorkspace = Atom.family((id: string) =>
   Atom.fn((_: undefined, get) =>
     fnSocket(get).pipe(
       Effect.flatMap((bridge) => bridge.desktopFocusWorkspace({ id })),
+    ),
+  ),
+);
+
+/** Something to do to a workspace on Hyprland. */
+export type WorkspaceAction =
+  | { readonly _tag: "rename"; readonly name: string }
+  | { readonly _tag: "move"; readonly display: string };
+
+/** Renames a workspace or moves it to a display, one atom per workspace. */
+export const workspaceAction = Atom.family((id: string) =>
+  Atom.fn((action: WorkspaceAction, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) =>
+        action._tag === "rename"
+          ? bridge.hyprlandRenameWorkspace({ id, name: action.name })
+          : bridge.hyprlandMoveWorkspace({ id, display: action.display }),
+      ),
+    ),
+  ),
+);
+
+/** Switches Hyprland's binds to a submap, or the default with an empty name. */
+export const setHyprlandSubmap = Atom.fn((name: string, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) =>
+      bridge.hyprlandSetSubmap(name === "" ? {} : { name }),
+    ),
+  ),
+);
+
+/** Sets a Hyprland config option, one atom per option. */
+export const setHyprlandOption = Atom.family((name: string) =>
+  Atom.fn((value: boolean | number, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.hyprlandSetOption({ name, value })),
+    ),
+  ),
+);
+
+/** A custom event from Hyprland, and when it arrived. */
+export interface ReceivedHyprlandEvent extends HyprlandEvent {
+  readonly received: number;
+}
+
+const HYPRLAND_EVENTS_KEPT = 10;
+
+/** The latest custom events from Hyprland's event dispatcher, newest first. */
+export const hyprlandEvents = Atom.make((get) =>
+  Stream.unwrap(
+    socket(get).pipe(
+      Effect.map((bridge) =>
+        bridge.hyprlandEvents.pipe(
+          Stream.scan(
+            (): readonly ReceivedHyprlandEvent[] => [],
+            (events, event) =>
+              [{ data: event.data, received: Date.now() }, ...events].slice(
+                0,
+                HYPRLAND_EVENTS_KEPT,
+              ),
+          ),
+        ),
+      ),
+    ),
+  ),
+).pipe(Atom.keepAlive);
+
+/** Ends a process, by its id, one atom per process. */
+export const killProcess = Atom.family((id: number) =>
+  Atom.fn((force: boolean, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.killProcess({ id, force })),
     ),
   ),
 );
@@ -669,6 +745,7 @@ export const desktopFailures = Atom.family((ids: string) =>
         : failureMessage(get(hyprlandDispatch(dispatcher))),
     ),
     ...failureMessage(get(closeOmarchyMenu)),
+    ...failureMessage(get(setHyprlandSubmap)),
     ...ids
       .split("\n")
       .filter((id) => id.length > 0)

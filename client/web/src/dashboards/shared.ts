@@ -143,6 +143,25 @@ export const dashboardStyles = css`
     min-height: var(--sb-placeholder-height, 14rem);
     border-radius: var(--sb-radius-l);
   }
+
+  /* A group of cards only some systems have, headed like an embedded page */
+  .dashboard-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sb-space-4);
+    scroll-margin-top: calc(var(--sb-header-height) + var(--sb-space-4));
+  }
+
+  .dashboard-section .page-header .tile {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--sb-radius-m);
+    --sb-icon-size: 1.375rem;
+  }
+
+  .dashboard-section .page-header h2 {
+    font-size: var(--sb-font-size-l);
+  }
 `;
 
 export interface GraphCard {
