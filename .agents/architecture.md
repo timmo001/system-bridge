@@ -21,8 +21,7 @@
 ├── types/               # Shared type definitions
 ├── bus/                 # Internal event bus
 ├── discovery/           # mDNS service discovery
-├── client/web/          # Lit + Vite frontend (embedded via go:embed)
-└── web-client-nextjs/   # Previous Next.js version (reference)
+└── client/web/          # Lit + Vite frontend (embedded via go:embed)
 ```
 
 ## Data Module System
@@ -126,8 +125,6 @@ bun run format:check
 bun run format:write
 bun run typecheck
 ```
-
-**Note**: The previous Next.js version has been preserved in `web-client-nextjs/` for reference.
 
 ## CLI Commands for Testing
 
