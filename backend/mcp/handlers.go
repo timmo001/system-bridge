@@ -75,6 +75,7 @@ type getHistoryInput struct {
 type hyprlandDispatchInput struct {
 	Dispatcher string `json:"dispatcher"`
 	Direction  string `json:"direction,omitempty"`
+	ID         string `json:"id,omitempty"`
 }
 
 type hyprlandGlobalShortcutInput struct {

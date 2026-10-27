@@ -156,13 +156,18 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_dispatch",
-		Description: "Run a Hyprland dispatcher on the focused window, as its bind would",
+		Description: "Run a Hyprland dispatcher on the focused window, or another window after focusing it, as its bind would",
 		InputSchema: objectSchema(map[string]any{
 			"dispatcher": map[string]any{
 				"type":        "string",
-				"description": "The dispatcher. center_window only acts on floating windows.",
-				"enum":        []string{"center_window", "cycle_next_window", "cycle_previous_window", "move_focus", "swap_window", "toggle_group", "toggle_split"},
+				"description": "The dispatcher. center_window only acts on floating windows. lock_group and unlock_group act on the window's group, and lock_groups and unlock_groups on every group.",
+				"enum": []string{
+					"center_window", "cycle_next_window", "cycle_previous_window", "group_next", "group_previous",
+					"lock_group", "lock_groups", "move_focus", "swap_window", "toggle_group", "toggle_split",
+					"unlock_group", "unlock_groups",
+				},
 			},
+			"id": map[string]any{"type": "string", "description": "Window id from the desktop module's windows, to focus before running the dispatcher. Leave out for the focused window."},
 			"direction": map[string]any{
 				"type":        "string",
 				"description": "Direction for move_focus and swap_window",

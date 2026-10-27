@@ -181,11 +181,24 @@ var hyprlandDirections = map[types.HyprlandDirection]string{
 }
 
 // HyprlandDispatch runs one of the named dispatchers on the focused window,
-// as its bind would. Moving focus and swapping take a direction.
-func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, direction types.HyprlandDirection) error {
+// as its bind would, or on the window with id, focusing it first. Moving
+// focus and swapping take a direction.
+func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, direction types.HyprlandDirection, id string) error {
 	data, err := hyprlandCurrent(ctx)
 	if err != nil {
 		return err
+	}
+	var commands []hyprlandCommand
+	// Not every classic dispatcher takes a window, so the window is focused
+	// as a bind would find it
+	if id != "" {
+		if _, err := findWindow(data, id); err != nil {
+			return err
+		}
+		commands = append(commands, hyprlandCommand{
+			lua:     "hl.dsp.focus({ window = " + luaString("address:"+id) + " })",
+			classic: "focuswindow address:" + id,
+		})
 	}
 	var command hyprlandCommand
 	switch dispatcher {
@@ -205,14 +218,26 @@ func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, 
 		} else {
 			command = hyprlandCommand{lua: "hl.dsp.window.swap({ direction = " + luaString(short) + " })", classic: "swapwindow " + short}
 		}
+	case types.HyprlandDispatcherGroupNext:
+		command = hyprlandCommand{lua: "hl.dsp.group.next()", classic: "changegroupactive f"}
+	case types.HyprlandDispatcherGroupPrevious:
+		command = hyprlandCommand{lua: "hl.dsp.group.prev()", classic: "changegroupactive b"}
+	case types.HyprlandDispatcherLockGroup:
+		command = hyprlandCommand{lua: `hl.dsp.group.lock_active({ action = "on" })`, classic: "lockactivegroup lock"}
+	case types.HyprlandDispatcherLockGroups:
+		command = hyprlandCommand{lua: `hl.dsp.group.lock({ action = "on" })`, classic: "lockgroups lock"}
 	case types.HyprlandDispatcherToggleGroup:
 		command = hyprlandCommand{lua: "hl.dsp.group.toggle()", classic: "togglegroup"}
 	case types.HyprlandDispatcherToggleSplit:
 		command = hyprlandCommand{lua: `hl.dsp.layout("togglesplit")`, classic: "layoutmsg togglesplit"}
+	case types.HyprlandDispatcherUnlockGroup:
+		command = hyprlandCommand{lua: `hl.dsp.group.lock_active({ action = "off" })`, classic: "lockactivegroup unlock"}
+	case types.HyprlandDispatcherUnlockGroups:
+		command = hyprlandCommand{lua: `hl.dsp.group.lock({ action = "off" })`, classic: "lockgroups unlock"}
 	default:
 		return fmt.Errorf("dispatcher %q: %w", dispatcher, ErrNotFound)
 	}
-	return hyprlandDispatch(ctx, data, command)
+	return hyprlandDispatch(ctx, data, append(commands, command)...)
 }
 
 // HyprlandMoveWindow moves a window to a workspace, leaving the focus where

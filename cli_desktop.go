@@ -98,8 +98,11 @@ func hyprlandCommand() *cli.Command {
 		Commands: []*cli.Command{
 			{
 				Name:      "dispatch",
-				Usage:     "Run a dispatcher on the focused window: center_window, cycle_next_window, cycle_previous_window, move_focus, swap_window, toggle_group or toggle_split",
+				Usage:     "Run a dispatcher on the focused window, or --window: center_window, cycle_next_window, cycle_previous_window, group_next, group_previous, lock_group, lock_groups, move_focus, swap_window, toggle_group, toggle_split, unlock_group or unlock_groups",
 				ArgsUsage: "<dispatcher> [down|left|right|up]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "window", Usage: "A window id to focus before running the dispatcher"},
+				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					dispatcher, direction := cmd.Args().Get(0), cmd.Args().Get(1)
 					if dispatcher == "" {
@@ -108,6 +111,9 @@ func hyprlandCommand() *cli.Command {
 					data := map[string]any{"dispatcher": dispatcher}
 					if direction != "" {
 						data["direction"] = direction
+					}
+					if window := cmd.String("window"); window != "" {
+						data["id"] = window
 					}
 					return client.Send(cmdCtx, event.EventHyprlandDispatch, data)
 				},

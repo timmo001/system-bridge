@@ -179,7 +179,7 @@ On Hyprland, float, pin, move, resize and kill windows, rename workspaces and mo
 
 | Event | Data | Response |
 | --- | --- | --- |
-| `HYPRLAND_DISPATCH` | `dispatcher`, and a `direction` for `move_focus` and `swap_window` | `HYPRLAND_DISPATCHED` |
+| `HYPRLAND_DISPATCH` | `dispatcher`, a `direction` for `move_focus` and `swap_window`, and optionally the `id` of a window to run it on | `HYPRLAND_DISPATCHED` |
 | `HYPRLAND_KILL_WINDOW` | `id` | `HYPRLAND_WINDOW_KILLED` |
 | `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
 | `HYPRLAND_MOVE_WORKSPACE` | `id`, a workspace `id`, and the `display` to move it to, from the [`displays`](/api/data/#displays) data | `HYPRLAND_WORKSPACE_MOVED` |
@@ -202,17 +202,23 @@ Moving a window leaves the focus where it is. Hyprland only pins floating window
 }
 ```
 
-The dispatchers act on the focused window, as their binds would:
+The dispatchers act on the focused window, as their binds would. With an `id`, that window is focused first:
 
 | Dispatcher | Effect |
 | --- | --- |
 | `center_window` | Center the window. Floating windows only. |
 | `cycle_next_window` | Focus the next window on the workspace. |
 | `cycle_previous_window` | Focus the previous window on the workspace. |
+| `group_next` | Show the next window in the window's group. |
+| `group_previous` | Show the previous window in the window's group. |
+| `lock_group` | Lock the window's group, so windows can't be moved in or out. |
+| `lock_groups` | Lock every group. |
 | `move_focus` | Move the focus to the window in a `direction`. |
 | `swap_window` | Swap the window with the one in a `direction`. |
 | `toggle_group` | Turn the window into a group, or break up its group. |
 | `toggle_split` | Switch the split the window is in between horizontal and vertical, in the dwindle layout. |
+| `unlock_group` | Unlock the window's group. |
+| `unlock_groups` | Unlock every group. |
 
 The direction is `down`, `left`, `right` or `up`. When Hyprland refuses, such as centring a tiled window, you get an `ERROR` with its reason.
 

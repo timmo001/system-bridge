@@ -10,7 +10,7 @@ import (
 )
 
 // HyprlandDispatch isn't possible without Hyprland
-func HyprlandDispatch(context.Context, types.HyprlandDispatcher, types.HyprlandDirection) error {
+func HyprlandDispatch(context.Context, types.HyprlandDispatcher, types.HyprlandDirection, string) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 }
 

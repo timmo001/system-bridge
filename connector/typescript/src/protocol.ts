@@ -510,6 +510,8 @@ export const HyprlandDispatchRequest = Schema.Struct({
   dispatcher: HyprlandDispatcher,
   /** Needed by `move_focus` and `swap_window`. */
   direction: Schema.optionalKey(HyprlandDirection),
+  /** A window's `id` from the desktop module, focused before the dispatcher runs. */
+  id: Schema.optionalKey(Schema.String),
 });
 
 export interface HyprlandDispatchRequest extends Schema.Schema.Type<

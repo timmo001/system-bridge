@@ -56,10 +56,16 @@ export const HyprlandDispatcher = Schema.Literals([
   "center_window",
   "cycle_next_window",
   "cycle_previous_window",
+  "group_next",
+  "group_previous",
+  "lock_group",
+  "lock_groups",
   "move_focus",
   "swap_window",
   "toggle_group",
   "toggle_split",
+  "unlock_group",
+  "unlock_groups",
 ]);
 
 export type HyprlandDispatcher = typeof HyprlandDispatcher.Type;

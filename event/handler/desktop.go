@@ -67,6 +67,7 @@ type HyprlandSubmapRequestData struct {
 type HyprlandDispatchRequestData struct {
 	Dispatcher types.HyprlandDispatcher `json:"dispatcher" mapstructure:"dispatcher"`
 	Direction  types.HyprlandDirection  `json:"direction" mapstructure:"direction"`
+	ID         string                   `json:"id" mapstructure:"id"` // A window to focus first
 }
 
 type OmarchyRequestData struct {
@@ -131,7 +132,7 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 			return required(string(request.Dispatcher), "No dispatcher provided")
 		},
 		func(ctx context.Context, request HyprlandDispatchRequestData) error {
-			return desktop.HyprlandDispatch(ctx, request.Dispatcher, request.Direction)
+			return desktop.HyprlandDispatch(ctx, request.Dispatcher, request.Direction, request.ID)
 		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandMoveWindow, event.ResponseTypeHyprlandWindowMoved, "Window moved",
 		func(request HyprlandMoveWindowRequestData) string {

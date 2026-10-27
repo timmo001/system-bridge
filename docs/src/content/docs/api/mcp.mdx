@@ -211,10 +211,11 @@ Example arguments:
 
 ### `system_bridge_hyprland_dispatch`
 
-Run a dispatcher on the focused window on Hyprland, as its bind would. See [Hyprland control](/api/websocket/control/#hyprland-control) for what each does.
+Run a dispatcher on the focused window on Hyprland, or another window after focusing it, as its bind would. See [Hyprland control](/api/websocket/control/#hyprland-control) for what each does.
 
-- `dispatcher` (required): `center_window`, `cycle_next_window`, `cycle_previous_window`, `move_focus`, `swap_window`, `toggle_group` or `toggle_split`.
+- `dispatcher` (required): `center_window`, `cycle_next_window`, `cycle_previous_window`, `group_next`, `group_previous`, `lock_group`, `lock_groups`, `move_focus`, `swap_window`, `toggle_group`, `toggle_split`, `unlock_group` or `unlock_groups`.
 - `direction` (optional): `down`, `left`, `right` or `up`. Needed for `move_focus` and `swap_window`.
+- `id` (optional): The `id` of a window from the `desktop` module's `windows` to focus first.
 
 ### `system_bridge_hyprland_move_window`
 

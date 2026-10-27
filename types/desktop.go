@@ -234,10 +234,16 @@ const (
 	HyprlandDispatcherCenterWindow        HyprlandDispatcher = "center_window" // Floating windows only
 	HyprlandDispatcherCycleNextWindow     HyprlandDispatcher = "cycle_next_window"
 	HyprlandDispatcherCyclePreviousWindow HyprlandDispatcher = "cycle_previous_window"
+	HyprlandDispatcherGroupNext           HyprlandDispatcher = "group_next"
+	HyprlandDispatcherGroupPrevious       HyprlandDispatcher = "group_previous"
+	HyprlandDispatcherLockGroup           HyprlandDispatcher = "lock_group"  // The focused window's group
+	HyprlandDispatcherLockGroups          HyprlandDispatcher = "lock_groups" // Every group
 	HyprlandDispatcherMoveFocus           HyprlandDispatcher = "move_focus"  // Takes a direction
 	HyprlandDispatcherSwapWindow          HyprlandDispatcher = "swap_window" // Takes a direction
 	HyprlandDispatcherToggleGroup         HyprlandDispatcher = "toggle_group"
 	HyprlandDispatcherToggleSplit         HyprlandDispatcher = "toggle_split"
+	HyprlandDispatcherUnlockGroup         HyprlandDispatcher = "unlock_group"
+	HyprlandDispatcherUnlockGroups        HyprlandDispatcher = "unlock_groups"
 )
 
 // HyprlandDirection is a direction for a dispatcher

@@ -78,7 +78,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
 - `system_bridge_hyprland_dispatch` runs a named Hyprland dispatcher, such as
-  moving focus or toggling the split, on the focused window.
+  moving focus, toggling the split or locking groups, on the focused window
+  or one it focuses first.
 - `system_bridge_hyprland_kill_window` kills a window's app on Hyprland,
   without asking it to close.
 - `system_bridge_hyprland_move_window` moves a window to a workspace on

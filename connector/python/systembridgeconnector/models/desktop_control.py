@@ -19,10 +19,16 @@ class HyprlandDispatcher(StrEnum):
     CENTER_WINDOW = "center_window"
     CYCLE_NEXT_WINDOW = "cycle_next_window"
     CYCLE_PREVIOUS_WINDOW = "cycle_previous_window"
+    GROUP_NEXT = "group_next"
+    GROUP_PREVIOUS = "group_previous"
+    LOCK_GROUP = "lock_group"
+    LOCK_GROUPS = "lock_groups"
     MOVE_FOCUS = "move_focus"
     SWAP_WINDOW = "swap_window"
     TOGGLE_GROUP = "toggle_group"
     TOGGLE_SPLIT = "toggle_split"
+    UNLOCK_GROUP = "unlock_group"
+    UNLOCK_GROUPS = "unlock_groups"
 
 
 class OmarchyAction(StrEnum):
@@ -73,12 +79,14 @@ class DesktopWorkspaceRequest:
 class HyprlandDispatchRequest:
     """Hyprland Dispatch Request.
 
-    Runs a dispatcher on the focused window, as its bind would. move_focus and
-    swap_window take a direction.
+    Runs a dispatcher on the focused window, as its bind would, or on the
+    window with id, focusing it first. move_focus and swap_window take a
+    direction.
     """
 
     dispatcher: HyprlandDispatcher
     direction: HyprlandDirection | None = None
+    id: str | None = None
 
 
 @dataclass(slots=True)

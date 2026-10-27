@@ -151,7 +151,7 @@ system-bridge client hyprland submap resize
 system-bridge client hyprland reload
 ```
 
-`set` takes `--floating` and `--pinned`, each turned off with `=false`, `--x` and `--y` to place the window, and `--width` and `--height` to size it, in pixels. `kill` ends the window's app without asking it to close. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `move_focus`, `swap_window`, `toggle_group` or `toggle_split`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`. `submap` with no name goes back to the default.
+`set` takes `--floating` and `--pinned`, each turned off with `=false`, `--x` and `--y` to place the window, and `--width` and `--height` to size it, in pixels. `kill` ends the window's app without asking it to close. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `group_next`, `group_previous`, `lock_group`, `lock_groups`, `move_focus`, `swap_window`, `toggle_group`, `toggle_split`, `unlock_group` or `unlock_groups`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. `--window` focuses a window first and runs the dispatcher on it. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`. `submap` with no name goes back to the default.
 
 ## Omarchy
 
