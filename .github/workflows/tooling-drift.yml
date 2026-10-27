@@ -1,9 +1,9 @@
 ---
 name: Tooling drift
 
-# Opens a review pull request for each Omarchy release newer than the one
-# recorded in tooling.yml, through the tooling-drift tool pinned in mise.toml.
-# See the tooling-drift skill.
+# Opens a review pull request for each tool in tooling.yml whose latest release
+# is newer than the one recorded there, through the tooling-drift tool pinned
+# in mise.toml. See the tooling-drift skill.
 
 on:
   schedule:
