@@ -134,6 +134,11 @@ type powerProfileInput struct {
 	Profile string `json:"profile"`
 }
 
+type keepAwakeInput struct {
+	Enabled  bool `json:"enabled"`
+	Duration *int `json:"duration,omitempty"`
+}
+
 type notificationInput struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`

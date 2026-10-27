@@ -23,7 +23,8 @@ const watchDebounce = 250 * time.Millisecond
 const watchRetry = time.Minute
 
 // Watch calls changed whenever the session is locked or unlocked, the user
-// goes away or comes back, or a systemd unit fails or recovers, until ctx is
+// goes away or comes back, the power profile changes, keeping awake runs
+// out, or a systemd unit fails or recovers, until ctx is
 // done. Lock and idle hints come from logind, input from the Wayland
 // compositor where it supports ext-idle-notify, and unit states from the
 // system and user systemd managers.
@@ -33,6 +34,8 @@ func Watch(ctx context.Context, changed func()) {
 
 	waylandIdle.setAwayChanged(trigger)
 	defer waylandIdle.setAwayChanged(nil)
+	keepAwake.setChanged(trigger)
+	defer keepAwake.setChanged(nil)
 
 	var wg sync.WaitGroup
 	for _, scope := range unitScopes {

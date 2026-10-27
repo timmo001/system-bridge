@@ -90,6 +90,11 @@ class System:
     power_profile: str | None = None
     # The profiles set_power_profile can switch to
     power_profiles: list[str] = field(default_factory=list)
+    # Whether the system is kept from idling, or None where that's not
+    # supported
+    keep_awake: bool | None = None
+    # When keeping awake ends, in Unix seconds, if it was set with a duration
+    keep_awake_until: int | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""

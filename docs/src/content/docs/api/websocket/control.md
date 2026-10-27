@@ -148,8 +148,11 @@ Change system settings. Linux only.
 | Event | Data | Response |
 | --- | --- | --- |
 | `SYSTEM_SET_POWER_PROFILE` | `profile`, one of the [`system`](/api/data/#system) data's `power_profiles` | `SYSTEM_POWER_PROFILE_SET` |
+| `SYSTEM_SET_KEEP_AWAKE` | `enabled`, `true` or `false`, and optionally `duration` in seconds | `SYSTEM_KEEP_AWAKE_SET` |
 
 Switching the power profile needs power-profiles-daemon, or tuned-ppd on Fedora.
+
+Keeping awake stops the system idling, so it doesn't lock, blank the screen or sleep for being left alone. With a `duration`, it lets the system idle again after that many seconds. On Omarchy it turns on the bar's stay awake switch. Elsewhere it holds a logind idle inhibitor, which most desktops and idle daemons, such as hypridle, follow, until it's turned off or System Bridge stops.
 
 ```json title="Request"
 {

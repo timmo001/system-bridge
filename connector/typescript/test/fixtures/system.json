@@ -53,5 +53,7 @@
   "idle_time": 120,
   "locked": false,
   "power_profile": "balanced",
-  "power_profiles": ["power-saver", "balanced", "performance"]
+  "power_profiles": ["power-saver", "balanced", "performance"],
+  "keep_awake": true,
+  "keep_awake_until": 1793130000
 }

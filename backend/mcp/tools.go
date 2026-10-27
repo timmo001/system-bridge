@@ -312,6 +312,15 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"profile"}),
 	}, eventTool[powerProfileInput](handlers, event.EventSystemSetPowerProfile))
 
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_keep_awake",
+		Description: "Keep the system from idling, so it doesn't lock, blank the screen or sleep for being idle, or let it idle again. On Omarchy this is the bar's stay awake switch. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"enabled":  boolean("Whether to keep the system awake"),
+			"duration": map[string]any{"type": "integer", "minimum": 0, "description": "Seconds until the system may idle again. Leave it out to keep it awake until told otherwise."},
+		}, []string{"enabled"}),
+	}, eventTool[keepAwakeInput](handlers, event.EventSystemSetKeepAwake))
+
 	omarchyAction := map[string]any{
 		"type":        "string",
 		"description": "Whether to open, close or toggle it",

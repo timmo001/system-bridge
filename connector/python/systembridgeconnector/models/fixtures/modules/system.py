@@ -69,4 +69,6 @@ FIXTURE_SYSTEM = System(
     locked=False,
     power_profile="balanced",
     power_profiles=["power-saver", "balanced", "performance"],
+    keep_awake=True,
+    keep_awake_until=1793130000,
 )

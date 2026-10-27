@@ -112,6 +112,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   `title` and `message` fields and an optional `icon`.
 - `system_bridge_set_power_profile` switches power-profiles-daemon's profile
   through `system.SetPowerProfile`.
+- `system_bridge_set_keep_awake` keeps the system from idling, optionally for a
+  `duration`, through `system.SetKeepAwake`.
 
 Power actions are left out on purpose, as an assistant could trigger them by
 mistake.

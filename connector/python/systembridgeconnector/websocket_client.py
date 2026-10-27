@@ -61,7 +61,7 @@ from .models.process_control import ProcessKillRequest
 from .models.request import Request
 from .models.response import Response
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
-from .models.system_control import PowerProfileRequest
+from .models.system_control import KeepAwakeRequest, PowerProfileRequest
 
 # The backend allows 30 seconds for a Bluetooth device to connect
 BLUETOOTH_TIMEOUT = 35.0
@@ -939,6 +939,19 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.SYSTEM_SET_POWER_PROFILE,
             EventType.SYSTEM_POWER_PROFILE_SET,
+            model,
+            request_id,
+        )
+
+    async def set_keep_awake(
+        self,
+        model: KeepAwakeRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Keep the system from idling, or let it idle again. Linux only."""
+        return await self._action(
+            EventType.SYSTEM_SET_KEEP_AWAKE,
+            EventType.SYSTEM_KEEP_AWAKE_SET,
             model,
             request_id,
         )

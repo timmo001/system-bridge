@@ -78,4 +78,10 @@ type SystemData struct {
 	PowerProfile *string `json:"power_profile" mapstructure:"power_profile"`
 	// PowerProfiles are the profiles SYSTEM_SET_POWER_PROFILE can switch to
 	PowerProfiles []string `json:"power_profiles" mapstructure:"power_profiles"`
+	// KeepAwake is whether the system is kept from idling, or nil where
+	// that's not supported
+	KeepAwake *bool `json:"keep_awake" mapstructure:"keep_awake"`
+	// KeepAwakeUntil is when keeping awake ends, in Unix seconds, if it was
+	// set with a duration
+	KeepAwakeUntil *int64 `json:"keep_awake_until" mapstructure:"keep_awake_until"`
 }

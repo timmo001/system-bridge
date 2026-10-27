@@ -66,6 +66,7 @@ import {
   HyprlandRenameWorkspaceRequest,
   HyprlandSetWindowRequest,
   HyprlandSubmapRequest,
+  KeepAwakeRequest,
   KeyboardKeypress,
   KeyboardText,
   MediaAction,
@@ -212,6 +213,10 @@ export interface Interface {
   /** Switches the power profile. Linux with power-profiles-daemon only. */
   readonly setPowerProfile: (
     request: PowerProfileRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Keeps the system from idling, or lets it idle again. Linux only. */
+  readonly setKeepAwake: (
+    request: KeepAwakeRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Asks a window to close, as its close button would. */
   readonly desktopCloseWindow: (
@@ -995,6 +1000,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const setKeepAwake = Effect.fn("SystemBridgeWebSocket.setKeepAwake")(
+    function* (request: KeepAwakeRequest) {
+      yield* call(
+        "SYSTEM_SET_KEEP_AWAKE",
+        "SYSTEM_KEEP_AWAKE_SET",
+        KeepAwakeRequest,
+        request,
+        ignoreReply,
+      );
+    },
+  );
+
   const discordControl = Effect.fn("SystemBridgeWebSocket.discordControl")(
     function* (control: DiscordControl) {
       yield* call(
@@ -1333,6 +1350,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothForget,
     bluetoothSetPower,
     setPowerProfile,
+    setKeepAwake,
     desktopCloseWindow,
     desktopFocusWindow,
     desktopFocusWorkspace,

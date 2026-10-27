@@ -65,6 +65,7 @@ const (
 	ResponseTypeSettingsChanged           ResponseType = "SETTINGS_CHANGED"
 	ResponseTypeSettingsResult            ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated           ResponseType = "SETTINGS_UPDATED"
+	ResponseTypeSystemKeepAwakeSet        ResponseType = "SYSTEM_KEEP_AWAKE_SET"
 	ResponseTypeSystemPowerProfileSet     ResponseType = "SYSTEM_POWER_PROFILE_SET"
 )
 

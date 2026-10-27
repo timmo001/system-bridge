@@ -61,6 +61,7 @@ export const EventType = Schema.Literals([
   "POWER_SLEEP",
   "PROCESS_KILL",
   "REGISTER_DATA_LISTENER",
+  "SYSTEM_SET_KEEP_AWAKE",
   "SYSTEM_SET_POWER_PROFILE",
   "UNREGISTER_DATA_LISTENER",
   "UPDATE_DISCORD_SETUP",
@@ -132,6 +133,7 @@ export const ResponseType = Schema.Literals([
   "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
+  "SYSTEM_KEEP_AWAKE_SET",
   "SYSTEM_POWER_PROFILE_SET",
 ]);
 
@@ -404,6 +406,17 @@ export const PowerProfileRequest = Schema.Struct({
 
 export interface PowerProfileRequest extends Schema.Schema.Type<
   typeof PowerProfileRequest
+> {}
+
+/** Keeps the system from idling, or lets it idle again. Linux only. */
+export const KeepAwakeRequest = Schema.Struct({
+  enabled: Schema.Boolean,
+  /** Seconds until the system may idle again. Leave it out to keep it awake until told otherwise. */
+  duration: Schema.optionalKey(Schema.Int),
+});
+
+export interface KeepAwakeRequest extends Schema.Schema.Type<
+  typeof KeepAwakeRequest
 > {}
 
 /** Sets an output's or input's volume or mute state, or makes it the default. */

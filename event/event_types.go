@@ -57,6 +57,7 @@ const (
 	EventPowerSleep                EventType = "POWER_SLEEP"
 	EventProcessKill               EventType = "PROCESS_KILL"
 	EventRegisterDataListener      EventType = "REGISTER_DATA_LISTENER"
+	EventSystemSetKeepAwake        EventType = "SYSTEM_SET_KEEP_AWAKE"
 	EventSystemSetPowerProfile     EventType = "SYSTEM_SET_POWER_PROFILE"
 	EventUnregisterDataListener    EventType = "UNREGISTER_DATA_LISTENER"
 	EventUpdateDiscordSetup        EventType = "UPDATE_DISCORD_SETUP"

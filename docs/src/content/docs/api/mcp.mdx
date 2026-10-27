@@ -380,6 +380,13 @@ Switch the power profile. Linux with power-profiles-daemon or tuned-ppd only. Se
 
 - `profile` (required): One of the `system` module's `power_profiles`, such as `power-saver`, `balanced` or `performance`.
 
+### `system_bridge_set_keep_awake`
+
+Keep the system from idling, so it doesn't lock, blank the screen or sleep for being left alone, or let it idle again. On Omarchy this is the bar's stay awake switch. Linux only.
+
+- `enabled` (required): `true` to keep it awake, `false` to let it idle.
+- `duration` (optional): Seconds until it may idle again.
+
 ## Troubleshooting
 
 ### Connection refused

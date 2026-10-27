@@ -61,7 +61,10 @@ from systembridgeconnector.models.settings import (
     SettingsCommandDefinition,
     SettingsCommands,
 )
-from systembridgeconnector.models.system_control import PowerProfileRequest
+from systembridgeconnector.models.system_control import (
+    KeepAwakeRequest,
+    PowerProfileRequest,
+)
 from systembridgeconnector.websocket_client import WebSocketClient
 
 from . import API_HOST, REQUEST_ID, ClientSessionGenerator
@@ -597,6 +600,20 @@ async def test_set_power_profile(
     )
     assert response.type == EventType.SYSTEM_POWER_PROFILE_SET
     assert response.data == {"profile": "performance"}
+
+
+@pytest.mark.asyncio
+async def test_set_keep_awake(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_keep_awake(
+        KeepAwakeRequest(enabled=False),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.SYSTEM_KEEP_AWAKE_SET
+    # Turning it off is sent, and no duration is
+    assert response.data == {"enabled": False}
 
 
 @pytest.mark.asyncio

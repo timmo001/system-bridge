@@ -1285,6 +1285,8 @@ export const SystemData = Schema.Struct({
   locked: Schema.NullOr(Schema.Boolean),
   power_profile: Schema.NullOr(Schema.String),
   power_profiles: Schema.Array(Schema.String),
+  keep_awake: Schema.NullOr(Schema.Boolean),
+  keep_awake_until: Schema.NullOr(Schema.Finite),
 });
 
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}
