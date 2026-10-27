@@ -4,8 +4,8 @@ license: Apache-2.0
 description: >
   Write commits, PR and issue text, docs, code comments and user-facing strings
   in the owner's concise, human UK English voice. Use when writing, editing or
-  reviewing these, making text sound natural, or attaching images or videos to
-  a PR or issue.
+  reviewing these, drafting or creating issues, making text sound natural, or
+  attaching images or videos to a PR or issue.
 ---
 
 # Writing Style
@@ -103,6 +103,8 @@ Size the description to the change. Most PRs need a sentence or two, such as "Fi
 - Inside a repo template, write in its description section (such as "Proposed change"), put links and screenshots in the template's own fields when it has them, and keep everything else, removing only what the template says to. Tick the boxes that are true for the change, following any rules the repo sets for them. When the user reviews the text and ticks or unticks boxes, or says which to tick in their notes, keep exactly their choices.
 - Never add placeholders or notes to the author, such as "Add screenshots here", "Insert issue link", or `<!-- TODO -->`, whether drafting or editing an existing description. Leave a section empty if you have nothing for it. This applies only to text you add: keep the template's own comments, prompts, and placeholders (such as `fixes #`) exactly as written.
 - Issues: a clear title can stand alone for small tasks; add a line or link when it needs context. Use a checklist for tracking issues. For bug templates, give the problem in a sentence plus logs.
+- Show every new issue to the user as a draft, with its title, body and labels, before creating it, even when they asked for it to be created. Make each task concrete: research the code first and split it into one issue per piece of work, rather than one issue that says "look into it".
+- Label every issue you create or draft when you can set labels on the repository (`gh label list --repo <owner>/<repo>`). In other people's or organisations' repositories, use only existing labels. In the user's own repositories, suggest a new label in the draft when none fits, and create it only once they agree.
 
 Longer examples, each a complete body; read the one closest to the change before drafting:
 
