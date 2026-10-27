@@ -1,7 +1,9 @@
 package settings
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -151,7 +153,10 @@ func Load() (*Settings, error) {
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			if err := viper.SafeWriteConfig(); err != nil {
+			// Another process starting at the same time may write it first,
+			// which leaves the same defaults in place
+			var exists viper.ConfigFileAlreadyExistsError
+			if err := viper.SafeWriteConfig(); err != nil && !errors.Is(err, fs.ErrExist) && !errors.As(err, &exists) {
 				return nil, fmt.Errorf("error writing default config file: %w", err)
 			}
 		} else {

@@ -76,13 +76,16 @@ func CaptureFatalError(err error, msg string, args ...any) {
 
 func setupLogging() {
 
-	settings, err := settings.Load()
+	// Initialize the dynamic log level from settings, or the default level
+	// when they can't be loaded
+	logLevel := settings.LogLevelWarn
+	loaded, err := settings.Load()
 	if err != nil {
 		slog.Error("error loading settings", "err", err)
+	} else {
+		logLevel = loaded.LogLevel
 	}
-
-	// Initialize the dynamic log level from settings
-	logging.LogLevel.Set(settings.LogLevel.ToSlogLevel())
+	logging.LogLevel.Set(logLevel.ToSlogLevel())
 
 	// Determine whether to log to stdout (only for backend command)
 	includeTerminal := shouldLogToStdout()
