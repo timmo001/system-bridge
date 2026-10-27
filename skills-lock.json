@@ -36,6 +36,27 @@
       "skillPath": "effect-service-design/SKILL.md",
       "computedHash": "307d3af97e0343c761d56c260310c75b7e754aec2e64c3dee8c0946570d310ee"
     },
+    "home-assistant-frontend": {
+      "source": "timmo001/skills",
+      "ref": "9956e40b45222dbdd0c22f7332b6c011993ba7c3",
+      "sourceType": "github",
+      "skillPath": "home-assistant-frontend/SKILL.md",
+      "computedHash": "f4b7634776309a30075ca6ad0b266de03088c7dcff5b4a82ca0c06520490d82b"
+    },
+    "home-assistant-lit-rendering": {
+      "source": "timmo001/skills",
+      "ref": "9956e40b45222dbdd0c22f7332b6c011993ba7c3",
+      "sourceType": "github",
+      "skillPath": "home-assistant-lit-rendering/SKILL.md",
+      "computedHash": "71de2e7392f22915724053e6041239b1545546fbf72d46ab7217e002c434af4f"
+    },
+    "lit-rendering": {
+      "source": "timmo001/skills",
+      "ref": "9956e40b45222dbdd0c22f7332b6c011993ba7c3",
+      "sourceType": "github",
+      "skillPath": "lit-rendering/SKILL.md",
+      "computedHash": "f642f29aabbb6f2b7d122ee0eb370f642f57aac936ff2712032a05ac60f8363f"
+    },
     "skill-prefixes": {
       "source": "timmo001/skills",
       "ref": "464b598d62528b331021dee2242fc7febb242f11",
