@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "@timmo001/tooling-drift": "0.1.4"
+    "@timmo001/tooling-drift": "0.1.5"
   }
 }

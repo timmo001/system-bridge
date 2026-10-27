@@ -20,7 +20,8 @@ tools:
     reviewed: 2026.10.4
     review: Bring the Python connector in line with Core's pyproject.toml at the new tag (requires-python, the aiohttp pin and the Ruff and pylint rules connector/python/pyproject.toml copies), and check homeassistant/components/system_bridge for calls into the connector that changed or that it no longer supports.
   - repo: omacom/omarchy
-    reviewed: v4.0.6
+    reviewed: v4.5.0-rc2
+    prereleases: true
     review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, omarchy-system logout, omarchy-launch-terminal, omarchy-launch-nautilus, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes). Also check data/module/system/keep_awake_linux.go, which runs omarchy-toggle-idle stay-awake, allow-idle and status, and reads enabled from the status JSON.
   - repo: hyprwm/Hyprland
     reviewed: v0.56.2

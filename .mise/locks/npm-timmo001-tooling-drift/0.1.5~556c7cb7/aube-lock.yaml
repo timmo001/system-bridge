@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@timmo001/tooling-drift':
-        specifier: 0.1.4
-        version: 0.1.4(redis@6.3.0)
+        specifier: 0.1.5
+        version: 0.1.5(redis@6.3.0)
 
 packages:
 
@@ -20,11 +20,11 @@ packages:
     peerDependencies:
       effect: ^4.0.6
 
-  '@effect/platform-node@4.0.3':
-    resolution: {integrity: sha512-ctvREpC1EzRVsOm0JyIzYHajAQScFaec6Gl+M7TEIpEqdmmx6Ju11Um92EA/CE2KBfY5Fp1QWlqTkK6lOL7tqg==}
+  '@effect/platform-node@4.0.6':
+    resolution: {integrity: sha512-gXvGHAy0/8PZbWvMMguloDUyeSP+rzYEo3FSEqUuGduxo9ORcGioDxPI+GOLCIFfam7VuNkmSUxBOiRMIrMrBw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      effect: ^4.0.3
+      effect: ^4.0.6
       redis: '>=5.0.0 <7.0.0'
 
   '@redis/bloom@6.3.0':
@@ -63,13 +63,13 @@ packages:
     peerDependencies:
       '@redis/client': ^6.3.0
 
-  '@timmo001/effect-gh@0.6.1':
-    resolution: {integrity: sha512-/L+ksAzcQRHYugOLE1PiF1sOVhTjUpNGCgwn3rDAtOIW3G33agk9O7ypFcX9+nP9XqoIoR7A7xgZ3PeQOQJE5w==}
+  '@timmo001/effect-gh@0.7.1':
+    resolution: {integrity: sha512-BXfHxbLknmHbwdxU6UlrPo8LOIE3ZrZ/6YYYdWxJvgTIwvMZpUFKzCZJA2aHtuiwPZ6ICZHW4ZyeQ8fT3RnvJQ==}
     peerDependencies:
-      effect: 4.0.3
+      effect: 4.0.6
 
-  '@timmo001/tooling-drift@0.1.4':
-    resolution: {integrity: sha512-kgwJY1owMIJMKQPadye1QzwNLkqP1DT4u8TmVT6dWGA7AY5DBciK0KnT0CyxYBojCLeId4YfPDkGwHKbZRlajA==}
+  '@timmo001/tooling-drift@0.1.5':
+    resolution: {integrity: sha512-WvG6yoj7UnKHJekkPJOuSMZ7PLPXIQ4T7+O1PTpfgXGdUs7RKSlFBvA1/OLvaTudSociVayf+BDn791ewZUj8w==}
     hasBin: true
 
   '@types/node@26.6.5':
@@ -77,9 +77,6 @@ packages:
 
   '@types/ws@8.18.2':
     resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
-
-  effect@4.0.3:
-    resolution: {integrity: sha512-LoWn/Uwwx0JjHSDmBAAahx8sB+klzM6vsZovnbYowBNw6B4QScJLRLBByO61plvNiycx7HPN8FnsWUCu0eXW5w==}
 
   effect@4.0.6:
     resolution: {integrity: sha512-Tc3mkzuLR6t6P9dhLt0D2GrxYtmU5td4XEJEiXCmILz53IRIfJyHsKZWjTA3xEjiwpNTtXBgI4iqYPxMztBDrw==}
@@ -118,10 +115,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.0.3(effect@4.0.3)(redis@6.3.0)':
+  '@effect/platform-node@4.0.6(effect@4.0.6)(redis@6.3.0)':
     dependencies:
       '@effect/platform-node-shared': 4.0.6(effect@4.0.6)
-      effect: 4.0.3
+      effect: 4.0.6
       redis: 6.3.0
       undici: 8.12.3
     transitivePeerDependencies:
@@ -146,17 +143,18 @@ snapshots:
     dependencies:
       '@redis/client': 6.3.0
 
-  '@timmo001/effect-gh@0.6.1(effect@4.0.3)':
+  '@timmo001/effect-gh@0.7.1(effect@4.0.6)':
     dependencies:
-      effect: 4.0.3
+      effect: 4.0.6
 
-  '@timmo001/tooling-drift@0.1.4(redis@6.3.0)':
+  '@timmo001/tooling-drift@0.1.5(redis@6.3.0)':
     dependencies:
-      '@effect/platform-node': 4.0.3(effect@4.0.3)(redis@6.3.0)
-      '@timmo001/effect-gh': 0.6.1(effect@4.0.3)
-      effect: 4.0.3
+      '@effect/platform-node': 4.0.6(effect@4.0.6)(redis@6.3.0)
+      '@timmo001/effect-gh': 0.7.1(effect@4.0.6)
+      effect: 4.0.6
     transitivePeerDependencies:
       - bufferutil
+      - redis
       - utf-8-validate
 
   '@types/node@26.6.5':
@@ -166,8 +164,6 @@ snapshots:
   '@types/ws@8.18.2':
     dependencies:
       '@types/node': 26.6.5
-
-  effect@4.0.3: {}
 
   effect@4.0.6: {}
 
