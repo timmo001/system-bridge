@@ -20,13 +20,13 @@ require (
 	github.com/distatus/battery v0.11.0
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-vgo/robotgo v1.3.7
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/godbus/dbus/v5 v5.2.4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/mdns v1.0.7
 	github.com/jezek/xgb v1.3.1
 	github.com/mdlayher/wifi v0.9.0
-	github.com/mitchellh/mapstructure v1.5.0
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/moutend/go-wca v0.3.0
 	github.com/phsym/console-slog v0.3.1
@@ -46,7 +46,6 @@ require (
 	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gen2brain/shm v0.2.2 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/jezek/xgbutil v0.0.0-20260124183602-9fd151d6a51a // indirect

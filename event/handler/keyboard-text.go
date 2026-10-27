@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/keyboard"
 )

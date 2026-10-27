@@ -6,7 +6,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
 	settingspkg "github.com/timmo001/system-bridge/settings"

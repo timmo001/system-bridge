@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
