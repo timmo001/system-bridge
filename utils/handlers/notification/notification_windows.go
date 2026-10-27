@@ -3,18 +3,64 @@
 package notification
 
 import (
-	"github.com/go-toast/toast"
+	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"sync"
+	"sync/atomic"
+
+	"git.sr.ht/~jackmordaunt/go-toast/v2/wintoast"
 )
 
-// windowsNotifier handles notifications on Windows via go-toast
+// activationGUID is the COM class Windows calls back when one of System
+// Bridge's notifications, or a button on it, is clicked
+const activationGUID = "{A61E2CEE-38E4-4998-BC63-A04A8B06224C}"
+
+var (
+	appDataOnce sync.Once
+	appDataErr  error
+
+	nextID atomic.Uint32
+
+	// sent are the notifications sent that open something when clicked, by
+	// id. Windows reports clicks but not closes, so each is forgotten once
+	// it's clicked.
+	sentMu sync.Mutex
+	sent   = map[uint32]sentToast{}
+)
+
+type sentToast struct {
+	notifier *windowsNotifier
+	url      string
+	path     string
+}
+
+// windowsNotifier sends toast notifications through the Windows Runtime
 type windowsNotifier struct {
 	appName  string
 	openURL  func(string) error
 	openPath func(string) error
 }
 
-// newPlatformNotifier creates a new notification handler for Windows
+// newPlatformNotifier registers System Bridge with Windows, once, so its
+// toasts can show and report clicks
 func newPlatformNotifier(appName string, openURL, openPath func(string) error) (platformNotifier, error) {
+	appDataOnce.Do(func() {
+		data := wintoast.AppData{AppID: appName, GUID: activationGUID}
+		if executable, err := os.Executable(); err == nil {
+			icon := filepath.Join(filepath.Dir(executable), "system-bridge.ico")
+			if _, err := os.Stat(icon); err == nil {
+				data.IconPath = icon
+			}
+		}
+		appDataErr = wintoast.SetAppData(data)
+		wintoast.SetActivationCallback(activated)
+	})
+	if appDataErr != nil {
+		return nil, fmt.Errorf("register notifications with Windows: %w", appDataErr)
+	}
+
 	return &windowsNotifier{
 		appName:  appName,
 		openURL:  openURL,
@@ -22,40 +68,58 @@ func newPlatformNotifier(appName string, openURL, openPath func(string) error) (
 	}, nil
 }
 
-// notify sends a notification via go-toast
+// notify shows a toast through the Windows Runtime. There's no PowerShell
+// fallback: it would run the toast's text as part of a script.
 func (n *windowsNotifier) notify(data NotificationData) (uint32, error) {
-	notification := toast.Notification{
-		AppID:   n.appName,
-		Title:   data.Title,
-		Message: data.Message,
+	id := nextID.Add(1)
+	toast, err := buildToast(id, data)
+	if err != nil {
+		return 0, err
+	}
+	if err := wintoast.Push(n.appName, toast); err != nil {
+		return 0, fmt.Errorf("show the toast: %w", err)
 	}
 
-	if data.Icon != "" {
-		notification.Icon = data.Icon
+	if data.ActionURL != "" || data.ActionPath != "" {
+		sentMu.Lock()
+		sent[id] = sentToast{notifier: n, url: data.ActionURL, path: data.ActionPath}
+		sentMu.Unlock()
+	}
+	return id, nil
+}
+
+// activated is called by Windows when a toast or one of its buttons is
+// clicked
+func activated(_ string, arguments string, _ []wintoast.UserData) {
+	id, action, ok := parseActivationArguments(arguments)
+	if !ok {
+		slog.Debug("Ignoring a toast activation", "arguments", arguments)
+		return
 	}
 
-	if data.Duration > 0 {
-		// go-toast supports Duration: toast.Short or toast.Long (not ms), so pick based on threshold
-		if data.Duration >= 7000 {
-			notification.Duration = toast.Long
-		} else {
-			notification.Duration = toast.Short
+	sentMu.Lock()
+	toast, ok := sent[id]
+	delete(sent, id)
+	sentMu.Unlock()
+
+	if ok && action == DefaultAction {
+		// URL takes precedence over path
+		if toast.url != "" && toast.notifier.openURL != nil {
+			if err := toast.notifier.openURL(toast.url); err != nil {
+				slog.Error("Failed to open URL from notification", "url", toast.url, "error", err)
+			}
+		} else if toast.path != "" && toast.notifier.openPath != nil {
+			if err := toast.notifier.openPath(toast.path); err != nil {
+				slog.Error("Failed to open path from notification", "path", toast.path, "error", err)
+			}
 		}
 	}
 
-	// Note: Windows toast notifications can support action URLs via ActivationArguments,
-	// but this requires more complex setup with protocol handlers.
-	// For now, we don't support click-to-open on Windows.
-
-	if err := notification.Push(); err != nil {
-		return 0, err
-	}
-
-	// go-toast doesn't return a notification ID
-	return 0, nil
+	emit(Event{ID: id, Action: action})
 }
 
-// dismiss isn't supported, as go-toast gives no notification id to close
+// dismiss isn't supported, as the Windows Runtime toast API go-toast wraps
+// can't remove a toast once shown
 func (n *windowsNotifier) dismiss(uint32) error {
 	return ErrUnsupported
 }

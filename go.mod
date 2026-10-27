@@ -14,10 +14,10 @@ ignore (
 
 require (
 	fyne.io/systray v1.12.2
+	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3
 	github.com/Microsoft/go-winio v0.6.4
 	github.com/distatus/battery v0.11.0
 	github.com/go-ole/go-ole v1.3.0
-	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v1.3.7
 	github.com/godbus/dbus/v5 v5.2.4
 	github.com/google/uuid v1.6.0
@@ -54,7 +54,6 @@ require (
 	github.com/mdlayher/netlink v1.11.2 // indirect
 	github.com/mdlayher/socket v0.6.0 // indirect
 	github.com/miekg/dns v1.1.72 // indirect
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/power-devops/perfstat v0.0.0-20260916203055-22a1a467d9f0 // indirect
