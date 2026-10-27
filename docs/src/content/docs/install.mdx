@@ -15,7 +15,7 @@ Each release ships these assets:
 - Windows: `system-bridge-<version>-setup.exe`
 - Windows archive: `system-bridge-<version>-windows-x86_64.zip`
 
-The archives hold just the executable, for [mise](#mise) and manual installs. Prefer a package where there is one, as the archives don't set up a service, shortcuts or dependencies.
+The archives hold just the executable, for [mise](https://mise.jdx.dev) and manual installs. Prefer a package where there is one, as the archives don't set up a service, shortcuts or dependencies.
 
 :::note
 Stable builds are attached to the releases page. Development builds from the latest `dev` branch are also available as workflow artifacts on the [GitHub Actions runs](https://github.com/timmo001/system-bridge/actions), which require a GitHub account to download.
@@ -24,7 +24,7 @@ Stable builds are attached to the releases page. Development builds from the lat
 <Tabs syncKey="os">
 <Tab title="Linux">
 
-Install the package that matches your distribution's package manager.
+Install the package that matches your distribution's package manager, or use mise or the archive on any distribution.
 
 <Tabs syncKey="distro">
 <Tab title="Arch Linux">
@@ -118,12 +118,68 @@ Or add it to your NixOS configuration as a flake input:
 ```
 
 </Tab>
+<Tab title="mise">
+
+[mise](https://mise.jdx.dev) installs the Linux archive from the latest release:
+
+```bash
+mise use -g github:timmo001/system-bridge
+```
+
+Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+
+The executable needs `libx11`, `libxtst`, `libxkbcommon` and `libxkbcommon-x11` (`libx11-6`, `libxtst6`, `libxkbcommon0` and `libxkbcommon-x11-0` on Debian / Ubuntu), even without a desktop. Nothing starts it for you: run `system-bridge backend`, or add your own service or autostart entry. See [Running](/running).
+
+</Tab>
+<Tab title="Archive">
+
+Download the archive with the [GitHub CLI](https://cli.github.com) and put `system-bridge` somewhere on your `PATH`:
+
+```bash
+gh release download -R timmo001/system-bridge -p '*-linux-x86_64.tar.gz'
+tar -xzf system-bridge-*-linux-x86_64.tar.gz -C ~/.local/bin system-bridge
+```
+
+Check the download first with `gh attestation verify system-bridge-*-linux-x86_64.tar.gz -R timmo001/system-bridge`.
+
+The executable needs the same libraries as with mise, and nothing starts it for you. See [Running](/running).
+
+</Tab>
 </Tabs>
 
 </Tab>
 <Tab title="Windows">
 
+<Tabs syncKey="distro">
+<Tab title="Installer">
+
 Run the `system-bridge-<version>-setup.exe` installer to install the application. After installation completes, you can start System Bridge from the Start Menu shortcut.
+
+</Tab>
+<Tab title="mise">
+
+[mise](https://mise.jdx.dev) installs the Windows archive from the latest release:
+
+```powershell
+mise use -g github:timmo001/system-bridge
+```
+
+Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations). Nothing starts it for you: run `system-bridge backend`. See [Running](/running).
+
+</Tab>
+<Tab title="Archive">
+
+Download the archive with the [GitHub CLI](https://cli.github.com):
+
+```powershell
+gh release download -R timmo001/system-bridge -p '*-windows-x86_64.zip'
+Expand-Archive system-bridge-*-windows-x86_64.zip "$env:LOCALAPPDATA\Programs\system-bridge"
+```
+
+Add that folder to your `PATH`, and keep the `now-playing` folder beside `system-bridge.exe`, as the [media](/api/data/#media) module needs it. Nothing starts it for you: run `system-bridge backend`. See [Running](/running).
+
+</Tab>
+</Tabs>
 
 </Tab>
 <Tab title="macOS">
@@ -138,45 +194,6 @@ Please do not submit feedback or bug reports for macOS, as it is not supported. 
 
 </Tab>
 </Tabs>
-
-## mise
-
-[mise](https://mise.jdx.dev) installs the archive for your platform from the latest release:
-
-```bash
-mise use -g github:timmo001/system-bridge
-```
-
-Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
-
-## Archive
-
-To install the archive by hand, download it with the [GitHub CLI](https://cli.github.com) and put `system-bridge` somewhere on your `PATH`:
-
-<Tabs syncKey="os">
-<Tab title="Linux">
-
-```bash
-gh release download -R timmo001/system-bridge -p '*-linux-x86_64.tar.gz'
-tar -xzf system-bridge-*-linux-x86_64.tar.gz -C ~/.local/bin system-bridge
-```
-
-Check the download first with `gh attestation verify system-bridge-*-linux-x86_64.tar.gz -R timmo001/system-bridge`.
-
-</Tab>
-<Tab title="Windows">
-
-```powershell
-gh release download -R timmo001/system-bridge -p '*-windows-x86_64.zip'
-Expand-Archive system-bridge-*-windows-x86_64.zip "$env:LOCALAPPDATA\Programs\system-bridge"
-```
-
-Add that folder to your `PATH`, and keep the `now-playing` folder beside `system-bridge.exe`, as the [media](/api/data/#media) module needs it.
-
-</Tab>
-</Tabs>
-
-On Linux, the executable needs `libx11`, `libxtst`, `libxkbcommon` and `libxkbcommon-x11` (`libx11-6`, `libxtst6`, `libxkbcommon0` and `libxkbcommon-x11-0` on Debian / Ubuntu), even without a desktop. Nothing starts it for you: run `system-bridge backend`, or add your own service or autostart entry. See [Running](/running).
 
 ## Updating
 
