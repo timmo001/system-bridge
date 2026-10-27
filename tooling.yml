@@ -3,6 +3,12 @@
 # tool (mise run tooling:status / tooling:publish) compares each with the
 # latest release and opens a pull request for review when it moves; its
 # README documents this file.
+#
+# PipeWire and PulseAudio (pw-dump, pactl --format=json and pactl subscribe in
+# data/module/audio and data/module/system) and the Wayland protocols the
+# desktop and system modules speak (wlr-foreign-toplevel-management,
+# ext-workspace, ext-idle-notify) are released on GitLab, which the tool can't
+# follow, so check those by hand.
 assignee: timmo001
 dispatch:
   - lint-general.yml
@@ -12,10 +18,10 @@ tools:
     review: Bring the Python connector in line with Core's pyproject.toml at the new tag (requires-python, the aiohttp pin and the Ruff and pylint rules connector/python/pyproject.toml copies), and check homeassistant/components/system_bridge for calls into the connector that changed or that it no longer supports.
   - repo: omacom/omarchy
     reviewed: v4.0.6
-    review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes).
+    review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, omarchy-system logout, omarchy-launch-terminal, omarchy-launch-nautilus, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes).
   - repo: hyprwm/Hyprland
     reviewed: v0.56.2
-    review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers.
+    review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers. Also check the Hyprland tools the command prefabs run in utils/handlers/command/prefab/prefab.go (hyprctl dispatch exit, grimblast save screen, active and area, and hyprshot's window and region modes).
   - repo: altdesktop/playerctl
     reviewed: v2.4.1
     review: Check the Linux media handling against changed flags, format template variables and status values. data/module/media/media_linux.go reads metadata --all-players --format with title, artist, album, mpris:length, position, status, playerName, volume, shuffle, loopStatus and mpris:artUrl, and takes the length and position as microseconds. data/playerctl_linux.go follows status with -a metadata --format -F. utils/handlers/media/media_linux.go picks a player from playerInstance and status, then sends commands with --player.
@@ -25,3 +31,18 @@ tools:
   - repo: rockowitz/ddcutil
     reviewed: v3.0.2
     review: Check the DDC/CI display controls in data/module/displays/controls_linux.go, which run ddcutil with --skip-ddc-checks, --bus and --noverify, and parse the --brief output of detect and of getvcp for VCP 10 (brightness) and D6 (power mode) in parseDetect, parseBrightness and parsePowerState, against changed flags, output formats and exit codes.
+  - repo: quickshell-mirror/quickshell
+    reviewed: v0.3.2
+    review: Check the Omarchy shell calls in data/module/desktop/omarchy_linux.go, which fall back to qs ipc -n -p <shell> call <target> <function> and list targets with qs ipc -n -p <shell> show, parsing its target and function lines with the ipcTarget and ipcFunction patterns in omarchyTargets, against changed flags, output and exit codes.
+  - repo: bluez/bluez
+    reviewed: "5.87"
+    review: Check the Bluetooth module's D-Bus use in data/module/bluetooth (bluetooth_linux.go reads org.bluez Adapter1 and Device1 through ObjectManager.GetManagedObjects; watch_linux.go follows PropertiesChanged, InterfacesAdded and InterfacesRemoved; actions_linux.go calls Device1.Connect and Disconnect, Adapter1.RemoveDevice and sets Adapter1.Powered) against changed interfaces, methods, properties and errors.
+  - repo: rpm-software-management/dnf5
+    reviewed: 5.4.6.0
+    review: Check the Fedora package checks. data/module/system/updates_linux.go runs dnf --quiet check-update with LC_ALL=C, takes exit code 100 as updates waiting, counts its three-field lines and stops at the Obsoleting section. data/module/system/system_linux.go runs dnf --disablerepo=* needs-restarting --reboothint and reads exit code 1 with "Reboot is required". Check both against changed commands, flags, output and exit codes.
+  - repo: flatpak/xdg-desktop-portal
+    reviewed: 1.22.1
+    review: Check the screenshot prefab's built-in in utils/handlers/command/prefab/screenshot_linux.go, which calls org.freedesktop.portal.Screenshot.Screenshot with interactive false, waits for org.freedesktop.portal.Request.Response and reads its uri, against changed methods, options, response codes and results.
+  - repo: microsoft/winget-cli
+    reviewed: v1.29.380
+    review: Check the Windows package update count in data/module/system/updates_windows.go, which runs winget upgrade --accept-source-agreements --disable-interactivity, counts the rows of its first table in wingetTableRows, and takes exit code 0x8A150014 (APPINSTALLER_CLI_ERROR_NO_APPLICATIONS_FOUND) as no updates, against changed flags, table layout, progress output and exit codes.
