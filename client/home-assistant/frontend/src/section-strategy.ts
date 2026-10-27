@@ -1,6 +1,10 @@
 import { ReactiveElement } from "lit";
 import { customElement } from "lit/decorators.js";
-import { DEFAULT_HOURS_TO_SHOW } from "./cards";
+import {
+  DEFAULT_HOURS_TO_SHOW,
+  DEFAULT_TILE_FEATURE,
+  percentageFeatures,
+} from "./cards";
 import "./editor";
 import type { SectionRef } from "./pages";
 import {
@@ -14,6 +18,7 @@ import { isSectionName, SECTIONS } from "./sections";
 import type {
   HomeAssistant,
   LovelaceSectionConfig,
+  SectionOptions,
   SectionStrategyConfig,
 } from "./types";
 
@@ -37,8 +42,16 @@ export const deviceError = (result: Extract<DeviceResult, { error: string }>) =>
 export const buildSection = (
   entities: SystemBridgeEntities,
   { section, item }: SectionRef,
-  hours: number,
-) => SECTIONS[section]({ entities, item, hours });
+  options: SectionOptions,
+) =>
+  SECTIONS[section]({
+    entities,
+    item,
+    hours: options.hours_to_show ?? DEFAULT_HOURS_TO_SHOW,
+    percentage: percentageFeatures(
+      options.tile_feature ?? DEFAULT_TILE_FEATURE,
+    ),
+  });
 
 const message = (content: string): LovelaceSectionConfig => ({
   type: "grid",
@@ -70,7 +83,7 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
       buildSection(
         entities,
         { section: config.section, item: config.item },
-        config.hours_to_show ?? DEFAULT_HOURS_TO_SHOW,
+        config,
       ) ?? message("No System Bridge entities for this section.")
     );
   }

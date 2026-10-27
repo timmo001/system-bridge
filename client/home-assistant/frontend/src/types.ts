@@ -105,6 +105,7 @@ export interface LovelaceViewConfig {
   title: string;
   path?: string;
   icon?: string;
+  show_icon_and_title?: boolean;
   max_columns?: number;
   badges?: EntityBadgeConfig[];
   sections?: (LovelaceSectionConfig | LovelaceStrategySectionConfig)[];
@@ -121,18 +122,37 @@ export interface LovelaceDashboardConfig {
 
 export const STRATEGY_TYPE = "custom:system-bridge";
 
-interface StrategyOptions {
+export const TILE_FEATURES = ["none", "bar", "trend"] as const;
+
+export type TileFeature = (typeof TILE_FEATURES)[number];
+
+/** Options every strategy passes on to the sections it generates. */
+export interface SectionOptions {
+  /** Hours of history the graphs show. */
+  hours_to_show?: number;
+  /** What percentage tiles, such as CPU usage, show below their state. */
+  tile_feature?: TileFeature;
+}
+
+interface StrategyOptions extends SectionOptions {
   type: typeof STRATEGY_TYPE;
   /** The System Bridge device. Optional when there is only one. */
   device_id?: string;
-  /** Hours of history the graphs show. */
-  hours_to_show?: number;
 }
 
-export type DashboardStrategyConfig = StrategyOptions;
+export interface DashboardStrategyConfig extends StrategyOptions {
+  /** The pages to show, in order. Leaving it out shows every page. */
+  pages?: string[];
+  /** The pages that show their icon and title in the tab. Defaults to all. */
+  icon_and_title_pages?: string[];
+  /** The pages that show the web client link at the top. Defaults to all. */
+  top_links_pages?: string[];
+}
 
 export interface ViewStrategyConfig extends StrategyOptions {
   page: string;
+  show_icon_and_title?: boolean;
+  show_top_links?: boolean;
 }
 
 export interface SectionStrategyConfig extends StrategyOptions {

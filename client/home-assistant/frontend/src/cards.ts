@@ -4,6 +4,7 @@ import type {
   HeadingCardConfig,
   HistoryGraphCardConfig,
   TileCardConfig,
+  TileFeature,
   TileFeatureConfig,
 } from "./types";
 
@@ -31,7 +32,21 @@ export const tile = (
   return card;
 };
 
-export const gauge = (entity: string) => tile(entity, [{ type: "bar-gauge" }]);
+export const DEFAULT_TILE_FEATURE: TileFeature = "bar";
+
+/** The tile features for a percentage tile's chosen feature. */
+export const percentageFeatures = (
+  feature: TileFeature,
+): TileFeatureConfig[] | undefined => {
+  switch (feature) {
+    case "bar":
+      return [{ type: "bar-gauge" }];
+    case "trend":
+      return [{ type: "trend-graph" }];
+    case "none":
+      return undefined;
+  }
+};
 
 export const heading = (text: string, icon?: string): HeadingCardConfig => {
   const card: HeadingCardConfig = { type: "heading", heading: text };

@@ -1,4 +1,4 @@
-import { gauge, heading, history, tile } from "./cards";
+import { heading, history, tile } from "./cards";
 import type { Item, ItemKind, SystemBridgeEntities } from "./registry";
 import type {
   LovelaceCardConfig,
@@ -6,10 +6,12 @@ import type {
   TileFeatureConfig,
 } from "./types";
 
-interface SectionContext {
+export interface SectionContext {
   entities: SystemBridgeEntities;
   item: string | undefined;
   hours: number;
+  /** The features percentage tiles show, from the tile feature option. */
+  percentage: TileFeatureConfig[] | undefined;
 }
 
 type SectionBuilder = (
@@ -55,8 +57,10 @@ const graph = (entities: string[], hours: number, title?: string) =>
 const tileOf = (entity: string | undefined) =>
   entity ? tile(entity) : undefined;
 
-const gaugeOf = (entity: string | undefined) =>
-  entity ? gauge(entity) : undefined;
+const percentageOf = (
+  entity: string | undefined,
+  percentage: TileFeatureConfig[] | undefined,
+) => (entity ? tile(entity, percentage) : undefined);
 
 /**
  * Tiles for an item's fields, named without the heading above them, so a
@@ -89,8 +93,6 @@ const itemTiles = (
       ),
     ];
   });
-
-const BAR_GAUGE: TileFeatureConfig[] = [{ type: "bar-gauge" }];
 
 export const SECTIONS = {
   storage: ({ entities }) =>
@@ -149,19 +151,19 @@ export const SECTIONS = {
   // TODO(Core): add per-device batteries and the AC power binary sensor once
   // Core #188564 merges, with their translation keys in release.ts's
   // RELEASE_GATES at the release that ships it
-  battery: ({ entities }) =>
+  battery: ({ entities, percentage }) =>
     grid([
       heading("Battery", "mdi:battery"),
-      gaugeOf(entities.single.get("battery")),
+      percentageOf(entities.single.get("battery"), percentage),
       ...singles(entities, "battery_time_remaining", "battery_is_charging").map(
         (entity) => tile(entity),
       ),
     ]),
 
-  cpu: ({ entities }) =>
+  cpu: ({ entities, percentage }) =>
     grid([
       heading("Usage", "mdi:cpu-64-bit"),
-      gaugeOf(entities.single.get("processes_load")),
+      percentageOf(entities.single.get("processes_load"), percentage),
       ...singles(
         entities,
         "cpu_speed",
@@ -207,10 +209,10 @@ export const SECTIONS = {
 
   // TODO(Core): add a swap gauge when Core has a swap used sensor (Core
   // roadmap note, "Gaps from the dashboards")
-  memory: ({ entities }) =>
+  memory: ({ entities, percentage }) =>
     grid([
       heading("In use", "mdi:memory"),
-      gaugeOf(entities.single.get("memory_used_percentage")),
+      percentageOf(entities.single.get("memory_used_percentage"), percentage),
       ...singles(entities, "memory_free", "memory_used").map((entity) =>
         tile(entity),
       ),
@@ -227,7 +229,7 @@ export const SECTIONS = {
 
   // TODO(Core): add the disk's temperature once Core has it (Core roadmap
   // note, "Core features: disk temperature")
-  mount: ({ entities, item }) => {
+  mount: ({ entities, item, percentage }) => {
     const mount =
       item === undefined ? undefined : entities.items.mount.get(item);
 
@@ -235,7 +237,7 @@ export const SECTIONS = {
 
     return grid([
       heading(name, "mdi:harddisk"),
-      ...itemTiles(mount, name, ["space_used"], BAR_GAUGE),
+      ...itemTiles(mount, name, ["space_used"], percentage),
     ]);
   },
 
@@ -275,7 +277,7 @@ export const SECTIONS = {
 
   // TODO(Core): add encoder and decoder load, memory load, performance state,
   // power limit and fan speed % with roadmap item 3c
-  gpu: ({ entities, item, hours }) => {
+  gpu: ({ entities, item, hours, percentage }) => {
     const gpu = item === undefined ? undefined : entities.items.gpu.get(item);
 
     const name = gpu?.name ?? "";
@@ -286,7 +288,7 @@ export const SECTIONS = {
         gpu,
         name,
         ["usage_percentage", "memory_used_percentage"],
-        BAR_GAUGE,
+        percentage,
       ),
       ...itemTiles(gpu, name, [
         "memory_free",

@@ -1,10 +1,6 @@
 import { ReactiveElement } from "lit";
 import { customElement } from "lit/decorators.js";
-import {
-  DEFAULT_HOURS_TO_SHOW,
-  diagnosticBadges,
-  webClientBadge,
-} from "./cards";
+import { diagnosticBadges, webClientBadge } from "./cards";
 import "./editor";
 import { type Page, PAGES } from "./pages";
 import {
@@ -21,6 +17,7 @@ import {
   type HomeAssistant,
   type LovelaceStrategySectionConfig,
   type LovelaceViewConfig,
+  type SectionOptions,
   type SectionStrategyConfig,
   STRATEGY_TYPE,
   type ViewStrategyConfig,
@@ -30,18 +27,11 @@ import {
 export const pageSections = (
   page: Page,
   entities: SystemBridgeEntities,
-  config: { device_id?: string; hours_to_show?: number },
+  options: SectionOptions,
 ): LovelaceStrategySectionConfig[] =>
   page
     .sections(entities)
-    .filter(
-      (ref) =>
-        buildSection(
-          entities,
-          ref,
-          config.hours_to_show ?? DEFAULT_HOURS_TO_SHOW,
-        ) !== undefined,
-    )
+    .filter((ref) => buildSection(entities, ref, options) !== undefined)
     .map((ref) => {
       const strategy: SectionStrategyConfig = {
         type: STRATEGY_TYPE,
@@ -49,8 +39,13 @@ export const pageSections = (
         ...ref,
       };
 
-      if (config.hours_to_show) {
-        strategy.hours_to_show = config.hours_to_show;
+      // Only options that were set, so the sections keep their defaults
+      if (options.hours_to_show !== undefined) {
+        strategy.hours_to_show = options.hours_to_show;
+      }
+
+      if (options.tile_feature !== undefined) {
+        strategy.tile_feature = options.tile_feature;
       }
 
       return { strategy };
@@ -59,18 +54,24 @@ export const pageSections = (
 export const pageView = (
   page: Page,
   entities: SystemBridgeEntities,
-  config: { device_id?: string; hours_to_show?: number },
+  options: SectionOptions & {
+    show_icon_and_title?: boolean;
+    show_top_links?: boolean;
+  },
 ): LovelaceViewConfig => ({
   type: "sections",
   title: page.title,
   path: page.page,
   icon: page.icon,
+  show_icon_and_title: options.show_icon_and_title ?? true,
   max_columns: 3,
   badges: [
-    ...webClientBadge(entities, page.page, page.title),
+    ...(options.show_top_links === false
+      ? []
+      : webClientBadge(entities, page.page, page.title)),
     ...(page.diagnostics ? diagnosticBadges(entities) : []),
   ],
-  sections: pageSections(page, entities, config),
+  sections: pageSections(page, entities, options),
 });
 
 @customElement("ll-strategy-view-system-bridge")
