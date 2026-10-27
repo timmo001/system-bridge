@@ -15,6 +15,7 @@ System Bridge shows notifications through your desktop's own notifications, so t
    - **Icon**: the path to an image on that machine.
    - **Link**: a URL to open when the notification is clicked.
    - **Sound**: the path to a sound file on that machine.
+   - **Urgency**: low, normal or critical. Critical notifications stay until they're dismissed. Linux only.
 4. Select **Send**. **Clear** empties the form.
 
 ### From the terminal

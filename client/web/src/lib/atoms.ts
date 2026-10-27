@@ -12,6 +12,7 @@ import {
   HyprlandDispatcher,
   type HyprlandEvent,
   type HyprlandSetWindowRequest,
+  type KeepAwakeRequest,
   type MediaControl,
   ModuleDataUpdate,
   type ModulesData,
@@ -487,6 +488,18 @@ export const bluetoothAction = Atom.family((address: string) =>
       }),
     ),
   ),
+);
+
+/** Switches the power profile, to one of the system data's `power_profiles`. */
+export const setPowerProfile = Atom.fn((profile: string, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => bridge.setPowerProfile({ profile })),
+  ),
+);
+
+/** Keeps the system awake, optionally for `duration` seconds, or lets it idle. */
+export const setKeepAwake = Atom.fn((request: KeepAwakeRequest, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.setKeepAwake(request))),
 );
 
 /** Turns the Bluetooth adapter on or off. */

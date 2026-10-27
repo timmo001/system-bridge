@@ -58,11 +58,11 @@ On Linux, hibernating needs swap set up for it. Depending on your distribution's
 
 ### Power profiles
 
-On Linux with power-profiles-daemon, or tuned-ppd on Fedora, the system data reports the active `power_profile` and the `power_profiles` available, usually `power-saver`, `balanced` and `performance`. Switch between them with [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_power_profile` tool, or `system-bridge client system power-profile`. A change made anywhere else, such as from your desktop's power menu, shows up straight away.
+On Linux with power-profiles-daemon, or tuned-ppd on Fedora, the system data reports the active `power_profile` and the `power_profiles` available, usually `power-saver`, `balanced` and `performance`. Switch between them from the **Power** card on the [web client](/using/web-client/)'s **System** page, with [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_power_profile` tool, or `system-bridge client system power-profile`. A change made anywhere else, such as from your desktop's power menu, shows up straight away.
 
 ### Keeping awake
 
-On Linux, [`SYSTEM_SET_KEEP_AWAKE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_keep_awake` tool, or `system-bridge client system keep-awake on` stop the system idling, so it doesn't lock, blank the screen or sleep while you're away. Give it a duration to let it idle again after that long. The system data's `keep_awake` and `keep_awake_until` show whether it's on and when it ends.
+On Linux, the **Power** card on the web client's **System** page, [`SYSTEM_SET_KEEP_AWAKE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_keep_awake` tool, or `system-bridge client system keep-awake on` stop the system idling, so it doesn't lock, blank the screen or sleep while you're away. Give it a duration to let it idle again after that long. The system data's `keep_awake` and `keep_awake_until` show whether it's on and when it ends.
 
 On Omarchy, this is the bar's stay awake switch, so turning either on shows in both. On other desktops System Bridge holds a logind idle inhibitor, which GNOME, KDE and idle daemons such as hypridle follow.
 

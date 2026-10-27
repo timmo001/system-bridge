@@ -53,6 +53,7 @@ import "~/components/sb-action-button";
 import "~/components/sb-hyprland-events";
 import "~/components/sb-hyprland-option";
 import "~/components/sb-select";
+import "~/components/sb-system-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-omarchy-actions";
 import "~/components/sb-process-actions";
@@ -205,6 +206,13 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               height: 220,
               width: "full",
             })
+      }
+      ${
+        system.power_profile === null && system.keep_awake === null
+          ? nothing
+          : html`<sb-card class="half" heading="Power">
+              <sb-system-power .system=${system}></sb-system-power>
+            </sb-card>`
       }
       <sb-card class="third" heading="Software">
         ${facts([
