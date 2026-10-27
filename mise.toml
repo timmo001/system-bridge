@@ -17,18 +17,18 @@ uv = "0.13.5"
 [tasks."build:all"]
 description = "Build everything (web client, backend)"
 depends = ["build:client:web"]
-run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux ."
+run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)-dev+$(git rev-parse --short HEAD)'\" -o system-bridge-linux ."
 run_windows = [
   "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1",
   "windres system-bridge.rc -O coff -o system-bridge.syso",
-  "go build -v -ldflags=\"-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe .",
+  "go build -v -ldflags=\"-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}-dev+{{ exec(command='git rev-parse --short HEAD') }}'\" -o system-bridge.exe .",
 ]
 
 [tasks."build:console"]
 description = "Build console version for debugging (Windows only)"
 depends = ["build:client:web"]
 run = "echo 'Console build is only supported on Windows'"
-run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe ."
+run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}-dev+{{ exec(command='git rev-parse --short HEAD') }}'\" -o system-bridge-console.exe ."
 
 [tasks."install:js"]
 description = "Install the Bun workspace dependencies (connector, web client and docs)"
@@ -191,8 +191,8 @@ run_windows = "./system-bridge.exe backend"
 [tasks."run:backend-dev"]
 description = "Build and run the backend server with console output"
 depends = ["build:client:web"]
-run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
-run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
+run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)-dev+$(git rev-parse --short HEAD)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
+run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}-dev+{{ exec(command='git rev-parse --short HEAD') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
 
 [tasks."tooling:status"]
 description = "Compare the reviewed releases in tooling.yml with the latest"
