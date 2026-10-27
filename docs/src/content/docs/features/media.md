@@ -23,10 +23,13 @@ With several players open on Linux, System Bridge shows the first one playing, t
 Open the **Media** page in the [web client](/using/web-client/). The player at the top shows what's playing, with:
 
 - Previous, play or pause, and next in the middle.
-- Stop on the left.
+- Stop on the left, with shuffle and repeat beside it when the player has them. Repeat moves from off to all to one.
 - The volume on the right. Hover over it, or focus it with the keyboard, to show volume down, mute and volume up. On a touch screen they're always shown.
+- The position, which you can drag to seek when the player supports it.
 
 A button is greyed out when the player says it can't do that, such as skipping on the last track.
+
+On Linux, any other players are listed under **Other players**, each with play or pause.
 
 ### Elsewhere
 

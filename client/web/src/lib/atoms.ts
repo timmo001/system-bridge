@@ -12,7 +12,7 @@ import {
   HyprlandDispatcher,
   type HyprlandEvent,
   type HyprlandSetWindowRequest,
-  type MediaAction,
+  type MediaControl,
   ModuleDataUpdate,
   type ModulesData,
   type Notification,
@@ -528,8 +528,8 @@ export const displayControl = Atom.family((id: string) =>
   ),
 );
 
-export const mediaControl = Atom.fn((action: MediaAction, get) =>
-  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(action))),
+export const mediaControl = Atom.fn((control: MediaControl, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(control))),
 );
 
 /** Something to do to a window. */
