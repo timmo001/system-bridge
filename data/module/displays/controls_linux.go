@@ -5,6 +5,7 @@ package displays
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -55,6 +57,21 @@ func addControls(ctx context.Context, displays []types.Display) {
 			display.Brightness, display.PowerState = readVCP(ctx, bus)
 		}
 	}
+
+	// Hyprland knows whether each display is on, for those DDC/CI can't read
+	if states, err := desktop.HyprlandDPMS(ctx); err == nil {
+		for i := range displays {
+			on, ok := states[displays[i].ID]
+			if !ok || displays[i].PowerState != nil {
+				continue
+			}
+			state := types.DisplayPowerStateOff
+			if on {
+				state = types.DisplayPowerStateOn
+			}
+			displays[i].PowerState = &state
+		}
+	}
 }
 
 // SetBrightness sets a display's brightness, in percent
@@ -87,16 +104,25 @@ func SetBrightness(ctx context.Context, id string, brightness float64) error {
 	return nil
 }
 
-// SetPowerState sets a monitor's power mode over DDC/CI
+// SetPowerState sets a monitor's power mode over DDC/CI. Without DDC/CI, such
+// as on a built-in panel, Hyprland turns the display on or off instead, as it
+// has no standby or suspend.
 func SetPowerState(ctx context.Context, id string, state types.DisplayPowerState) error {
 	value, ok := powerStateValues[state]
 	if !ok {
 		return fmt.Errorf("unknown power state %q", state)
 	}
-	if isInternal(id) {
-		return fmt.Errorf("%w: %s is a built-in panel", ErrUnsupported, id)
+	bus, err := "", fmt.Errorf("%w: %s is a built-in panel", ErrUnsupported, id)
+	if !isInternal(id) {
+		bus, err = ddcBus(ctx, id)
 	}
-	bus, err := ddcBus(ctx, id)
+	if errors.Is(err, ErrUnsupported) {
+		hyprlandErr := desktop.HyprlandSetDPMS(ctx, id, state == types.DisplayPowerStateOn)
+		if hyprlandErr == nil || !errors.Is(hyprlandErr, desktop.ErrUnsupported) {
+			return hyprlandErr
+		}
+		return err
+	}
 	if err != nil {
 		return err
 	}

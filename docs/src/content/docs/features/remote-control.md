@@ -146,9 +146,10 @@ system-bridge client display HDMI-A-2 --power off
 The [`displays`](/api/data/#displays) data reports each display's `brightness` and `power_state`.
 
 - **External monitors** are controlled over DDC/CI, which most monitors support, though some turn it off by default in their own menu. On Linux this needs [ddcutil](https://www.ddcutil.com/), and access to `/dev/i2c-*`, usually by being in the `i2c` group. On Windows it works through the monitor's driver.
-- **Built-in laptop panels** use their backlight. They have brightness but no power state. On Linux, System Bridge sets the backlight through logind, so it needs to run in, or as the user of, an active login session.
+- **Built-in laptop panels** use their backlight for brightness. On Linux, System Bridge sets the backlight through logind, so it needs to run in, or as the user of, an active login session.
+- **On Hyprland**, displays without DDC/CI, built-in panels included, are turned on and off with Hyprland's DPMS. It only has `on` and `off`, so `standby` and `suspend` turn the display off.
 
-Not every monitor answers DDC/CI. Those report `null`, and controlling them returns an error. macOS isn't supported yet.
+Not every monitor answers DDC/CI. Outside Hyprland, those report `null`, and controlling them returns an error. macOS isn't supported yet.
 
 ## Security
 

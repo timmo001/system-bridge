@@ -1,6 +1,7 @@
 package types
 
-// DisplayPowerState is a monitor's DDC/CI power mode
+// DisplayPowerState is a monitor's DDC/CI power mode, or on or off from
+// Hyprland's DPMS for a display without DDC/CI
 type DisplayPowerState string
 
 const (

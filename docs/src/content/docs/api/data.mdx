@@ -234,7 +234,7 @@ On Linux without an X server, such as under Wayland, the displays come from the 
 | `pixel_clock` | number | Pixel clock. |
 | `refresh_rate` | number | Refresh rate in Hz. |
 | `brightness` | number \| null | Brightness in percent, over DDC/CI or from a built-in panel's backlight. `null` when it can't be read. |
-| `power_state` | string \| null | `on`, `standby`, `suspend` or `off`, over DDC/CI. `null` when it can't be read. |
+| `power_state` | string \| null | `on`, `standby`, `suspend` or `off`, over DDC/CI. On Hyprland, `on` or `off` from its DPMS for a display without DDC/CI. `null` when it can't be read. |
 
 ### `gpus`
 

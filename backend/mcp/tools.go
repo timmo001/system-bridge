@@ -102,7 +102,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_display_control",
-		Description: "Set a display's brightness or power state over DDC/CI, or a built-in panel's backlight. Get display ids from the displays module.",
+		Description: "Set a display's brightness or power state over DDC/CI, or a built-in panel's backlight. Without DDC/CI, Hyprland turns the display on or off. Get display ids from the displays module.",
 		InputSchema: objectSchema(map[string]any{
 			"id": map[string]any{"type": "string", "description": "Display id from the displays module"},
 			"brightness": map[string]any{

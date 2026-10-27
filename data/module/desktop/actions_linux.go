@@ -307,6 +307,49 @@ func HyprlandReloadConfig(ctx context.Context) error {
 	return hyprlandSend(ctx, "reload")
 }
 
+// HyprlandDPMS is whether each enabled display is on, by name. It asks
+// Hyprland each time, as turning a display off sends no event.
+func HyprlandDPMS(ctx context.Context) (map[string]bool, error) {
+	dir, err := hyprlandDir()
+	if err != nil {
+		return nil, err
+	}
+	replies, err := hyprlandBatch(ctx, dir, "monitors")
+	if err != nil {
+		return nil, err
+	}
+	var monitors []hyprlandMonitor
+	if err := decodeReplies(replies, []any{&monitors}, 0); err != nil {
+		return nil, err
+	}
+	states := make(map[string]bool, len(monitors))
+	for _, monitor := range monitors {
+		if !monitor.Disabled {
+			states[monitor.Name] = monitor.DPMSStatus
+		}
+	}
+	return states, nil
+}
+
+// HyprlandSetDPMS turns a display on or off
+func HyprlandSetDPMS(ctx context.Context, display string, on bool) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if _, ok := data.Hyprland.Displays[display]; !ok {
+		return fmt.Errorf("display %q: %w", display, ErrNotFound)
+	}
+	action := "off"
+	if on {
+		action = "on"
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.dpms({ action = " + luaString(action) + ", monitor = " + luaString(display) + " })",
+		classic: "dpms " + action + " " + display,
+	})
+}
+
 func omarchyCurrent(ctx context.Context) (*types.OmarchyData, error) {
 	data, err := current(ctx)
 	if err != nil {
