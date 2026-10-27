@@ -2,6 +2,7 @@
 # name: test_desktop
   Desktop(
     compositor=<DesktopCompositor.HYPRLAND: 'hyprland'>,
+    focused_display='HDMI-A-1',
     focused_window='0x2',
     focused_workspace='2',
     hyprland=Hyprland(
@@ -115,12 +116,16 @@
           ]),
           hidden=False,
           initial_app='chromium',
+          initial_title='Chromium',
           pinned=False,
+          stable_id='18000056',
           swallowing=None,
           tags=list([
             'chromium-based-browser*',
           ]),
           tearing_hint=False,
+          visible=True,
+          xdg_description=None,
           xdg_tag=None,
           xwayland=False,
         ),
@@ -131,25 +136,32 @@
           ]),
           hidden=False,
           initial_app='com.mitchellh.ghostty',
+          initial_title=None,
           pinned=False,
+          stable_id='1800004b',
           swallowing=None,
           tags=list([
           ]),
           tearing_hint=True,
+          visible=True,
+          xdg_description='Terminal',
           xdg_tag=None,
           xwayland=False,
         ),
       }),
       workspaces=dict({
         '-98': HyprlandWorkspace(
+          last_window=None,
           layout='dwindle',
           persistent=False,
         ),
         '1': HyprlandWorkspace(
+          last_window='0x1',
           layout='dwindle',
           persistent=True,
         ),
         '2': HyprlandWorkspace(
+          last_window='0x2',
           layout='master',
           persistent=False,
         ),

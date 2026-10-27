@@ -419,7 +419,11 @@ export const HyprlandWindow = Schema.Struct({
   focus_history: Schema.Finite,
   initial_app: Schema.NullOr(Schema.String),
   xdg_tag: Schema.NullOr(Schema.String),
+  xdg_description: Schema.NullOr(Schema.String),
   tearing_hint: Schema.Boolean,
+  visible: Schema.Boolean,
+  stable_id: Schema.String,
+  initial_title: Schema.NullOr(Schema.String),
 });
 
 export interface HyprlandWindow extends Schema.Schema.Type<
@@ -429,6 +433,7 @@ export interface HyprlandWindow extends Schema.Schema.Type<
 export const HyprlandWorkspace = Schema.Struct({
   layout: Schema.NullOr(Schema.String),
   persistent: Schema.Boolean,
+  last_window: Schema.NullOr(Schema.String),
 });
 
 export interface HyprlandWorkspace extends Schema.Schema.Type<
@@ -510,6 +515,7 @@ export const DesktopData = Schema.Struct({
   compositor: DesktopCompositor,
   focused_window: Schema.NullOr(Schema.String),
   focused_workspace: Schema.NullOr(Schema.String),
+  focused_display: Schema.NullOr(Schema.String),
   keyboard: DesktopKeyboard,
   windows: Schema.Array(DesktopWindow),
   workspaces: Schema.Array(DesktopWorkspace),

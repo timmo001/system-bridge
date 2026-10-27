@@ -16,6 +16,7 @@ type DesktopData struct {
 	Compositor       DesktopCompositor  `json:"compositor" mapstructure:"compositor"`
 	FocusedWindow    *string            `json:"focused_window" mapstructure:"focused_window"`
 	FocusedWorkspace *string            `json:"focused_workspace" mapstructure:"focused_workspace"`
+	FocusedDisplay   *string            `json:"focused_display" mapstructure:"focused_display"` // The displays module's id
 	Keyboard         DesktopKeyboard    `json:"keyboard" mapstructure:"keyboard"`
 	Windows          []DesktopWindow    `json:"windows" mapstructure:"windows"`
 	Workspaces       []DesktopWorkspace `json:"workspaces" mapstructure:"workspaces"`
@@ -205,7 +206,11 @@ type HyprlandWindow struct {
 	FocusHistory   int                    `json:"focus_history" mapstructure:"focus_history"` // 0 is the most recent
 	InitialApp     *string                `json:"initial_app" mapstructure:"initial_app"`
 	XDGTag         *string                `json:"xdg_tag" mapstructure:"xdg_tag"`
+	XDGDescription *string                `json:"xdg_description" mapstructure:"xdg_description"`
 	TearingHint    bool                   `json:"tearing_hint" mapstructure:"tearing_hint"`
+	Visible        bool                   `json:"visible" mapstructure:"visible"`
+	StableID       string                 `json:"stable_id" mapstructure:"stable_id"`         // Unlike its address, never reused for another window
+	InitialTitle   *string                `json:"initial_title" mapstructure:"initial_title"` // Only reported when the desktop.windowTitles setting is on
 }
 
 // HyprlandWorkspace is what Hyprland reports about a workspace beyond the
@@ -213,6 +218,7 @@ type HyprlandWindow struct {
 type HyprlandWorkspace struct {
 	Layout     *string `json:"layout" mapstructure:"layout"` // dwindle, master, scrolling or monocle
 	Persistent bool    `json:"persistent" mapstructure:"persistent"`
+	LastWindow *string `json:"last_window" mapstructure:"last_window"` // The window last focused on it
 }
 
 // HyprlandDispatcher is a Hyprland dispatcher System Bridge can run

@@ -2,6 +2,7 @@
   "compositor": "hyprland",
   "focused_window": "0x555dbfe3a6e0",
   "focused_workspace": "1",
+  "focused_display": "DP-1",
   "omarchy": {
     "menus": [
       { "id": "root", "name": "Omarchy menu", "aliases": [] },
@@ -274,7 +275,11 @@
         "focus_history": 2,
         "initial_app": "org.qt-project.qml6",
         "xdg_tag": null,
-        "tearing_hint": false
+        "xdg_description": null,
+        "tearing_hint": false,
+        "visible": true,
+        "stable_id": "18000056",
+        "initial_title": null
       },
       "0x555dbff99ba0": {
         "fullscreen_mode": "none",
@@ -287,7 +292,11 @@
         "focus_history": 3,
         "initial_app": "com.edde746.plezy",
         "xdg_tag": null,
-        "tearing_hint": false
+        "xdg_description": null,
+        "tearing_hint": false,
+        "visible": false,
+        "stable_id": "1800004c",
+        "initial_title": null
       },
       "0x555dc01ffeb0": {
         "fullscreen_mode": "none",
@@ -303,21 +312,28 @@
         "focus_history": 4,
         "initial_app": "org.omarchy.agent",
         "xdg_tag": null,
-        "tearing_hint": false
+        "xdg_description": null,
+        "tearing_hint": false,
+        "visible": true,
+        "stable_id": "1800004d",
+        "initial_title": null
       }
     },
     "workspaces": {
       "-98": {
         "layout": "dwindle",
-        "persistent": false
+        "persistent": false,
+        "last_window": null
       },
       "1": {
         "layout": "dwindle",
-        "persistent": false
+        "persistent": false,
+        "last_window": "0x555dbf98b430"
       },
       "2": {
         "layout": "dwindle",
-        "persistent": false
+        "persistent": false,
+        "last_window": "0x555dc01ffeb0"
       }
     }
   }

@@ -32,6 +32,7 @@ FIXTURE_DESKTOP = Desktop(
     compositor=DesktopCompositor.HYPRLAND,
     focused_window="0x2",
     focused_workspace="2",
+    focused_display="HDMI-A-1",
     keyboard=DesktopKeyboard(layout="gb", name="English (UK)", layouts=["gb"]),
     windows=[
         DesktopWindow(
@@ -173,8 +174,11 @@ FIXTURE_DESKTOP = Desktop(
                 hidden=False,
                 focus_history=1,
                 tearing_hint=False,
+                visible=True,
+                stable_id="18000056",
                 tags=["chromium-based-browser*"],
                 initial_app="chromium",
+                initial_title="Chromium",
             ),
             "0x2": HyprlandWindow(
                 fullscreen_mode=HyprlandFullscreenMode.FULLSCREEN,
@@ -183,13 +187,20 @@ FIXTURE_DESKTOP = Desktop(
                 hidden=False,
                 focus_history=0,
                 tearing_hint=True,
+                visible=True,
+                stable_id="1800004b",
                 initial_app="com.mitchellh.ghostty",
+                xdg_description="Terminal",
             ),
         },
         workspaces={
             "-98": HyprlandWorkspace(layout="dwindle", persistent=False),
-            "1": HyprlandWorkspace(layout="dwindle", persistent=True),
-            "2": HyprlandWorkspace(layout="master", persistent=False),
+            "1": HyprlandWorkspace(
+                layout="dwindle", persistent=True, last_window="0x1"
+            ),
+            "2": HyprlandWorkspace(
+                layout="master", persistent=False, last_window="0x2"
+            ),
         },
     ),
     omarchy=Omarchy(

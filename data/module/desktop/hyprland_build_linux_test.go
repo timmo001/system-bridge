@@ -36,7 +36,7 @@ func TestBuildHyprland(t *testing.T) {
 		json.RawMessage(`{"address":"0x2"}`),
 		json.RawMessage(`{"id":2,"name":"Terminal"}`),
 		json.RawMessage(`[
-			{"address":"0x1","mapped":true,"at":[0,24],"size":[800,600],"workspace":{"id":1,"name":"1"},"monitor":0,"class":"firefox","title":"Private","pid":10,"fullscreen":1,"grouped":["0x1"],"swallowing":"0x0","contentType":"video"},
+			{"address":"0x1","mapped":true,"at":[0,24],"size":[800,600],"workspace":{"id":1,"name":"1"},"monitor":0,"class":"firefox","title":"Private","initialTitle":"Mozilla Firefox","pid":10,"fullscreen":1,"grouped":["0x1"],"swallowing":"0x0","contentType":"video","visible":true,"stableId":"1800004b"},
 			{"address":"0x2","mapped":true,"workspace":{"id":2,"name":"Terminal"},"monitor":1,"class":"kitty","title":"Shared","pid":20,"fullscreen":3,"contentType":"none"},
 			{"address":"0x3","mapped":false,"class":"hidden"}
 		]`),
@@ -44,9 +44,9 @@ func TestBuildHyprland(t *testing.T) {
 		json.RawMessage(`{"DP-1":{"levels":{"2":[{"namespace":"bar"}]}}}`),
 		json.RawMessage(`[
 			{"id":0,"name":"DP-1","activeWorkspace":{"id":1},"specialWorkspace":{"id":-98},"reserved":[1,2,3,4],"directScanoutTo":"0","mirrorOf":"none"},
-			{"id":1,"name":"HDMI-A-1","activeWorkspace":{"id":2},"specialWorkspace":{"id":0},"directScanoutTo":"0x5","mirrorOf":"0"}
+			{"id":1,"name":"HDMI-A-1","focused":true,"activeWorkspace":{"id":2},"specialWorkspace":{"id":0},"directScanoutTo":"0x5","mirrorOf":"0"}
 		]`),
-		json.RawMessage(`[{"id":2,"name":"Terminal","monitor":"HDMI-A-1","windows":1},{"id":1,"name":"1","monitor":"DP-1","windows":1,"tiledLayout":"master"}]`),
+		json.RawMessage(`[{"id":2,"name":"Terminal","monitor":"HDMI-A-1","windows":1,"lastwindow":"0x0"},{"id":1,"name":"1","monitor":"DP-1","windows":1,"tiledLayout":"master","lastwindow":"0x1"}]`),
 	}
 	require.NoError(t, decodeReplies(replies, state.targets(), 0))
 
@@ -61,6 +61,7 @@ func TestBuildHyprland(t *testing.T) {
 	assert.Equal(t, types.DesktopCompositorHyprland, data.Compositor)
 	assert.Equal(t, "0x2", *data.FocusedWindow)
 	assert.Equal(t, "2", *data.FocusedWorkspace)
+	assert.Equal(t, "HDMI-A-1", *data.FocusedDisplay)
 	assert.Equal(t, "us", *data.Keyboard.Layout)
 	assert.Equal(t, []string{"gb", "us"}, data.Keyboard.Layouts)
 
@@ -90,13 +91,20 @@ func TestBuildHyprland(t *testing.T) {
 	assert.Equal(t, []string{"lid"}, hyprland.Switches)
 	assert.Equal(t, types.HyprlandFullscreenModeMaximised, hyprland.Windows["0x1"].FullscreenMode)
 	assert.Nil(t, hyprland.Windows["0x1"].Swallowing)
+	assert.True(t, hyprland.Windows["0x1"].Visible)
+	assert.Equal(t, "1800004b", hyprland.Windows["0x1"].StableID)
+	assert.Nil(t, hyprland.Windows["0x1"].InitialTitle, "the initial title is a window title")
 	assert.Equal(t, "master", *hyprland.Workspaces["1"].Layout)
+	assert.Equal(t, "0x1", *hyprland.Workspaces["1"].LastWindow)
+	assert.Nil(t, hyprland.Workspaces["2"].LastWindow)
 	assert.Equal(t, []types.HyprlandScreencast{
 		{Type: types.HyprlandScreencastTypeMonitor, Display: pointer("DP-1")},
 		{Type: types.HyprlandScreencastTypeWindow, Window: pointer("0x2")},
 	}, hyprland.Screencasts)
 
-	assert.Equal(t, "Private", *buildHyprland(state, hyprlandConfig{}, events, true).Windows[0].Title)
+	withTitles := buildHyprland(state, hyprlandConfig{}, events, true)
+	assert.Equal(t, "Private", *withTitles.Windows[0].Title)
+	assert.Equal(t, "Mozilla Firefox", *withTitles.Hyprland.Windows["0x1"].InitialTitle)
 
 	events.handle("activewindowv2", "1")
 	events.handle("screencastv2", "0,1,Shared")

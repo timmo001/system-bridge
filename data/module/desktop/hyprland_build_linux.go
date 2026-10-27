@@ -42,6 +42,10 @@ type hyprlandClient struct {
 	XDGTag         string               `json:"xdgTag"`
 	ContentType    string               `json:"contentType"`
 	TearingHint    bool                 `json:"tearingHint"`
+	Visible        bool                 `json:"visible"`
+	StableID       string               `json:"stableId"`
+	InitialTitle   string               `json:"initialTitle"`
+	XDGDescription string               `json:"xdgDescription"`
 }
 
 type hyprlandWorkspace struct {
@@ -52,11 +56,13 @@ type hyprlandWorkspace struct {
 	HasFullscreen bool   `json:"hasfullscreen"`
 	IsPersistent  bool   `json:"ispersistent"`
 	TiledLayout   string `json:"tiledLayout"`
+	LastWindow    string `json:"lastwindow"`
 }
 
 type hyprlandMonitor struct {
 	ID                    int                  `json:"id"`
 	Name                  string               `json:"name"`
+	Focused               bool                 `json:"focused"`
 	ActiveWorkspace       hyprlandWorkspaceRef `json:"activeWorkspace"`
 	SpecialWorkspace      hyprlandWorkspaceRef `json:"specialWorkspace"`
 	Reserved              [4]int               `json:"reserved"` // left, top, right, bottom
@@ -384,7 +390,13 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 			FocusHistory:   client.FocusHistoryID,
 			InitialApp:     nonEmpty(client.InitialClass),
 			XDGTag:         nonEmpty(client.XDGTag),
+			XDGDescription: nonEmpty(client.XDGDescription),
 			TearingHint:    client.TearingHint,
+			Visible:        client.Visible,
+			StableID:       client.StableID,
+		}
+		if titles {
+			extra.InitialTitle = nonEmpty(client.InitialTitle)
 		}
 		if client.Swallowing != "0x0" {
 			extra.Swallowing = nonEmpty(client.Swallowing)
@@ -406,10 +418,14 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 			Windows:    pointer(workspace.Windows),
 			Fullscreen: pointer(workspace.HasFullscreen),
 		})
-		hyprland.Workspaces[id] = types.HyprlandWorkspace{
+		extra := types.HyprlandWorkspace{
 			Layout:     nonEmpty(workspace.TiledLayout),
 			Persistent: workspace.IsPersistent,
 		}
+		if workspace.LastWindow != "0x0" {
+			extra.LastWindow = nonEmpty(workspace.LastWindow)
+		}
+		hyprland.Workspaces[id] = extra
 	}
 	slices.SortStableFunc(data.Workspaces, func(a, b types.DesktopWorkspace) int {
 		left, _ := strconv.Atoi(a.ID)
@@ -420,6 +436,9 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 	for _, monitor := range state.Monitors {
 		if monitor.Disabled {
 			continue
+		}
+		if monitor.Focused {
+			data.FocusedDisplay = pointer(monitor.Name)
 		}
 		display := types.HyprlandDisplay{
 			Scale:         monitor.Scale,

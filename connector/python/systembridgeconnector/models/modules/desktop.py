@@ -223,7 +223,9 @@ class HyprlandGlobalShortcut:
 class HyprlandWindow:
     """Hyprland Window.
 
-    focus_history is 0 for the most recently focused window.
+    focus_history is 0 for the most recently focused window. stable_id, unlike
+    the window's address, is never reused for another window. initial_title is
+    only reported when the desktop.windowTitles setting is on.
     """
 
     fullscreen_mode: HyprlandFullscreenMode
@@ -232,20 +234,28 @@ class HyprlandWindow:
     hidden: bool
     focus_history: int
     tearing_hint: bool
+    visible: bool
+    stable_id: str
     group: list[str] = field(default_factory=list)
     swallowing: str | None = None
     tags: list[str] = field(default_factory=list)
     initial_app: str | None = None
+    initial_title: str | None = None
     xdg_tag: str | None = None
+    xdg_description: str | None = None
 
 
 @filter_unexpected_fields
 @dataclass(slots=True)
 class HyprlandWorkspace:
-    """Hyprland Workspace."""
+    """Hyprland Workspace.
+
+    last_window is the window last focused on it.
+    """
 
     persistent: bool
     layout: str | None = None
+    last_window: str | None = None
 
 
 @filter_unexpected_fields
@@ -410,6 +420,7 @@ class Desktop:
     keyboard: DesktopKeyboard
     focused_window: str | None = None
     focused_workspace: str | None = None
+    focused_display: str | None = None
     windows: list[DesktopWindow] = field(default_factory=list)
     workspaces: list[DesktopWorkspace] = field(default_factory=list)
     hyprland: Hyprland | None = None
