@@ -136,13 +136,15 @@ The id is the display's `id` from the [`displays`](/api/data/#displays) data. Th
 
 ## Hyprland
 
-On Hyprland, float or pin a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, switch the submap, or reload the config:
+On Hyprland, float or pin a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, rename a workspace or move it to another display, switch the submap, or reload the config:
 
 ```bash
 system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
 system-bridge client hyprland move 0x555dbf21c9e0 2
 system-bridge client hyprland dispatch swap_window right
 system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
+system-bridge client hyprland workspace rename 2 Music
+system-bridge client hyprland workspace move 2 HDMI-A-1
 system-bridge client hyprland submap resize
 system-bridge client hyprland reload
 ```

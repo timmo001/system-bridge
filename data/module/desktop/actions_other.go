@@ -29,6 +29,16 @@ func HyprlandRunGlobalShortcut(context.Context, string) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 }
 
+// HyprlandRenameWorkspace isn't possible without Hyprland
+func HyprlandRenameWorkspace(context.Context, string, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandMoveWorkspace isn't possible without Hyprland
+func HyprlandMoveWorkspace(context.Context, string, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
 // HyprlandSetSubmap isn't possible without Hyprland
 func HyprlandSetSubmap(context.Context, string) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)

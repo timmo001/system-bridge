@@ -33,6 +33,8 @@ from .models.desktop_control import (
     HyprlandEvent,
     HyprlandGlobalShortcutRequest,
     HyprlandMoveWindowRequest,
+    HyprlandMoveWorkspaceRequest,
+    HyprlandRenameWorkspaceRequest,
     HyprlandSetWindowRequest,
     HyprlandSubmapRequest,
     OmarchyMenuRequest,
@@ -843,6 +845,32 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.HYPRLAND_SET_WINDOW,
             EventType.HYPRLAND_WINDOW_SET,
+            model,
+            request_id,
+        )
+
+    async def hyprland_move_workspace(
+        self,
+        model: HyprlandMoveWorkspaceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Move a workspace to another display."""
+        return await self._action(
+            EventType.HYPRLAND_MOVE_WORKSPACE,
+            EventType.HYPRLAND_WORKSPACE_MOVED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_rename_workspace(
+        self,
+        model: HyprlandRenameWorkspaceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Rename a workspace, or give it back its default name."""
+        return await self._action(
+            EventType.HYPRLAND_RENAME_WORKSPACE,
+            EventType.HYPRLAND_WORKSPACE_RENAMED,
             model,
             request_id,
         )

@@ -198,6 +198,24 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[hyprlandGlobalShortcutInput](handlers, event.EventHyprlandRunGlobalShortcut))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_rename_workspace",
+		Description: "Rename a workspace on Hyprland, or give it back its default name",
+		InputSchema: objectSchema(map[string]any{
+			"id":   map[string]any{"type": "string", "description": "Workspace id from the desktop module's workspaces"},
+			"name": map[string]any{"type": "string", "description": "The new name. Leave out for the default."},
+		}, []string{"id"}),
+	}, eventTool[hyprlandRenameWorkspaceInput](handlers, event.EventHyprlandRenameWorkspace))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_move_workspace",
+		Description: "Move a workspace to another display on Hyprland",
+		InputSchema: objectSchema(map[string]any{
+			"id":      map[string]any{"type": "string", "description": "Workspace id from the desktop module's workspaces"},
+			"display": map[string]any{"type": "string", "description": "Display id from the displays module"},
+		}, []string{"id", "display"}),
+	}, eventTool[hyprlandMoveWorkspaceInput](handlers, event.EventHyprlandMoveWorkspace))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_submap",
 		Description: "Switch Hyprland's binds to a submap, or back to the default. Submaps are the binds' submap in the desktop module's hyprland.binds.",
 		InputSchema: objectSchema(map[string]any{

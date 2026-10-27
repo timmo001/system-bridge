@@ -86,6 +86,16 @@ type hyprlandMoveWindowInput struct {
 	Workspace string `json:"workspace"`
 }
 
+type hyprlandRenameWorkspaceInput struct {
+	ID   string `json:"id"`
+	Name string `json:"name,omitempty"`
+}
+
+type hyprlandMoveWorkspaceInput struct {
+	ID      string `json:"id"`
+	Display string `json:"display"`
+}
+
 type hyprlandSubmapInput struct {
 	Name string `json:"name,omitempty"`
 }

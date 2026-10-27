@@ -44,6 +44,8 @@ const (
 	ResponseTypeHyprlandSubmapSet         ResponseType = "HYPRLAND_SUBMAP_SET"
 	ResponseTypeHyprlandWindowMoved       ResponseType = "HYPRLAND_WINDOW_MOVED"
 	ResponseTypeHyprlandWindowSet         ResponseType = "HYPRLAND_WINDOW_SET"
+	ResponseTypeHyprlandWorkspaceMoved    ResponseType = "HYPRLAND_WORKSPACE_MOVED"
+	ResponseTypeHyprlandWorkspaceRenamed  ResponseType = "HYPRLAND_WORKSPACE_RENAMED"
 	ResponseTypeKeyboardKeyPressed        ResponseType = "KEYBOARD_KEY_PRESSED"
 	ResponseTypeKeyboardTextSent          ResponseType = "KEYBOARD_TEXT_SENT"
 	ResponseTypeMediaControlled           ResponseType = "MEDIA_CONTROLLED"

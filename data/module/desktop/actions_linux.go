@@ -299,6 +299,44 @@ func HyprlandRunGlobalShortcut(ctx context.Context, name string) error {
 	})
 }
 
+// HyprlandRenameWorkspace names a workspace, or gives it back its default
+// name, its ID, with an empty name. Hyprland leaves a workspace renamed
+// without a name with none.
+func HyprlandRenameWorkspace(ctx context.Context, id string, name string) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if _, err := findWorkspace(data, id); err != nil {
+		return err
+	}
+	if name == "" {
+		name = id
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.workspace.rename({ workspace = " + luaString(id) + ", name = " + luaString(name) + " })",
+		classic: "renameworkspace " + id + " " + name,
+	})
+}
+
+// HyprlandMoveWorkspace moves a workspace to another display
+func HyprlandMoveWorkspace(ctx context.Context, id string, display string) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if _, err := findWorkspace(data, id); err != nil {
+		return err
+	}
+	if _, ok := data.Hyprland.Displays[display]; !ok {
+		return fmt.Errorf("display %q: %w", display, ErrNotFound)
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.workspace.move({ workspace = " + luaString(id) + ", monitor = " + luaString(display) + " })",
+		classic: "moveworkspacetomonitor " + id + " " + display,
+	})
+}
+
 // HyprlandSetSubmap switches binds to a submap one of them names, or back to
 // the default with an empty name
 func HyprlandSetSubmap(ctx context.Context, name string) error {

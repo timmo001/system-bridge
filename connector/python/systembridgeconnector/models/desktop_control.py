@@ -112,6 +112,30 @@ class HyprlandMoveWindowRequest:
 
 
 @dataclass(slots=True)
+class HyprlandMoveWorkspaceRequest:
+    """Hyprland Move Workspace Request.
+
+    Moves a workspace, by its id from the desktop module, to a display, by its
+    id from the displays module.
+    """
+
+    id: str
+    display: str
+
+
+@dataclass(slots=True)
+class HyprlandRenameWorkspaceRequest:
+    """Hyprland Rename Workspace Request.
+
+    Renames a workspace, by its id from the desktop module, or gives it back
+    its default name when name is None.
+    """
+
+    id: str
+    name: str | None = None
+
+
+@dataclass(slots=True)
 class HyprlandSetWindowRequest:
     """Hyprland Set Window Request.
 

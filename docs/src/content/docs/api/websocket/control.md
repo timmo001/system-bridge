@@ -175,13 +175,15 @@ The response type is `DISPLAY_CONTROLLED`, and the displays module updates strai
 
 ## Hyprland control
 
-On Hyprland, float, pin and move windows, run dispatchers on the focused window, trigger global shortcuts, switch the submap, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+On Hyprland, float, pin and move windows, rename workspaces and move them between displays, run dispatchers on the focused window, trigger global shortcuts, switch the submap, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
 
 | Event | Data | Response |
 | --- | --- | --- |
 | `HYPRLAND_DISPATCH` | `dispatcher`, and a `direction` for `move_focus` and `swap_window` | `HYPRLAND_DISPATCHED` |
 | `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
+| `HYPRLAND_MOVE_WORKSPACE` | `id`, a workspace `id`, and the `display` to move it to, from the [`displays`](/api/data/#displays) data | `HYPRLAND_WORKSPACE_MOVED` |
 | `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
+| `HYPRLAND_RENAME_WORKSPACE` | `id`, a workspace `id`, and its new `name`, or none for the default | `HYPRLAND_WORKSPACE_RENAMED` |
 | `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
 | `HYPRLAND_SET_SUBMAP` | `name`, a submap the `binds` in the [`desktop`](/api/data/#desktop) data's `hyprland` are in, or none for the default | `HYPRLAND_SUBMAP_SET` |
 | `HYPRLAND_SET_WINDOW` | `id`, and either or both of `floating` and `pinned` as `true` or `false` | `HYPRLAND_WINDOW_SET` |

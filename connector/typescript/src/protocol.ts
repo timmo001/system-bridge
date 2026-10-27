@@ -38,7 +38,9 @@ export const EventType = Schema.Literals([
   "GET_SETTINGS",
   "HYPRLAND_DISPATCH",
   "HYPRLAND_MOVE_WINDOW",
+  "HYPRLAND_MOVE_WORKSPACE",
   "HYPRLAND_RELOAD_CONFIG",
+  "HYPRLAND_RENAME_WORKSPACE",
   "HYPRLAND_RUN_GLOBAL_SHORTCUT",
   "HYPRLAND_SET_SUBMAP",
   "HYPRLAND_SET_WINDOW",
@@ -105,6 +107,8 @@ export const ResponseType = Schema.Literals([
   "HYPRLAND_SUBMAP_SET",
   "HYPRLAND_WINDOW_MOVED",
   "HYPRLAND_WINDOW_SET",
+  "HYPRLAND_WORKSPACE_MOVED",
+  "HYPRLAND_WORKSPACE_RENAMED",
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
@@ -542,6 +546,29 @@ export const HyprlandSetWindowRequest = Schema.Struct({
 
 export interface HyprlandSetWindowRequest extends Schema.Schema.Type<
   typeof HyprlandSetWindowRequest
+> {}
+
+/** Moves a workspace to another display. */
+export const HyprlandMoveWorkspaceRequest = Schema.Struct({
+  /** The workspace's `id` from the desktop module. */
+  id: Schema.String,
+  /** A display's `id` from the displays module. */
+  display: Schema.String,
+});
+
+export interface HyprlandMoveWorkspaceRequest extends Schema.Schema.Type<
+  typeof HyprlandMoveWorkspaceRequest
+> {}
+
+/** Renames a workspace, or gives it back its default name when `name` is left out. */
+export const HyprlandRenameWorkspaceRequest = Schema.Struct({
+  /** The workspace's `id` from the desktop module. */
+  id: Schema.String,
+  name: Schema.optionalKey(Schema.String),
+});
+
+export interface HyprlandRenameWorkspaceRequest extends Schema.Schema.Type<
+  typeof HyprlandRenameWorkspaceRequest
 > {}
 
 /** Switches binds to a submap, or back to the default when `name` is left out. */

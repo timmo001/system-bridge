@@ -46,6 +46,16 @@ type HyprlandGlobalShortcutRequestData struct {
 	Name string `json:"name" mapstructure:"name"`
 }
 
+type HyprlandRenameWorkspaceRequestData struct {
+	ID   string `json:"id" mapstructure:"id"`
+	Name string `json:"name" mapstructure:"name"`
+}
+
+type HyprlandMoveWorkspaceRequestData struct {
+	ID      string `json:"id" mapstructure:"id"`
+	Display string `json:"display" mapstructure:"display"`
+}
+
 type HyprlandSubmapRequestData struct {
 	Name string `json:"name" mapstructure:"name"`
 }
@@ -140,6 +150,23 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		},
 		func(ctx context.Context, request HyprlandGlobalShortcutRequestData) error {
 			return desktop.HyprlandRunGlobalShortcut(ctx, request.Name)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandRenameWorkspace, event.ResponseTypeHyprlandWorkspaceRenamed, "Workspace renamed",
+		func(request HyprlandRenameWorkspaceRequestData) string {
+			return required(request.ID, "No workspace id provided")
+		},
+		func(ctx context.Context, request HyprlandRenameWorkspaceRequestData) error {
+			return desktop.HyprlandRenameWorkspace(ctx, request.ID, request.Name)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandMoveWorkspace, event.ResponseTypeHyprlandWorkspaceMoved, "Workspace moved",
+		func(request HyprlandMoveWorkspaceRequestData) string {
+			if request.Display == "" {
+				return "No display provided"
+			}
+			return required(request.ID, "No workspace id provided")
+		},
+		func(ctx context.Context, request HyprlandMoveWorkspaceRequestData) error {
+			return desktop.HyprlandMoveWorkspace(ctx, request.ID, request.Display)
 		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetSubmap, event.ResponseTypeHyprlandSubmapSet, "Submap set",
 		func(HyprlandSubmapRequestData) string { return "" },

@@ -81,7 +81,10 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   moving focus or toggling the split, on the focused window.
 - `system_bridge_hyprland_move_window` moves a window to a workspace on
   Hyprland.
+- `system_bridge_hyprland_move_workspace` moves a workspace to another display
+  on Hyprland.
 - `system_bridge_hyprland_reload_config` reloads Hyprland's config.
+- `system_bridge_hyprland_rename_workspace` renames a workspace on Hyprland.
 - `system_bridge_hyprland_run_global_shortcut` triggers a global shortcut an
   app registered with Hyprland.
 - `system_bridge_hyprland_set_submap` switches Hyprland's binds to a submap,

@@ -153,6 +153,36 @@ func hyprlandCommand() *cli.Command {
 				},
 			},
 			{
+				Name:  "workspace",
+				Usage: "Rename a workspace, or move it to another display",
+				Commands: []*cli.Command{
+					{
+						Name:      "rename",
+						Usage:     "Rename a workspace, or give it back its default name with no name",
+						ArgsUsage: "<workspace id> [name]",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							id := cmd.Args().First()
+							if id == "" {
+								return fmt.Errorf("a workspace id is required")
+							}
+							return client.Send(cmdCtx, event.EventHyprlandRenameWorkspace, map[string]any{"id": id, "name": cmd.Args().Get(1)})
+						},
+					},
+					{
+						Name:      "move",
+						Usage:     "Move a workspace to another display",
+						ArgsUsage: "<workspace id> <display id>",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							id, display := cmd.Args().Get(0), cmd.Args().Get(1)
+							if id == "" || display == "" {
+								return fmt.Errorf("a workspace id and a display id are required")
+							}
+							return client.Send(cmdCtx, event.EventHyprlandMoveWorkspace, map[string]any{"id": id, "display": display})
+						},
+					},
+				},
+			},
+			{
 				Name:      "submap",
 				Usage:     "Switch binds to a submap, or back to the default with no name",
 				ArgsUsage: "[name]",

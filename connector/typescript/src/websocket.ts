@@ -61,6 +61,8 @@ import {
   HyprlandDispatchRequest,
   HyprlandGlobalShortcutRequest,
   HyprlandMoveWindowRequest,
+  HyprlandMoveWorkspaceRequest,
+  HyprlandRenameWorkspaceRequest,
   HyprlandSetWindowRequest,
   HyprlandSubmapRequest,
   KeyboardKeypress,
@@ -248,6 +250,12 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly hyprlandSetWindow: (
     settings: HyprlandSetWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly hyprlandMoveWorkspace: (
+    move: HyprlandMoveWorkspaceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly hyprlandRenameWorkspace: (
+    rename: HyprlandRenameWorkspaceRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Switches binds to a submap, or back to the default. */
   readonly hyprlandSetSubmap: (
@@ -1122,6 +1130,30 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const hyprlandMoveWorkspace = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandMoveWorkspace",
+  )(function* (move: HyprlandMoveWorkspaceRequest) {
+    yield* call(
+      "HYPRLAND_MOVE_WORKSPACE",
+      "HYPRLAND_WORKSPACE_MOVED",
+      HyprlandMoveWorkspaceRequest,
+      move,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandRenameWorkspace = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandRenameWorkspace",
+  )(function* (rename: HyprlandRenameWorkspaceRequest) {
+    yield* call(
+      "HYPRLAND_RENAME_WORKSPACE",
+      "HYPRLAND_WORKSPACE_RENAMED",
+      HyprlandRenameWorkspaceRequest,
+      rename,
+      ignoreReply,
+    );
+  });
+
   const hyprlandSetSubmap = Effect.fn(
     "SystemBridgeWebSocket.hyprlandSetSubmap",
   )(function* (submap: HyprlandSubmapRequest) {
@@ -1244,6 +1276,8 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     hyprlandReloadConfig,
     hyprlandRunGlobalShortcut,
     hyprlandSetWindow,
+    hyprlandMoveWorkspace,
+    hyprlandRenameWorkspace,
     hyprlandSetSubmap,
     mediaControl,
     sendNotification,

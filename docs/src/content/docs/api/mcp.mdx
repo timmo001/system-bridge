@@ -223,9 +223,23 @@ Move a window to another workspace on Hyprland, leaving the focus where it is. S
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 - `workspace` (required): The workspace to move it to.
 
+### `system_bridge_hyprland_move_workspace`
+
+Move a workspace to another display on Hyprland.
+
+- `id` (required): The workspace's `id` from the `desktop` module's `workspaces`.
+- `display` (required): The display's `id` from the `displays` module.
+
 ### `system_bridge_hyprland_reload_config`
 
 Reload Hyprland's config. It takes no arguments.
+
+### `system_bridge_hyprland_rename_workspace`
+
+Rename a workspace on Hyprland.
+
+- `id` (required): The workspace's `id` from the `desktop` module's `workspaces`.
+- `name` (optional): The new name. Leave it out to give the workspace back its default name.
 
 ### `system_bridge_hyprland_run_global_shortcut`
 
