@@ -152,6 +152,19 @@ description = "Download the Windows NowPlaying helper (Windows only)"
 run = "echo 'Downloading the NowPlaying helper is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/download-now-playing.ps1"
 
+[tasks."nix:hashes"]
+description = "Refresh the Nix package's dependency hashes, running Nix in Docker when it isn't installed"
+run = "./.scripts/linux/update-nix-hashes.sh"
+
+[tasks."nix:post-commit"]
+description = "Refresh and commit the Nix hashes after a commit that changes dependencies (run by the post-commit hook)"
+hide = true
+run = "./.scripts/linux/nix-hashes-post-commit.sh"
+
+[tasks."install:hooks"]
+description = "Install the post-commit hook that refreshes the Nix hashes after a dependency change"
+run = "mise generate git-pre-commit --write --hook post-commit --task nix:post-commit"
+
 [tasks.install]
 description = "Install the application with go install"
 depends = ["build:all"]

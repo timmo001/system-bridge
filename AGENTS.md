@@ -94,5 +94,6 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-connector-python` - Python connector tasks, code style and release versioning
 - `system-bridge-connector-typescript` - TypeScript connector layout, generated schemas, tasks and release versioning
 - `system-bridge-release` - check the connectors for drift, then version, publish and sense-check a release (assets, PyPI, Arch, AUR)
+- `system-bridge-nix-hashes` - keep the Nix package's dependency hashes current after a Go or Bun dependency change
 - `system-bridge-docs-page-workflow` - add or restructure docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page
