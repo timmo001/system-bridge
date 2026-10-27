@@ -23,7 +23,12 @@ optdepends=('lm_sensors: broader temperature and fan sensor coverage'
             'pciutils: GPU model identification via lspci'
             'pipewire: name apps using the microphone or camera via pw-dump'
             'playerctl: media player data and controls'
-            'zenity: tray and desktop confirmation prompts')
+            'zenity: tray and desktop confirmation prompts'
+            'libpulse: audio devices, controls and notification sounds via pactl and paplay'
+            'alsa-utils: notification sounds via aplay'
+            'bluez: Bluetooth devices and controls'
+            'ddcutil: external monitor brightness and power over DDC/CI'
+            'xdotool: browser media titles on X11')
 provides=('system-bridge')
 options=('!strip')
 

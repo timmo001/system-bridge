@@ -122,10 +122,17 @@ System Bridge reads most hardware metrics directly from the kernel, so these too
 | `pipewire` (Arch), `pipewire-bin` (Debian / Ubuntu), `pipewire-utils` (Fedora) | `pw-dump` | Names the apps using the microphone or camera. Without it, microphone usage falls back to ALSA, which names the sound server instead of the app. |
 | `playerctl` | `playerctl` | What's playing, and [media controls](/features/media). Without it, the Media module is empty and media controls do nothing. |
 | `zenity` | `zenity` | The confirmation before **Quit** or **Hide system tray**. Without it, those actions can't be confirmed, so they don't run. |
+| `libpulse` (Arch), `pulseaudio-utils` (Debian / Ubuntu, Fedora) | `pactl`, `paplay` | Audio devices and [audio controls](/features/remote-control/#audio), and notification sounds. Needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. |
+| `alsa-utils` | `aplay` | Notification sounds when `paplay` isn't installed. |
+| `bluez` | `bluetoothd` | Bluetooth devices and [Bluetooth controls](/features/remote-control/#bluetooth). |
+| `ddcutil` | `ddcutil` | Brightness and power for [external monitors](/features/remote-control/#displays) over DDC/CI. Needs access to `/dev/i2c-*`, usually by being in the `i2c` group. |
+| `xdotool` | `xdotool` | On X11, a title for media playing in a browser that `playerctl` can't see. |
 
-The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire, `playerctl` and `zenity`, so `apt` and `dnf` install them by default. The Arch package lists all of these as optional dependencies, which `pacman` shows but doesn't install.
+The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire, `playerctl`, `zenity` and `pulseaudio-utils`, so `apt` and `dnf` install them by default. The Arch package lists all of these as optional dependencies, which `pacman` shows but doesn't install.
 
-Windows needs no optional tools.
+The [command prefabs](/features/commands/#prefab-commands) run tools for the desktop you're on, such as `wl-clipboard` for the clipboard or `grim` for screenshots. A prefab that can't run says which tools it looks for.
+
+On Windows, the waiting package update count needs [winget](https://learn.microsoft.com/windows/package-manager/winget/), which Windows 11 includes. Nothing else is needed.
 
 ## Next steps
 
