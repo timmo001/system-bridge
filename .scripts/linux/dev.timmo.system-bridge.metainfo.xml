@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.timmo.system-bridge</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <name>System Bridge</name>
+  <summary>Share your system's information and controls with Home Assistant</summary>
+  <developer id="dev.timmo">
+    <name>Aidan Timson</name>
+  </developer>
+  <description>
+    <p>
+      System Bridge runs in the background and shares information about your computer over a local HTTP and WebSocket API, so other applications can monitor and control it.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Monitor CPU, memory, disks, networks, GPUs, sensors, battery, displays and media</li>
+      <li>Control media playback, audio, displays, power and notifications remotely</li>
+      <li>Connect to Home Assistant through its official System Bridge integration</li>
+      <li>View your data and manage settings in the built-in web client</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">dev.timmo.system-bridge.desktop</launchable>
+  <icon type="remote" width="512" height="512">https://raw.githubusercontent.com/timmo001/system-bridge/dev/.resources/system-bridge-dimmed-512.png</icon>
+  <url type="homepage">https://system-bridge.timmo.dev</url>
+  <url type="bugtracker">https://github.com/timmo001/system-bridge/issues</url>
+  <url type="help">https://system-bridge.timmo.dev/install</url>
+  <url type="vcs-browser">https://github.com/timmo001/system-bridge</url>
+  <categories>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>system</keyword>
+    <keyword>monitor</keyword>
+    <keyword>home assistant</keyword>
+  </keywords>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="5.19.0" date="2026-10-27" />
+    <release version="5.18.3" date="2026-10-27" />
+    <release version="5.18.2" date="2026-10-27" />
+    <release version="5.18.1" date="2026-10-27" />
+    <release version="5.18.0" date="2026-10-25" />
+  </releases>
+</component>
