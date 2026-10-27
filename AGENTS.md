@@ -23,6 +23,7 @@ mise tasks
 - **Backend**: Go application (HTTP/WebSocket APIs)
 - **MCP Server**: Model Context Protocol server
 - **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`)
+- **Home Assistant frontend**: Lovelace dashboard, view and section strategies (`custom:system-bridge`) at `client/home-assistant/frontend/`, built into `system-bridge-dashboard.js` and attached to each release. It reads the integration's entities by their unique ID keys, so check `src/registry.ts` when Core changes them; `TODO(Core)` comments mark pages and sections waiting on Core entities
 - **CLI**: Command-line interface
 - **Docs**: Blume site at `docs/`, using `@timmo001/docs-kit`, deployed separately as a Cloudflare Worker with a docs MCP server at `/mcp`
 - **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
@@ -32,7 +33,7 @@ mise tasks
 ## Key Conventions
 
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
-- **Package manager**: bun for all JavaScript/TypeScript. `client/web`, `connector/typescript` and `docs` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
+- **Package manager**: bun for all JavaScript/TypeScript. `client/home-assistant/frontend`, `client/web`, `connector/typescript` and `docs` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
 - **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
 - **Connector drift**: Run `mise run drift:connectors` after adding or changing an event, reply or model, and before every release. It compares both connectors with the backend
 - **Git hooks**: Run `mise run install:hooks` once per checkout. The post-commit hook refreshes the Nix hashes after a dependency change; the pre-push hook runs `lint:go` (including golangci-lint, as CI does) and `generate:schemas:check`

@@ -553,6 +553,33 @@ jobs:
       check-command: bun run lint && bun run typecheck && bun run test && bun run build
       version-from-release-tag: true
 
+  build-home-assistant-frontend:
+    name: Build Home Assistant frontend
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        working-directory: client/home-assistant/frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build dashboard strategies
+        working-directory: client/home-assistant/frontend
+        run: bun run build
+
+      - name: Upload dashboard strategies
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: system-bridge-home-assistant-frontend-${{ github.event.release.tag_name }}
+          path: client/home-assistant/frontend/dist/system-bridge-dashboard.js
+
   update-release:
     name: Update release
     if: github.event_name == 'release'
@@ -560,6 +587,7 @@ jobs:
       - build-linux
       - package-linux
       - build-package-windows
+      - build-home-assistant-frontend
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -596,6 +624,12 @@ jobs:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
+      - name: Download Home Assistant frontend
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: system-bridge-home-assistant-frontend-${{ github.event.release.tag_name }}
+          path: dist/home-assistant
+
       - name: Publish release assets
         uses: timmo001/workflows/.github/actions/publish-release-assets@de4221cd9b24ad3d61aa1db87b6e4864cf56d5a1 # 20261027.0
         with:
@@ -607,4 +641,5 @@ jobs:
             dist/linux/archive/*.tar.gz
             dist/windows/*-setup.exe
             dist/windows/*-windows-x86_64.zip
+            dist/home-assistant/*.js
           bundle-path: dist/system-bridge-${{ github.event.release.tag_name }}.sigstore.json

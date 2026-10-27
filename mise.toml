@@ -299,13 +299,20 @@ run = "go test ./..."
 
 [tasks.check]
 description = "Run all linters and tests"
-depends = ["lint:all", "test", "test:connector:python", "test:connector:typescript"]
+depends = [
+  "lint:all",
+  "test",
+  "test:connector:python",
+  "test:connector:typescript",
+  "test:client:home-assistant",
+]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client, Python and TypeScript connectors)"
+description = "Run all linters (Go, web client, Home Assistant frontend, Python and TypeScript connectors)"
 depends = [
   "lint:go",
   "lint:client:web",
+  "lint:client:home-assistant",
   "lint:connector:python",
   "typecheck:connector:python",
   "lint:connector:typescript",
@@ -346,6 +353,38 @@ description = "Run web client linters (Oxlint, typecheck)"
 depends = ["install:js"]
 dir = "client/web"
 run = "bun run --parallel --no-exit-on-error lint typecheck"
+
+[tasks."lint:client:home-assistant"]
+description = "Lint, type check and check the formatting of the Home Assistant frontend"
+depends = ["install:js"]
+dir = "client/home-assistant/frontend"
+run = "bun run --parallel --no-exit-on-error lint typecheck format:check"
+
+[tasks."format:client:home-assistant"]
+description = "Format the Home Assistant frontend with Prettier"
+depends = ["install:js"]
+dir = "client/home-assistant/frontend"
+run = "bun run format:write"
+
+[tasks."test:client:home-assistant"]
+description = "Run the Home Assistant frontend tests"
+depends = ["install:js"]
+dir = "client/home-assistant/frontend"
+run = "bun run test"
+
+[tasks."build:client:home-assistant"]
+description = "Build the Home Assistant dashboard strategies into one resource"
+depends = ["install:js"]
+dir = "client/home-assistant/frontend"
+sources = [
+  "src/**/*.ts",
+  "package.json",
+  "tsconfig.json",
+  "vite.config.ts",
+  "../../../bun.lock",
+]
+outputs = ["dist/system-bridge-dashboard.js"]
+run = "bun run build"
 
 [tasks."install:connector:python"]
 description = "Install the Python connector and its test requirements into connector/python/.venv"

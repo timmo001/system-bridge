@@ -1,0 +1,50 @@
+---
+name: Home Assistant frontend
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "client/home-assistant/frontend/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/workflows/home-assistant-frontend.yml"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - "client/home-assistant/frontend/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/workflows/home-assistant-frontend.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        working-directory: client/home-assistant/frontend
+        run: bun install --frozen-lockfile
+
+      - name: Lint, typecheck, format check, test and build
+        working-directory: client/home-assistant/frontend
+        run: bun run --parallel --no-exit-on-error lint typecheck format:check test build
