@@ -148,6 +148,7 @@ type notificationInput struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
 	Icon    string `json:"icon,omitempty"`
+	Urgency string `json:"urgency,omitempty"`
 }
 
 type omarchyInput struct {
@@ -298,6 +299,9 @@ func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRe
 	arguments := map[string]interface{}{"title": input.Title, "message": input.Message}
 	if input.Icon != "" {
 		arguments["icon"] = input.Icon
+	}
+	if input.Urgency != "" {
+		arguments["urgency"] = input.Urgency
 	}
 	message := event.Message{
 		ID:    generateID(),

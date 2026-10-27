@@ -53,7 +53,10 @@ from systembridgeconnector.models.modules.disks import (
     DiskMounts,
     DiskUsage,
 )
-from systembridgeconnector.models.notification import Notification
+from systembridgeconnector.models.notification import (
+    Notification,
+    NotificationDismissRequest,
+)
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
 from systembridgeconnector.models.response import Response
@@ -588,6 +591,19 @@ async def test_bluetooth_set_power(
     assert response.type == EventType.BLUETOOTH_POWER_SET
     # Turning it off is sent, not left out as unset
     assert response.data == {"powered": False}
+
+
+@pytest.mark.asyncio
+async def test_dismiss_notification(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.dismiss_notification(
+        NotificationDismissRequest(id=42),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.NOTIFICATION_DISMISSED
+    assert response.data == {"id": 42}
 
 
 @pytest.mark.asyncio

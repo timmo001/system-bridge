@@ -109,7 +109,7 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_run_command` runs a command from the allowlist and waits for
   its result through `command.Run`.
 - `system_bridge_send_notification` sends a desktop notification with required
-  `title` and `message` fields and an optional `icon`.
+  `title` and `message` fields and an optional `icon` and `urgency`.
 - `system_bridge_set_clipboard` puts text on the clipboard through
   `prefab.SetClipboard`.
 - `system_bridge_set_power_profile` switches power-profiles-daemon's profile

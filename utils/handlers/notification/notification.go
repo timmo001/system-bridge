@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"errors"
 	"log/slog"
 	"sync"
 )
@@ -37,6 +38,59 @@ type NotificationData struct {
 	ActionURL  string `json:"actionUrl,omitempty" mapstructure:"actionUrl"`   // URL to open when notification is clicked
 	ActionPath string `json:"actionPath,omitempty" mapstructure:"actionPath"` // File/folder path to open when notification is clicked
 	Sound      string `json:"sound,omitempty" mapstructure:"sound"`           // Path to sound file to play
+	// Urgency is low, normal or critical. Critical ones stay until
+	// dismissed. Linux only.
+	Urgency string `json:"urgency,omitempty" mapstructure:"urgency"`
+	// Buttons on the notification. Pressing one sends a NOTIFICATION_ACTION
+	// event with its id. Linux only. Not actions, which older connectors send
+	// in another shape.
+	Buttons []NotificationButton `json:"buttons,omitempty" mapstructure:"buttons"`
+}
+
+// NotificationButton is a button on a notification
+type NotificationButton struct {
+	ID    string `json:"id" mapstructure:"id"`
+	Label string `json:"label" mapstructure:"label"`
+}
+
+// DefaultAction is the action of clicking a notification rather than one of
+// its buttons
+const DefaultAction = "default"
+
+// Event is something that happened to a notification System Bridge sent:
+// clicking it or a button on it, or it closing
+type Event struct {
+	ID uint32
+	// Action is the button's id, or DefaultAction for the notification
+	// itself. Empty when it closed.
+	Action string
+	// Reason is why it closed: expired, dismissed or closed (by
+	// NOTIFICATION_DISMISS). Empty when it was clicked.
+	Reason string
+}
+
+// ErrUnsupported is returned for what this platform's notifications can't do
+var ErrUnsupported = errors.New("not supported by notifications on this platform")
+
+var (
+	eventHandler   func(Event)
+	eventHandlerMu sync.RWMutex
+)
+
+// OnEvent sets the function told when a notification is clicked or closes
+func OnEvent(handler func(Event)) {
+	eventHandlerMu.Lock()
+	eventHandler = handler
+	eventHandlerMu.Unlock()
+}
+
+func emit(event Event) {
+	eventHandlerMu.RLock()
+	handler := eventHandler
+	eventHandlerMu.RUnlock()
+	if handler != nil {
+		handler(event)
+	}
 }
 
 // Notifier handles desktop notifications
@@ -49,6 +103,7 @@ type Notifier struct {
 // platformNotifier is implemented by each platform
 type platformNotifier interface {
 	notify(data NotificationData) (uint32, error)
+	dismiss(id uint32) error
 	close() error
 }
 
@@ -116,20 +171,27 @@ func (n *Notifier) Close() error {
 // (enabling action callbacks like OpenURL and OpenPath).
 // Otherwise, a temporary notifier with default settings is created.
 func Send(data NotificationData) error {
+	_, err := SendWithID(data)
+	return err
+}
+
+// SendWithID sends a notification like Send, returning its id for
+// Dismiss and the events about it. The id is 0 when there's no default
+// notifier to follow it with.
+func SendWithID(data NotificationData) (uint32, error) {
 	// Try to use the default notifier if set
 	defaultNotifierMu.RLock()
 	notifier := defaultNotifier
 	defaultNotifierMu.RUnlock()
 
 	if notifier != nil {
-		_, err := notifier.Send(data)
-		return err
+		return notifier.Send(data)
 	}
 
 	// Fall back to creating a temporary notifier
 	tempNotifier, err := NewNotifier(NotifierOptions{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func() {
 		if err := tempNotifier.Close(); err != nil {
@@ -138,5 +200,17 @@ func Send(data NotificationData) error {
 	}()
 
 	_, err = tempNotifier.Send(data)
-	return err
+	return 0, err
+}
+
+// Dismiss closes a notification System Bridge sent, by its id
+func Dismiss(id uint32) error {
+	defaultNotifierMu.RLock()
+	notifier := defaultNotifier
+	defaultNotifierMu.RUnlock()
+
+	if notifier == nil {
+		return errors.New("notifications aren't set up")
+	}
+	return notifier.platform.dismiss(id)
 }

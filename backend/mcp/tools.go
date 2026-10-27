@@ -368,6 +368,11 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			"title":   map[string]any{"type": "string", "description": "Notification title"},
 			"message": map[string]any{"type": "string", "description": "Notification message body"},
 			"icon":    map[string]any{"type": "string", "description": "Icon name (optional)"},
+			"urgency": map[string]any{
+				"type":        "string",
+				"description": "How urgent it is. Critical notifications stay until dismissed. Linux only.",
+				"enum":        []string{"low", "normal", "critical"},
+			},
 		}, []string{"title", "message"}),
 	}, handlers.handleNotification)
 }

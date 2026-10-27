@@ -75,6 +75,9 @@ import {
   MediaDirectory,
   ModulesRequest,
   Notification,
+  NotificationDismissRequest,
+  NotificationEvent,
+  NotificationSent,
   OmarchyMenuRequest,
   OmarchyPanelRequest,
   ProcessKillRequest,
@@ -292,9 +295,16 @@ export interface Interface {
   readonly mediaControl: (
     control: MediaAction | MediaControl,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Sends a notification, returning its id for `dismissNotification` and `notificationEvents`. */
   readonly sendNotification: (
     notification: Notification,
+  ) => Effect.Effect<number, WebSocketError>;
+  /** Closes a notification System Bridge sent. Linux only. */
+  readonly dismissNotification: (
+    request: NotificationDismissRequest,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Clicks on, and closes of, the notifications System Bridge sent, from any client. Linux only. */
+  readonly notificationEvents: Stream.Stream<NotificationEvent>;
   /** Opens, closes or toggles the Omarchy menu at a route. */
   readonly omarchyMenu: (
     menu: OmarchyMenuRequest,
@@ -446,6 +456,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     PubSub.shutdown,
   );
 
+  const notificationEventResponses = yield* Effect.acquireRelease(
+    PubSub.unbounded<WebSocketResponse>(),
+    PubSub.shutdown,
+  );
+
   const closed = yield* Deferred.make<never, ConnectionError>();
 
   const prefix = (yield* Random.nextInt).toString(36);
@@ -490,6 +505,15 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
     if (response.type === "HYPRLAND_EVENT") {
       yield* PubSub.publish(hyprlandEventResponses, response);
+
+      return;
+    }
+
+    if (
+      response.type === "NOTIFICATION_ACTION" ||
+      response.type === "NOTIFICATION_CLOSED"
+    ) {
+      yield* PubSub.publish(notificationEventResponses, response);
 
       return;
     }
@@ -653,6 +677,21 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
       ),
     ),
   );
+
+  const notificationEvents: Stream.Stream<NotificationEvent> =
+    Stream.fromPubSub(notificationEventResponses).pipe(
+      Stream.filterMapEffect((response) =>
+        Schema.decodeUnknownEffect(NotificationEvent)(response.data).pipe(
+          Effect.map(Result.succeed),
+          Effect.catch((error) =>
+            Effect.logWarning(
+              "Skipping an unreadable notification event",
+              error.message,
+            ).pipe(Effect.as(Result.fail(response))),
+          ),
+        ),
+      ),
+    );
 
   const collectModules = Effect.fnUntraced(function* (
     subscription: PubSub.Subscription<WebSocketResponse>,
@@ -1272,15 +1311,29 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
   const sendNotification = Effect.fn("SystemBridgeWebSocket.sendNotification")(
     function* (notification: Notification) {
-      yield* call(
+      const sent = yield* call(
         "NOTIFICATION",
         "NOTIFICATION_SENT",
         Notification,
         notification,
-        ignoreReply,
+        NotificationSent,
       );
+
+      return sent.id;
     },
   );
+
+  const dismissNotification = Effect.fn(
+    "SystemBridgeWebSocket.dismissNotification",
+  )(function* (request: NotificationDismissRequest) {
+    yield* call(
+      "NOTIFICATION_DISMISS",
+      "NOTIFICATION_DISMISSED",
+      NotificationDismissRequest,
+      request,
+      ignoreReply,
+    );
+  });
 
   const omarchyMenu = Effect.fn("SystemBridgeWebSocket.omarchyMenu")(function* (
     menu: OmarchyMenuRequest,
@@ -1354,6 +1407,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     validateDirectory,
     settingsChanges,
     hyprlandEvents,
+    notificationEvents,
     addCommand,
     updateCommand,
     removeCommand,
@@ -1390,6 +1444,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     hyprlandSetSubmap,
     mediaControl,
     sendNotification,
+    dismissNotification,
     omarchyMenu,
     omarchyPanel,
     open,

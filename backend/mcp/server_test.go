@@ -258,7 +258,7 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	notification := schemaMap(t, byName["system_bridge_send_notification"])
 	assert.Equal(t, []any{"title", "message"}, notification["required"])
 	notificationProperties := notification["properties"].(map[string]any)
-	assert.ElementsMatch(t, []string{"title", "message", "icon"}, mapKeys(notificationProperties))
+	assert.ElementsMatch(t, []string{"title", "message", "icon", "urgency"}, mapKeys(notificationProperties))
 	for _, name := range []string{"title", "message", "icon"} {
 		assert.Equal(t, "string", notificationProperties[name].(map[string]any)["type"])
 	}

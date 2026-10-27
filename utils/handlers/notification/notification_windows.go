@@ -55,6 +55,11 @@ func (n *windowsNotifier) notify(data NotificationData) (uint32, error) {
 	return 0, nil
 }
 
+// dismiss isn't supported, as go-toast gives no notification id to close
+func (n *windowsNotifier) dismiss(uint32) error {
+	return ErrUnsupported
+}
+
 // close is a no-op on Windows
 func (n *windowsNotifier) close() error {
 	return nil

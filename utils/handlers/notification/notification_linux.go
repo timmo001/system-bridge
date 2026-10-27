@@ -16,6 +16,20 @@ const (
 	dbusDestination = "org.freedesktop.Notifications"
 )
 
+// urgencies are the notification spec's urgency levels
+var urgencies = map[string]byte{
+	"low":      0,
+	"normal":   1,
+	"critical": 2,
+}
+
+// closeReasons are why the notification spec says a notification closed
+var closeReasons = map[uint32]string{
+	1: "expired",
+	2: "dismissed",
+	3: "closed",
+}
+
 // notificationAction represents what to do when a notification is clicked
 type notificationAction struct {
 	url  string // URL to open (takes precedence)
@@ -27,9 +41,11 @@ type linuxNotifier struct {
 	conn    *dbus.Conn
 	appName string
 
-	// Track notification IDs to their associated actions for click handling
-	mu           sync.RWMutex
-	notifActions map[uint32]notificationAction
+	// The notifications this notifier sent, with what clicking each opens.
+	// The daemon signals clicks and closes for every app's notifications, so
+	// only these are acted on.
+	mu   sync.RWMutex
+	sent map[uint32]notificationAction
 
 	// Action callbacks
 	openURL  func(string) error
@@ -61,12 +77,12 @@ func newPlatformNotifier(appName string, openURL, openPath func(string) error) (
 	}
 
 	n := &linuxNotifier{
-		conn:         conn,
-		appName:      appName,
-		notifActions: make(map[uint32]notificationAction),
-		openURL:      openURL,
-		openPath:     openPath,
-		done:         make(chan struct{}),
+		conn:     conn,
+		appName:  appName,
+		sent:     make(map[uint32]notificationAction),
+		openURL:  openURL,
+		openPath: openPath,
+		done:     make(chan struct{}),
 	}
 
 	// Start listening for action signals
@@ -128,10 +144,15 @@ func (n *linuxNotifier) handleSignal(sig *dbus.Signal) {
 			}
 		}
 	case dbusInterface + ".NotificationClosed":
-		if len(sig.Body) >= 1 {
-			notifID, ok := sig.Body[0].(uint32)
-			if ok {
-				n.cleanupNotification(notifID)
+		if len(sig.Body) >= 2 {
+			notifID, ok1 := sig.Body[0].(uint32)
+			reason, ok2 := sig.Body[1].(uint32)
+			if ok1 && ok2 && n.forget(notifID) {
+				closed, known := closeReasons[reason]
+				if !known {
+					closed = "unknown"
+				}
+				emit(Event{ID: notifID, Reason: closed})
 			}
 		}
 	}
@@ -140,15 +161,14 @@ func (n *linuxNotifier) handleSignal(sig *dbus.Signal) {
 // handleAction is called when a notification action is invoked
 func (n *linuxNotifier) handleAction(notifID uint32, actionKey string) {
 	n.mu.RLock()
-	action, exists := n.notifActions[notifID]
+	action, exists := n.sent[notifID]
 	n.mu.RUnlock()
 
 	if !exists {
-		slog.Debug("Action invoked for unknown notification", "notifID", notifID)
 		return
 	}
 
-	if actionKey == "default" {
+	if actionKey == DefaultAction {
 		// URL takes precedence over path
 		if action.url != "" && n.openURL != nil {
 			slog.Debug("Opening URL from notification click", "url", action.url)
@@ -163,32 +183,37 @@ func (n *linuxNotifier) handleAction(notifID uint32, actionKey string) {
 		}
 	}
 
-	// Clean up after action is handled
-	n.cleanupNotification(notifID)
+	emit(Event{ID: notifID, Action: actionKey})
 }
 
-// cleanupNotification removes a notification from tracking
-func (n *linuxNotifier) cleanupNotification(notifID uint32) {
+// forget stops following a notification, reporting whether it was one this
+// notifier sent
+func (n *linuxNotifier) forget(notifID uint32) bool {
 	n.mu.Lock()
-	delete(n.notifActions, notifID)
-	n.mu.Unlock()
+	defer n.mu.Unlock()
+	_, ok := n.sent[notifID]
+	delete(n.sent, notifID)
+	return ok
 }
 
 // notify sends a notification via DBus
 func (n *linuxNotifier) notify(data NotificationData) (uint32, error) {
 	obj := n.conn.Object(dbusDestination, dbusPath)
 
-	// Build actions array
-	// "default" is a special action key that's invoked when clicking the notification body
-	var actions []string
-	hasAction := data.ActionURL != "" || data.ActionPath != ""
-	if hasAction {
-		actions = []string{"default", "Open"}
+	// Actions are pairs of key and label. "default" is invoked when clicking
+	// the notification itself, so clicks are reported even without a URL or
+	// path to open; the label is only shown by daemons that list it.
+	actions := []string{DefaultAction, "Open"}
+	for _, button := range data.Buttons {
+		actions = append(actions, button.ID, button.Label)
 	}
 
-	// Hints can include things like urgency, category, etc.
+	urgency, ok := urgencies[data.Urgency]
+	if !ok {
+		urgency = urgencies["normal"]
+	}
 	hints := map[string]dbus.Variant{
-		"urgency": dbus.MakeVariant(byte(1)), // Normal urgency
+		"urgency": dbus.MakeVariant(urgency),
 	}
 
 	// Timeout: -1 means use notification daemon's default, otherwise use Duration
@@ -221,17 +246,29 @@ func (n *linuxNotifier) notify(data NotificationData) (uint32, error) {
 		return 0, fmt.Errorf("failed to get notification ID: %w", err)
 	}
 
-	// Track the action for this notification if provided
-	if hasAction {
-		n.mu.Lock()
-		n.notifActions[notifID] = notificationAction{
-			url:  data.ActionURL,
-			path: data.ActionPath,
-		}
-		n.mu.Unlock()
+	n.mu.Lock()
+	n.sent[notifID] = notificationAction{
+		url:  data.ActionURL,
+		path: data.ActionPath,
 	}
+	n.mu.Unlock()
 
 	return notifID, nil
+}
+
+// dismiss closes a notification this notifier sent
+func (n *linuxNotifier) dismiss(id uint32) error {
+	n.mu.RLock()
+	_, ok := n.sent[id]
+	n.mu.RUnlock()
+	if !ok {
+		return fmt.Errorf("no notification %d from System Bridge is open", id)
+	}
+
+	if err := n.conn.Object(dbusDestination, dbusPath).Call(dbusInterface+".CloseNotification", 0, id).Err; err != nil {
+		return fmt.Errorf("close the notification: %w", err)
+	}
+	return nil
 }
 
 // close closes the DBus connection

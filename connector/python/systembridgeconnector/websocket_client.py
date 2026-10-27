@@ -55,7 +55,11 @@ from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.modules import GetData, Module, ModulesData, RegisterDataListener
 from .models.modules.disks import DiskMounts
-from .models.notification import Notification
+from .models.notification import (
+    Notification,
+    NotificationDismissRequest,
+    NotificationEvent,
+)
 from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
 from .models.process_control import ProcessKillRequest
@@ -975,7 +979,11 @@ class WebSocketClient(Base):
         model: Notification,
         request_id: str | None = None,
     ) -> Response:
-        """Send notification."""
+        """Send notification.
+
+        The response's data has the notification's id, for
+        dismiss_notification and matching its events.
+        """
         self._logger.info("Send notification: %s", model)
         return await self.send_message(
             EventType.NOTIFICATION,
@@ -983,6 +991,19 @@ class WebSocketClient(Base):
             model.to_payload(),
             wait_for_response=True,
             response_type=EventType.NOTIFICATION_SENT,
+        )
+
+    async def dismiss_notification(
+        self,
+        model: NotificationDismissRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Close a notification System Bridge sent. Linux only."""
+        return await self._action(
+            EventType.NOTIFICATION_DISMISS,
+            EventType.NOTIFICATION_DISMISSED,
+            model,
+            request_id,
         )
 
     async def omarchy_menu(
@@ -1273,6 +1294,8 @@ class WebSocketClient(Base):
         no_data_callback: Callable[[str], Awaitable[None]] | None = None,
         hyprland_event_callback: Callable[[HyprlandEvent], Awaitable[None]]
         | None = None,
+        notification_event_callback: Callable[[NotificationEvent], Awaitable[None]]
+        | None = None,
     ) -> None:
         """Listen for messages and map to modules.
 
@@ -1280,6 +1303,8 @@ class WebSocketClient(Base):
         no_data_callback gets a module's name when the backend answers for it
         with no data. hyprland_event_callback gets each custom event from
         Hyprland, once listening for the desktop module.
+        notification_event_callback gets each click on, or close of, a
+        notification System Bridge sent, from any client. Linux only.
         """
 
         async def _callback_message(message: dict) -> None:
@@ -1409,6 +1434,21 @@ class WebSocketClient(Base):
                 self._logger.debug("[%s] Hyprland event", name)
                 await hyprland_event_callback(
                     HyprlandEvent(data=message[EventKey.DATA].get("data", ""))
+                )
+            elif (
+                message[EventKey.TYPE]
+                in (EventType.NOTIFICATION_ACTION, EventType.NOTIFICATION_CLOSED)
+                and notification_event_callback is not None
+                and isinstance(message.get(EventKey.DATA), dict)
+            ):
+                self._logger.debug("[%s] Notification event", name)
+                data = message[EventKey.DATA]
+                await notification_event_callback(
+                    NotificationEvent(
+                        id=data["id"],
+                        action=data.get("action"),
+                        reason=data.get("reason"),
+                    )
                 )
             else:
                 self._logger.debug(

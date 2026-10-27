@@ -34,6 +34,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
+	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -129,6 +130,13 @@ func (b *Backend) Run(ctx context.Context) error {
 			Module:  types.ModuleDesktop,
 		})
 	})
+
+	// Every client hears when a notification System Bridge sent is clicked or
+	// closes, as it may have sent it
+	notification.OnEvent(func(e notification.Event) {
+		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
+	})
+	defer notification.OnEvent(nil)
 
 	// These modules follow changes on the system, so they update as soon as
 	// one happens rather than on their next refresh

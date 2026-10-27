@@ -51,6 +51,7 @@ export const EventType = Schema.Literals([
   "KEYBOARD_TEXT",
   "MEDIA_CONTROL",
   "NOTIFICATION",
+  "NOTIFICATION_DISMISS",
   "OMARCHY_MENU",
   "OMARCHY_PANEL",
   "OPEN",
@@ -121,6 +122,9 @@ export const ResponseType = Schema.Literals([
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
+  "NOTIFICATION_ACTION",
+  "NOTIFICATION_CLOSED",
+  "NOTIFICATION_DISMISSED",
   "NOTIFICATION_SENT",
   "OMARCHY_MENU_CHANGED",
   "OMARCHY_PANEL_CHANGED",
@@ -332,6 +336,17 @@ export interface CommandResult extends Schema.Schema.Type<
   typeof CommandResult
 > {}
 
+/** A button on a notification. Pressing it sends a `NOTIFICATION_ACTION` event with its `id`. */
+export const NotificationButton = Schema.Struct({
+  /** Anything but `default`, which is clicking the notification itself. */
+  id: Schema.String,
+  label: Schema.String,
+});
+
+export interface NotificationButton extends Schema.Schema.Type<
+  typeof NotificationButton
+> {}
+
 export const Notification = Schema.Struct({
   title: Schema.String,
   message: Schema.String,
@@ -341,9 +356,39 @@ export const Notification = Schema.Struct({
   actionUrl: Schema.optionalKey(Schema.String),
   actionPath: Schema.optionalKey(Schema.String),
   sound: Schema.optionalKey(Schema.String),
+  /** Critical ones stay until dismissed. Linux only. */
+  urgency: Schema.optionalKey(Schema.Literals(["low", "normal", "critical"])),
+  /** Up to 3 buttons. Linux only. */
+  buttons: Schema.optionalKey(Schema.Array(NotificationButton)),
 });
 
 export interface Notification extends Schema.Schema.Type<typeof Notification> {}
+
+/** `NOTIFICATION_SENT`'s reply: what was sent, and its `id`. */
+export const NotificationSent = Schema.Struct({
+  /** For `NOTIFICATION_DISMISS` and matching its events. 0 where it can't be followed. */
+  id: Schema.Int,
+});
+
+/** Closes a notification System Bridge sent. Linux only. */
+export const NotificationDismissRequest = Schema.Struct({ id: Schema.Int });
+
+export interface NotificationDismissRequest extends Schema.Schema.Type<
+  typeof NotificationDismissRequest
+> {}
+
+/** A notification System Bridge sent was clicked, or closed. */
+export const NotificationEvent = Schema.Struct({
+  id: Schema.Int,
+  /** The button's `id`, or `default` for the notification itself. Missing when it closed. */
+  action: Schema.optionalKey(Schema.String),
+  /** `expired`, `dismissed` or `closed`. Missing when it was clicked. */
+  reason: Schema.optionalKey(Schema.String),
+});
+
+export interface NotificationEvent extends Schema.Schema.Type<
+  typeof NotificationEvent
+> {}
 
 export const KeyboardKeypress = Schema.Struct({
   key: Schema.String,

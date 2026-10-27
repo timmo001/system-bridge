@@ -31,8 +31,16 @@ The integration can send notifications to your machine, so an automation can tel
 
 ### From your own code or an agent
 
-- Send [`NOTIFICATION`](/api/websocket/control/#send-notification) over the WebSocket. It also takes a `duration` in milliseconds and an `actionPath` to open a file or folder when clicked.
+- Send [`NOTIFICATION`](/api/websocket/control/#send-notification) over the WebSocket. It also takes a `duration` in milliseconds, an `actionPath` to open a file or folder when clicked, an `urgency`, and up to 3 `buttons`.
 - Agents can use the [MCP server](/api/mcp/)'s `system_bridge_send_notification` tool.
+
+## Buttons, clicks and dismissing
+
+On Linux, a notification can have up to 3 buttons, such as **Snooze** and **Done**. When one is pressed, or the notification itself is clicked, every connected client gets a [`NOTIFICATION_ACTION`](/api/websocket/control/#notification-events) event with the notification's `id` and which button it was. So an automation can react to the answer. A `NOTIFICATION_CLOSED` event follows when it closes, saying whether it expired or was dismissed.
+
+Clients can also close a notification they sent with [`NOTIFICATION_DISMISS`](/api/websocket/control/#dismiss-notification), such as once the door it was about has closed again.
+
+Set `urgency` to `critical` for a notification that stays until it's dismissed, or `low` for one that matters less. How each looks is up to your notification daemon.
 
 ## What each platform supports
 
@@ -43,5 +51,8 @@ The integration can send notifications to your machine, so an automation can tel
 | Duration | Shown for the time you set, if your notification daemon allows it | Short, or long from 7 seconds |
 | Open a link or path when clicked | Yes | No |
 | Sound | Played with `paplay` or `aplay` | Windows plays its own notification sound |
+| Urgency | Yes | No |
+| Buttons, and events when clicked or closed | Yes | No |
+| Dismissing | Yes | No |
 
 On Linux, notifications need a notification daemon, which most desktops include.

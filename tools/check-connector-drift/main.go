@@ -99,6 +99,8 @@ var handlerPairs = map[string]pairing{
 	"HyprlandSubmapRequestData":          {[]string{"HyprlandSubmapRequest"}, []string{"HyprlandSubmapRequest"}},
 	"KeyboardTextRequestData":            {[]string{"KeyboardText"}, []string{"KeyboardText"}},
 	"MediaControlRequestData":            {[]string{"MediaControl"}, []string{"MediaControl"}},
+	"NotificationDismissRequestData":     {[]string{"NotificationDismissRequest"}, []string{"NotificationDismissRequest"}},
+	"NotificationEventData":              {[]string{"NotificationEvent"}, []string{"NotificationEvent"}},
 	"OmarchyRequestData":                 {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},
 	"ProcessKillRequestData":             {[]string{"ProcessKillRequest"}, []string{"ProcessKillRequest"}},
 	"SystemKeepAwakeRequestData":         {[]string{"KeepAwakeRequest"}, []string{"KeepAwakeRequest"}},

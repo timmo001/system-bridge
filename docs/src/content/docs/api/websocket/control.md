@@ -342,6 +342,53 @@ Available fields:
 - `actionUrl` (optional): A URL to open when the notification is clicked.
 - `actionPath` (optional): A file or folder path to open when the notification is clicked.
 - `sound` (optional): Path to a sound file to play with the notification.
+- `urgency` (optional): `low`, `normal` or `critical`. Critical notifications stay until they're dismissed. Linux only.
+- `buttons` (optional): Up to 3 buttons, each with an `id` and a `label`. The `id` can be anything but `default`. Linux only.
+
+The response type is `NOTIFICATION_SENT`, and its data is what was sent with the notification's `id` added. Use the `id` to dismiss it, and to match the events about it. It's `0` where the notification can't be followed, such as on Windows.
+
+```json title="A notification with buttons"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "NOTIFICATION",
+    "data": {
+        "title": "Washing machine",
+        "message": "The wash has finished",
+        "urgency": "critical",
+        "buttons": [
+            { "id": "snooze", "label": "Remind me in 10 minutes" },
+            { "id": "done", "label": "Done" }
+        ]
+    }
+}
+```
+
+### Notification events
+
+On Linux, every connected client is sent an event when a notification System Bridge sent is clicked or closes, whichever client sent it:
+
+| Type | Data |
+| --- | --- |
+| `NOTIFICATION_ACTION` | `id`, and `action`: the button's `id`, or `default` when the notification itself was clicked |
+| `NOTIFICATION_CLOSED` | `id`, and `reason`: `expired`, `dismissed` (by you) or `closed` (with `NOTIFICATION_DISMISS`) |
+
+These come with the `id` `system`, as they don't answer a request.
+
+### Dismiss notification
+
+Send the `NOTIFICATION_DISMISS` event with a notification's `id` to close it. The response type is `NOTIFICATION_DISMISSED`. Linux only, and only for notifications System Bridge sent.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "NOTIFICATION_DISMISS",
+    "data": {
+        "id": 47
+    }
+}
+```
 
 ## Open a path
 
