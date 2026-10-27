@@ -55,6 +55,7 @@ const (
 	EventPowerRestart              EventType = "POWER_RESTART"
 	EventPowerShutdown             EventType = "POWER_SHUTDOWN"
 	EventPowerSleep                EventType = "POWER_SLEEP"
+	EventProcessKill               EventType = "PROCESS_KILL"
 	EventRegisterDataListener      EventType = "REGISTER_DATA_LISTENER"
 	EventUnregisterDataListener    EventType = "UNREGISTER_DATA_LISTENER"
 	EventUpdateDiscordSetup        EventType = "UPDATE_DISCORD_SETUP"

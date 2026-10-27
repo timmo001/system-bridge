@@ -116,6 +116,11 @@ type hyprlandSetWindowInput struct {
 	Height   *int   `json:"height,omitempty"`
 }
 
+type processKillInput struct {
+	ID    int  `json:"id"`
+	Force bool `json:"force,omitempty"`
+}
+
 type mediaControlInput struct {
 	Action string `json:"action"`
 }

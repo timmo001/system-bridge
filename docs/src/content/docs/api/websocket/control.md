@@ -328,6 +328,26 @@ Send the `OPEN` event with a `url` to open it in the default browser.
 }
 ```
 
+## Process control
+
+Send the `PROCESS_KILL` event to end a process. It's asked to stop, as closing it would, unless you `force` it.
+
+- `id` (required): The process's `id` from the [`processes`](/api/data/#processes) data.
+- `force` (optional): `true` to end it straight away, losing anything unsaved.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "PROCESS_KILL",
+    "data": {
+        "id": 12345
+    }
+}
+```
+
+The response type is `PROCESS_KILLED`, and the processes module updates straight after. A process that doesn't exist, or System Bridge itself, gets an `ERROR` with the subtype `BAD_REQUEST`, and one the backend's user isn't allowed to end gets an `ERROR` with the system's reason.
+
 ## Power control
 
 Control the system power state with one of the following events. Each takes empty `data`.

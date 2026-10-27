@@ -96,6 +96,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   or back to the default.
 - `system_bridge_hyprland_set_window` floats or tiles, pins or unpins, and
   moves or resizes a window on Hyprland.
+- `system_bridge_kill_process` ends a process from the processes module,
+  through `processes.Kill`.
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.

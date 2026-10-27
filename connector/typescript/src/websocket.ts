@@ -75,6 +75,7 @@ import {
   Notification,
   OmarchyMenuRequest,
   OmarchyPanelRequest,
+  ProcessKillRequest,
   OpenTarget,
   PathRequest,
   type ResponseType,
@@ -286,6 +287,10 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly open: (target: OpenTarget) => Effect.Effect<void, WebSocketError>;
   readonly power: (action: PowerAction) => Effect.Effect<void, WebSocketError>;
+  /** Ends a process, by its id from the processes module. */
+  readonly killProcess: (
+    process: ProcessKillRequest,
+  ) => Effect.Effect<void, WebSocketError>;
   /** Asks the backend to exit. Does not wait for a reply. */
   readonly exitBackend: Effect.Effect<void, WebSocketError>;
 }
@@ -1253,6 +1258,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     yield* call("OPEN", "OPENED", OpenTarget, target, ignoreReply);
   });
 
+  const killProcess = Effect.fn("SystemBridgeWebSocket.killProcess")(function* (
+    process: ProcessKillRequest,
+  ) {
+    yield* call(
+      "PROCESS_KILL",
+      "PROCESS_KILLED",
+      ProcessKillRequest,
+      process,
+      ignoreReply,
+    );
+  });
+
   const power = Effect.fn("SystemBridgeWebSocket.power")(function* (
     action: PowerAction,
   ) {
@@ -1320,6 +1337,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     omarchyPanel,
     open,
     power,
+    killProcess,
     exitBackend,
   });
 });

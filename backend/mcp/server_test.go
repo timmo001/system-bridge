@@ -180,7 +180,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 30)
+	require.Len(t, tools.Tools, 31)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
@@ -209,6 +209,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_hyprland_set_option",
 		"system_bridge_hyprland_set_submap",
 		"system_bridge_hyprland_set_window",
+		"system_bridge_kill_process",
 		"system_bridge_list_command_prefabs",
 		"system_bridge_list_commands",
 		"system_bridge_media_control",

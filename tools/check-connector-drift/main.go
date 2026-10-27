@@ -99,6 +99,7 @@ var handlerPairs = map[string]pairing{
 	"KeyboardTextRequestData":            {[]string{"KeyboardText"}, []string{"KeyboardText"}},
 	"MediaControlRequestData":            {[]string{"MediaControl"}, []string{"MediaControl"}},
 	"OmarchyRequestData":                 {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},
+	"ProcessKillRequestData":             {[]string{"ProcessKillRequest"}, []string{"ProcessKillRequest"}},
 	// OPEN takes a path or a URL, which the connectors model as two requests
 	"OpenRequestData":                 {nil, nil},
 	"RegisterDataListenerRequestData": {[]string{"ModulesRequest"}, []string{"GetData"}},

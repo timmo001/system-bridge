@@ -57,6 +57,7 @@ from .models.modules.disks import DiskMounts
 from .models.notification import Notification
 from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
+from .models.process_control import ProcessKillRequest
 from .models.request import Request
 from .models.response import Response
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
@@ -999,6 +1000,19 @@ class WebSocketClient(Base):
             asdict(model),
             wait_for_response=True,
             response_type=EventType.OPENED,
+        )
+
+    async def kill_process(
+        self,
+        model: ProcessKillRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """End a process, by its id from the processes module."""
+        return await self._action(
+            EventType.PROCESS_KILL,
+            EventType.PROCESS_KILLED,
+            model,
+            request_id,
         )
 
     async def power_sleep(

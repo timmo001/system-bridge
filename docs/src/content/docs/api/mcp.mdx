@@ -277,6 +277,13 @@ Kill a window's app on Hyprland without asking it to close, so anything unsaved 
 
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 
+### `system_bridge_kill_process`
+
+End a process. See [process control](/api/websocket/control/#process-control).
+
+- `id` (required): The process's `id` from the `processes` module.
+- `force` (optional): `true` to end it straight away rather than asking it to stop, losing anything unsaved.
+
 ### `system_bridge_list_command_prefabs`
 
 List the [prefab commands](/features/commands/#prefab-commands), with whether each can run on this system, what it would run, and why not. It takes no arguments. An assistant can't add them: a prefab only runs once you add it to your commands.

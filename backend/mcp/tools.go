@@ -263,6 +263,15 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[desktopWindowInput](handlers, event.EventHyprlandKillWindow))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_kill_process",
+		Description: "End a process, by its id from the processes module. It asks the process to stop, or with force ends it straight away, losing anything unsaved. Check the process's name first.",
+		InputSchema: objectSchema(map[string]any{
+			"id":    map[string]any{"type": "integer", "description": "Process id from the processes module", "minimum": 1},
+			"force": boolean("End the process straight away rather than asking it to stop"),
+		}, []string{"id"}),
+	}, eventTool[processKillInput](handlers, event.EventProcessKill))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_commands",
 		Description: "List the commands the user has allowed System Bridge to run. An entry with a prefab and no command runs that prefab's program for the platform.",
 		InputSchema: objectSchema(map[string]any{}, []string{}),

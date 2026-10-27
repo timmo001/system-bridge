@@ -10,6 +10,7 @@ import (
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/data/module/bluetooth"
 	"github.com/timmo001/system-bridge/data/module/desktop"
+	"github.com/timmo001/system-bridge/data/module/processes"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -61,7 +62,8 @@ func registerAction[T any](
 			switch {
 			case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, desktop.ErrUnsupported):
 				subtype = event.ResponseSubtypeInvalidAction
-			case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue):
+			case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue),
+				errors.Is(err, processes.ErrNotFound), errors.Is(err, processes.ErrRefused):
 				subtype = event.ResponseSubtypeBadRequest
 			}
 			return errorResponse(subtype, err.Error())

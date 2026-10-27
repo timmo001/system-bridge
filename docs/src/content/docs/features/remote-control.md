@@ -151,6 +151,17 @@ The [`displays`](/api/data/#displays) data reports each display's `brightness` a
 
 Not every monitor answers DDC/CI. Outside Hyprland, those report `null`, and controlling them returns an error. macOS isn't supported yet.
 
+## Processes
+
+End a process from the [`processes`](/api/data/#processes) data with [`PROCESS_KILL`](/api/websocket/control/#process-control), the [MCP server](/api/mcp/)'s `system_bridge_kill_process` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client process kill 12345
+system-bridge client process kill 12345 --force
+```
+
+A process is asked to stop, as closing it would, so it can save first. `--force` ends it straight away. System Bridge can only end processes its own user may, and won't end itself.
+
 ## Security
 
 Anyone with your API token can do all of this, including shutting the machine down. Keep the token private, and see [privacy and security](/privacy/).

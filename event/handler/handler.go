@@ -37,6 +37,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterPowerRestartHandler(router)
 	RegisterPowerShutdownHandler(router)
 	RegisterPowerSleepHandler(router)
+	RegisterProcessHandlers(router, dataStore)
 	RegisterRegisterDataListenerHandler(router)
 	RegisterUnregisterDataListenerHandler(router)
 	RegisterUpdateDiscordSetupHandler(router)

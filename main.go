@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -705,6 +706,27 @@ func main() {
 							}
 							openWebClientPath(token, path)
 							return nil
+						},
+					},
+					{
+						Name:  "process",
+						Usage: "Control processes",
+						Commands: []*cli.Command{
+							{
+								Name:      "kill",
+								Usage:     "End a process, by its id from the processes module",
+								ArgsUsage: "<process id>",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "force", Usage: "End it straight away rather than asking it to stop"},
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									id, err := strconv.Atoi(cmd.Args().First())
+									if err != nil || id <= 0 {
+										return fmt.Errorf("a process id is required")
+									}
+									return client.Send(cmdCtx, event.EventProcessKill, map[string]any{"id": id, "force": cmd.Bool("force")})
+								},
+							},
 						},
 					},
 					{

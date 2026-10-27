@@ -176,6 +176,17 @@ system-bridge client media pause
 
 The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`.
 
+## Processes
+
+End a process by its id from the [`processes`](/api/data/#processes) data:
+
+```bash
+system-bridge client process kill 12345
+system-bridge client process kill 12345 --force
+```
+
+It's asked to stop, so it can save first. `--force` ends it straight away.
+
 ## Discovery
 
 ### List Services

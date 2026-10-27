@@ -59,6 +59,7 @@ export const EventType = Schema.Literals([
   "POWER_RESTART",
   "POWER_SHUTDOWN",
   "POWER_SLEEP",
+  "PROCESS_KILL",
   "REGISTER_DATA_LISTENER",
   "UNREGISTER_DATA_LISTENER",
   "UPDATE_DISCORD_SETUP",
@@ -126,6 +127,7 @@ export const ResponseType = Schema.Literals([
   "POWER_RESTARTING",
   "POWER_SHUTTINGDOWN",
   "POWER_SLEEPING",
+  "PROCESS_KILLED",
   "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
@@ -611,6 +613,20 @@ export const HyprlandSubmapRequest = Schema.Struct({
 
 export interface HyprlandSubmapRequest extends Schema.Schema.Type<
   typeof HyprlandSubmapRequest
+> {}
+
+/**
+ * Ends a process. It's asked to stop, or with `force` ended straight away,
+ * losing anything unsaved.
+ */
+export const ProcessKillRequest = Schema.Struct({
+  /** The process's `id` from the processes module. */
+  id: Schema.Int,
+  force: Schema.optionalKey(Schema.Boolean),
+});
+
+export interface ProcessKillRequest extends Schema.Schema.Type<
+  typeof ProcessKillRequest
 > {}
 
 /**
