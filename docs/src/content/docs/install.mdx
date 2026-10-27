@@ -1,6 +1,6 @@
 ---
 title: Download and install
-description: Install System Bridge on Linux or Windows from the AUR, a package or the installer.
+description: Install System Bridge on Linux or Windows from the AUR, a package, the installer, mise or an archive.
 ---
 
 Download the package for your platform from the [releases page](https://github.com/timmo001/system-bridge/releases).
@@ -11,7 +11,11 @@ Each release ships these assets:
 - Debian / Ubuntu: `system-bridge_<version>_<arch>.deb`
 - Fedora / RHEL: `system-bridge-<version>.<arch>.rpm`
 - Flatpak: `system-bridge-<version>.flatpak`
+- Linux archive: `system-bridge-<version>-linux-x86_64.tar.gz`
 - Windows: `system-bridge-<version>-setup.exe`
+- Windows archive: `system-bridge-<version>-windows-x86_64.zip`
+
+The archives hold just the executable, for [mise](#mise) and manual installs. Prefer a package where there is one, as the archives don't set up a service, shortcuts or dependencies.
 
 :::note
 Stable builds are attached to the releases page. Development builds from the latest `dev` branch are also available as workflow artifacts on the [GitHub Actions runs](https://github.com/timmo001/system-bridge/actions), which require a GitHub account to download.
@@ -135,9 +139,50 @@ Please do not submit feedback or bug reports for macOS, as it is not supported. 
 </Tab>
 </Tabs>
 
+## mise
+
+[mise](https://mise.jdx.dev) installs the archive for your platform from the latest release:
+
+```bash
+mise use -g github:timmo001/system-bridge
+```
+
+Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+
+## Archive
+
+To install the archive by hand, download it with the [GitHub CLI](https://cli.github.com) and put `system-bridge` somewhere on your `PATH`:
+
+<Tabs syncKey="os">
+<Tab title="Linux">
+
+```bash
+gh release download -R timmo001/system-bridge -p '*-linux-x86_64.tar.gz'
+tar -xzf system-bridge-*-linux-x86_64.tar.gz -C ~/.local/bin system-bridge
+```
+
+Check the download first with `gh attestation verify system-bridge-*-linux-x86_64.tar.gz -R timmo001/system-bridge`.
+
+</Tab>
+<Tab title="Windows">
+
+```powershell
+gh release download -R timmo001/system-bridge -p '*-windows-x86_64.zip'
+Expand-Archive system-bridge-*-windows-x86_64.zip "$env:LOCALAPPDATA\Programs\system-bridge"
+```
+
+Add that folder to your `PATH`, and keep the `now-playing` folder beside `system-bridge.exe`, as the [media](/api/data/#media) module needs it.
+
+</Tab>
+</Tabs>
+
+On Linux, the executable needs `libx11`, `libxtst`, `libxkbcommon` and `libxkbcommon-x11` (`libx11-6`, `libxtst6`, `libxkbcommon0` and `libxkbcommon-x11-0` on Debian / Ubuntu), even without a desktop. Nothing starts it for you: run `system-bridge backend`, or add your own service or autostart entry. See [Running](/running).
+
 ## Updating
 
 On Linux, System Bridge restarts itself within a minute of a package update replacing it, so the new version runs without you restarting it. Flatpak keeps running the version it started with, so restart System Bridge after updating it there.
+
+The same goes for replacing the Linux executable from an archive by hand. mise installs each version to its own folder instead, so restart System Bridge after `mise upgrade`, and after updating from the Windows archive.
 
 ## Optional dependencies
 
