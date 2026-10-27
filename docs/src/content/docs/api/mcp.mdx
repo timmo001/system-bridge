@@ -152,6 +152,19 @@ Example arguments:
 { "id": "0x555dbf21c9e0", "fullscreen": true }
 ```
 
+### `system_bridge_discord_control`
+
+Control Discord, which must be [set up](/features/discord/) first. It takes the same actions and fields as [Discord control](/api/websocket/control/#discord-control).
+
+- `action` (required): What to do, such as `JOIN_VOICE_CHANNEL`, `TOGGLE_MUTE` or `PLAY_SOUND`.
+- `channel_id`, `user_id`, `sound_id`, `device_id`, `mode` and `value` (optional): What the action needs, with ids from the `discord` module.
+
+Example arguments:
+
+```json
+{ "action": "TOGGLE_MUTE" }
+```
+
 ### `system_bridge_display_control`
 
 Set a display's brightness or power state. See [display control](/api/websocket/control/#display-control) for what each display supports.
@@ -278,6 +291,21 @@ Kill a window's app on Hyprland without asking it to close, so anything unsaved 
 
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 
+### `system_bridge_keyboard_keypress`
+
+Press a key in whichever window has focus. See [keyboard keypress](/api/websocket/input/#keyboard-keypress).
+
+- `key` (required): The key to press, such as `a`, `enter` or `space`.
+- `modifiers` (optional): Keys to hold while pressing it: `shift`, `ctrl`, `alt` or `cmd`.
+- `delay` (optional): Milliseconds to wait first.
+
+### `system_bridge_keyboard_text`
+
+Type text in whichever window has focus. See [keyboard text](/api/websocket/input/#keyboard-text).
+
+- `text` (required): The text to type.
+- `delay` (optional): Milliseconds to wait first.
+
 ### `system_bridge_kill_process`
 
 End a process. See [process control](/api/websocket/control/#process-control).
@@ -292,6 +320,10 @@ List the [prefab commands](/features/commands/#prefab-commands), with whether ea
 ### `system_bridge_list_commands`
 
 List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments`, `workingDir` and `prefab`. It takes no arguments.
+
+### `system_bridge_lock`
+
+Lock the screen. It takes no arguments.
 
 ### `system_bridge_media_control`
 
@@ -347,6 +379,15 @@ Open, close or toggle a panel or overlay of an Omarchy shell plugin.
 - `action` (required): `open`, `close` or `toggle`.
 - `id` (required): A panel `id` from the `desktop` module's `omarchy.panels`, such as `omarchy.audio`.
 
+### `system_bridge_open`
+
+Open a URL in the default browser, or a file or folder with its default app. See [open a path](/api/websocket/control/#open-a-path).
+
+- `url` (optional): A URL to open.
+- `path` (optional): A file or folder to open.
+
+Give one of them.
+
 ### `system_bridge_run_command`
 
 Run a command from the allowlist and wait for it to finish. It returns the command's `exitCode`, `stdout` and `stderr`, and `error` when it couldn't run or timed out. Commands time out after 5 minutes.
@@ -359,7 +400,7 @@ Example arguments:
 { "id": "backup" }
 ```
 
-Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake.
+Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake. Locking is, with `system_bridge_lock`, as it loses nothing.
 
 ### `system_bridge_send_notification`
 

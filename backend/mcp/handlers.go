@@ -131,6 +131,32 @@ type mediaControlInput struct {
 	Repeat   string   `json:"repeat,omitempty"`
 }
 
+type openInput struct {
+	URL  string `json:"url,omitempty"`
+	Path string `json:"path,omitempty"`
+}
+
+type keypressInput struct {
+	Key       string   `json:"key"`
+	Modifiers []string `json:"modifiers,omitempty"`
+	Delay     int      `json:"delay,omitempty"`
+}
+
+type keyboardTextInput struct {
+	Text  string `json:"text"`
+	Delay int    `json:"delay,omitempty"`
+}
+
+type discordControlInput struct {
+	Action    string   `json:"action"`
+	ChannelID string   `json:"channel_id,omitempty"`
+	UserID    string   `json:"user_id,omitempty"`
+	SoundID   string   `json:"sound_id,omitempty"`
+	DeviceID  string   `json:"device_id,omitempty"`
+	Mode      string   `json:"mode,omitempty"`
+	Value     *float64 `json:"value,omitempty"`
+}
+
 type clipboardTextInput struct {
 	Text string `json:"text"`
 }

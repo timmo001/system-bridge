@@ -70,6 +70,7 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_desktop_set_keyboard_layout` switches the keyboard layout.
 - `system_bridge_desktop_set_window_state` makes a window fullscreen,
   maximised or minimised, or not.
+- `system_bridge_discord_control` controls Discord through `DISCORD_CONTROL`.
 - `system_bridge_display_control` sets a display's brightness or power state.
 - `system_bridge_get_data` returns the latest data for requested modules.
   Supported modules are `audio`, `battery`, `bluetooth`, `cpu`, `desktop`,
@@ -96,16 +97,22 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   or back to the default.
 - `system_bridge_hyprland_set_window` floats or tiles, pins or unpins, and
   moves or resizes a window on Hyprland.
+- `system_bridge_keyboard_keypress` presses a key, with modifiers, through
+  `KEYBOARD_KEYPRESS`.
+- `system_bridge_keyboard_text` types text through `KEYBOARD_TEXT`.
 - `system_bridge_kill_process` ends a process from the processes module,
   through `processes.Kill`.
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.
+- `system_bridge_lock` locks the screen through `POWER_LOCK`. The other power
+  actions aren't tools.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
   `PREVIOUS`, `STOP`, `VOLUME_DOWN`, `VOLUME_UP`, `SEEK`, `SET_VOLUME`,
   `SET_SHUFFLE` or `SET_REPEAT`, on the reported player or the one in `player`.
 - `system_bridge_omarchy_menu` opens, closes or toggles the Omarchy menu.
 - `system_bridge_omarchy_panel` opens, closes or toggles an Omarchy shell panel.
+- `system_bridge_open` opens a URL or a path through `OPEN`.
 - `system_bridge_run_command` runs a command from the allowlist and waits for
   its result through `command.Run`.
 - `system_bridge_send_notification` sends a desktop notification with required

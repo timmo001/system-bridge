@@ -3,6 +3,7 @@ package mcp
 import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -304,6 +305,76 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{"action"}),
 	}, eventTool[mediaControlInput](handlers, event.EventMediaControl))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_open",
+		Description: "Open a URL in the default browser, or a file or folder with its default app, on the system. Give url or path.",
+		InputSchema: objectSchema(map[string]any{
+			"url":  map[string]any{"type": "string", "description": "A URL to open, such as https://example.com"},
+			"path": map[string]any{"type": "string", "description": "A file or folder to open"},
+		}, []string{}),
+	}, eventTool[openInput](handlers, event.EventOpen))
+
+	delay := map[string]any{"type": "integer", "minimum": 0, "description": "Milliseconds to wait first, such as for a window to open"}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_keyboard_keypress",
+		Description: "Press a key, optionally holding modifiers, in whichever window has focus. For example space to pause a video, or l with ctrl to focus a browser's address bar.",
+		InputSchema: objectSchema(map[string]any{
+			"key": map[string]any{"type": "string", "description": "The key to press, such as a, enter, space, f5 or audio_play"},
+			"modifiers": map[string]any{
+				"type":        "array",
+				"description": "Modifier keys to hold while pressing it",
+				"items":       map[string]any{"type": "string", "enum": []string{"shift", "ctrl", "alt", "cmd"}},
+			},
+			"delay": delay,
+		}, []string{"key"}),
+	}, eventTool[keypressInput](handlers, event.EventKeyboardKeypress))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_keyboard_text",
+		Description: "Type text in whichever window has focus, as if on the system's own keyboard",
+		InputSchema: objectSchema(map[string]any{
+			"text":  map[string]any{"type": "string", "description": "The text to type"},
+			"delay": delay,
+		}, []string{"text"}),
+	}, eventTool[keyboardTextInput](handlers, event.EventKeyboardText))
+
+	discordActions := []string{}
+	for _, action := range []discord.Action{
+		discord.ActionJoinVoiceChannel, discord.ActionLeaveVoiceChannel, discord.ActionOpenTextChannel,
+		discord.ActionMute, discord.ActionUnmute, discord.ActionToggleMute,
+		discord.ActionDeafen, discord.ActionUndeafen, discord.ActionToggleDeafen,
+		discord.ActionSetInputVolume, discord.ActionSetInputDevice, discord.ActionSetOutputVolume, discord.ActionSetOutputDevice,
+		discord.ActionSetVoiceMode, discord.ActionSetVoiceThreshold, discord.ActionSetPushToTalkDelay,
+		discord.ActionEnableQoS, discord.ActionDisableQoS, discord.ActionToggleQoS,
+		discord.ActionEnableSilenceWarn, discord.ActionDisableSilenceWarn, discord.ActionToggleSilenceWarn,
+		discord.ActionMuteUser, discord.ActionUnmuteUser, discord.ActionToggleUserMute, discord.ActionSetUserVolume,
+		discord.ActionToggleVideo, discord.ActionToggleScreenshare, discord.ActionPlaySound,
+	} {
+		discordActions = append(discordActions, string(action))
+	}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_discord_control",
+		Description: "Control Discord: join or leave a voice channel, open a text channel, mute, deafen, change voice settings, mute or set the volume of another user for you only, toggle your camera or screenshare, or play a soundboard sound. Get channel, user, device and sound ids from the discord module. Discord must be set up in System Bridge first.",
+		InputSchema: objectSchema(map[string]any{
+			"action":     map[string]any{"type": "string", "description": "What to do", "enum": discordActions},
+			"channel_id": map[string]any{"type": "string", "description": "A channel's id, for JOIN_VOICE_CHANNEL and OPEN_TEXT_CHANNEL"},
+			"user_id":    map[string]any{"type": "string", "description": "A user's id, for the *_USER actions"},
+			"sound_id":   map[string]any{"type": "string", "description": "A sound's id from the discord module's sounds, for PLAY_SOUND"},
+			"device_id":  map[string]any{"type": "string", "description": "A device's id, for SET_INPUT_DEVICE and SET_OUTPUT_DEVICE"},
+			"mode":       map[string]any{"type": "string", "description": "For SET_VOICE_MODE", "enum": []string{"VOICE_ACTIVITY", "PUSH_TO_TALK"}},
+			"value": map[string]any{
+				"type":        "number",
+				"description": "Input volume 0-100, output and user volume 0-200, voice threshold -100 to 0 dB, or push to talk delay 0-2000 ms",
+			},
+		}, []string{"action"}),
+	}, eventTool[discordControlInput](handlers, event.EventDiscordControl))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_lock",
+		Description: "Lock the system's screen",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, eventTool[struct{}](handlers, event.EventPowerLock))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_set_clipboard",
