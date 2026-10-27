@@ -2,7 +2,14 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { DEFAULT_HOURS_TO_SHOW, DEFAULT_TILE_FEATURE } from "./cards";
 import { PAGES } from "./pages";
-import { isSectionName, SECTIONS, type SectionName } from "./sections";
+import {
+  getSystemBridgeEntities,
+  type ItemKind,
+  resolveDevice,
+  type SystemBridgeEntities,
+} from "./registry";
+import { isSectionName, type SectionName } from "./sections";
+import { sectionImage } from "./section-images";
 import {
   type DashboardStrategyConfig,
   type HomeAssistant,
@@ -147,7 +154,6 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
 const HELPERS = new Map([
   ["device_id", "The System Bridge device to show."],
   ["page", "The web client page this view shows."],
-  ["section", "What this section shows."],
   [
     "item",
     "For sections about one thing: its mount point, GPU, display or interface name.",
@@ -161,11 +167,27 @@ const HELPERS = new Map([
   ["top_links_pages", "Pages with a link to the web client at the top."],
 ]);
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+/** The sections about one disk, GPU, display or interface, and what they list. */
+const ITEM_KINDS = new Map<string, ItemKind>([
+  ["mount", "mount"],
+  ["gpu", "gpu"],
+  ["display", "display"],
+  ["interface", "interface"],
+]);
+
 const sameList = (a: readonly string[], b: readonly string[]) =>
   a.length === b.length && a.every((value, index) => value === b[index]);
 
 /** The options every strategy has, then those of the strategy the config is for. */
-const generalSchema = (config: StrategyConfig) => [
+const generalSchema = (
+  config: StrategyConfig,
+  itemOptions: readonly SelectOption[],
+) => [
   {
     name: "device_id",
     selector: { device: { integration: "system_bridge" } },
@@ -208,16 +230,43 @@ const generalSchema = (config: StrategyConfig) => [
           required: true,
           selector: {
             select: {
-              mode: "dropdown",
+              mode: "box",
+              box_max_columns: 2,
               sort: true,
-              options: Object.keys(SECTIONS).map((value) => ({
-                value,
-                label: sectionLabel(value),
-              })),
+              options: Object.entries(SECTION_DESCRIPTIONS).flatMap(
+                ([value, description]) =>
+                  isSectionName(value)
+                    ? [
+                        {
+                          value,
+                          label: sectionLabel(value),
+                          description,
+                          image: {
+                            src: sectionImage(value, false),
+                            src_dark: sectionImage(value, true),
+                          },
+                        },
+                      ]
+                    : [],
+              ),
             },
           },
         },
-        { name: "item", selector: { text: {} } },
+        ...(ITEM_KINDS.has(config.section)
+          ? [
+              {
+                name: "item",
+                required: true,
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    sort: true,
+                    options: itemOptions,
+                  },
+                },
+              },
+            ]
+          : []),
       ]
     : []),
   {
@@ -263,8 +312,67 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
   @state() private _config?: StrategyConfig;
 
+  @state() private _entities?: SystemBridgeEntities;
+
+  private _entitiesFor?: string;
+
   public setConfig(config: StrategyConfig) {
     this._config = config;
+  }
+
+  protected willUpdate() {
+    const hass = this.hass;
+    const config = this._config;
+
+    if (!hass || !config || !("section" in config)) {
+      return;
+    }
+
+    // Looked up once for each device, since hass changes all the time
+    const key = config.device_id ?? "";
+
+    if (this._entitiesFor === key) {
+      return;
+    }
+
+    this._entitiesFor = key;
+
+    const result = resolveDevice(hass, config.device_id);
+
+    if (!("device" in result)) {
+      this._entities = undefined;
+
+      return;
+    }
+
+    void getSystemBridgeEntities(hass, result.device).then((entities) => {
+      if (this._entitiesFor === key) {
+        this._entities = entities;
+      }
+    });
+  }
+
+  /** The device's mounts, GPUs, displays or interfaces, for the section. */
+  private _itemOptions(config: StrategyConfig): SelectOption[] {
+    if (!("section" in config)) {
+      return [];
+    }
+
+    const kind = ITEM_KINDS.get(config.section);
+
+    const options = kind
+      ? [...(this._entities?.items[kind] ?? [])].map(([value, item]) => ({
+          value,
+          label: item.name,
+        }))
+      : [];
+
+    // Keep a saved item that the device doesn't have, so it still shows
+    if (config.item && !options.some(({ value }) => value === config.item)) {
+      options.push({ value: config.item, label: config.item });
+    }
+
+    return options;
   }
 
   protected render() {
@@ -289,7 +397,7 @@ export class SystemBridgeStrategyEditor extends LitElement {
       <ha-form
         .hass=${this.hass}
         .data=${{ ...DEFAULTS, ...config }}
-        .schema=${generalSchema(config)}
+        .schema=${generalSchema(config, this._itemOptions(config))}
         .computeLabel=${this._computeLabel}
         .computeHelper=${this._computeHelper}
         @value-changed=${this._generalChanged}
@@ -301,17 +409,8 @@ export class SystemBridgeStrategyEditor extends LitElement {
   private _computeLabel = (schema: { name: string }) =>
     LABELS.get(schema.name) ?? schema.name;
 
-  private _computeHelper = (schema: { name: string }) => {
-    const config = this._config;
-
-    if (schema.name === "section" && config && "section" in config) {
-      return isSectionName(config.section)
-        ? SECTION_DESCRIPTIONS[config.section]
-        : HELPERS.get("section");
-    }
-
-    return HELPERS.get(schema.name);
-  };
+  private _computeHelper = (schema: { name: string }) =>
+    HELPERS.get(schema.name);
 
   private _generalChanged = (ev: CustomEvent<{ value: StrategyConfig }>) => {
     ev.stopPropagation();
