@@ -419,15 +419,20 @@ export interface KeepAwakeRequest extends Schema.Schema.Type<
   typeof KeepAwakeRequest
 > {}
 
-/** Sets an output's or input's volume or mute state, or makes it the default. */
+/**
+ * Sets an output's, input's or app's volume or mute state, makes an output or
+ * input the default, or moves an app to another output.
+ */
 export const AudioControl = Schema.Struct({
-  /** The device's `id` from the audio module. */
+  /** An `id` from the audio module's `outputs`, `inputs` or `apps`. */
   id: Schema.String,
   /** Percent, 0-100. */
   volume: Schema.optionalKey(Schema.Finite),
   muted: Schema.optionalKey(Schema.Boolean),
   /** Makes it the default output or input. */
   default: Schema.optionalKey(Schema.Boolean),
+  /** An output's `id`, to move an app's sound to it. Linux only. */
+  output: Schema.optionalKey(Schema.String),
 });
 
 export interface AudioControl extends Schema.Schema.Type<typeof AudioControl> {}

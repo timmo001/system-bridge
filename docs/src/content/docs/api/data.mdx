@@ -48,6 +48,7 @@ The same payloads are pushed over the WebSocket API as [`DATA_UPDATE`](/api/webs
 | --- | --- | --- |
 | `outputs` | array | Output devices, such as speakers and headphones. |
 | `inputs` | array | Input devices, such as microphones. |
+| `apps` | array | Apps playing sound, each of which can be turned up, down or muted on its own. Linux only, and empty elsewhere. |
 
 Each device has:
 
@@ -59,7 +60,19 @@ Each device has:
 | `muted` | boolean | Whether the device is muted. |
 | `default` | boolean | Whether it's the default output or input. |
 
-On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. Monitor sources, which capture an output, aren't listed as inputs. On macOS both lists are empty.
+Each app has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | The app's id, such as `app:120`. It changes when the app stops and starts playing again. |
+| `name` | string | The app's name, such as `Firefox`. |
+| `title` | string | What the app says it's playing, such as a track, or `null`. |
+| `volume` | number | The app's own volume as a percentage, averaged over its channels. |
+| `muted` | boolean | Whether the app is muted. |
+| `playing` | boolean | `false` while the app has paused its sound. |
+| `output` | string | The `id` of the output it plays to. |
+
+On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. Monitor sources, which capture an output, aren't listed as inputs, and filters such as an equaliser aren't listed as apps. On macOS all three lists are empty.
 
 ### `battery`
 

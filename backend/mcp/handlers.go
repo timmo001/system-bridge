@@ -28,6 +28,7 @@ type audioControlInput struct {
 	Volume  *float64 `json:"volume,omitempty"`
 	Muted   *bool    `json:"muted,omitempty"`
 	Default bool     `json:"default,omitempty"`
+	Output  string   `json:"output,omitempty"`
 }
 
 type bluetoothDeviceInput struct {
@@ -164,6 +165,9 @@ func (h toolHandlers) handleAudioControl(_ context.Context, _ *sdkmcp.CallToolRe
 	}
 	if input.Default {
 		arguments["default"] = true
+	}
+	if input.Output != "" {
+		arguments["output"] = input.Output
 	}
 	message := event.Message{
 		ID:    generateID(),

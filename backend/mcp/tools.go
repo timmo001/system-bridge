@@ -12,9 +12,9 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_audio_control",
-		Description: "Set an audio output's or input's volume or mute state, or make it the default. Get device ids from the audio module.",
+		Description: "Set an audio output's, input's or app's volume or mute state, make an output or input the default, or move an app to another output. Get ids from the audio module.",
 		InputSchema: objectSchema(map[string]any{
-			"id": map[string]any{"type": "string", "description": "Device id from the audio module's outputs or inputs"},
+			"id": map[string]any{"type": "string", "description": "Id from the audio module's outputs, inputs or apps"},
 			"volume": map[string]any{
 				"type":        "number",
 				"description": "Volume in percent",
@@ -23,6 +23,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 			"muted":   map[string]any{"type": "boolean", "description": "Whether to mute the device"},
 			"default": map[string]any{"type": "boolean", "description": "Make the device the default output or input"},
+			"output":  map[string]any{"type": "string", "description": "An output's id, to move an app's sound to it. Linux only."},
 		}, []string{"id"}),
 	}, handlers.handleAudioControl)
 

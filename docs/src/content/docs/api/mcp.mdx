@@ -75,12 +75,13 @@ Configure the client to launch `websocat` with the WebSocket URL as its argument
 
 ### `system_bridge_audio_control`
 
-Set an audio output's or input's volume or mute state, or make it the default. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
+Set an audio output's, input's or app's volume or mute state, make an output or input the default, or move an app to another output. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
 
-- `id` (required): The device's `id` from the `audio` module's `outputs` or `inputs`.
+- `id` (required): An `id` from the `audio` module's `outputs`, `inputs` or `apps`.
 - `volume` (optional): Volume in percent, 0-100.
-- `muted` (optional): `true` to mute the device, `false` to unmute it.
+- `muted` (optional): `true` to mute it, `false` to unmute it.
 - `default` (optional): `true` to make it the default output or input.
+- `output` (optional): An output's `id`, to move an app's sound to it. Linux only.
 
 Example arguments:
 

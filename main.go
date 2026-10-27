@@ -237,12 +237,13 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "audio",
-						Usage:     "Set an audio output's or input's volume or mute, or make it the default",
-						ArgsUsage: "<device id>",
+						Usage:     "Set an audio output's, input's or app's volume or mute, make a device the default, or move an app to another output",
+						ArgsUsage: "<device or app id>",
 						Flags: []cli.Flag{
 							&cli.FloatFlag{Name: "volume", Usage: "Volume in percent"},
-							&cli.BoolFlag{Name: "mute", Usage: "Mute the device, or unmute it with --mute=false"},
+							&cli.BoolFlag{Name: "mute", Usage: "Mute the device or app, or unmute it with --mute=false"},
 							&cli.BoolFlag{Name: "default", Usage: "Make the device the default output or input"},
+							&cli.StringFlag{Name: "output", Usage: "Move an app's sound to this output"},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							id := cmd.Args().First()
@@ -259,8 +260,11 @@ func main() {
 							if cmd.Bool("default") {
 								data["default"] = true
 							}
+							if output := cmd.String("output"); output != "" {
+								data["output"] = output
+							}
 							if len(data) == 1 {
-								return fmt.Errorf("set --volume, --mute or --default")
+								return fmt.Errorf("set --volume, --mute, --default or --output")
 							}
 							return client.SendWithin(cmdCtx, client.SlowSendTimeout, event.EventAudioControl, data)
 						},

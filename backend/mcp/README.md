@@ -58,8 +58,8 @@ the connection. Use `wss://` when connecting through TLS.
 
 Tools are registered in `tools.go` and implemented in `handlers.go`:
 
-- `system_bridge_audio_control` sets an audio device's volume or mute state, or
-  makes it the default.
+- `system_bridge_audio_control` sets an audio device's or app's volume or mute
+  state, makes a device the default, or moves an app to another output.
 - `system_bridge_bluetooth_connect` connects a paired Bluetooth device.
 - `system_bridge_bluetooth_disconnect` disconnects a paired Bluetooth device.
 - `system_bridge_bluetooth_forget` forgets (unpairs) a Bluetooth device.

@@ -118,6 +118,18 @@ export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
 
+export const AudioApp = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  title: Schema.NullOr(Schema.String),
+  volume: Schema.NullOr(Schema.Finite),
+  muted: Schema.NullOr(Schema.Boolean),
+  playing: Schema.Boolean,
+  output: Schema.NullOr(Schema.String),
+});
+
+export interface AudioApp extends Schema.Schema.Type<typeof AudioApp> {}
+
 export const AudioDevice = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -131,6 +143,7 @@ export interface AudioDevice extends Schema.Schema.Type<typeof AudioDevice> {}
 export const AudioData = Schema.Struct({
   outputs: Schema.Array(AudioDevice),
   inputs: Schema.Array(AudioDevice),
+  apps: Schema.Array(AudioApp),
 });
 
 export interface AudioData extends Schema.Schema.Type<typeof AudioData> {}

@@ -4,7 +4,8 @@
 # latest release and opens a pull request for review when it moves; its
 # README documents this file.
 #
-# PipeWire and PulseAudio (pw-dump, pactl --format=json and pactl subscribe in
+# PipeWire and PulseAudio (pw-dump, pactl --format=json, including list
+# sink-inputs, set-sink-input-volume and move-sink-input, and pactl subscribe in
 # data/module/audio and data/module/system) and the Wayland protocols the
 # desktop and system modules speak (wlr-foreign-toplevel-management,
 # ext-workspace, ext-idle-notify) are released on GitLab, which the tool can't

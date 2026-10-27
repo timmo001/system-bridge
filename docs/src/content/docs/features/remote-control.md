@@ -57,7 +57,7 @@ On Omarchy, this is the bar's stay awake switch, so turning either on shows in b
 
 ## Audio
 
-Set an output's or input's volume, mute or unmute it, or make it the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:
+Set an output's, input's or app's volume, mute or unmute it, or make a device the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:
 
 ```bash title="Terminal"
 system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --volume 40
@@ -66,6 +66,13 @@ system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --default
 ```
 
 The id is the device's `id` from the [`audio`](/api/data/#audio) data, which reports each device's `volume`, `muted` and `default`.
+
+On Linux, each app playing sound is listed too, in the data's `apps` and in an **Apps** card on the **Audio** page. Turn one up, down or mute it on its own, or move it to another output, by its id:
+
+```bash title="Terminal"
+system-bridge client audio app:120 --volume 50
+system-bridge client audio app:120 --output alsa_output.pci-0000_00_1f.3.hdmi-stereo
+```
 
 - **Linux** uses `pactl`, so it needs PulseAudio or PipeWire with `pipewire-pulse`.
 - **Windows** uses the system's audio endpoints.

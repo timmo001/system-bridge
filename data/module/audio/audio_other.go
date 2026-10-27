@@ -10,5 +10,5 @@ import (
 
 // GetAudioData isn't supported on this platform yet
 func GetAudioData(context.Context) (types.AudioData, error) {
-	return types.AudioData{Outputs: []types.AudioDevice{}, Inputs: []types.AudioDevice{}}, nil
+	return types.AudioData{Outputs: []types.AudioDevice{}, Inputs: []types.AudioDevice{}, Apps: []types.AudioApp{}}, nil
 }

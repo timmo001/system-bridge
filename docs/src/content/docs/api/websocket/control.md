@@ -93,12 +93,13 @@ The response type is `DISCORD_CONTROLLED`. If Discord is not connected, the resp
 
 ## Audio control
 
-Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mute state, or to make it the default. Set any of them together. See [audio](/features/remote-control/#audio) for what's supported.
+Send the `AUDIO_CONTROL` event to set an audio output's, input's or app's volume or mute state, to make an output or input the default, or to move an app to another output. Set any of them together. See [audio](/features/remote-control/#audio) for what's supported.
 
-- `id` (required): The device's `id` from the [`audio`](/api/data/#audio) data's `outputs` or `inputs`.
+- `id` (required): An `id` from the [`audio`](/api/data/#audio) data's `outputs`, `inputs` or `apps`.
 - `volume` (optional): Volume in percent, 0-100.
 - `muted` (optional): `true` to mute, `false` to unmute.
 - `default` (optional): `true` to make it the default output or input.
+- `output` (optional): An output's `id`, to move an app's sound to it. Linux only.
 
 ```json title="Request"
 {
@@ -113,7 +114,7 @@ Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mut
 }
 ```
 
-The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id` gets an `ERROR` with the subtype `BAD_REQUEST`, and a platform that can't control audio gets `INVALID_ACTION`.
+The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id`, or something that doesn't apply to it, such as making an app the default, gets an `ERROR` with the subtype `BAD_REQUEST`. A platform that can't control audio gets `INVALID_ACTION`.
 
 ## Bluetooth control
 

@@ -770,10 +770,35 @@ export const audioDashboard = ({ data }: DashboardContext) => {
     return noData("audio devices");
   }
 
+  const outputNames = new Map(
+    audio.outputs.map((output) => [output.id, output.name]),
+  );
+
+  const apps = [...audio.apps]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(
+      (app) =>
+        html`<sb-audio-device
+          .app=${app}
+          .outputName=${
+            app.output === null
+              ? null
+              : (outputNames.get(app.output) ?? app.output)
+          }
+        ></sb-audio-device>`,
+    );
+
   return html`
     <div class="dashboard">
       ${audioCard("Outputs", audio.outputs)}
       ${audioCard("Inputs", audio.inputs)}
+      ${
+        apps.length === 0
+          ? nothing
+          : html`<sb-card heading="Apps">
+              <div class="audio-devices">${apps}</div>
+            </sb-card>`
+      }
     </div>
   `;
 };

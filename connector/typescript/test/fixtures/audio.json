@@ -30,5 +30,16 @@
       "muted": null,
       "default": false
     }
+  ],
+  "apps": [
+    {
+      "id": "app:18122",
+      "name": "Chromium",
+      "title": "Playback",
+      "volume": 100,
+      "muted": false,
+      "playing": true,
+      "output": "alsa_output.usb-Generic_USB_Audio-00.HiFi__Speaker__sink"
+    }
   ]
 }
