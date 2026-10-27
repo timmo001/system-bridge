@@ -45,6 +45,10 @@ Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assi
 
 On Linux, hibernating needs swap set up for it. Depending on your distribution's polkit rules, suspending or shutting down may ask for a password when System Bridge runs as a service.
 
+### Power profiles
+
+On Linux with power-profiles-daemon, or tuned-ppd on Fedora, the system data reports the active `power_profile` and the `power_profiles` available, usually `power-saver`, `balanced` and `performance`. Switch between them with [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control), the MCP server's `system_bridge_set_power_profile` tool, or `system-bridge client system power-profile`. A change made anywhere else, such as from your desktop's power menu, shows up straight away.
+
 ## Audio
 
 Set an output's or input's volume, mute or unmute it, or make it the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:

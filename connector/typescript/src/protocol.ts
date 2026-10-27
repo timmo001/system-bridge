@@ -61,6 +61,7 @@ export const EventType = Schema.Literals([
   "POWER_SLEEP",
   "PROCESS_KILL",
   "REGISTER_DATA_LISTENER",
+  "SYSTEM_SET_POWER_PROFILE",
   "UNREGISTER_DATA_LISTENER",
   "UPDATE_DISCORD_SETUP",
   "UPDATE_SETTINGS",
@@ -131,6 +132,7 @@ export const ResponseType = Schema.Literals([
   "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
+  "SYSTEM_POWER_PROFILE_SET",
 ]);
 
 export type ResponseType = typeof ResponseType.Type;
@@ -393,6 +395,16 @@ export const MediaControl = Schema.Struct({
 });
 
 export interface MediaControl extends Schema.Schema.Type<typeof MediaControl> {}
+
+/** Switches the power profile. Linux with power-profiles-daemon only. */
+export const PowerProfileRequest = Schema.Struct({
+  /** One of the system module's `power_profiles`, such as `balanced`. */
+  profile: Schema.String,
+});
+
+export interface PowerProfileRequest extends Schema.Schema.Type<
+  typeof PowerProfileRequest
+> {}
 
 /** Sets an output's or input's volume or mute state, or makes it the default. */
 export const AudioControl = Schema.Struct({

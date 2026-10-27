@@ -1,6 +1,6 @@
 """System."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import cast
 
@@ -85,6 +85,11 @@ class System:
     failed_units: list[SystemFailedUnit] | None = None
     idle_time: int | None = None
     locked: bool | None = None
+    # The active power profile, such as balanced, or None without
+    # power-profiles-daemon
+    power_profile: str | None = None
+    # The profiles set_power_profile can switch to
+    power_profiles: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Post Init."""

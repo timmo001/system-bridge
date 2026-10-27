@@ -68,7 +68,7 @@ import {
   HyprlandSubmapRequest,
   KeyboardKeypress,
   KeyboardText,
-  type MediaAction,
+  MediaAction,
   MediaControl,
   MediaDirectory,
   ModulesRequest,
@@ -78,12 +78,15 @@ import {
   ProcessKillRequest,
   OpenTarget,
   PathRequest,
+  PowerProfileRequest,
   type ResponseType,
   Settings,
   SettingsCommandDefinition,
   ValidateDirectoryResult,
   WebSocketResponse,
 } from "./protocol.js";
+
+const isMediaAction = Schema.is(MediaAction);
 
 export type WebSocketError =
   | ConnectionError
@@ -205,6 +208,10 @@ export interface Interface {
   /** Turns the Bluetooth adapter on or off. Linux only. */
   readonly bluetoothSetPower: (
     power: BluetoothPowerRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Switches the power profile. Linux with power-profiles-daemon only. */
+  readonly setPowerProfile: (
+    request: PowerProfileRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Asks a window to close, as its close button would. */
   readonly desktopCloseWindow: (
@@ -976,6 +983,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const setPowerProfile = Effect.fn("SystemBridgeWebSocket.setPowerProfile")(
+    function* (request: PowerProfileRequest) {
+      yield* call(
+        "SYSTEM_SET_POWER_PROFILE",
+        "SYSTEM_POWER_PROFILE_SET",
+        PowerProfileRequest,
+        request,
+        ignoreReply,
+      );
+    },
+  );
+
   const discordControl = Effect.fn("SystemBridgeWebSocket.discordControl")(
     function* (control: DiscordControl) {
       yield* call(
@@ -1211,7 +1230,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         "MEDIA_CONTROL",
         "MEDIA_CONTROLLED",
         MediaControl,
-        typeof control === "string" ? { action: control } : control,
+        isMediaAction(control) ? { action: control } : control,
         ignoreReply,
       );
     },
@@ -1313,6 +1332,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothDisconnect,
     bluetoothForget,
     bluetoothSetPower,
+    setPowerProfile,
     desktopCloseWindow,
     desktopFocusWindow,
     desktopFocusWorkspace,

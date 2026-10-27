@@ -100,6 +100,7 @@ var handlerPairs = map[string]pairing{
 	"MediaControlRequestData":            {[]string{"MediaControl"}, []string{"MediaControl"}},
 	"OmarchyRequestData":                 {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},
 	"ProcessKillRequestData":             {[]string{"ProcessKillRequest"}, []string{"ProcessKillRequest"}},
+	"SystemPowerProfileRequestData":      {[]string{"PowerProfileRequest"}, []string{"PowerProfileRequest"}},
 	// OPEN takes a path or a URL, which the connectors model as two requests
 	"OpenRequestData":                 {nil, nil},
 	"RegisterDataListenerRequestData": {[]string{"ModulesRequest"}, []string{"GetData"}},

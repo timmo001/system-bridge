@@ -339,6 +339,8 @@ Returns an array of objects, one per process.
 | `package_updates` | integer | How many package updates are waiting, from `checkupdates` on Arch, apt on Debian and Ubuntu, dnf on Fedora, or winget on Windows. Checked in the background about once an hour, so it's null until the first check finishes or when no supported package manager is found. Linux and Windows only. |
 | `failed_units` | array | The systemd units that failed, from the system manager and, when System Bridge runs in your session, your user manager. Each has `name`, `description`, `scope` (`system` or `user`), `load_state`, `result` (why it failed, such as `exit-code`, `signal`, `timeout` or `oom-kill`) and `since` (when it failed, in Unix seconds). Empty when nothing has failed, and `null` without systemd. Linux only. |
 | `power_usage` | number | System power draw in watts. Linux only. |
+| `power_profile` | string | The active power profile, such as `power-saver`, `balanced` or `performance`, from power-profiles-daemon or tuned-ppd. `null` without either. Linux only. |
+| `power_profiles` | array | The profiles [`SYSTEM_SET_POWER_PROFILE`](/api/websocket/control/#system-control) can switch to. Empty without power-profiles-daemon. Linux only. |
 | `run_mode` | string | How the backend is running. |
 | `idle_time` | number | Seconds since the user's last keyboard or mouse input. On Linux this comes from the Wayland compositor where it supports `ext-idle-notify-v1` (such as Hyprland, sway, niri and KDE), otherwise from logind's idle hint. `null` when neither is available. |
 | `locked` | boolean | Whether the user's session is locked. On Linux this is logind's `LockedHint`, which GNOME and KDE set but some desktops, such as Omarchy, don't. `null` on macOS. |

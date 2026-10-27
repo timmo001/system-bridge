@@ -42,10 +42,57 @@ func Watch(ctx context.Context, changed func()) {
 			})
 		})
 	}
+	wg.Go(func() {
+		watch.Retry(ctx, watchRetry, "power profiles", func(ctx context.Context) error {
+			return followPowerProfiles(ctx, trigger)
+		})
+	})
 	watch.Retry(ctx, watchRetry, "logind", func(ctx context.Context) error {
 		return followLogind(ctx, trigger)
 	})
 	wg.Wait()
+}
+
+// followPowerProfiles triggers when the active power profile changes, such as
+// from the desktop's own power menu
+func followPowerProfiles(ctx context.Context, trigger func()) error {
+	conn, err := dbus.ConnectSystemBus()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+
+	for _, service := range powerProfilesServices {
+		if err := conn.AddMatchSignal(
+			dbus.WithMatchObjectPath(service.path),
+			dbus.WithMatchInterface("org.freedesktop.DBus.Properties"),
+			dbus.WithMatchMember("PropertiesChanged"),
+			dbus.WithMatchArg(0, service.name),
+		); err != nil {
+			return err
+		}
+	}
+	signals := make(chan *dbus.Signal, 16)
+	conn.Signal(signals)
+	defer conn.RemoveSignal(signals)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case signal, ok := <-signals:
+			if !ok {
+				return errors.New("the system bus connection closed")
+			}
+			if len(signal.Body) < 2 {
+				continue
+			}
+			properties, _ := signal.Body[1].(map[string]dbus.Variant)
+			if _, ok := properties["ActiveProfile"]; ok {
+				trigger()
+			}
+		}
+	}
 }
 
 // followUnits triggers when a unit fails, or a failed unit starts again or is

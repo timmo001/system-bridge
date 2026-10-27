@@ -130,6 +130,10 @@ type mediaControlInput struct {
 	Repeat   string   `json:"repeat,omitempty"`
 }
 
+type powerProfileInput struct {
+	Profile string `json:"profile"`
+}
+
 type notificationInput struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`

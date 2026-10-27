@@ -304,6 +304,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"action"}),
 	}, eventTool[mediaControlInput](handlers, event.EventMediaControl))
 
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_power_profile",
+		Description: "Switch the power profile, such as to power-saver or performance. Get the profiles from the system module's power_profiles. Linux with power-profiles-daemon only.",
+		InputSchema: objectSchema(map[string]any{
+			"profile": map[string]any{"type": "string", "description": "One of the system module's power_profiles, such as balanced"},
+		}, []string{"profile"}),
+	}, eventTool[powerProfileInput](handlers, event.EventSystemSetPowerProfile))
+
 	omarchyAction := map[string]any{
 		"type":        "string",
 		"description": "Whether to open, close or toggle it",

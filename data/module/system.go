@@ -184,6 +184,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	systemData.IdleTime, systemData.Locked = system.GetIdleState()
 	systemData.PackageUpdates = system.GetPackageUpdates()
+	systemData.PowerProfile, systemData.PowerProfiles = system.GetPowerProfile(ctx)
 
 	// Populate optional fields when available per-OS
 	// Linux: detect camera usage processes, pending reboot, and PSU power usage via subpackage helpers

@@ -61,6 +61,7 @@ from systembridgeconnector.models.settings import (
     SettingsCommandDefinition,
     SettingsCommands,
 )
+from systembridgeconnector.models.system_control import PowerProfileRequest
 from systembridgeconnector.websocket_client import WebSocketClient
 
 from . import API_HOST, REQUEST_ID, ClientSessionGenerator
@@ -583,6 +584,19 @@ async def test_bluetooth_set_power(
     assert response.type == EventType.BLUETOOTH_POWER_SET
     # Turning it off is sent, not left out as unset
     assert response.data == {"powered": False}
+
+
+@pytest.mark.asyncio
+async def test_set_power_profile(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_power_profile(
+        PowerProfileRequest(profile="performance"),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.SYSTEM_POWER_PROFILE_SET
+    assert response.data == {"profile": "performance"}
 
 
 @pytest.mark.asyncio

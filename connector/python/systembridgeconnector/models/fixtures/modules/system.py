@@ -67,4 +67,6 @@ FIXTURE_SYSTEM = System(
     ],
     idle_time=120,
     locked=False,
+    power_profile="balanced",
+    power_profiles=["power-saver", "balanced", "performance"],
 )

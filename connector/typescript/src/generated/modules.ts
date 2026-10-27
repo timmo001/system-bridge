@@ -1283,6 +1283,8 @@ export const SystemData = Schema.Struct({
   failed_units: Schema.NullOr(Schema.Array(SystemFailedUnit)),
   idle_time: Schema.NullOr(Schema.Finite),
   locked: Schema.NullOr(Schema.Boolean),
+  power_profile: Schema.NullOr(Schema.String),
+  power_profiles: Schema.Array(Schema.String),
 });
 
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}

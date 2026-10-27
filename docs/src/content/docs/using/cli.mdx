@@ -189,6 +189,16 @@ system-bridge client process kill 12345 --force
 
 It's asked to stop, so it can save first. `--force` ends it straight away.
 
+## System
+
+Switch the power profile to one of the [`system`](/api/data/#system) data's `power_profiles`:
+
+```bash
+system-bridge client system power-profile performance
+```
+
+This needs power-profiles-daemon, or tuned-ppd on Fedora. Linux only.
+
 ## Discovery
 
 ### List Services

@@ -1,9 +1,9 @@
 ---
 title: Control
-description: Control media, Discord, displays, windows and workspaces, send notifications, open files and URLs, and change the power state over the WebSocket API.
+description: Control media, Discord, displays, windows and workspaces, send notifications, open files and URLs, and change the power state or profile over the WebSocket API.
 ---
 
-Control playback, Discord, displays, windows and workspaces, send notifications, open files and URLs, and manage system power state.
+Control playback, Discord, displays, windows and workspaces, send notifications, open files and URLs, and manage the system's power state and profile.
 
 ## Media control
 
@@ -140,6 +140,29 @@ Forgetting a device unpairs it, so it has to be paired again before it can conne
 ```
 
 The response comes once the device has connected, which can take up to 30 seconds, and the bluetooth module updates straight after. An unknown address gets an `ERROR` with the subtype `BAD_REQUEST`, and something the platform can't do gets `INVALID_ACTION`.
+
+## System control
+
+Change system settings. Linux only.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `SYSTEM_SET_POWER_PROFILE` | `profile`, one of the [`system`](/api/data/#system) data's `power_profiles` | `SYSTEM_POWER_PROFILE_SET` |
+
+Switching the power profile needs power-profiles-daemon, or tuned-ppd on Fedora.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "SYSTEM_SET_POWER_PROFILE",
+    "data": {
+        "profile": "performance"
+    }
+}
+```
+
+The system module updates straight after. A profile that isn't in `power_profiles` gets an `ERROR`.
 
 ## Desktop control
 

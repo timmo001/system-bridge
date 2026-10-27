@@ -51,5 +51,7 @@
     }
   ],
   "idle_time": 120,
-  "locked": false
+  "locked": false,
+  "power_profile": "balanced",
+  "power_profiles": ["power-saver", "balanced", "performance"]
 }

@@ -110,6 +110,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   its result through `command.Run`.
 - `system_bridge_send_notification` sends a desktop notification with required
   `title` and `message` fields and an optional `icon`.
+- `system_bridge_set_power_profile` switches power-profiles-daemon's profile
+  through `system.SetPowerProfile`.
 
 Power actions are left out on purpose, as an assistant could trigger them by
 mistake.

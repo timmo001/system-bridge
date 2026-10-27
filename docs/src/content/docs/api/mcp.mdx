@@ -374,6 +374,12 @@ Example arguments:
 { "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
 ```
 
+### `system_bridge_set_power_profile`
+
+Switch the power profile. Linux with power-profiles-daemon or tuned-ppd only. See [system control](/api/websocket/control/#system-control).
+
+- `profile` (required): One of the `system` module's `power_profiles`, such as `power-saver`, `balanced` or `performance`.
+
 ## Troubleshooting
 
 ### Connection refused

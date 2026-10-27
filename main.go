@@ -266,6 +266,7 @@ func main() {
 						},
 					},
 					bluetoothCommand(),
+					systemCommand(),
 					commandCommand(),
 					{
 						Name:    "data",

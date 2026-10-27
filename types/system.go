@@ -73,4 +73,9 @@ type SystemData struct {
 	// IdleTime is the seconds since the user's last input
 	IdleTime *uint64 `json:"idle_time" mapstructure:"idle_time"`
 	Locked   *bool   `json:"locked" mapstructure:"locked"`
+	// PowerProfile is the active power profile, such as balanced, or nil
+	// without power-profiles-daemon
+	PowerProfile *string `json:"power_profile" mapstructure:"power_profile"`
+	// PowerProfiles are the profiles SYSTEM_SET_POWER_PROFILE can switch to
+	PowerProfiles []string `json:"power_profiles" mapstructure:"power_profiles"`
 }
