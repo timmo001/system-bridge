@@ -30,6 +30,17 @@ Home Assistant and the API can type text and press keys, as if on the machine's 
 
 Both take an optional `delay` in milliseconds before they start, which helps when something else has to open first.
 
+## Clipboard
+
+On Linux, put text on the clipboard, ready to paste, with [`CLIPBOARD_SET_TEXT`](/api/websocket/input/#clipboard), the MCP server's `system_bridge_set_clipboard` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client clipboard set "Some text"
+echo "Some text" | system-bridge client clipboard set
+```
+
+It needs wl-clipboard on Wayland, or xclip or xsel on X11. To read the clipboard, add the **Get the clipboard** [command prefab](/features/commands/#prefab-commands).
+
 ## Power
 
 Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assistant or the [API](/api/websocket/control/#power-control). System Bridge doesn't ask for confirmation, so these happen straight away.

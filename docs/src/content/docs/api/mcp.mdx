@@ -375,6 +375,12 @@ Example arguments:
 { "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
 ```
 
+### `system_bridge_set_clipboard`
+
+Put text on the clipboard, ready to paste. Linux only, with wl-clipboard, xclip or xsel. See [clipboard](/api/websocket/input/#clipboard).
+
+- `text` (required): The text to put on the clipboard.
+
 ### `system_bridge_set_power_profile`
 
 Switch the power profile. Linux with power-profiles-daemon or tuned-ppd only. See [system control](/api/websocket/control/#system-control).

@@ -306,6 +306,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[mediaControlInput](handlers, event.EventMediaControl))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_set_clipboard",
+		Description: "Put text on the system's clipboard, so it can be pasted there. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"text": map[string]any{"type": "string", "description": "The text to put on the clipboard"},
+		}, []string{"text"}),
+	}, eventTool[clipboardTextInput](handlers, event.EventClipboardSetText))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_set_power_profile",
 		Description: "Switch the power profile, such as to power-saver or performance. Get the profiles from the system module's power_profiles. Linux with power-profiles-daemon only.",
 		InputSchema: objectSchema(map[string]any{

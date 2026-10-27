@@ -21,6 +21,7 @@ from systembridgeconnector.exceptions import (
 )
 from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
+from systembridgeconnector.models.clipboard import ClipboardTextRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_prefab import CommandPrefab
 from systembridgeconnector.models.command_result import ExecuteResult
@@ -587,6 +588,19 @@ async def test_bluetooth_set_power(
     assert response.type == EventType.BLUETOOTH_POWER_SET
     # Turning it off is sent, not left out as unset
     assert response.data == {"powered": False}
+
+
+@pytest.mark.asyncio
+async def test_set_clipboard(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.set_clipboard(
+        ClipboardTextRequest(text="Hello"),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.CLIPBOARD_TEXT_SET
+    assert response.data == {"text": "Hello"}
 
 
 @pytest.mark.asyncio

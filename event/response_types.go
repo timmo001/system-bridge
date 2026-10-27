@@ -10,6 +10,7 @@ const (
 	ResponseTypeBluetoothDisconnected     ResponseType = "BLUETOOTH_DISCONNECTED"
 	ResponseTypeBluetoothForgotten        ResponseType = "BLUETOOTH_FORGOTTEN"
 	ResponseTypeBluetoothPowerSet         ResponseType = "BLUETOOTH_POWER_SET"
+	ResponseTypeClipboardTextSet          ResponseType = "CLIPBOARD_TEXT_SET"
 	ResponseTypeCommandAdded              ResponseType = "COMMAND_ADDED"
 	ResponseTypeCommandCompleted          ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeCommandExecuting          ResponseType = "COMMAND_EXECUTING"

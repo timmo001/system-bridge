@@ -270,6 +270,7 @@ func main() {
 						},
 					},
 					bluetoothCommand(),
+					clipboardCommand(),
 					systemCommand(),
 					commandCommand(),
 					{

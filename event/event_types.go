@@ -9,6 +9,7 @@ const (
 	EventBluetoothDisconnect       EventType = "BLUETOOTH_DISCONNECT"
 	EventBluetoothForget           EventType = "BLUETOOTH_FORGET"
 	EventBluetoothSetPower         EventType = "BLUETOOTH_SET_POWER"
+	EventClipboardSetText          EventType = "CLIPBOARD_SET_TEXT"
 	EventCommandAdd                EventType = "COMMAND_ADD"
 	EventCommandExecute            EventType = "COMMAND_EXECUTE"
 	EventCommandRemove             EventType = "COMMAND_REMOVE"

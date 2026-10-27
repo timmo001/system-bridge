@@ -39,6 +39,7 @@ import {
   AudioControl,
   BluetoothDeviceRequest,
   BluetoothPowerRequest,
+  ClipboardTextRequest,
   CommandIdRequest,
   CommandRequest,
   CommandResult,
@@ -209,6 +210,10 @@ export interface Interface {
   /** Turns the Bluetooth adapter on or off. Linux only. */
   readonly bluetoothSetPower: (
     power: BluetoothPowerRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Puts text on the clipboard. Linux only. */
+  readonly setClipboard: (
+    request: ClipboardTextRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Switches the power profile. Linux with power-profiles-daemon only. */
   readonly setPowerProfile: (
@@ -988,6 +993,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const setClipboard = Effect.fn("SystemBridgeWebSocket.setClipboard")(
+    function* (request: ClipboardTextRequest) {
+      yield* call(
+        "CLIPBOARD_SET_TEXT",
+        "CLIPBOARD_TEXT_SET",
+        ClipboardTextRequest,
+        request,
+        ignoreReply,
+      );
+    },
+  );
+
   const setPowerProfile = Effect.fn("SystemBridgeWebSocket.setPowerProfile")(
     function* (request: PowerProfileRequest) {
       yield* call(
@@ -1349,6 +1366,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothDisconnect,
     bluetoothForget,
     bluetoothSetPower,
+    setClipboard,
     setPowerProfile,
     setKeepAwake,
     desktopCloseWindow,

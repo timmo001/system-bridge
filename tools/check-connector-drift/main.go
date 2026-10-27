@@ -75,6 +75,7 @@ var handlerPairs = map[string]pairing{
 	"AudioControlRequestData":            {[]string{"AudioControl"}, []string{"AudioControl"}},
 	"BluetoothDeviceRequestData":         {[]string{"BluetoothDeviceRequest"}, []string{"BluetoothDeviceRequest"}},
 	"BluetoothPowerRequestData":          {[]string{"BluetoothPowerRequest"}, []string{"BluetoothPowerRequest"}},
+	"ClipboardTextRequestData":           {[]string{"ClipboardTextRequest"}, []string{"ClipboardTextRequest"}},
 	"DesktopKeyboardLayoutRequestData":   {[]string{"DesktopKeyboardLayoutRequest"}, []string{"DesktopKeyboardLayoutRequest"}},
 	"DesktopWindowRequestData":           {[]string{"DesktopWindowRequest"}, []string{"DesktopWindowRequest"}},
 	"DesktopWindowStateRequestData":      {[]string{"DesktopWindowStateRequest"}, []string{"DesktopWindowStateRequest"}},

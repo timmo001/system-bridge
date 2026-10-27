@@ -88,6 +88,17 @@ system-bridge client bluetooth power on
 
 The address is the device's `address` from the [`bluetooth`](/api/data/#bluetooth) data. See [Bluetooth](/features/remote-control/#bluetooth) for what each platform supports.
 
+## Clipboard
+
+Put text on the backend system's clipboard, as an argument or piped in:
+
+```bash
+system-bridge client clipboard set "Some text"
+echo "Some text" | system-bridge client clipboard set
+```
+
+It needs wl-clipboard on Wayland, or xclip or xsel on X11. Linux only.
+
 ## Commands
 
 List the [commands](/features/commands/) on your list and the prefabs, and run one by its ID:

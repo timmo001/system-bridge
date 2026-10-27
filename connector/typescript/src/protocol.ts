@@ -13,6 +13,7 @@ export const EventType = Schema.Literals([
   "BLUETOOTH_DISCONNECT",
   "BLUETOOTH_FORGET",
   "BLUETOOTH_SET_POWER",
+  "CLIPBOARD_SET_TEXT",
   "COMMAND_ADD",
   "COMMAND_EXECUTE",
   "COMMAND_REMOVE",
@@ -78,6 +79,7 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_DISCONNECTED",
   "BLUETOOTH_FORGOTTEN",
   "BLUETOOTH_POWER_SET",
+  "CLIPBOARD_TEXT_SET",
   "COMMAND_ADDED",
   "COMMAND_COMPLETED",
   "COMMAND_EXECUTING",
@@ -361,6 +363,13 @@ export const KeyboardText = Schema.Struct({
 });
 
 export interface KeyboardText extends Schema.Schema.Type<typeof KeyboardText> {}
+
+/** Text to put on the clipboard. Linux only. */
+export const ClipboardTextRequest = Schema.Struct({ text: Schema.String });
+
+export interface ClipboardTextRequest extends Schema.Schema.Type<
+  typeof ClipboardTextRequest
+> {}
 
 export const MediaAction = Schema.Literals([
   "PLAY",
