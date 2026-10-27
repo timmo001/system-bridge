@@ -110,11 +110,10 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			mediaData.AlbumTitle = &chosen.Album
 
 			// Only art a client can load itself: a web or data URL. A file
-			// URL points at this machine's disk
-			if strings.HasPrefix(chosen.ArtURL, "https://") ||
-				strings.HasPrefix(chosen.ArtURL, "http://") ||
-				strings.HasPrefix(chosen.ArtURL, "data:image/") {
-				mediaData.Thumbnail = &chosen.ArtURL
+			// URL points at this machine's disk, so resolveArtURL converts
+			// file URLs into base64 data URLs.
+			if resolved := resolveArtURL(chosen.ArtURL); resolved != "" {
+				mediaData.Thumbnail = &resolved
 			}
 
 			// Normalize status to HA-expected constants
