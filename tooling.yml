@@ -13,3 +13,15 @@ tools:
   - repo: omacom/omarchy
     reviewed: v4.0.6
     review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes).
+  - repo: hyprwm/Hyprland
+    reviewed: v0.56.2
+    review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers.
+  - repo: altdesktop/playerctl
+    reviewed: v2.4.1
+    review: Check the Linux media handling against changed flags, format template variables and status values. data/module/media/media_linux.go reads metadata --all-players --format with title, artist, album, mpris:length, position, status, playerName, volume, shuffle, loopStatus and mpris:artUrl, and takes the length and position as microseconds. data/playerctl_linux.go follows status with -a metadata --format -F. utils/handlers/media/media_linux.go picks a player from playerInstance and status, then sends commands with --player.
+  - repo: OpenAsar/arrpc
+    reviewed: 3.7.0
+    review: A proxy for Discord's local RPC over IPC, which has no releases of its own. Read the arRPC release notes, then Discord's RPC page (developers/topics/rpc.mdx in discord/discord-api-docs) for anything changed since the last review, and check discord/ (ipc.go and dial_*.go for the socket and framing, discord.go for AUTHORIZE, AUTHENTICATE, SUBSCRIBE and the GET_* commands and events it decodes, control.go for SET_VOICE_SETTINGS, auth.go for the OAuth2 token exchange) against changed commands, events, fields and scopes.
+  - repo: rockowitz/ddcutil
+    reviewed: v3.0.2
+    review: Check the DDC/CI display controls in data/module/displays/controls_linux.go, which run ddcutil with --skip-ddc-checks, --bus and --noverify, and parse the --brief output of detect and of getvcp for VCP 10 (brightness) and D6 (power mode) in parseDetect, parseBrightness and parsePowerState, against changed flags, output formats and exit codes.
