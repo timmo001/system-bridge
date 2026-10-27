@@ -309,40 +309,21 @@ func ReadCPUVcoreVoltage() *float64 {
 				}
 			}
 		}
-		// Fallback: try common in0_input/in1_input without label
-		for _, idx := range []int{0, 1} {
-			p := filepath.Join(hm, fmt.Sprintf("in%d_input", idx))
-			if v := readVoltageValue(p); v != nil {
-				return v
-			}
-		}
 	}
 	return nil
 }
 
+// readVoltageValue reads an hwmon in*_input, which is in millivolts.
 func readVoltageValue(path string) *float64 {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil
 	}
-	s := strings.TrimSpace(string(b))
-	if s == "" {
-		return nil
-	}
-	raw, err := strconv.ParseFloat(s, 64)
+	millivolts, err := strconv.ParseFloat(strings.TrimSpace(string(b)), 64)
 	if err != nil {
 		return nil
 	}
-	// Heuristic: if value is extremely large, assume microvolts; else millivolts
-	var volts float64
-	switch {
-	case raw > 100000: // microvolts
-		volts = raw / 1_000_000.0
-	case raw > 100: // millivolts
-		volts = raw / 1000.0
-	default:
-		volts = raw // already volts
-	}
+	volts := millivolts / 1000.0
 	return &volts
 }
 
