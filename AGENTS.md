@@ -35,6 +35,7 @@ mise tasks
 - **Package manager**: bun for all JavaScript/TypeScript. `client/web`, `connector/typescript` and `docs` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
 - **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
 - **Connector drift**: Run `mise run drift:connectors` after adding or changing an event, reply or model, and before every release. It compares both connectors with the backend
+- **Git hooks**: Run `mise run install:hooks` once per checkout. The post-commit hook refreshes the Nix hashes after a dependency change; the pre-push hook runs `lint:go` (including golangci-lint, as CI does) and `generate:schemas:check`
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 - **Logo and icons**: `.resources/system-bridge-logo.svg` is the only source. After changing it, run `mise run generate:icons`, which rewrites the app, tray, web client and docs icons, the README banner and the docs' brand images. Never edit those by hand
 

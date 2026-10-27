@@ -3,6 +3,7 @@ min_version = "2025.1.0"
 [tools]
 bun = "1.4.4"
 go = "1.27.3"
+golangci-lint = "2.15.0"
 node = "26.12.1"
 "npm:@timmo001/tooling-drift" = { version = "0.1.5", allow_low_downloads = true }
 # renovate: datasource=custom.home-assistant-python-minor depName=python
@@ -44,15 +45,17 @@ run = [
   "cd connector/typescript && bunx prettier --write src/generated/modules.ts",
 ]
 
-[tasks."drift:connectors"]
-description = "Compare the Python and TypeScript connectors with the backend before a release"
+[tasks."generate:schemas:check"]
+description = "Fail when the generated TypeScript schemas are out of date"
 depends = ["generate:schemas"]
 # The TypeScript module data schemas are generated, so they're in sync once
 # regenerating them changes nothing
-run = [
-  "git diff --exit-code --stat -- connector/typescript/src/generated/modules.ts",
-  "go run ./tools/check-connector-drift",
-]
+run = "git diff --exit-code --stat -- connector/typescript/src/generated/modules.ts"
+
+[tasks."drift:connectors"]
+description = "Compare the Python and TypeScript connectors with the backend before a release"
+depends = ["generate:schemas:check"]
+run = "go run ./tools/check-connector-drift"
 
 [tasks."generate:icons"]
 description = "Generate every icon from .resources/system-bridge-logo.svg, then the docs' brand images"
@@ -161,9 +164,17 @@ description = "Refresh and commit the Nix hashes after a commit that changes dep
 hide = true
 run = "./.scripts/linux/nix-hashes-post-commit.sh"
 
+[tasks."hooks:pre-push"]
+description = "Check Go lint and generated schemas before a push (run by the pre-push hook)"
+hide = true
+depends = ["lint:go", "generate:schemas:check"]
+
 [tasks."install:hooks"]
-description = "Install the post-commit hook that refreshes the Nix hashes after a dependency change"
-run = "mise generate git-pre-commit --write --hook post-commit --task nix:post-commit"
+description = "Install the post-commit hook (Nix hashes) and the pre-push hook (Go lint, schema drift)"
+run = [
+  "mise generate git-pre-commit --write --hook post-commit --task nix:post-commit",
+  "mise generate git-pre-commit --write --hook pre-push --task hooks:pre-push",
+]
 
 [tasks.install]
 description = "Install the application with go install"
@@ -302,8 +313,8 @@ depends = [
 ]
 
 [tasks."lint:go"]
-description = "Run Go linters (format check, vet)"
-depends = ["lint:go:fmt", "lint:go:vet"]
+description = "Run Go linters (format check, vet, golangci-lint)"
+depends = ["lint:go:fmt", "lint:go:vet", "lint:go:golangci"]
 
 [tasks."lint:go:fmt"]
 description = "Check Go formatting without rewriting files"
@@ -320,6 +331,11 @@ fi
 description = "Run go vet"
 depends = ["build:client:web"]
 run = "go vet ./..."
+
+[tasks."lint:go:golangci"]
+description = "Run golangci-lint, as CI does"
+depends = ["build:client:web"]
+run = "golangci-lint run ./..."
 
 [tasks."format:go"]
 description = "Format Go code"
