@@ -157,7 +157,7 @@ Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state,
 
 - `id` (required): The display's `id` from the [`displays`](/api/data/#displays) data.
 - `brightness` (optional): Brightness in percent, 0-100.
-- `power_state` (optional): `on`, `standby`, `suspend` or `off`. External monitors only.
+- `power_state` (optional): `on`, `standby`, `suspend` or `off`. External monitors only, except on Hyprland, which turns any display on or off.
 
 ```json title="Request"
 {
