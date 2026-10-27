@@ -46,6 +46,7 @@ var appNotifier *notification.Notifier
 var upgradedPath atomic.Pointer[string]
 
 func main() {
+	attachConsole()
 	setupLogging()
 
 	defer func() {
