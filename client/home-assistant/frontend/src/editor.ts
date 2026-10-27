@@ -15,30 +15,30 @@ type StrategyConfig =
   DashboardStrategyConfig | ViewStrategyConfig | SectionStrategyConfig;
 
 const LABELS = new Map([
-  ["device_id", "System Bridge device"],
-  ["hours_to_show", "Hours of history"],
-  ["tile_feature", "Percentage tiles show"],
+  ["device_id", "Device"],
+  ["hours_to_show", "History"],
+  ["tile_feature", "Percentage tiles"],
   ["page", "Page"],
   ["section", "Section"],
-  ["item", "Disk, mount, GPU, display or network interface"],
-  ["show_icon_and_title", "Show icon and title in the tab"],
-  ["show_top_links", "Show the web client link at the top"],
+  ["item", "Item"],
+  ["show_icon_and_title", "Icon and title"],
+  ["show_top_links", "Web client link"],
   ["pages_options", "Page options"],
   ["pages", "Pages"],
-  ["icon_and_title_pages", "Pages showing icon and title in the tab"],
-  ["top_links_pages", "Pages showing the web client link at the top"],
+  ["icon_and_title_pages", "Icon and title"],
+  ["top_links_pages", "Web client link"],
 ]);
 
 const TILE_FEATURE_LABELS = new Map([
-  ["none", "Nothing"],
-  ["bar", "Bar gauge"],
-  ["trend", "Trend graph"],
+  ["none", "None"],
+  ["bar", "Bar"],
+  ["trend", "Trend"],
 ]);
 
 const TILE_FEATURE_DESCRIPTIONS = new Map([
-  ["none", "Just the value"],
-  ["bar", "A bar of the percentage"],
-  ["trend", "A graph of recent values"],
+  ["none", "Only the value"],
+  ["bar", "The percentage as a bar"],
+  ["trend", "Recent values as a graph"],
 ]);
 
 /** What a tile with each feature looks like, in the style of the built-in select box images. */
@@ -146,27 +146,18 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
 
 const HELPERS = new Map([
   ["device_id", "The System Bridge device to show."],
-  ["page", "The page of the web client this view shows."],
+  ["page", "The web client page this view shows."],
   ["section", "What this section shows."],
   [
     "item",
-    "Only for sections about one thing: the mount point, GPU, display or network interface name.",
+    "For sections about one thing: its mount point, GPU, display or interface name.",
   ],
-  ["hours_to_show", "How far back history graphs go."],
-  [
-    "tile_feature",
-    "What the tiles for a percentage, such as CPU or memory usage, show underneath.",
-  ],
-  ["show_icon_and_title", "Show the page's icon next to its title in the tab."],
-  [
-    "show_top_links",
-    "Show a link to the System Bridge web client at the top of the page.",
-  ],
-  [
-    "pages",
-    "The pages to show, in tab order. Drag to reorder and remove the ones to hide.",
-  ],
-  ["icon_and_title_pages", "Pages whose tab shows the icon and the title."],
+  ["hours_to_show", "Hours that graphs go back."],
+  ["tile_feature", "Shown under percentages such as CPU and memory usage."],
+  ["show_icon_and_title", "Show the icon next to the title in the tab."],
+  ["show_top_links", "Show a link to the System Bridge web client at the top."],
+  ["pages", "In tab order. Drag to reorder, remove to hide."],
+  ["icon_and_title_pages", "Pages whose tab shows the icon next to the title."],
   ["top_links_pages", "Pages with a link to the web client at the top."],
 ]);
 
@@ -216,9 +207,8 @@ const generalSchema = (config: StrategyConfig) => [
           name: "section",
           required: true,
           selector: {
-            // Only the custom value picker has search; unknown names are ignored
             select: {
-              custom_value: true,
+              mode: "dropdown",
               sort: true,
               options: Object.keys(SECTIONS).map((value) => ({
                 value,
