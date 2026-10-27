@@ -69,9 +69,9 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	systemData.Hostname = infoStat.Hostname
 
-	systemData.IPAddress4 = getIPv4Address()
+	systemData.IPAddress4 = utils.PrimaryIPv4Address()
 	systemData.IPAddress6 = getIPv6Address()
-	systemData.MACAddress = getMACAddress()
+	systemData.MACAddress = utils.PrimaryMACAddress()
 
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -230,24 +230,6 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	return systemData, nil
 }
 
-// getIPv4Address gets the primary IPv4 address
-func getIPv4Address() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-	d := net.Dialer{Timeout: 1 * time.Second}
-	conn, err := d.DialContext(ctx, "udp", "8.8.8.8:80")
-	if err != nil {
-		slog.Info("IPv4 address unavailable", "error", err)
-		return ""
-	}
-	defer func() {
-		err = errors.Join(err, conn.Close())
-	}()
-
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP.String()
-}
-
 // getIPv6Address gets the primary IPv6 address
 func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
@@ -265,25 +247,6 @@ func getIPv6Address() string {
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String()
-}
-
-// getMACAddress gets the MAC address of the primary interface
-func getMACAddress() string {
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		slog.Info("MAC address unavailable", "error", err)
-		return ""
-	}
-
-	for _, iface := range interfaces {
-		// Skip loopback and interfaces without MAC
-		if iface.Flags&net.FlagLoopback == 0 && len(iface.HardwareAddr) > 0 {
-			return iface.HardwareAddr.String()
-		}
-	}
-
-	slog.Debug("No MAC address found")
-	return ""
 }
 
 // from https://gist.github.com/golightlyb/0d6a0270b0cff882d373dfc6704c5e34

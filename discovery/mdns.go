@@ -3,9 +3,13 @@ package discovery
 import (
 	"fmt"
 	"log/slog"
+	"net"
 	"os"
+	"strconv"
 
 	"github.com/hashicorp/mdns"
+	"github.com/shirou/gopsutil/v4/host"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // MDNSDiscovery represents an mDNS-based service discovery mechanism
@@ -43,8 +47,31 @@ func (m *MDNSDiscovery) Start() error {
 		hostname = "systembridge"
 	}
 
+	// Home Assistant reads where to connect, and the UUID it keys the
+	// integration by, from these. The UUID matches the system module's, so a
+	// discovered machine matches one added by hand.
+	info, err := host.Info()
+	if err != nil {
+		slog.Warn("Failed to get host info for the mDNS UUID", "err", err)
+		info = &host.InfoStat{Hostname: hostname}
+	}
+	ip := utils.PrimaryIPv4Address()
+	// Without addresses, the library looks up the hostname, which can give a
+	// bridge's, such as Docker's or libvirt's
+	var ips []net.IP
+	if parsed := net.ParseIP(ip); parsed != nil {
+		ips = []net.IP{parsed}
+	} else {
+		slog.Warn("No IPv4 address to advertise over mDNS, so Home Assistant can't discover System Bridge")
+	}
+	txt := []string{
+		"ip=" + ip,
+		"port=" + strconv.Itoa(m.port),
+		"uuid=" + utils.GetSystemUUID(info.HostID, utils.PrimaryMACAddress(), info.Hostname),
+	}
+
 	// Create mDNS service
-	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", m.port, nil, nil)
+	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", m.port, ips, txt)
 	if err != nil {
 		return fmt.Errorf("could not create mDNS service: %w", err)
 	}

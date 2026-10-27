@@ -68,7 +68,7 @@ System Bridge only sends system data to clients that have connected with the tok
 
 System Bridge announces itself on your local network over mDNS so apps like [Home Assistant](/using/home-assistant/) can find it. These messages stay on your local network and aren't routed to the internet.
 
-System Bridge advertises the `_system-bridge._tcp` service with your hostname, IP addresses and API port, and answers mDNS queries for it.
+System Bridge advertises the `_system-bridge._tcp` service with your hostname, IP addresses, API port and system UUID, and answers mDNS queries for it. Home Assistant uses these to find it and tell machines apart.
 
 The `system-bridge client discovery` command also sends mDNS queries for `_system-bridge._tcp` and `_http._tcp` to find other System Bridge instances.
 
