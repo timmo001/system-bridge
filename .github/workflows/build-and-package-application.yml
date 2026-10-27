@@ -75,6 +75,23 @@ jobs:
           name: system-bridge-linux-${{ env.VERSION }}
           path: system-bridge-linux
 
+      # A portable archive for mise, aqua and manual installs. Artifacts drop
+      # the executable bit, so the tarball keeps it
+      - name: Create archive
+        run: |
+          mkdir -p "$RUNNER_TEMP/system-bridge-archive" dist
+          install -m 755 system-bridge-linux "$RUNNER_TEMP/system-bridge-archive/system-bridge"
+          cp LICENSE "$RUNNER_TEMP/system-bridge-archive/"
+          tar -czf "dist/system-bridge-${VERSION}-linux-x86_64.tar.gz" -C "$RUNNER_TEMP/system-bridge-archive" system-bridge LICENSE
+
+      - name: Upload archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: system-bridge-linux-archive-${{ env.VERSION }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
+
   package-linux:
     name: Package ${{ matrix.build.package }} (${{ matrix.build.distro }})
     needs:
@@ -567,6 +584,12 @@ jobs:
           name: system-bridge-linux-packages-flatpak-${{ needs.build-linux.outputs.version }}
           path: dist/linux/flatpak
 
+      - name: Download linux archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: system-bridge-linux-archive-${{ needs.build-linux.outputs.version }}
+          path: dist/linux/archive
+
       - name: Download windows packages
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
@@ -581,5 +604,7 @@ jobs:
             dist/linux/deb/*.deb
             dist/linux/rpm/*.rpm
             dist/linux/flatpak/*.flatpak
+            dist/linux/archive/*.tar.gz
             dist/windows/*-setup.exe
+            dist/windows/*-windows-x86_64.zip
           bundle-path: dist/system-bridge-${{ github.event.release.tag_name }}.sigstore.json

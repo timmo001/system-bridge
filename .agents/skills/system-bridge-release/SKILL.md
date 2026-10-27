@@ -67,7 +67,7 @@ To fix notes after publishing, `gh release edit <version> --notes-file notes.md`
 
 All of this comes from the `release` jobs in `build-and-package-application.yml`:
 
-- **Release assets**: the deb, rpm, Flatpak and Windows installer, with a sigstore bundle (`update-release`)
+- **Release assets**: the deb, rpm, Flatpak, Windows installer and the Linux and Windows archives that mise installs, with a sigstore bundle (`update-release`)
 - **Arch**: the `system-bridge` package (epoch `2:`), built and attached to the release with its own sigstore bundle, then dispatched to `timmo001/arch-repo` for the signed `timmo` pacman repository (`build-arch-package-stable`, `attach-arch-package-stable`)
 - **AUR**: `system-bridge` (`update-aur-stable`)
 - **PyPI**: `systembridgeconnector`, built from `connector/python` with the tag as its version (`build-connector-python`, `publish-connector-python`)
@@ -89,7 +89,7 @@ gh run list -R timmo001/arch-repo --limit 3                         # "Publish s
 curl -s https://aur.archlinux.org/rpc/v5/info/system-bridge | jq -r '.results[0].Version'
 ```
 
-A finished release has seven assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI, npm, JSR and the AUR show the new version once their jobs finish.
+A finished release has nine assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-linux-x86_64.tar.gz`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>-windows-x86_64.zip`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI, npm, JSR and the AUR show the new version once their jobs finish.
 
 ## Setup
 
