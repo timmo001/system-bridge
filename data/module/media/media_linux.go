@@ -16,7 +16,7 @@ import (
 
 func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	// On Linux, we'll use playerctl to get media information
-	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}","artUrl":"{{mpris:artUrl}}"}`, "--all-players")
+	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","playerInstance":"{{playerInstance}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}","artUrl":"{{mpris:artUrl}}"}`, "--all-players")
 	output, err := cmd.Output()
 	if err != nil {
 		// Info logging for playerctl errors (expected when no media player running)
@@ -42,6 +42,7 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			Position   string `json:"position"`
 			Status     string `json:"status"`
 			PlayerName string `json:"playerName"`
+			Instance   string `json:"playerInstance"`
 			Volume     string `json:"volume"`
 			Shuffle    string `json:"shuffle"`
 			LoopStatus string `json:"loopStatus"`
@@ -156,10 +157,19 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 				}
 			}
 
-			// Set control states based on status
+			// Set control states based on status, and on what the player says it
+			// can do when it can be asked
 			isPlaying := strings.ToLower(chosen.Status) == "playing"
-			mediaData.IsPlayEnabled = &[]bool{!isPlaying}[0]
-			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
+			canPlay, canPause := true, true
+			if capabilities, err := readCapabilities(chosen.Instance); err == nil {
+				canPlay, canPause = capabilities.play, capabilities.pause
+				mediaData.IsNextEnabled = &capabilities.next
+				mediaData.IsPreviousEnabled = &capabilities.previous
+			} else {
+				slog.Debug("Failed to read the media player's capabilities", "player", chosen.Instance, "error", err)
+			}
+			mediaData.IsPlayEnabled = &[]bool{canPlay && !isPlaying}[0]
+			mediaData.IsPauseEnabled = &[]bool{canPause && isPlaying}[0]
 			mediaData.IsStopEnabled = &[]bool{true}[0]
 
 			// Set shuffle and repeat states
