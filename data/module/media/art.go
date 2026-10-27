@@ -1,8 +1,12 @@
 package media
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/xml"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -11,14 +15,27 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 )
 
 const maxArtFileSize = 5 * 1024 * 1024 // 5 MB
 
-var (
-	artCacheMu sync.Mutex
-	artCache   = make(map[string]string)
-)
+// artCache holds the last local artwork resolved. Only one player's artwork
+// is reported at a time, so one entry is enough, and it bounds the memory the
+// cache uses.
+var artCache struct {
+	sync.Mutex
+	key     artKey
+	dataURL string
+}
+
+// artKey identifies a version of an artwork file, so rewriting the file with
+// new artwork misses the cache
+type artKey struct {
+	path    string
+	size    int64
+	modTime time.Time
+}
 
 func fileURLToPath(rawURL string) string {
 	if !strings.HasPrefix(rawURL, "file://") {
@@ -69,13 +86,6 @@ func resolveArtURL(rawURL string) string {
 
 	filePath = filepath.Clean(filePath)
 
-	artCacheMu.Lock()
-	if cached, ok := artCache[rawURL]; ok {
-		artCacheMu.Unlock()
-		return cached
-	}
-	artCacheMu.Unlock()
-
 	info, err := os.Stat(filePath)
 	if err != nil {
 		slog.Debug("Could not stat cover art file", "path", filePath, "error", err)
@@ -87,45 +97,66 @@ func resolveArtURL(rawURL string) string {
 		return ""
 	}
 
+	key := artKey{path: filePath, size: info.Size(), modTime: info.ModTime()}
+	artCache.Lock()
+	if artCache.key == key {
+		dataURL := artCache.dataURL
+		artCache.Unlock()
+		return dataURL
+	}
+	artCache.Unlock()
+
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		slog.Debug("Could not read cover art file", "path", filePath, "error", err)
 		return ""
 	}
 
-	ext := strings.ToLower(filepath.Ext(filePath))
-	var mimeType string
-	switch ext {
-	case ".jpg", ".jpeg":
-		mimeType = "image/jpeg"
-	case ".png":
-		mimeType = "image/png"
-	case ".webp":
-		mimeType = "image/webp"
-	case ".gif":
-		mimeType = "image/gif"
-	case ".svg":
+	// The player chooses the path, so trust what the file holds rather than
+	// its name, which keeps other files from being sent as images
+	mimeType := http.DetectContentType(data)
+	if !strings.HasPrefix(mimeType, "image/") && strings.EqualFold(filepath.Ext(filePath), ".svg") && isSVG(data) {
 		mimeType = "image/svg+xml"
-	case ".bmp":
-		mimeType = "image/bmp"
-	default:
-		mimeType = http.DetectContentType(data)
 	}
-
 	if !strings.HasPrefix(mimeType, "image/") {
-		slog.Debug("Cover art file has non-image MIME type", "path", filePath, "mime", mimeType)
+		slog.Debug("Cover art file isn't an image", "path", filePath, "mime", mimeType)
 		return ""
 	}
 
-	encoded := base64.StdEncoding.EncodeToString(data)
-	dataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, encoded)
+	dataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(data))
 
-	artCacheMu.Lock()
-	if len(artCache) >= 20 {
-		clear(artCache)
-	}
-	artCache[rawURL] = dataURL
-	artCacheMu.Unlock()
+	artCache.Lock()
+	artCache.key, artCache.dataURL = key, dataURL
+	artCache.Unlock()
 
 	return dataURL
+}
+
+// isSVG reports whether data is well-formed XML with an svg root element, as
+// content sniffing doesn't recognise SVG
+func isSVG(data []byte) bool {
+	decoder := xml.NewDecoder(bytes.NewReader(data))
+	depth := 0
+	rootSeen := false
+	for {
+		token, err := decoder.Token()
+		if errors.Is(err, io.EOF) {
+			return rootSeen && depth == 0
+		}
+		if err != nil {
+			return false
+		}
+		switch token := token.(type) {
+		case xml.StartElement:
+			if depth == 0 {
+				if rootSeen || token.Name.Local != "svg" {
+					return false
+				}
+				rootSeen = true
+			}
+			depth++
+		case xml.EndElement:
+			depth--
+		}
+	}
 }
