@@ -1256,6 +1256,16 @@ export const SystemUser = Schema.Struct({
 
 export interface SystemUser extends Schema.Schema.Type<typeof SystemUser> {}
 
+export const SystemPackageUpdate = Schema.Struct({
+  name: Schema.String,
+  version: Schema.String,
+  current_version: Schema.NullOr(Schema.String),
+});
+
+export interface SystemPackageUpdate extends Schema.Schema.Type<
+  typeof SystemPackageUpdate
+> {}
+
 export const SystemFailedUnit = Schema.Struct({
   name: Schema.String,
   description: Schema.String,
@@ -1288,6 +1298,7 @@ export const SystemData = Schema.Struct({
   ip_address_6: Schema.String,
   pending_reboot: Schema.NullOr(Schema.Boolean),
   package_updates: Schema.NullOr(Schema.Finite),
+  package_update_list: Schema.NullOr(Schema.Array(SystemPackageUpdate)),
   run_mode: RunMode,
   version_latest_url: Schema.NullOr(Schema.String),
   version_latest: Schema.NullOr(Schema.String),

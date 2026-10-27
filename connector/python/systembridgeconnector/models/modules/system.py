@@ -56,6 +56,18 @@ class SystemFailedUnit:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class SystemPackageUpdate:
+    """A package with an update waiting."""
+
+    name: str
+    # The version waiting to be installed
+    version: str
+    # The installed version, where the package manager says
+    current_version: str | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class System:
     """System."""
 
@@ -76,6 +88,8 @@ class System:
     ip_address_6: str | None = None
     pending_reboot: bool | None = None
     package_updates: int | None = None
+    # Each update package_updates counts, or None when it is
+    package_update_list: list[SystemPackageUpdate] | None = None
     power_usage: float | None = None
     run_mode: RunMode | None = None
     version_latest_url: str | None = None
@@ -104,4 +118,9 @@ class System:
             self.failed_units = [
                 SystemFailedUnit(**cast(dict, u)) if isinstance(u, dict) else u
                 for u in self.failed_units
+            ]
+        if self.package_update_list is not None:
+            self.package_update_list = [
+                SystemPackageUpdate(**cast(dict, p)) if isinstance(p, dict) else p
+                for p in self.package_update_list
             ]

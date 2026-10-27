@@ -104,6 +104,20 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
   const failedUnits = system.failed_units ?? [];
   const power = powerSeries(data, history);
 
+  const updates = (system.package_update_list ?? []).map(
+    (update) =>
+      html`<li>
+        <span class="spacer truncate"><strong>${update.name}</strong></span>
+        <span class="muted xsmall mono"
+          >${
+            update.current_version === null
+              ? update.version
+              : `${update.current_version} → ${update.version}`
+          }</span
+        >
+      </li>`,
+  );
+
   const users = system.users.map(
     (user) =>
       html`<li>
@@ -255,6 +269,19 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               ])
         }
       </sb-card>
+      ${
+        updates.length === 0
+          ? nothing
+          : html`<sb-card
+              class="half"
+              heading="Package updates"
+              subheading=${`${updates.length} waiting`}
+            >
+              <ul class="list">
+                ${updates}
+              </ul>
+            </sb-card>`
+      }
       <sb-card class="half" heading="Users" subheading="Signed in now">
         ${
           users.length === 0

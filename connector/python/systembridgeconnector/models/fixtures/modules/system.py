@@ -5,6 +5,7 @@ from systembridgeconnector.models.modules.system import (
     RunMode,
     System,
     SystemFailedUnit,
+    SystemPackageUpdate,
     SystemUser,
 )
 
@@ -41,7 +42,14 @@ FIXTURE_SYSTEM = System(
     ],
     ip_address_6="::1",
     pending_reboot=True,
-    package_updates=3,
+    package_updates=1,
+    package_update_list=[
+        SystemPackageUpdate(
+            name="linux",
+            version="6.11.6.arch1-1",
+            current_version="6.11.5.arch1-1",
+        )
+    ],
     version_latest_url="https://github.com/timmo001/system-bridge/releases/latest",
     version_latest="4.99.0",
     version_newer_available=True,

@@ -350,6 +350,7 @@ Returns an array of objects, one per process.
 | `microphone_usage` | array | Apps using the microphone. Linux only. |
 | `pending_reboot` | boolean | Whether a reboot is pending. Linux only. |
 | `package_updates` | integer | How many package updates are waiting, from `checkupdates` on Arch, apt on Debian and Ubuntu, dnf on Fedora, or winget on Windows. Checked in the background about once an hour, so it's null until the first check finishes or when no supported package manager is found. Linux and Windows only. |
+| `package_update_list` | array | Each update `package_updates` counts, with its `name`, the `version` waiting and the `current_version` installed. dnf doesn't say the installed version, so it's `null` there. `null` when `package_updates` is. |
 | `failed_units` | array | The systemd units that failed, from the system manager and, when System Bridge runs in your session, your user manager. Each has `name`, `description`, `scope` (`system` or `user`), `load_state`, `result` (why it failed, such as `exit-code`, `signal`, `timeout` or `oom-kill`) and `since` (when it failed, in Unix seconds). Empty when nothing has failed, and `null` without systemd. Linux only. |
 | `power_usage` | number | System power draw in watts. Linux only. |
 | `power_profile` | string | The active power profile, such as `power-saver`, `balanced` or `performance`, from power-profiles-daemon or tuned-ppd. `null` without either. Linux only. |
