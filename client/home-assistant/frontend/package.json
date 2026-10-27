@@ -1,0 +1,30 @@
+{
+  "name": "home-assistant-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "System Bridge dashboard, view and section strategies for Home Assistant",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "lint": "oxlint src test",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "test": "bun test",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:write": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "dependencies": {
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.89.0",
+    "@timmo001/oxlint-rules": "0.6.3",
+    "@types/bun": "1.4.4",
+    "eslint-plugin-lit": "2.3.1",
+    "eslint-plugin-wc": "3.1.0",
+    "oxlint": "1.89.0",
+    "oxlint-tsgolint": "7.0.2005",
+    "prettier": "3.9.10",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  }
+}
