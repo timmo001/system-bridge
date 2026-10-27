@@ -61,6 +61,28 @@ Trigger actions on the machine running System Bridge:
 - Send a keypress or type text.
 - Send a power command such as `sleep`, `lock`, `restart`, or `shutdown`.
 
+## Dashboard
+
+A System Bridge dashboard lays out a machine's sensors in Home Assistant the way the web client does, with a view for each page, such as CPU, Disks and GPUs. It's built from the integration's entities, so new disks, GPUs and sensors appear on their own. Each view also has a badge that opens the same page in the web client.
+
+To add it:
+
+1. Download `system-bridge-dashboard.js` from the [latest release](https://github.com/timmo001/system-bridge/releases/latest) and put it in your Home Assistant `config/www/` folder.
+2. Go to **Settings > Dashboards**, open the menu and select **Resources**, then add `/local/system-bridge-dashboard.js` as a **JavaScript module**.
+3. Back in **Settings > Dashboards**, select **Add dashboard** and choose **System Bridge**. With more than one System Bridge device, choose the device in the dashboard's settings.
+
+To add part of a page to another sections dashboard, such as a GPU, add a section in YAML:
+
+```yaml
+strategy:
+  type: custom:system-bridge
+  device_id: <device ID>
+  section: gpu
+  item: card0
+```
+
+`item` names the disk, mount, GPU, display or network interface, for the sections that show one. The section editor lists every section.
+
 ## Next steps
 
 - See what each feature does in more detail: [monitoring](/features/monitoring/), [notifications](/features/notifications/), [media](/features/media/) and [remote control](/features/remote-control/).
