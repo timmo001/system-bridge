@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
-
-	"github.com/timmo001/system-bridge/utils"
 )
 
 // DiscoveryManager manages all service discovery mechanisms
 type DiscoveryManager struct {
-	port       int
-	ssdpServer *SSDPServer
-	mdnsDisc   *MDNSDiscovery
-	mu         sync.RWMutex
-	running    bool
+	port     int
+	mdnsDisc *MDNSDiscovery
+	mu       sync.RWMutex
+	running  bool
 }
 
 // ServiceInfo represents a discovered service
@@ -22,8 +19,7 @@ type ServiceInfo struct {
 	IP       string
 	Port     int
 	Hostname string
-	Type     string // "ssdp", "mdns"
-	Location string // For SSDP
+	Type     string // "mdns"
 }
 
 // NewDiscoveryManager creates a new discovery manager
@@ -43,13 +39,6 @@ func (dm *DiscoveryManager) Start() error {
 	}
 
 	slog.Info("Starting service discovery manager...")
-
-	// Start SSDP server on configurable SSDP port
-	ssdpPort := utils.GetSSDPPort()
-	dm.ssdpServer = NewSSDPServer(ssdpPort, dm.port)
-	if err := dm.ssdpServer.Start(); err != nil {
-		return fmt.Errorf("failed to start SSDP server: %w", err)
-	}
 
 	// Start mDNS discovery
 	dm.mdnsDisc = NewMDNSDiscovery(dm.port)
@@ -73,12 +62,6 @@ func (dm *DiscoveryManager) Stop() error {
 	}
 
 	slog.Info("Stopping service discovery manager...")
-
-	if dm.ssdpServer != nil {
-		if err := dm.ssdpServer.Stop(); err != nil {
-			slog.Error("Failed to stop SSDP server", "err", err)
-		}
-	}
 
 	if dm.mdnsDisc != nil {
 		if err := dm.mdnsDisc.Stop(); err != nil {
@@ -131,18 +114,8 @@ func (dm *DiscoveryManager) DiscoverServices() ([]ServiceInfo, error) {
 		}
 	}
 
-	// Note: SSDP services are discovered asynchronously via multicast
-	// They would be tracked in a separate registry
-
 	slog.Info("Service discovery completed", "found", len(services))
 	return services, nil
-}
-
-// GetSSDPService returns the SSDP server instance
-func (dm *DiscoveryManager) GetSSDPService() *SSDPServer {
-	dm.mu.RLock()
-	defer dm.mu.RUnlock()
-	return dm.ssdpServer
 }
 
 // GetMDNSDiscovery returns the mDNS discovery instance

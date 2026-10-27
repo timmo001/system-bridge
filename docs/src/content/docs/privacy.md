@@ -12,7 +12,7 @@ This page lists every way the app communicates, so you can decide what to allow.
 | Connection | Direction | Where | When |
 | --- | --- | --- | --- |
 | [API server](#api-server) | Incoming | Port `9170` | Always |
-| [Network discovery](#network-discovery) | Both | Port `1900`, mDNS | Always |
+| [Network discovery](#network-discovery) | Both | mDNS | Always |
 | [Update check](#update-check) | Outgoing | `api.github.com` | Up to 12 an hour |
 | [DNS lookups](#dns-lookups) | Outgoing | Your DNS server | Every minute |
 | [Discord](#optional-discord) | Outgoing | `discord.com` | [If set up](/features/discord/) |
@@ -66,17 +66,7 @@ System Bridge only sends system data to clients that have connected with the tok
 
 ## Network discovery
 
-System Bridge announces itself on your local network so apps like [Home Assistant](/using/home-assistant/) can find it. These messages stay on your local network and aren't routed to the internet.
-
-### SSDP
-
-- Every 30 seconds, System Bridge sends an SSDP `NOTIFY` message to the multicast address `239.255.255.250:1900`. It contains your hostname, local IP address and API port.
-- It answers SSDP searches for System Bridge, or for all devices, with the same details.
-- It serves a device description at `http://{host}:1900/description.xml`, with no token needed. The description contains your hostname, local IP address and API port.
-
-Change the SSDP port with `SYSTEM_BRIDGE_SSDP_PORT`.
-
-### mDNS
+System Bridge announces itself on your local network over mDNS so apps like [Home Assistant](/using/home-assistant/) can find it. These messages stay on your local network and aren't routed to the internet.
 
 System Bridge advertises the `_system-bridge._tcp` service with your hostname, IP addresses and API port, and answers mDNS queries for it.
 
