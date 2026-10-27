@@ -4,7 +4,6 @@ package media
 
 import (
 	"context"
-	"strings"
 
 	"log/slog"
 
@@ -55,11 +54,9 @@ func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaDa
 		mediaData.TrackNumber = &number
 	}
 
-	// Only art a client can load itself: a web or data URL. A file URL points
-	// at this machine's disk
-	if artURL := player.text("mpris:artUrl"); strings.HasPrefix(artURL, "https://") ||
-		strings.HasPrefix(artURL, "http://") ||
-		strings.HasPrefix(artURL, "data:image/") {
+	// A file URL points at this machine's disk, which clients can't load, so
+	// resolveArtURL turns it into a data URL
+	if artURL := resolveArtURL(player.text("mpris:artUrl")); artURL != "" {
 		mediaData.Thumbnail = &artURL
 	}
 
