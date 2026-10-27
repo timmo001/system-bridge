@@ -5,7 +5,7 @@ bun = "1.4.4"
 go = "1.27.3"
 golangci-lint = "2.15.0"
 node = "26.12.1"
-"npm:@timmo001/tooling-drift" = { version = "0.1.5", allow_low_downloads = true }
+"npm:@timmo001/tooling-drift" = { version = "0.1.6", allow_low_downloads = true }
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
 uv = "0.13.5"

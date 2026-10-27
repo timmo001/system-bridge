@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@timmo001/tooling-drift':
-        specifier: 0.1.5
-        version: 0.1.5(redis@6.3.0)
+        specifier: 0.1.6
+        version: 0.1.6(redis@6.3.0)
 
 packages:
 
@@ -68,8 +68,8 @@ packages:
     peerDependencies:
       effect: 4.0.6
 
-  '@timmo001/tooling-drift@0.1.5':
-    resolution: {integrity: sha512-WvG6yoj7UnKHJekkPJOuSMZ7PLPXIQ4T7+O1PTpfgXGdUs7RKSlFBvA1/OLvaTudSociVayf+BDn791ewZUj8w==}
+  '@timmo001/tooling-drift@0.1.6':
+    resolution: {integrity: sha512-YbEGpAZXomITQvActjRsZcdbXpUEq8YK5FuNojwOJc0Qk/DhHCkj7efQrmLntWWxT5kyAGx+9sHBOjh3LI48yQ==}
     hasBin: true
 
   '@types/node@26.6.5':
@@ -147,7 +147,7 @@ snapshots:
     dependencies:
       effect: 4.0.6
 
-  '@timmo001/tooling-drift@0.1.5(redis@6.3.0)':
+  '@timmo001/tooling-drift@0.1.6(redis@6.3.0)':
     dependencies:
       '@effect/platform-node': 4.0.6(effect@4.0.6)(redis@6.3.0)
       '@timmo001/effect-gh': 0.7.1(effect@4.0.6)
