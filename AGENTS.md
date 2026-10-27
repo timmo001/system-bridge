@@ -89,7 +89,7 @@ mise run package:windows-installer
 Task-scoped skills load on demand from `.agents/skills/` (registered via `skills.paths` in `opencode.json`):
 
 - `system-bridge-go-backend` - Go backend patterns: error wrapping, graceful degradation, slog, context, nil safety
-- `system-bridge-testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
+- `system-bridge-testing-workflow` - Go tests, web-client checks, browser testing with Playwright or Chrome DevTools, schema verification, act
 - `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
 - `system-bridge-connector-python` - Python connector tasks, code style and release versioning
 - `system-bridge-connector-typescript` - TypeScript connector layout, generated schemas, tasks and release versioning

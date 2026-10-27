@@ -1,6 +1,6 @@
 ---
 name: system-bridge-testing-workflow
-description: How to test System Bridge - Go table-driven tests and commands, web-client quality checks (lint/typecheck/format, no unit tests), the Chrome DevTools MCP interactive test loop for UI and WebSocket, the generate:schemas verification cycle, and running GitHub workflows locally with act. Use when writing or running system-bridge tests, verifying Go type/schema changes, or interactively testing the web client.
+description: How to test System Bridge - Go table-driven tests and commands, web-client quality checks (lint/typecheck/format, no unit tests), the interactive browser test loop for UI and WebSocket with the Playwright or Chrome DevTools MCP, the generate:schemas verification cycle, and running GitHub workflows locally with act. Use when writing or running system-bridge tests, verifying Go type/schema changes, or interactively testing the web client.
 ---
 
 # System Bridge Testing
@@ -48,22 +48,21 @@ bun run format:check
 
 Run the full application lint (Go + web client) with `mise run lint:all`. Docs have a separate check: `mise run docs:build` and `mise run docs:lint`.
 
-## Interactive Testing with Chrome DevTools MCP
+## Interactive Testing in the Browser
 
-Functional web-client testing is done via the chrome-devtools MCP server.
+Functional web-client testing uses whichever browser MCP is loaded, Playwright or Chrome DevTools. Neither is preferred.
 
 ```bash
-mise run run   # backend (port 9170) + web client (port 5173)
+mise run serve:all   # backend on :9170 + web client, through pitchfork
 ```
 
-Open http://localhost:5173 in Chrome, then drive it with the MCP tools:
+Open the web client at https://web.system-bridge.localhost. It connects from URL parameters, as `system-bridge client open` does: add `?host=127.0.0.1&port=9170&apiKey=<token>` to any page, with the token from the data folder (see `system-bridge-troubleshooting`). Pages are at `/<module>`, such as `/desktop`.
 
-- `take_snapshot` to read page state (add `verbose=true` to inspect ARIA).
-- `click uid=...`, `fill uid=... value=...`, `navigate_page type="url" url=...`.
-- `list_console_messages` / `get_console_message msgid=...` to catch errors.
-- `list_network_requests` / `get_network_request reqid=...` for WebSocket traffic.
+- Read page state from the accessibility snapshot, and find elements by text or role rather than reading the whole snapshot.
+- Check the console for errors, and the network or WebSocket traffic when a request misbehaves.
+- With Playwright, a missing browser fails with "Browser "chromium" is not installed". Install it with `npx @playwright/mcp install-browser chromium`.
 
-Always check the console for schema decode errors after navigating the module tabs (Battery, CPU, Disks, ...).
+Always check the console for schema decode errors after navigating the module tabs (Battery, CPU, Disks, ...). Errors that name a file you were editing may be from a hot reload mid-edit, so reload the page before treating them as real.
 
 ## Verifying Schema Changes
 
