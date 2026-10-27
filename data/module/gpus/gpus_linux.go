@@ -181,13 +181,16 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 			Name: name,
 		}
 
+		hwmon := readGPUHwmon(devPath)
 		if v := readGPUCoreClock(cardPath, devPath); v != nil {
 			gpu.CoreClock = v
+		} else {
+			gpu.CoreClock = hwmon.coreClock
 		}
+		gpu.MemoryClock = hwmon.memoryClock
 		if v := readGPULoad(devPath); v != nil {
 			gpu.CoreLoad = v
 		}
-		hwmon := readGPUHwmon(devPath)
 		gpu.Temperature = hwmon.temperature
 		gpu.PowerUsage = hwmon.power
 		gpu.PowerLimit = hwmon.powerLimit
@@ -343,6 +346,8 @@ func readXeBusyPercent(devPath string) *float64 {
 }
 
 type gpuHwmon struct {
+	coreClock       *float64
+	memoryClock     *float64
 	temperature     *float64
 	power           *float64
 	powerLimit      *float64
@@ -350,10 +355,10 @@ type gpuHwmon struct {
 	fanSpeedPercent *float64
 }
 
-// readGPUHwmon reads temperature (Celsius), power and its cap (Watts), and fan
-// speed (RPM and percent) from any hwmon device attached under the GPU's DRM
-// device. Discrete Intel Arc and AMD cards expose these; integrated GPUs
-// typically have no fan or cap.
+// readGPUHwmon reads core and memory clocks (MHz), temperature (Celsius), power
+// and its cap (Watts), and fan speed (RPM and percent) from any hwmon device
+// attached under the GPU's DRM device. Discrete Intel Arc and AMD cards expose
+// these; integrated GPUs typically have no fan, cap or memory clock.
 func readGPUHwmon(devPath string) gpuHwmon {
 	var r gpuHwmon
 	hwmons, err := filepath.Glob(filepath.Join(devPath, "hwmon", "hwmon*"))
@@ -362,6 +367,12 @@ func readGPUHwmon(devPath string) gpuHwmon {
 	}
 	sort.Strings(hwmons)
 	for _, h := range hwmons {
+		if r.coreClock == nil {
+			r.coreClock = readHwmonFreq(h, "sclk")
+		}
+		if r.memoryClock == nil {
+			r.memoryClock = readHwmonFreq(h, "mclk")
+		}
 		if r.temperature == nil {
 			r.temperature = readHwmonGPUTemp(h)
 		}
@@ -382,6 +393,23 @@ func readGPUHwmon(devPath string) gpuHwmon {
 		}
 	}
 	return r
+}
+
+// readHwmonFreq returns the frequency in MHz of the freq*_input whose label
+// matches, such as amdgpu's "sclk" (core) and "mclk" (memory). Values are in Hz.
+func readHwmonFreq(hwmonDir, label string) *float64 {
+	labels, _ := filepath.Glob(filepath.Join(hwmonDir, "freq*_label"))
+	sort.Strings(labels)
+	for _, labelPath := range labels {
+		if l, ok := readSysString(labelPath); !ok || !strings.EqualFold(l, label) {
+			continue
+		}
+		if v := readSysFloat(strings.TrimSuffix(labelPath, "_label") + "_input"); v != nil {
+			mhz := *v / 1_000_000.0
+			return &mhz
+		}
+	}
+	return nil
 }
 
 func readMicrowatts(path string) *float64 {
