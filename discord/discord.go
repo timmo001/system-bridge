@@ -41,6 +41,9 @@ var (
 	// errRejected means Discord answered and refused the request, as opposed to
 	// a timeout or a dropped connection.
 	errRejected = errors.New("discord rejected the request")
+	// errInvalidClient means Discord refused the client ID or secret, so
+	// authorizing again cannot work until the credentials change.
+	errInvalidClient = errors.New("discord refused the clientId or clientSecret in discord.json")
 )
 
 var (
@@ -73,6 +76,9 @@ func Run(ctx context.Context, update func(types.DiscordData)) {
 
 	lastErr := ""
 	configured := false
+	// refused holds credentials Discord refused, so Run does not prompt again
+	// until discord.json changes.
+	var refused *Credentials
 	for {
 		wait := connectRetryDelay
 		creds, err := loadCredentials()
@@ -85,7 +91,10 @@ func Run(ctx context.Context, update func(types.DiscordData)) {
 			wait = credentialsRetryDelay
 		case creds == nil:
 			wait = credentialsRetryDelay
+		case refused != nil && *refused == *creds:
+			wait = credentialsRetryDelay
 		default:
+			refused = nil
 			lastErr = ""
 			if !configured {
 				configured = true
@@ -98,6 +107,11 @@ func Run(ctx context.Context, update func(types.DiscordData)) {
 				return
 			case errors.Is(err, errNoSocket):
 				slog.Debug("Discord is not running")
+			case errors.Is(err, errInvalidClient):
+				slog.Warn("Discord refused the credentials, waiting for discord.json to change", "error", err)
+				reportError(err)
+				refused = creds
+				wait = credentialsRetryDelay
 			case errors.Is(err, errAuth):
 				slog.Warn("Discord session ended", "error", err)
 				reportError(err)
@@ -567,6 +581,8 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 	if tok != nil && tok.expired() {
 		refreshed, err := refreshToken(ctx, creds, tok.RefreshToken)
 		switch {
+		case errors.Is(err, errInvalidClient):
+			return nil, fmt.Errorf("%w: %w", errAuth, err)
 		case errors.Is(err, errRejected):
 			slog.Info("Discord rejected the token refresh, authorizing again", "error", err)
 			tok = nil
