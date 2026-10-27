@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/timmo001/system-bridge/utils/confirmation"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
+	"github.com/timmo001/system-bridge/utils/reexec"
 	"github.com/timmo001/system-bridge/version"
 	"github.com/urfave/cli/v3"
 )
@@ -37,6 +39,10 @@ var webClientContent embed.FS
 
 // Global notifier for the application
 var appNotifier *notification.Notifier
+
+// upgradedPath is the new executable to restart into once the backend has
+// shut down.
+var upgradedPath atomic.Pointer[string]
 
 func main() {
 	setupLogging()
@@ -189,6 +195,12 @@ func main() {
 
 					// Create and run backend server with signal-aware context
 					b := backend.New(s, dataStore, token, &webClientContent)
+
+					go reexec.Watch(cmdCtx, func(path string) {
+						slog.Info("System Bridge was upgraded, restarting", "path", path)
+						upgradedPath.Store(&path)
+						cancel()
+					})
 
 					// Show startup notification if requested
 					if cmd.Bool("open-web-client") {
@@ -751,6 +763,13 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		}
 		os.Exit(1)
+	}
+
+	if path := upgradedPath.Load(); path != nil {
+		if err := reexec.Exec(*path); err != nil {
+			slog.Error("Failed to restart after upgrade", "error", err)
+			os.Exit(1)
+		}
 	}
 }
 
