@@ -43,6 +43,12 @@ tools:
   - repo: flatpak/xdg-desktop-portal
     reviewed: 1.22.1
     review: Check the screenshot prefab's built-in in utils/handlers/command/prefab/screenshot_linux.go, which calls org.freedesktop.portal.Screenshot.Screenshot with interactive false, waits for org.freedesktop.portal.Request.Response and reads its uri, against changed methods, options, response codes and results.
+  - repo: swaywm/sway
+    reviewed: "1.12"
+    review: Check the keyboard layouts in data/module/desktop/keyboard_compositor_linux.go, which use Sway's IPC through SWAYSOCK or sway-ipc.*.sock, GET_INPUTS for each keyboard's xkb_layout_names and xkb_active_layout_index, RUN_COMMAND with input type:keyboard xkb_switch_layout, and the input event subscription's xkb_layout, xkb_keymap, added and removed changes, against changed message types, fields and commands.
+  - repo: YaLTeR/niri
+    reviewed: v26.04
+    review: Check the keyboard layouts in data/module/desktop/keyboard_compositor_linux.go, which use niri's IPC through NIRI_SOCKET or niri.*.sock, the KeyboardLayouts request and its names and current_idx, the SwitchLayout action with an Index, and the EventStream's KeyboardLayoutsChanged and KeyboardLayoutSwitched events, against changed requests, actions, replies and events.
   - repo: microsoft/winget-cli
     reviewed: v1.29.380
     review: Check the Windows package update count in data/module/system/updates_windows.go, which runs winget upgrade --accept-source-agreements --disable-interactivity, counts the rows of its first table in wingetTableRows, and takes exit code 0x8A150014 (APPINSTALLER_CLI_ERROR_NO_APPLICATIONS_FOUND) as no updates, against changed flags, table layout, progress output and exit codes.

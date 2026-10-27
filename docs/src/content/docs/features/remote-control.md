@@ -134,7 +134,9 @@ The ids are the window and workspace `id`s from the [`desktop`](/api/data/#deskt
 | Maximise | Yes | Yes | Yes |
 | Minimise | No | Yes | Yes |
 | Show a workspace | Yes | Yes | No |
-| Switch keyboard layout | Yes | No | Yes |
+| Switch keyboard layout | Yes | Sway and niri | Yes |
+
+Wayland has no standard way to read or switch keyboard layouts, so on other Wayland desktops they come from the compositor's own IPC, which Sway and niri have. There, layouts are named as xkb describes them, such as `English (UK)`, rather than by their codes.
 
 ### Hyprland
 

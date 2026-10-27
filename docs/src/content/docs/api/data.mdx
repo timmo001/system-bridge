@@ -192,7 +192,7 @@ The open windows, workspaces and keyboard layout, from Hyprland, another Wayland
 | `focused_window` | string | The focused window's `id`, or `null`. |
 | `focused_workspace` | string | The focused workspace's `id`, or `null`. |
 | `focused_display` | string | The focused display's id from the [`displays`](#displays) module, or `null`. Hyprland only. |
-| `keyboard` | object | `layout` (the active layout, such as `gb`), `name` (such as `English (UK)`) and `layouts` (every installed layout). |
+| `keyboard` | object | `layout` (the active layout, such as `gb`), `name` (such as `English (UK)`) and `layouts` (every installed layout). On Sway and niri, the layouts are named rather than coded, so `layout` and `name` are both the name, such as `English (UK)`. Empty on other Wayland desktops. |
 | `windows` | array | The open windows. See below. |
 | `workspaces` | array | The workspaces. Empty on Windows. See below. |
 | `hyprland` | object | What only Hyprland reports, or `null` elsewhere. See below. |
