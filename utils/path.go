@@ -6,47 +6,20 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/adrg/xdg"
 )
 
 const logDirPermissions os.FileMode = 0700
 
-// GetConfigPath returns the path to the config directory
+// GetConfigPath returns the path to the config directory: in the user's data
+// directory, such as ~/.local/share on Linux, ~/Library/Application Support
+// on macOS and LocalAppData on Windows, unless SYSTEM_BRIDGE_CONFIG_DIR sets
+// one
 func GetConfigPath() (string, error) {
-	var configDirPath string
-
-	switch runtime.GOOS {
-	case "windows":
-		// First check if user has explicitly set a config path
-		if customPath := os.Getenv("SYSTEM_BRIDGE_CONFIG_DIR"); customPath != "" {
-			configDirPath = customPath
-		} else if appData := os.Getenv("LOCALAPPDATA"); appData != "" {
-			configDirPath = filepath.Join(appData, "system-bridge", "v5")
-		} else {
-			return "", fmt.Errorf("LOCALAPPDATA environment variable not set")
-		}
-	case "darwin":
-		// First check if user has explicitly set a config path
-		if customPath := os.Getenv("SYSTEM_BRIDGE_CONFIG_DIR"); customPath != "" {
-			configDirPath = customPath
-		} else if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
-			// Support XDG spec on macOS for CLI apps
-			configDirPath = filepath.Join(xdgData, "system-bridge", "v5")
-		} else if home := os.Getenv("HOME"); home != "" {
-			configDirPath = filepath.Join(home, "Library", "Application Support", "system-bridge", "v5")
-		} else {
-			return "", fmt.Errorf("HOME environment variable not set")
-		}
-	default:
-		// Linux and others: Follow XDG Base Directory Specification
-		if customPath := os.Getenv("SYSTEM_BRIDGE_CONFIG_DIR"); customPath != "" {
-			configDirPath = customPath
-		} else if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
-			configDirPath = filepath.Join(xdgData, "system-bridge", "v5")
-		} else if home := os.Getenv("HOME"); home != "" {
-			configDirPath = filepath.Join(home, ".local", "share", "system-bridge", "v5")
-		} else {
-			return "", fmt.Errorf("HOME environment variable not set")
-		}
+	configDirPath := os.Getenv("SYSTEM_BRIDGE_CONFIG_DIR")
+	if configDirPath == "" {
+		configDirPath = filepath.Join(xdg.DataHome, "system-bridge", "v5")
 	}
 
 	// Ensure the path is absolute
@@ -83,34 +56,17 @@ func GetDataPath() (string, error) {
 
 // GetLogsPath returns the path to the logs directory.
 func GetLogsPath() (string, error) {
-	var logsDirPath string
-
-	switch runtime.GOOS {
-	case "windows":
-		if customPath := os.Getenv("SYSTEM_BRIDGE_LOG_DIR"); customPath != "" {
-			logsDirPath = customPath
-		} else if appData := os.Getenv("LOCALAPPDATA"); appData != "" {
-			logsDirPath = filepath.Join(appData, "system-bridge", "logs")
-		} else {
-			return "", fmt.Errorf("LOCALAPPDATA environment variable not set")
-		}
-	case "darwin":
-		if customPath := os.Getenv("SYSTEM_BRIDGE_LOG_DIR"); customPath != "" {
-			logsDirPath = customPath
-		} else if home := os.Getenv("HOME"); home != "" {
-			logsDirPath = filepath.Join(home, "Library", "Logs", "system-bridge")
-		} else {
-			return "", fmt.Errorf("HOME environment variable not set")
-		}
-	default:
-		if customPath := os.Getenv("SYSTEM_BRIDGE_LOG_DIR"); customPath != "" {
-			logsDirPath = customPath
-		} else if xdgState := os.Getenv("XDG_STATE_HOME"); xdgState != "" {
-			logsDirPath = filepath.Join(xdgState, "system-bridge")
-		} else if home := os.Getenv("HOME"); home != "" {
-			logsDirPath = filepath.Join(home, ".local", "state", "system-bridge")
-		} else {
-			return "", fmt.Errorf("HOME environment variable not set")
+	logsDirPath := os.Getenv("SYSTEM_BRIDGE_LOG_DIR")
+	if logsDirPath == "" {
+		switch runtime.GOOS {
+		case "windows":
+			logsDirPath = filepath.Join(xdg.StateHome, "system-bridge", "logs")
+		case "darwin":
+			// xdg's state directory on macOS is Application Support, but
+			// logs belong in Library/Logs
+			logsDirPath = filepath.Join(xdg.Home, "Library", "Logs", "system-bridge")
+		default:
+			logsDirPath = filepath.Join(xdg.StateHome, "system-bridge")
 		}
 	}
 

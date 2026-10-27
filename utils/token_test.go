@@ -57,11 +57,8 @@ func TestGetTokenFilePath(t *testing.T) {
 	})
 
 	t.Run("Handle config path error", func(t *testing.T) {
-		// Unset all relevant environment variables to force an error
-		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "")
-		t.Setenv("XDG_DATA_HOME", "")
-		t.Setenv("HOME", "")
-		t.Setenv("LOCALAPPDATA", "")
+		// A relative config path makes the config path fail
+		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "relative/path")
 
 		_, err := GetTokenFilePath()
 		assert.Error(t, err)

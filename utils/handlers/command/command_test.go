@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/timmo001/system-bridge/settings"
@@ -358,8 +359,11 @@ func TestValidatePrefabCommand(t *testing.T) {
 			{program: saves, wantSaved: true},
 			{program: skips},
 		} {
-			// Each run gets its own folder, as both save under the same name
+			// Each run gets its own folder, as both save under the same name.
+			// Cleanups run last first, so xdg reads the restored value.
+			t.Cleanup(xdg.Reload)
 			t.Setenv("XDG_PICTURES_DIR", t.TempDir())
+			xdg.Reload()
 			// An override keeps the prefab, so its placeholders are filled in
 			result := execute(context.Background(), &settings.SettingsCommandDefinition{
 				ID:        "shot",

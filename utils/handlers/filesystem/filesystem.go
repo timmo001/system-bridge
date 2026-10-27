@@ -1,5 +1,7 @@
 package filesystem
 
+import "github.com/adrg/xdg"
+
 // DirectoryInfo represents information about a directory
 type DirectoryInfo struct {
 	Key  string `json:"key" mapstructure:"key"`
@@ -16,9 +18,17 @@ type FileInfo struct {
 	MimeType  string `json:"mime_type" mapstructure:"mime_type"`
 }
 
-// GetUserDirectories returns a list of user directories
+// GetUserDirectories returns the user's own folders: from user-dirs.dirs on
+// Linux and the known folders on Windows, so renamed or moved ones are found
 func GetUserDirectories() []DirectoryInfo {
-	return getUserDirectories()
+	return []DirectoryInfo{
+		{Key: "desktop", Path: xdg.UserDirs.Desktop},
+		{Key: "documents", Path: xdg.UserDirs.Documents},
+		{Key: "downloads", Path: xdg.UserDirs.Download},
+		{Key: "music", Path: xdg.UserDirs.Music},
+		{Key: "pictures", Path: xdg.UserDirs.Pictures},
+		{Key: "videos", Path: xdg.UserDirs.Videos},
+	}
 }
 
 // GetDirectoryContents returns the contents of a directory

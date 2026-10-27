@@ -10,22 +10,6 @@ import (
 	"strings"
 )
 
-func getUserDirectories() []DirectoryInfo {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil
-	}
-
-	return []DirectoryInfo{
-		{Key: "desktop", Path: filepath.Join(homeDir, "Desktop")},
-		{Key: "documents", Path: filepath.Join(homeDir, "Documents")},
-		{Key: "downloads", Path: filepath.Join(homeDir, "Downloads")},
-		{Key: "music", Path: filepath.Join(homeDir, "Music")},
-		{Key: "pictures", Path: filepath.Join(homeDir, "Pictures")},
-		{Key: "videos", Path: filepath.Join(homeDir, "Movies")},
-	}
-}
-
 func getDirectoryContents(path string) ([]FileInfo, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {

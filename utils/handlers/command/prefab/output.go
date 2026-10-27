@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/adrg/xdg"
 )
 
 // Placeholders in a prefab's arguments and variables for the file it saves,
@@ -26,19 +28,6 @@ var now = time.Now
 type Output struct {
 	Path string
 	Dir  string
-}
-
-// screenshotDir is the Screenshots folder in the user's pictures folder
-func screenshotDir() (string, error) {
-	pictures := os.Getenv("XDG_PICTURES_DIR")
-	if pictures == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("find the home folder: %w", err)
-		}
-		pictures = filepath.Join(home, "Pictures")
-	}
-	return filepath.Join(pictures, "Screenshots"), nil
 }
 
 func hasPlaceholder(value string) bool {
@@ -67,10 +56,9 @@ func Expand(arguments []string, env []string) ([]string, []string, Output, error
 		return arguments, env, Output{}, nil
 	}
 
-	dir, err := screenshotDir()
-	if err != nil {
-		return nil, nil, Output{}, err
-	}
+	// The Screenshots folder in the pictures folder user-dirs.dirs or the
+	// known folders name
+	dir := filepath.Join(xdg.UserDirs.Pictures, "Screenshots")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, nil, Output{}, fmt.Errorf("create %s: %w", dir, err)
 	}

@@ -6,13 +6,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestExpand(t *testing.T) {
 	pictures := t.TempDir()
+	// Cleanups run last first, so xdg reads the restored value
+	t.Cleanup(xdg.Reload)
 	t.Setenv("XDG_PICTURES_DIR", pictures)
+	xdg.Reload()
 	originalNow := now
 	t.Cleanup(func() { now = originalNow })
 	now = func() time.Time { return time.Date(2026, 10, 25, 14, 30, 0, 0, time.Local) }

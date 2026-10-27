@@ -10,7 +10,8 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/adrg/xdg"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	settingspkg "github.com/timmo001/system-bridge/settings"
@@ -121,11 +122,11 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter, dataStore *data.
 			switch runtime.GOOS {
 			case "linux":
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
-				err = os.WriteFile(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"), linuxAutostartDesktopFile, 0644)
+				err = os.WriteFile(filepath.Join(xdg.ConfigHome, "autostart", "system-bridge.desktop"), linuxAutostartDesktopFile, 0644)
 				if err != nil {
 					slog.Error("Failed to write autostart desktop file", "error", err)
 				} else {
-					slog.Info("Autostart desktop file written", "path", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+					slog.Info("Autostart desktop file written", "path", filepath.Join(xdg.ConfigHome, "autostart", "system-bridge.desktop"))
 				}
 			case "windows":
 				// Create shortcut in startup folder using PowerShell
@@ -161,11 +162,11 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter, dataStore *data.
 			switch runtime.GOOS {
 			case "linux":
 				// Remove autostart desktop file in ~/.config/autostart/system-bridge.desktop
-				err = os.Remove(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+				err = os.Remove(filepath.Join(xdg.ConfigHome, "autostart", "system-bridge.desktop"))
 				if err != nil {
 					slog.Error("Failed to remove autostart desktop file", "error", err)
 				} else {
-					slog.Info("Autostart desktop file removed", "path", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+					slog.Info("Autostart desktop file removed", "path", filepath.Join(xdg.ConfigHome, "autostart", "system-bridge.desktop"))
 				}
 			case "windows":
 				// Remove shortcut from startup folder

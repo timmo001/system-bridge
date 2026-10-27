@@ -7,9 +7,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// setenvXDG sets an environment variable xdg reads, so it reads it again now
+// and again once the test restores it
+func setenvXDG(t *testing.T, key, value string) {
+	t.Helper()
+	// Cleanups run last first, so this runs after Setenv restores the value
+	t.Cleanup(xdg.Reload)
+	t.Setenv(key, value)
+	xdg.Reload()
+}
 
 func TestGetConfigPath(t *testing.T) {
 	t.Run("Get config path with custom environment variable", func(t *testing.T) {
@@ -38,24 +49,7 @@ func TestGetConfigPath(t *testing.T) {
 
 		switch runtime.GOOS {
 		case "windows":
-			// Test Windows path
-			tempAppData, err := os.MkdirTemp("", "localappdata-*")
-			require.NoError(t, err)
-			defer func() {
-				err := os.RemoveAll(tempAppData)
-				if err != nil {
-					t.Fatalf("failed to remove temp dir: %v", err)
-				}
-			}()
-
-			t.Setenv("LOCALAPPDATA", tempAppData)
-
-			configPath, err := GetConfigPath()
-			require.NoError(t, err)
-
-			expectedPath := filepath.Join(tempAppData, "system-bridge", "v5")
-			assert.Equal(t, expectedPath, configPath)
-			assert.DirExists(t, configPath)
+			t.Skip("Windows uses the LocalAppData known folder, which a test can't redirect")
 
 		case "darwin":
 			// Test macOS path
@@ -68,8 +62,8 @@ func TestGetConfigPath(t *testing.T) {
 				}
 			}()
 
-			t.Setenv("HOME", tempHome)
-			t.Setenv("XDG_DATA_HOME", "") // Clear XDG to test default macOS behavior
+			setenvXDG(t, "HOME", tempHome)
+			setenvXDG(t, "XDG_DATA_HOME", "") // Clear XDG to test default macOS behavior
 
 			configPath, err := GetConfigPath()
 			require.NoError(t, err)
@@ -89,8 +83,8 @@ func TestGetConfigPath(t *testing.T) {
 				}
 			}()
 
-			t.Setenv("HOME", tempHome)
-			t.Setenv("XDG_DATA_HOME", "") // Clear XDG to test default behavior
+			setenvXDG(t, "HOME", tempHome)
+			setenvXDG(t, "XDG_DATA_HOME", "") // Clear XDG to test default behavior
 
 			configPath, err := GetConfigPath()
 			require.NoError(t, err)
@@ -102,9 +96,6 @@ func TestGetConfigPath(t *testing.T) {
 	})
 
 	t.Run("Get config path with XDG_DATA_HOME", func(t *testing.T) {
-		if runtime.GOOS == "windows" {
-			t.Skip("XDG_DATA_HOME is not used on Windows; skipping test.")
-		}
 		// This should work on all platforms
 		tempXDG, err := os.MkdirTemp("", "xdg-*")
 		require.NoError(t, err)
@@ -116,7 +107,7 @@ func TestGetConfigPath(t *testing.T) {
 		}()
 
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "")
-		t.Setenv("XDG_DATA_HOME", tempXDG)
+		setenvXDG(t, "XDG_DATA_HOME", tempXDG)
 
 		configPath, err := GetConfigPath()
 		require.NoError(t, err)
@@ -124,24 +115,6 @@ func TestGetConfigPath(t *testing.T) {
 		expectedPath := filepath.Join(tempXDG, "system-bridge", "v5")
 		assert.Equal(t, expectedPath, configPath)
 		assert.DirExists(t, configPath)
-	})
-
-	t.Run("Error when no valid environment variables", func(t *testing.T) {
-		// Clear all relevant environment variables
-		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "")
-		t.Setenv("XDG_DATA_HOME", "")
-		t.Setenv("HOME", "")
-		t.Setenv("LOCALAPPDATA", "")
-
-		_, err := GetConfigPath()
-		assert.Error(t, err)
-
-		switch runtime.GOOS {
-		case "windows":
-			assert.Contains(t, err.Error(), "LOCALAPPDATA")
-		default:
-			assert.Contains(t, err.Error(), "HOME")
-		}
 	})
 
 	t.Run("Error when path is not absolute", func(t *testing.T) {
@@ -223,11 +196,8 @@ func TestGetDataPath(t *testing.T) {
 	})
 
 	t.Run("Error when config path fails", func(t *testing.T) {
-		// Clear all relevant environment variables to force GetConfigPath to fail
-		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "")
-		t.Setenv("XDG_DATA_HOME", "")
-		t.Setenv("HOME", "")
-		t.Setenv("LOCALAPPDATA", "")
+		// A relative config path makes GetConfigPath fail
+		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "relative/path")
 
 		_, err := GetDataPath()
 		assert.Error(t, err)
@@ -282,23 +252,7 @@ func TestGetLogsPath(t *testing.T) {
 
 		switch runtime.GOOS {
 		case "windows":
-			tempAppData, err := os.MkdirTemp("", "localappdata-*")
-			require.NoError(t, err)
-			defer func() {
-				err := os.RemoveAll(tempAppData)
-				if err != nil {
-					t.Fatalf("failed to remove temp dir: %v", err)
-				}
-			}()
-
-			t.Setenv("LOCALAPPDATA", tempAppData)
-
-			statePath, err := GetLogsPath()
-			require.NoError(t, err)
-
-			expectedPath := filepath.Join(tempAppData, "system-bridge", "logs")
-			assert.Equal(t, expectedPath, statePath)
-			assert.DirExists(t, statePath)
+			t.Skip("Windows uses the LocalAppData known folder, which a test can't redirect")
 		case "darwin":
 			tempHome, err := os.MkdirTemp("", "home-*")
 			require.NoError(t, err)
@@ -309,7 +263,7 @@ func TestGetLogsPath(t *testing.T) {
 				}
 			}()
 
-			t.Setenv("HOME", tempHome)
+			setenvXDG(t, "HOME", tempHome)
 
 			statePath, err := GetLogsPath()
 			require.NoError(t, err)
@@ -327,8 +281,8 @@ func TestGetLogsPath(t *testing.T) {
 				}
 			}()
 
-			t.Setenv("HOME", tempHome)
-			t.Setenv("XDG_STATE_HOME", "")
+			setenvXDG(t, "HOME", tempHome)
+			setenvXDG(t, "XDG_STATE_HOME", "")
 
 			statePath, err := GetLogsPath()
 			require.NoError(t, err)
@@ -340,8 +294,8 @@ func TestGetLogsPath(t *testing.T) {
 	})
 
 	t.Run("Get logs path with XDG_STATE_HOME", func(t *testing.T) {
-		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			t.Skip("XDG_STATE_HOME is not used on Windows or macOS; skipping test.")
+		if runtime.GOOS == "darwin" {
+			t.Skip("Logs go in Library/Logs on macOS, whatever XDG_STATE_HOME says")
 		}
 
 		tempXDG, err := os.MkdirTemp("", "xdg-state-*")
@@ -354,12 +308,15 @@ func TestGetLogsPath(t *testing.T) {
 		}()
 
 		t.Setenv("SYSTEM_BRIDGE_LOG_DIR", "")
-		t.Setenv("XDG_STATE_HOME", tempXDG)
+		setenvXDG(t, "XDG_STATE_HOME", tempXDG)
 
 		statePath, err := GetLogsPath()
 		require.NoError(t, err)
 
 		expectedPath := filepath.Join(tempXDG, "system-bridge")
+		if runtime.GOOS == "windows" {
+			expectedPath = filepath.Join(expectedPath, "logs")
+		}
 		assert.Equal(t, expectedPath, statePath)
 		assert.DirExists(t, statePath)
 	})
