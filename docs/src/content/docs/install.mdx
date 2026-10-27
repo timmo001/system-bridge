@@ -85,6 +85,35 @@ flatpak run dev.timmo.system-bridge
 ```
 
 </Tab>
+<Tab title="NixOS">
+
+The repository is a Nix flake that builds System Bridge from source on x86_64 Linux, from the latest `dev` branch. Run it without installing:
+
+```bash
+nix run github:timmo001/system-bridge -- backend --open-web-client
+```
+
+Or add it to your NixOS configuration as a flake input:
+
+```nix
+{
+  inputs.system-bridge.url = "github:timmo001/system-bridge";
+
+  outputs = { nixpkgs, system-bridge, ... }: {
+    nixosConfigurations.<host> = nixpkgs.lib.nixosSystem {
+      modules = [
+        {
+          environment.systemPackages = [
+            system-bridge.packages.x86_64-linux.default
+          ];
+        }
+      ];
+    };
+  };
+}
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
