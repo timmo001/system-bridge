@@ -82,6 +82,17 @@ class HyprlandDispatchRequest:
 
 
 @dataclass(slots=True)
+class HyprlandEvent:
+    """Hyprland Event.
+
+    A custom event from Hyprland's event dispatcher, such as a bind to
+    hl.dsp.event("dock"). data is what the bind passed.
+    """
+
+    data: str
+
+
+@dataclass(slots=True)
 class HyprlandGlobalShortcutRequest:
     """A global shortcut's name from the desktop module's hyprland.global_shortcuts."""
 

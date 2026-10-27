@@ -26,6 +26,7 @@ from systembridgeconnector.models.command_prefab import CommandPrefab
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.desktop_control import (
     DesktopWindowStateRequest,
+    HyprlandEvent,
     OmarchyAction,
     OmarchyMenuRequest,
 )
@@ -415,6 +416,40 @@ async def test_listen_settings_changed(
         )
 
     assert changed == [Settings(autostart=True)]
+
+
+@pytest.mark.asyncio
+async def test_listen_hyprland_event(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a listener gets Hyprland's custom events."""
+    received: list[HyprlandEvent] = []
+
+    async def hyprland_event_callback(hyprland_event: HyprlandEvent) -> None:
+        received.append(hyprland_event)
+
+    with (
+        patch.object(
+            mock_websocket_client_connected,
+            "receive_message",
+            side_effect=[
+                {
+                    "id": "system",
+                    "type": EventType.HYPRLAND_EVENT,
+                    "subtype": EventSubType.NONE,
+                    "data": {"data": "dock"},
+                    "module": "desktop",
+                },
+                ConnectionClosedException("Connection closed to server"),
+            ],
+        ),
+        pytest.raises(ConnectionClosedException),
+    ):
+        await mock_websocket_client_connected.listen(
+            hyprland_event_callback=hyprland_event_callback
+        )
+
+    assert received == [HyprlandEvent(data="dock")]
 
 
 @pytest.mark.asyncio

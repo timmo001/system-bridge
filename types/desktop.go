@@ -221,6 +221,12 @@ type HyprlandWorkspace struct {
 	LastWindow *string `json:"last_window" mapstructure:"last_window"` // The window last focused on it
 }
 
+// HyprlandEvent is a custom event from Hyprland's event dispatcher, such as a
+// bind to hl.dsp.event("dock")
+type HyprlandEvent struct {
+	Data string `json:"data" mapstructure:"data"`
+}
+
 // HyprlandDispatcher is a Hyprland dispatcher System Bridge can run
 type HyprlandDispatcher string
 

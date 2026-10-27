@@ -30,6 +30,7 @@ from .models.desktop_control import (
     DesktopWindowStateRequest,
     DesktopWorkspaceRequest,
     HyprlandDispatchRequest,
+    HyprlandEvent,
     HyprlandGlobalShortcutRequest,
     HyprlandMoveWindowRequest,
     HyprlandSetWindowRequest,
@@ -1148,12 +1149,15 @@ class WebSocketClient(Base):
         name: str = "WebSocket Listener",
         settings_callback: Callable[[Settings], Awaitable[None]] | None = None,
         no_data_callback: Callable[[str], Awaitable[None]] | None = None,
+        hyprland_event_callback: Callable[[HyprlandEvent], Awaitable[None]]
+        | None = None,
     ) -> None:
         """Listen for messages and map to modules.
 
         settings_callback gets the settings each time any client changes them.
         no_data_callback gets a module's name when the backend answers for it
-        with no data.
+        with no data. hyprland_event_callback gets each custom event from
+        Hyprland, once listening for the desktop module.
         """
 
         async def _callback_message(message: dict) -> None:
@@ -1275,6 +1279,15 @@ class WebSocketClient(Base):
             ):
                 self._logger.debug("[%s] Settings changed", name)
                 await settings_callback(Settings(**message[EventKey.DATA]))
+            elif (
+                message[EventKey.TYPE] == EventType.HYPRLAND_EVENT
+                and hyprland_event_callback is not None
+                and isinstance(message.get(EventKey.DATA), dict)
+            ):
+                self._logger.debug("[%s] Hyprland event", name)
+                await hyprland_event_callback(
+                    HyprlandEvent(data=message[EventKey.DATA].get("data", ""))
+                )
             else:
                 self._logger.debug(
                     "[%s] Other message: %s",

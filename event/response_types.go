@@ -39,6 +39,7 @@ const (
 	ResponseTypeHistory                   ResponseType = "HISTORY"
 	ResponseTypeHyprlandConfigReloaded    ResponseType = "HYPRLAND_CONFIG_RELOADED"
 	ResponseTypeHyprlandDispatched        ResponseType = "HYPRLAND_DISPATCHED"
+	ResponseTypeHyprlandEvent             ResponseType = "HYPRLAND_EVENT"
 	ResponseTypeHyprlandGlobalShortcutRun ResponseType = "HYPRLAND_GLOBAL_SHORTCUT_RUN"
 	ResponseTypeHyprlandWindowMoved       ResponseType = "HYPRLAND_WINDOW_MOVED"
 	ResponseTypeHyprlandWindowSet         ResponseType = "HYPRLAND_WINDOW_SET"

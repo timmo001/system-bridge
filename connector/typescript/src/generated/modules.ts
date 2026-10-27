@@ -851,6 +851,14 @@ export const GPUsData = Schema.Array(GPU);
 
 export type GPUsData = typeof GPUsData.Type;
 
+export const HyprlandEvent = Schema.Struct({
+  data: Schema.String,
+});
+
+export interface HyprlandEvent extends Schema.Schema.Type<
+  typeof HyprlandEvent
+> {}
+
 export const MediaData = Schema.Struct({
   album_artist: Schema.NullOr(Schema.String),
   album_title: Schema.NullOr(Schema.String),

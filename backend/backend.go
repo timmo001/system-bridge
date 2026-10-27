@@ -119,6 +119,16 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
 
+	desktop.OnHyprlandEvent(func(hyprlandEvent types.HyprlandEvent) {
+		b.wsServer.BroadcastModuleEvent(types.ModuleDesktop, event.MessageResponse{
+			ID:      "system",
+			Type:    event.ResponseTypeHyprlandEvent,
+			Subtype: event.ResponseSubtypeNone,
+			Data:    hyprlandEvent,
+			Module:  types.ModuleDesktop,
+		})
+	})
+
 	// These modules follow changes on the system, so they update as soon as
 	// one happens rather than on their next refresh
 	for module, watch := range map[types.ModuleName]func(context.Context, func()){

@@ -29,6 +29,7 @@ import {
 import {
   CommandPrefab,
   DiskMountsResponse,
+  HyprlandEvent,
   MetricHistory,
   ModuleDataUpdate,
   type ModuleName,
@@ -148,6 +149,12 @@ export interface Interface {
    * another client's changes before saving over them.
    */
   readonly settingsChanges: Stream.Stream<Settings>;
+  /**
+   * Custom events from Hyprland's event dispatcher, such as a bind to
+   * `hl.dsp.event("dock")`. Only sent after `registerDataListener` for the
+   * desktop module.
+   */
+  readonly hyprlandEvents: Stream.Stream<HyprlandEvent>;
   /** Adds one command to the allowlist, leaving the others as they are. */
   readonly addCommand: (
     command: SettingsCommandDefinition,
@@ -389,6 +396,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     PubSub.shutdown,
   );
 
+  const hyprlandEventResponses = yield* Effect.acquireRelease(
+    PubSub.unbounded<WebSocketResponse>(),
+    PubSub.shutdown,
+  );
+
   const closed = yield* Deferred.make<never, ConnectionError>();
 
   const prefix = (yield* Random.nextInt).toString(36);
@@ -427,6 +439,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
     if (response.type === "SETTINGS_CHANGED") {
       yield* PubSub.publish(settingsResponses, response);
+
+      return;
+    }
+
+    if (response.type === "HYPRLAND_EVENT") {
+      yield* PubSub.publish(hyprlandEventResponses, response);
 
       return;
     }
@@ -568,6 +586,22 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         Effect.catch((error) =>
           Effect.logWarning(
             "Skipping unreadable changed settings",
+            error.message,
+          ).pipe(Effect.as(Result.fail(response))),
+        ),
+      ),
+    ),
+  );
+
+  const hyprlandEvents: Stream.Stream<HyprlandEvent> = Stream.fromPubSub(
+    hyprlandEventResponses,
+  ).pipe(
+    Stream.filterMapEffect((response) =>
+      Schema.decodeUnknownEffect(HyprlandEvent)(response.data).pipe(
+        Effect.map(Result.succeed),
+        Effect.catch((error) =>
+          Effect.logWarning(
+            "Skipping an unreadable Hyprland event",
             error.message,
           ).pipe(Effect.as(Result.fail(response))),
         ),
@@ -1166,6 +1200,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     updateSettings,
     validateDirectory,
     settingsChanges,
+    hyprlandEvents,
     addCommand,
     updateCommand,
     removeCommand,

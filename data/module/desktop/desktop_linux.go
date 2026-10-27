@@ -196,6 +196,12 @@ func (h *hyprland) follow(ctx context.Context, trigger func(read bool)) error {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		name, data, _ := strings.Cut(scanner.Text(), ">>")
+		if name == "custom" {
+			if listener := hyprlandEventListener.Load(); listener != nil {
+				(*listener)(types.HyprlandEvent{Data: data})
+			}
+			continue
+		}
 
 		h.mu.Lock()
 		changed := h.events.handle(name, data)

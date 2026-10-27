@@ -209,29 +209,43 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 		return
 	}
 
-	// Broadcast to all connections that are listening for this module.
-	// Encode once: module data such as the process list is large, and
-	// encoding it per listener multiplied the work by the listener count.
+	ws.broadcastToListeners(module.Name, response)
+}
+
+// BroadcastModuleEvent sends a message to the connections listening for a
+// module, for something that happened rather than new data, such as a
+// Hyprland custom event
+func (ws *WebsocketServer) BroadcastModuleEvent(module types.ModuleName, response event.MessageResponse) {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
+	ws.broadcastToListeners(module, response)
+}
+
+// broadcastToListeners sends a message to all connections that are listening
+// for a module. ws.mutex must be held. It encodes once: module data such as
+// the process list is large, and encoding it per listener multiplied the work
+// by the listener count.
+func (ws *WebsocketServer) broadcastToListeners(module types.ModuleName, response event.MessageResponse) {
 	var payload []byte
 	broadcastCount := 0
 	for remote_addr, connInfo := range ws.connections {
 		modules, ok := ws.dataListeners[remote_addr]
-		if !ok || !slices.Contains(modules, module.Name) {
+		if !ok || !slices.Contains(modules, module) {
 			continue
 		}
 		if payload == nil {
 			encoded, err := json.Marshal(response)
 			if err != nil {
-				slog.Error("Failed to encode module update", "module", module.Name, "error", err)
+				slog.Error("Failed to encode broadcast", "module", module, "type", response.Type, "error", err)
 				return
 			}
 			payload = encoded
 		}
-		slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+		slog.Debug("WS: Broadcasting to listener", "addr", remote_addr, "module", module, "type", response.Type)
 		ws.sendPayloadWithLock(connInfo, payload, true)
 		broadcastCount++
 	}
-	slog.Debug("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
+	slog.Debug("WS: Broadcast complete", "module", module, "type", response.Type, "recipients", broadcastCount)
 }
 
 // handleGetDataModule handles module data updates from the event bus

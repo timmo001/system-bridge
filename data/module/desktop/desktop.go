@@ -4,9 +4,19 @@ package desktop
 
 import (
 	"log/slog"
+	"sync/atomic"
 
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 )
+
+var hyprlandEventListener atomic.Pointer[func(types.HyprlandEvent)]
+
+// OnHyprlandEvent calls listener with each custom event Hyprland sends, from a
+// bind to its event dispatcher
+func OnHyprlandEvent(listener func(types.HyprlandEvent)) {
+	hyprlandEventListener.Store(&listener)
+}
 
 // windowTitlesEnabled is whether to report window titles, which are off by
 // default as they can hold private information

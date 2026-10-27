@@ -91,6 +91,28 @@ This will look something like this:
 }
 ```
 
+## Hyprland events
+
+While registered as a listener for the `desktop` module on Hyprland, you also receive each custom event Hyprland sends. A bind sends one with Hyprland's event dispatcher, so a key can trigger an automation:
+
+```lua title="hyprland.lua"
+hl.bind("SUPER + F12", hl.dsp.event("dock"))
+```
+
+With a classic config, bind to `event, dock`, or send one from a script with `hyprctl dispatch event dock`. Each arrives with the `HYPRLAND_EVENT` type, and `data` is what the bind passed:
+
+```json title="Response"
+{
+    "id": "system",
+    "type": "HYPRLAND_EVENT",
+    "subtype": "NONE",
+    "data": { "data": "dock" },
+    "module": "desktop"
+}
+```
+
+The TypeScript connector has them as the `hyprlandEvents` stream, and the Python connector passes them to `listen()`'s `hyprland_event_callback`.
+
 ## Getting history
 
 System Bridge keeps up to the last 24 hours of the graphed readings and keeps them through restarts. It records about one a minute of each:
