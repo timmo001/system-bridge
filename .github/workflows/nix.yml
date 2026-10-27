@@ -1,0 +1,94 @@
+---
+name: Nix
+
+# Builds the Nix flake. nix/package.nix pins hashes of the Go and Bun
+# dependencies, so on Renovate branches a stale hash is refreshed and pushed.
+# A push with this workflow's token starts no other workflows, so the
+# required checks are dispatched for the new commit.
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - go.mod
+      - go.sum
+      - bun.lock
+      - package.json
+      - client/web/package.json
+      - connector/typescript/package.json
+      - flake.nix
+      - flake.lock
+      - nix/**
+      - .scripts/linux/update-nix-hashes.sh
+      - .github/workflows/nix.yml
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - go.mod
+      - go.sum
+      - bun.lock
+      - package.json
+      - client/web/package.json
+      - connector/typescript/package.json
+      - flake.nix
+      - flake.lock
+      - nix/**
+      - .scripts/linux/update-nix-hashes.sh
+      - .github/workflows/nix.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Nix package
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    env:
+      REFRESH: >-
+        ${{ github.event_name == 'pull_request'
+        && startsWith(github.head_ref, 'renovate/')
+        && github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+
+      - name: Refresh dependency hashes
+        if: env.REFRESH == 'true'
+        run: .scripts/linux/update-nix-hashes.sh
+
+      - name: Push refreshed hashes
+        if: env.REFRESH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if git diff --quiet nix/package.nix; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update Nix dependency hashes" nix/package.nix
+          git push origin "HEAD:$HEAD_REF"
+          for workflow in lint-application.yml test-application.yml build-and-package-application.yml; do
+            gh workflow run "$workflow" --ref "$HEAD_REF"
+          done
+
+      - name: Build
+        run: nix build .#default --no-link -L
