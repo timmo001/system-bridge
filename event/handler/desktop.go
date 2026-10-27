@@ -40,6 +40,10 @@ type HyprlandSetWindowRequestData struct {
 	ID       string `json:"id" mapstructure:"id"`
 	Floating *bool  `json:"floating" mapstructure:"floating"`
 	Pinned   *bool  `json:"pinned" mapstructure:"pinned"`
+	X        *int   `json:"x" mapstructure:"x"`
+	Y        *int   `json:"y" mapstructure:"y"`
+	Width    *int   `json:"width" mapstructure:"width"`
+	Height   *int   `json:"height" mapstructure:"height"`
 }
 
 type HyprlandGlobalShortcutRequestData struct {
@@ -175,8 +179,17 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetWindow, event.ResponseTypeHyprlandWindowSet, "Window set",
 		func(request HyprlandSetWindowRequestData) string {
-			if request.Floating == nil && request.Pinned == nil {
-				return "Provide floating or pinned"
+			if (request.X == nil) != (request.Y == nil) {
+				return "Provide both x and y"
+			}
+			if (request.Width == nil) != (request.Height == nil) {
+				return "Provide both width and height"
+			}
+			if request.Width != nil && (*request.Width <= 0 || *request.Height <= 0) {
+				return "Width and height must be more than 0"
+			}
+			if request.Floating == nil && request.Pinned == nil && request.X == nil && request.Width == nil {
+				return "Provide floating, pinned, a position or a size"
 			}
 			return required(request.ID, "No window id provided")
 		},
@@ -184,7 +197,16 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 			return desktop.HyprlandSetWindow(ctx, request.ID, desktop.HyprlandWindowSettings{
 				Floating: request.Floating,
 				Pinned:   request.Pinned,
+				X:        request.X,
+				Y:        request.Y,
+				Width:    request.Width,
+				Height:   request.Height,
 			})
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandKillWindow, event.ResponseTypeHyprlandWindowKilled, "Window killed",
+		func(request DesktopWindowRequestData) string { return required(request.ID, "No window id provided") },
+		func(ctx context.Context, request DesktopWindowRequestData) error {
+			return desktop.HyprlandKillWindow(ctx, request.ID)
 		})
 }
 

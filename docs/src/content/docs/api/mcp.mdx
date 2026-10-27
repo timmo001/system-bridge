@@ -255,11 +255,19 @@ Switch Hyprland's binds to a submap, such as a resize mode, or back to the defau
 
 ### `system_bridge_hyprland_set_window`
 
-Float or tile a window on Hyprland, and pin or unpin it. Pinning a tiled window floats it first.
+Float or tile a window on Hyprland, pin or unpin it, and move or resize it. Pinning a tiled window floats it first.
 
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 - `floating` (optional): `true` to float the window, `false` to tile it.
 - `pinned` (optional): `true` to show it on every workspace, `false` to unpin it.
+- `x` and `y` (optional, together): Where to put the window's top-left corner, in pixels across every display.
+- `width` and `height` (optional, together): The window's size in pixels.
+
+### `system_bridge_hyprland_kill_window`
+
+Kill a window's app on Hyprland without asking it to close, so anything unsaved is lost. `system_bridge_desktop_close_window` asks it to close instead.
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
 
 ### `system_bridge_list_command_prefabs`
 

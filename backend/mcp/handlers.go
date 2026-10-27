@@ -104,6 +104,10 @@ type hyprlandSetWindowInput struct {
 	ID       string `json:"id"`
 	Floating *bool  `json:"floating,omitempty"`
 	Pinned   *bool  `json:"pinned,omitempty"`
+	X        *int   `json:"x,omitempty"`
+	Y        *int   `json:"y,omitempty"`
+	Width    *int   `json:"width,omitempty"`
+	Height   *int   `json:"height,omitempty"`
 }
 
 type mediaControlInput struct {

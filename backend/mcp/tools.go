@@ -225,13 +225,25 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_window",
-		Description: "Float or tile a window on Hyprland, and pin or unpin it. Leave out a setting to keep it.",
+		Description: "Float or tile a window on Hyprland, pin or unpin it, and move or resize it. Leave out a setting to keep it.",
 		InputSchema: objectSchema(map[string]any{
 			"id":       windowID,
 			"floating": boolean("Whether the window floats"),
 			"pinned":   boolean("Whether the window is pinned, showing on every workspace"),
+			"x":        map[string]any{"type": "integer", "description": "Where to put the window's left edge, in pixels across every display. Needs y."},
+			"y":        map[string]any{"type": "integer", "description": "Where to put the window's top edge, in pixels across every display. Needs x."},
+			"width":    map[string]any{"type": "integer", "description": "The window's width in pixels. Needs height.", "minimum": 1},
+			"height":   map[string]any{"type": "integer", "description": "The window's height in pixels. Needs width.", "minimum": 1},
 		}, []string{"id"}),
 	}, eventTool[hyprlandSetWindowInput](handlers, event.EventHyprlandSetWindow))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_kill_window",
+		Description: "Kill a window's app on Hyprland, without asking it to close first. Use system_bridge_desktop_close_window to ask it to close.",
+		InputSchema: objectSchema(map[string]any{
+			"id": windowID,
+		}, []string{"id"}),
+	}, eventTool[desktopWindowInput](handlers, event.EventHyprlandKillWindow))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_commands",

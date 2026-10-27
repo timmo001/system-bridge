@@ -278,7 +278,40 @@ func HyprlandSetWindow(ctx context.Context, id string, settings HyprlandWindowSe
 			commands = append([]hyprlandCommand{pin}, commands...)
 		}
 	}
+	// Sized and placed after it floats, as Hyprland only puts a floating
+	// window exactly where it's asked. Resizing keeps the window's centre, so
+	// it's resized before it's moved.
+	if settings.Width != nil && settings.Height != nil {
+		width, height := strconv.Itoa(*settings.Width), strconv.Itoa(*settings.Height)
+		commands = append(commands, hyprlandCommand{
+			lua:     "hl.dsp.window.resize({ x = " + width + ", y = " + height + ", window = " + selector + " })",
+			classic: "resizewindowpixel exact " + width + " " + height + ",address:" + id,
+		})
+	}
+	if settings.X != nil && settings.Y != nil {
+		x, y := strconv.Itoa(*settings.X), strconv.Itoa(*settings.Y)
+		commands = append(commands, hyprlandCommand{
+			lua:     "hl.dsp.window.move({ x = " + x + ", y = " + y + ", window = " + selector + " })",
+			classic: "movewindowpixel exact " + x + " " + y + ",address:" + id,
+		})
+	}
 	return hyprlandDispatch(ctx, data, commands...)
+}
+
+// HyprlandKillWindow forces a window's app off the window, rather than
+// asking it to close
+func HyprlandKillWindow(ctx context.Context, id string) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if _, err := findWindow(data, id); err != nil {
+		return err
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.window.kill({ window = " + luaString("address:"+id) + " })",
+		classic: "killwindow address:" + id,
+	})
 }
 
 // HyprlandRunGlobalShortcut triggers a global shortcut an app registered, as

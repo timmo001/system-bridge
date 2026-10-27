@@ -37,6 +37,7 @@ export const EventType = Schema.Literals([
   "GET_HISTORY",
   "GET_SETTINGS",
   "HYPRLAND_DISPATCH",
+  "HYPRLAND_KILL_WINDOW",
   "HYPRLAND_MOVE_WINDOW",
   "HYPRLAND_MOVE_WORKSPACE",
   "HYPRLAND_RELOAD_CONFIG",
@@ -105,6 +106,7 @@ export const ResponseType = Schema.Literals([
   "HYPRLAND_EVENT",
   "HYPRLAND_GLOBAL_SHORTCUT_RUN",
   "HYPRLAND_SUBMAP_SET",
+  "HYPRLAND_WINDOW_KILLED",
   "HYPRLAND_WINDOW_MOVED",
   "HYPRLAND_WINDOW_SET",
   "HYPRLAND_WORKSPACE_MOVED",
@@ -535,13 +537,24 @@ export interface HyprlandMoveWindowRequest extends Schema.Schema.Type<
   typeof HyprlandMoveWindowRequest
 > {}
 
-/** Floats or tiles a window, and pins or unpins it. A setting left out stays as it is. */
+/**
+ * Floats or tiles a window, pins or unpins it, and moves or resizes it. A
+ * setting left out stays as it is.
+ */
 export const HyprlandSetWindowRequest = Schema.Struct({
   /** The window's `id` from the desktop module. */
   id: Schema.String,
   floating: Schema.optionalKey(Schema.Boolean),
   /** Shown on every workspace. Only floating windows can be pinned. */
   pinned: Schema.optionalKey(Schema.Boolean),
+  /** The window's left edge in pixels across every display, set with `y`. */
+  x: Schema.optionalKey(Schema.Int),
+  /** The window's top edge in pixels across every display, set with `x`. */
+  y: Schema.optionalKey(Schema.Int),
+  /** In pixels, set with `height`. */
+  width: Schema.optionalKey(Schema.Int),
+  /** In pixels, set with `width`. */
+  height: Schema.optionalKey(Schema.Int),
 });
 
 export interface HyprlandSetWindowRequest extends Schema.Schema.Type<

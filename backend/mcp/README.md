@@ -79,6 +79,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   with optional `since` and `modules`.
 - `system_bridge_hyprland_dispatch` runs a named Hyprland dispatcher, such as
   moving focus or toggling the split, on the focused window.
+- `system_bridge_hyprland_kill_window` kills a window's app on Hyprland,
+  without asking it to close.
 - `system_bridge_hyprland_move_window` moves a window to a workspace on
   Hyprland.
 - `system_bridge_hyprland_move_workspace` moves a workspace to another display
@@ -89,8 +91,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   app registered with Hyprland.
 - `system_bridge_hyprland_set_submap` switches Hyprland's binds to a submap,
   or back to the default.
-- `system_bridge_hyprland_set_window` floats or tiles, and pins or unpins, a
-  window on Hyprland.
+- `system_bridge_hyprland_set_window` floats or tiles, pins or unpins, and
+  moves or resizes a window on Hyprland.
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.

@@ -796,6 +796,19 @@ class WebSocketClient(Base):
             request_id,
         )
 
+    async def hyprland_kill_window(
+        self,
+        model: DesktopWindowRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Kill a window's app, without asking it to close first."""
+        return await self._action(
+            EventType.HYPRLAND_KILL_WINDOW,
+            EventType.HYPRLAND_WINDOW_KILLED,
+            model,
+            request_id,
+        )
+
     async def hyprland_move_window(
         self,
         model: HyprlandMoveWindowRequest,
@@ -841,7 +854,7 @@ class WebSocketClient(Base):
         model: HyprlandSetWindowRequest,
         request_id: str | None = None,
     ) -> Response:
-        """Float or tile a window, and pin or unpin it."""
+        """Float or tile a window, pin or unpin it, and move or resize it."""
         return await self._action(
             EventType.HYPRLAND_SET_WINDOW,
             EventType.HYPRLAND_WINDOW_SET,

@@ -139,13 +139,19 @@ class HyprlandRenameWorkspaceRequest:
 class HyprlandSetWindowRequest:
     """Hyprland Set Window Request.
 
-    Floats or tiles a window, and pins or unpins it. A setting left as None
-    stays as it is. Only floating windows can be pinned.
+    Floats or tiles a window, pins or unpins it, and moves or resizes it. A
+    setting left as None stays as it is. Only floating windows can be pinned.
+    x and y place the window's top-left corner, in pixels across every display,
+    and width and height size it, each set as a pair.
     """
 
     id: str
     floating: bool | None = None
     pinned: bool | None = None
+    x: int | None = None
+    y: int | None = None
+    width: int | None = None
+    height: int | None = None
 
 
 @dataclass(slots=True)

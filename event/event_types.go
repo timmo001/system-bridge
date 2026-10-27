@@ -33,6 +33,7 @@ const (
 	EventGetHistory                EventType = "GET_HISTORY"
 	EventGetSettings               EventType = "GET_SETTINGS"
 	EventHyprlandDispatch          EventType = "HYPRLAND_DISPATCH"
+	EventHyprlandKillWindow        EventType = "HYPRLAND_KILL_WINDOW"
 	EventHyprlandMoveWindow        EventType = "HYPRLAND_MOVE_WINDOW"
 	EventHyprlandMoveWorkspace     EventType = "HYPRLAND_MOVE_WORKSPACE"
 	EventHyprlandReloadConfig      EventType = "HYPRLAND_RELOAD_CONFIG"

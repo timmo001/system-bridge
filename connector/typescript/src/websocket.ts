@@ -240,6 +240,10 @@ export interface Interface {
   readonly hyprlandDispatch: (
     dispatch: HyprlandDispatchRequest,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Kills a window's app, without asking it to close first. */
+  readonly hyprlandKillWindow: (
+    window: DesktopWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
   readonly hyprlandMoveWindow: (
     move: HyprlandMoveWindowRequest,
   ) => Effect.Effect<void, WebSocketError>;
@@ -1083,6 +1087,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const hyprlandKillWindow = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandKillWindow",
+  )(function* (window: DesktopWindowRequest) {
+    yield* call(
+      "HYPRLAND_KILL_WINDOW",
+      "HYPRLAND_WINDOW_KILLED",
+      DesktopWindowRequest,
+      window,
+      ignoreReply,
+    );
+  });
+
   const hyprlandMoveWindow = Effect.fn(
     "SystemBridgeWebSocket.hyprlandMoveWindow",
   )(function* (move: HyprlandMoveWindowRequest) {
@@ -1272,6 +1288,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     updateDiscordSetup,
     displayControl,
     hyprlandDispatch,
+    hyprlandKillWindow,
     hyprlandMoveWindow,
     hyprlandReloadConfig,
     hyprlandRunGlobalShortcut,

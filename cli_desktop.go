@@ -133,11 +133,15 @@ func hyprlandCommand() *cli.Command {
 			},
 			{
 				Name:      "set",
-				Usage:     "Float or tile a window, and pin or unpin it",
+				Usage:     "Float or tile a window, pin or unpin it, and move or resize it",
 				ArgsUsage: "<window id>",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "floating", Usage: "Float the window, or tile it with --floating=false"},
 					&cli.BoolFlag{Name: "pinned", Usage: "Pin the window, or unpin it with --pinned=false"},
+					&cli.IntFlag{Name: "x", Usage: "Move the window's left edge here, with --y"},
+					&cli.IntFlag{Name: "y", Usage: "Move the window's top edge here, with --x"},
+					&cli.IntFlag{Name: "width", Usage: "Resize the window to this width, with --height"},
+					&cli.IntFlag{Name: "height", Usage: "Resize the window to this height, with --width"},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					id := cmd.Args().First()
@@ -146,12 +150,18 @@ func hyprlandCommand() *cli.Command {
 					}
 					data := map[string]any{"id": id}
 					setFlags(cmd, data, "floating", "pinned")
+					for _, flag := range []string{"x", "y", "width", "height"} {
+						if cmd.IsSet(flag) {
+							data[flag] = cmd.Int(flag)
+						}
+					}
 					if len(data) == 1 {
-						return fmt.Errorf("set --floating or --pinned")
+						return fmt.Errorf("set --floating, --pinned, --x and --y, or --width and --height")
 					}
 					return client.Send(cmdCtx, event.EventHyprlandSetWindow, data)
 				},
 			},
+			windowCommand("kill", "Kill a window's app, without asking it to close first", event.EventHyprlandKillWindow),
 			{
 				Name:  "workspace",
 				Usage: "Rename a workspace, or move it to another display",

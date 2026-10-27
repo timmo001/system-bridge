@@ -17,8 +17,12 @@ type WindowState struct {
 }
 
 // HyprlandWindowSettings is what to set on a Hyprland window. Nil leaves a
-// setting as it is.
+// setting as it is. The position and size are in pixels, each set as a pair.
 type HyprlandWindowSettings struct {
 	Floating *bool
 	Pinned   *bool
+	X        *int
+	Y        *int
+	Width    *int
+	Height   *int
 }

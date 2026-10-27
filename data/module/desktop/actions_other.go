@@ -24,6 +24,11 @@ func HyprlandSetWindow(context.Context, string, HyprlandWindowSettings) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 }
 
+// HyprlandKillWindow isn't possible without Hyprland
+func HyprlandKillWindow(context.Context, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
 // HyprlandRunGlobalShortcut isn't possible without Hyprland
 func HyprlandRunGlobalShortcut(context.Context, string) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
