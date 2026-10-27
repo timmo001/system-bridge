@@ -343,9 +343,9 @@ Returns an array of objects, one per process.
 | `uuid` | string | Stable machine identifier. |
 | `users` | array | Logged-in users with `name`, `active`, `terminal`, `host`, `started`, and `pid`. |
 | `version` | string | Installed System Bridge version. |
-| `version_latest` | string | Latest available version. |
-| `version_latest_url` | string | URL for the latest release. |
-| `version_newer_available` | boolean | Whether a newer version is available. |
+| `version_latest` | string | Latest available version. Development builds track the `dev` branch, so this is the latest commit when there's a newer one. |
+| `version_latest_url` | string | URL for the latest release, or the commits since the build for development builds. |
+| `version_newer_available` | boolean | Whether a newer version, or a newer commit for development builds, is available. |
 | `camera_usage` | array | Apps using the camera. Linux only. |
 | `microphone_usage` | array | Apps using the microphone. Linux only. |
 | `pending_reboot` | boolean | Whether a reboot is pending. Linux only. |

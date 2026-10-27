@@ -23,6 +23,16 @@ var (
 	// LatestVersionUserURL is the URL to check for the latest version for the user
 	LatestVersionUserURL = "https://github.com/timmo001/system-bridge/releases/latest"
 
+	// DevBranchURL is the URL to check for the latest commit on the development branch
+	DevBranchURL = "https://api.github.com/repos/timmo001/system-bridge/branches/dev"
+
+	// compareUserURL is the base of the URL showing the user the commits since their build
+	compareUserURL = "https://github.com/timmo001/system-bridge/compare/"
+
+	// reBuildCommit matches the commit a development build was made from, in
+	// the Arch -git (.g<sha>) or CI (-dev+<sha>) version formats
+	reBuildCommit = regexp.MustCompile(`(?i)(?:[.\-]g|-dev\+)([0-9a-f]{7,})`)
+
 	// docsBaseURL is the documentation site root. It is used to build the
 	// per-surface documentation links below and is not linked directly.
 	docsBaseURL = "https://system-bridge.timmo.dev"
@@ -62,6 +72,48 @@ func GetLatestVersion() (string, error) {
 	version := strings.TrimPrefix(release.TagName, "v")
 
 	return version, nil
+}
+
+// BuildCommit returns the commit a development build was made from, or an
+// empty string for a release build
+func BuildCommit() string {
+	if m := reBuildCommit.FindStringSubmatch(Version); len(m) == 2 {
+		return strings.ToLower(m[1])
+	}
+	return ""
+}
+
+// GetLatestCommit fetches the latest commit on the development branch from GitHub with caching
+func GetLatestCommit() (string, error) {
+	body, err := client.Get(DevBranchURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch latest commit: %v", err)
+	}
+
+	var branch struct {
+		Commit struct {
+			SHA string `json:"sha"`
+		} `json:"commit"`
+	}
+	if err := json.Unmarshal(body, &branch); err != nil {
+		return "", fmt.Errorf("failed to parse response: %v", err)
+	}
+	if branch.Commit.SHA == "" {
+		return "", fmt.Errorf("response has no commit")
+	}
+
+	return strings.ToLower(branch.Commit.SHA), nil
+}
+
+// IsNewerCommitAvailable checks if the latest commit differs from the one a
+// development build was made from. The build commit may be abbreviated.
+func IsNewerCommitAvailable(buildCommit, latestCommit string) bool {
+	return !strings.HasPrefix(latestCommit, buildCommit)
+}
+
+// CompareUserURL returns the URL showing the user the commits since their build
+func CompareUserURL(buildCommit string) string {
+	return compareUserURL + buildCommit + "...dev"
 }
 
 // IsNewerVersionAvailable checks if a newer version is available

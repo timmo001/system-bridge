@@ -212,19 +212,34 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		systemData.FailedUnits = system.GetFailedUnits()
 	}
 
-	// Get version information
+	// Get version information. Development builds track the dev branch, and
+	// release builds track releases.
 	currentVersion := version.APIVersion()
-	latestVersion, err := version.GetLatestVersion()
-	if err != nil {
-		slog.Warn("Failed to get latest version", "error", err)
-		latestVersion = currentVersion
+	latestVersion := currentVersion
+	latestVersionURL := version.LatestVersionUserURL
+	versionNewerAvailable := false
+	if buildCommit := version.BuildCommit(); buildCommit != "" {
+		latestVersionURL = version.CompareUserURL(buildCommit)
+		latestCommit, err := version.GetLatestCommit()
+		if err != nil {
+			slog.Warn("Failed to get latest commit", "error", err)
+		} else if version.IsNewerCommitAvailable(buildCommit, latestCommit) {
+			latestVersion = latestCommit[:min(7, len(latestCommit))]
+			versionNewerAvailable = true
+		}
+	} else {
+		latest, err := version.GetLatestVersion()
+		if err != nil {
+			slog.Warn("Failed to get latest version", "error", err)
+		} else {
+			latestVersion = latest
+			versionNewerAvailable = version.IsNewerVersionAvailable(currentVersion, latestVersion)
+		}
 	}
-
-	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
 	systemData.Version = currentVersion
 	systemData.VersionLatest = &latestVersion
-	systemData.VersionLatestURL = &version.LatestVersionUserURL
+	systemData.VersionLatestURL = &latestVersionURL
 	systemData.VersionNewerAvailable = &versionNewerAvailable
 
 	return systemData, nil

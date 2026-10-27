@@ -68,6 +68,41 @@ func TestAPIVersion_Normalization(t *testing.T) {
 	}
 }
 
+func TestBuildCommit(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"Release tag", "v5.20.0", ""},
+		{"Release package", "5.20.0", ""},
+		{"Prerelease tag", "v5.0.0-beta.8", ""},
+		{"CI dev build", "5.0.0-dev+9a1e6b4b", "9a1e6b4b"},
+		{"Arch -git build", "5.19.1.r7013.g78f15ca", "78f15ca"},
+		{"Arch -git prerelease build", "5.0.0.beta.8.r0.g88B1b13", "88b1b13"},
+	}
+
+	orig := Version
+	defer func() { Version = orig }()
+
+	for _, tc := range cases {
+		Version = tc.input
+		if got := BuildCommit(); got != tc.expected {
+			t.Errorf("%s: BuildCommit() = %q, want %q", tc.name, got, tc.expected)
+		}
+	}
+}
+
+func TestIsNewerCommitAvailable(t *testing.T) {
+	latest := "78f15ca0123456789abcdef0123456789abcdef0"
+	if IsNewerCommitAvailable("78f15ca", latest) {
+		t.Error("same commit reported as newer")
+	}
+	if !IsNewerCommitAvailable("023e2a0", latest) {
+		t.Error("different commit not reported as newer")
+	}
+}
+
 func TestIsNewerVersionAvailable(t *testing.T) {
 	cases := []struct {
 		name    string
