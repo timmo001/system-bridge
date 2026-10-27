@@ -83,6 +83,24 @@ type HyprlandData struct {
 	GlobalShortcuts []HyprlandGlobalShortcut     `json:"global_shortcuts" mapstructure:"global_shortcuts"`
 	Windows         map[string]HyprlandWindow    `json:"windows" mapstructure:"windows"`
 	Workspaces      map[string]HyprlandWorkspace `json:"workspaces" mapstructure:"workspaces"`
+	Options         []HyprlandOption             `json:"options" mapstructure:"options"`
+}
+
+// HyprlandOptionType is the type of an option's value
+type HyprlandOptionType string
+
+const (
+	HyprlandOptionTypeBool HyprlandOptionType = "bool"
+	HyprlandOptionTypeInt  HyprlandOptionType = "int"
+)
+
+// HyprlandOption is one of the config options System Bridge can read and set,
+// such as animations.enabled. Only the field for its type is set.
+type HyprlandOption struct {
+	Name string             `json:"name" mapstructure:"name"`
+	Type HyprlandOptionType `json:"type" mapstructure:"type"`
+	Bool *bool              `json:"bool" mapstructure:"bool"`
+	Int  *int               `json:"int" mapstructure:"int"`
 }
 
 // HyprlandVersion is the running Hyprland's build and setup

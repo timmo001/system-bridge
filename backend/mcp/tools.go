@@ -221,6 +221,18 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[hyprlandMoveWorkspaceInput](handlers, event.EventHyprlandMoveWorkspace))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_set_option",
+		Description: "Set one of Hyprland's config options that System Bridge allows, until the config reloads. Get them and their types from the desktop module's hyprland.options.",
+		InputSchema: objectSchema(map[string]any{
+			"name": map[string]any{"type": "string", "description": "Option name from hyprland.options, such as animations.enabled"},
+			"value": map[string]any{
+				"type":        []string{"boolean", "integer"},
+				"description": "true or false for a bool option, or a whole number, 0 or more, for an int option",
+			},
+		}, []string{"name", "value"}),
+	}, eventTool[hyprlandOptionInput](handlers, event.EventHyprlandSetOption))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_submap",
 		Description: "Switch Hyprland's binds to a submap, or back to the default. Submaps are the binds' submap in the desktop module's hyprland.binds.",
 		InputSchema: objectSchema(map[string]any{

@@ -62,6 +62,7 @@ import {
   HyprlandGlobalShortcutRequest,
   HyprlandMoveWindowRequest,
   HyprlandMoveWorkspaceRequest,
+  HyprlandOptionRequest,
   HyprlandRenameWorkspaceRequest,
   HyprlandSetWindowRequest,
   HyprlandSubmapRequest,
@@ -260,6 +261,10 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly hyprlandRenameWorkspace: (
     rename: HyprlandRenameWorkspaceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Sets a config option from `hyprland.options` until the config reloads. */
+  readonly hyprlandSetOption: (
+    option: HyprlandOptionRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Switches binds to a submap, or back to the default. */
   readonly hyprlandSetSubmap: (
@@ -1170,6 +1175,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const hyprlandSetOption = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandSetOption",
+  )(function* (option: HyprlandOptionRequest) {
+    yield* call(
+      "HYPRLAND_SET_OPTION",
+      "HYPRLAND_OPTION_SET",
+      HyprlandOptionRequest,
+      option,
+      ignoreReply,
+    );
+  });
+
   const hyprlandSetSubmap = Effect.fn(
     "SystemBridgeWebSocket.hyprlandSetSubmap",
   )(function* (submap: HyprlandSubmapRequest) {
@@ -1295,6 +1312,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     hyprlandSetWindow,
     hyprlandMoveWorkspace,
     hyprlandRenameWorkspace,
+    hyprlandSetOption,
     hyprlandSetSubmap,
     mediaControl,
     sendNotification,

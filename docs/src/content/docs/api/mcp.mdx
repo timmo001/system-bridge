@@ -248,6 +248,13 @@ Trigger a global shortcut an app registered with Hyprland, such as one that open
 
 - `name` (required): A `name` from the `desktop` module's `hyprland.global_shortcuts`.
 
+### `system_bridge_hyprland_set_option`
+
+Set one of the Hyprland config options System Bridge allows, such as turning animations off, until the config reloads. See [Hyprland control](/api/websocket/control/#hyprland-control) for the list.
+
+- `name` (required): A `name` from the `desktop` module's `hyprland.options`.
+- `value` (required): `true` or `false` for a `bool` option, or a whole number, 0 or more, for an `int` option.
+
 ### `system_bridge_hyprland_set_submap`
 
 Switch Hyprland's binds to a submap, such as a resize mode, or back to the default.

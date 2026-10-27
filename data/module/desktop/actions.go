@@ -9,6 +9,10 @@ var ErrUnsupported = errors.New("not supported on this desktop")
 // action names isn't on the desktop
 var ErrNotFound = errors.New("not found on the desktop")
 
+// ErrInvalidValue is returned for a value an action can't take, such as a
+// number for an option that's true or false
+var ErrInvalidValue = errors.New("invalid value")
+
 // WindowState is the states to set on a window. Nil leaves a state as it is.
 type WindowState struct {
 	Fullscreen *bool

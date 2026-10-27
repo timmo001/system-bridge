@@ -23,6 +23,13 @@ class HyprlandFullscreenMode(StrEnum):
     NONE = "none"
 
 
+class HyprlandOptionType(StrEnum):
+    """Hyprland Option Type."""
+
+    BOOL = "bool"
+    INT = "int"
+
+
 class HyprlandScreencastType(StrEnum):
     """Hyprland Screencast Type."""
 
@@ -260,6 +267,21 @@ class HyprlandWorkspace:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class HyprlandOption:
+    """Hyprland Option.
+
+    One of the config options System Bridge can read and set, such as
+    animations.enabled. Only the field for its type is set.
+    """
+
+    name: str
+    type: HyprlandOptionType
+    bool: bool | None = None
+    int: int | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class Hyprland:
     """What only Hyprland reports.
 
@@ -281,11 +303,17 @@ class Hyprland:
     global_shortcuts: list[HyprlandGlobalShortcut] = field(default_factory=list)
     windows: dict[str, HyprlandWindow] = field(default_factory=dict)
     workspaces: dict[str, HyprlandWorkspace] = field(default_factory=dict)
+    options: list[HyprlandOption] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Post Init."""
         if isinstance(self.version, dict):
             self.version = HyprlandVersion(**self.version)
+
+        self.options = [
+            HyprlandOption(**cast(dict, o)) if isinstance(o, dict) else o
+            for o in self.options or []
+        ]
 
         self.screencasts = [
             HyprlandScreencast(**cast(dict, s)) if isinstance(s, dict) else s

@@ -61,7 +61,7 @@ func registerAction[T any](
 			switch {
 			case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, desktop.ErrUnsupported):
 				subtype = event.ResponseSubtypeInvalidAction
-			case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, desktop.ErrNotFound):
+			case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue):
 				subtype = event.ResponseSubtypeBadRequest
 			}
 			return errorResponse(subtype, err.Error())

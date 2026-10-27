@@ -34,6 +34,7 @@ from .models.desktop_control import (
     HyprlandGlobalShortcutRequest,
     HyprlandMoveWindowRequest,
     HyprlandMoveWorkspaceRequest,
+    HyprlandOptionRequest,
     HyprlandRenameWorkspaceRequest,
     HyprlandSetWindowRequest,
     HyprlandSubmapRequest,
@@ -884,6 +885,19 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.HYPRLAND_RENAME_WORKSPACE,
             EventType.HYPRLAND_WORKSPACE_RENAMED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_set_option(
+        self,
+        model: HyprlandOptionRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Set a config option until the config reloads."""
+        return await self._action(
+            EventType.HYPRLAND_SET_OPTION,
+            EventType.HYPRLAND_OPTION_SET,
             model,
             request_id,
         )

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/event"
@@ -196,6 +197,25 @@ func hyprlandCommand() *cli.Command {
 							return client.Send(cmdCtx, event.EventHyprlandMoveWorkspace, map[string]any{"id": id, "display": display})
 						},
 					},
+				},
+			},
+			{
+				Name:      "option",
+				Usage:     "Set a config option from the desktop data's hyprland.options, until the config reloads",
+				ArgsUsage: "<name> <true|false|number>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					name, text := cmd.Args().Get(0), cmd.Args().Get(1)
+					if name == "" || text == "" {
+						return fmt.Errorf("an option name and a value are required")
+					}
+					// A number first, as ParseBool would take 0 and 1 as false and true
+					var value any = text
+					if number, err := strconv.Atoi(text); err == nil {
+						value = number
+					} else if parsed, err := strconv.ParseBool(text); err == nil {
+						value = parsed
+					}
+					return client.Send(cmdCtx, event.EventHyprlandSetOption, map[string]any{"name": name, "value": value})
 				},
 			},
 			{

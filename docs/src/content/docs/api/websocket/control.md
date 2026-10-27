@@ -175,7 +175,7 @@ The response type is `DISPLAY_CONTROLLED`, and the displays module updates strai
 
 ## Hyprland control
 
-On Hyprland, float, pin, move, resize and kill windows, rename workspaces and move them between displays, run dispatchers on the focused window, trigger global shortcuts, switch the submap, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+On Hyprland, float, pin, move, resize and kill windows, rename workspaces and move them between displays, run dispatchers on the focused window, trigger global shortcuts, switch the submap, set some config options, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
 
 | Event | Data | Response |
 | --- | --- | --- |
@@ -186,10 +186,25 @@ On Hyprland, float, pin, move, resize and kill windows, rename workspaces and mo
 | `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
 | `HYPRLAND_RENAME_WORKSPACE` | `id`, a workspace `id`, and its new `name`, or none for the default | `HYPRLAND_WORKSPACE_RENAMED` |
 | `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
+| `HYPRLAND_SET_OPTION` | `name`, an option from the `options` in the [`desktop`](/api/data/#desktop) data's `hyprland`, and its `value` | `HYPRLAND_OPTION_SET` |
 | `HYPRLAND_SET_SUBMAP` | `name`, a submap the `binds` in the [`desktop`](/api/data/#desktop) data's `hyprland` are in, or none for the default | `HYPRLAND_SUBMAP_SET` |
 | `HYPRLAND_SET_WINDOW` | `id`, and any of `floating` and `pinned` as `true` or `false`, `x` and `y`, and `width` and `height` | `HYPRLAND_WINDOW_SET` |
 
-Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. `x` and `y` place the window's top-left corner in pixels across every display, and `width` and `height` size it, each as a pair. Hyprland only places a floating window exactly, so float it in the same request. Killing a window ends its app without asking, unlike `DESKTOP_CLOSE_WINDOW`, so anything unsaved is lost. Only the global shortcuts apps have registered and the dispatchers below can run, and there's no way to send Hyprland any other command.
+Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. `x` and `y` place the window's top-left corner in pixels across every display, and `width` and `height` size it, each as a pair. Hyprland only places a floating window exactly, so float it in the same request. Killing a window ends its app without asking, unlike `DESKTOP_CLOSE_WINDOW`, so anything unsaved is lost. Only the global shortcuts apps have registered, the dispatchers below and the options listed in `options` can run or change, and there's no way to send Hyprland any other command.
+
+The options are `animations.enabled`, `decoration.blur.enabled`, `decoration.dim_inactive`, `decoration.rounding`, `decoration.shadow.enabled`, `general.border_size`, `general.gaps_in`, `general.gaps_out`, `input.touchpad.natural_scroll` and `misc.vrr`. Each has a `type`: `bool` takes `true` or `false`, and `int` a whole number, 0 or more. A value set this way lasts until Hyprland's config reloads.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_SET_OPTION",
+    "data": {
+        "name": "animations.enabled",
+        "value": false
+    }
+}
+```
 
 ```json title="Request"
 {

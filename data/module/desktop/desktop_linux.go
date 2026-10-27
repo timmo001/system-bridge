@@ -105,8 +105,7 @@ func (h *hyprland) refresh(ctx context.Context, titles bool, read bool) (*types.
 		if h.config == nil {
 			requests = append(requests, hyprlandConfigRequests...)
 			targets = append(targets, config.targets()...)
-			// Older versions don't know status
-			optional = 1
+			optional = hyprlandConfigOptional
 		}
 
 		replies, err := hyprlandBatch(ctx, dir, requests...)
@@ -126,6 +125,14 @@ func (h *hyprland) refresh(ctx context.Context, titles bool, read bool) (*types.
 	data.Omarchy = omarchySource.get(ctx)
 	h.data, h.titles = &data, titles
 	return h.data, nil
+}
+
+// forgetConfig makes the next update read Hyprland's config again, such as
+// after an option is set, which sends no event
+func (h *hyprland) forgetConfig() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.config, h.data = nil, nil
 }
 
 // Watch calls changed whenever the desktop changes, until ctx is done. It

@@ -145,6 +145,7 @@ type hyprlandConfig struct {
 		ConfigProvider string `json:"configProvider"`
 		Backend        string `json:"backend"`
 	}
+	Options []hyprlandOptionReply // In hyprlandOptions' order
 }
 
 type hyprlandBind struct {
@@ -178,12 +179,90 @@ var hyprlandModifiers = []struct {
 	{128, "MOD5"},
 }
 
-// hyprlandConfigRequests are the requests for hyprlandConfig, with status last
-// as older versions don't know it
-var hyprlandConfigRequests = []string{"version", "configerrors", "globalshortcuts", "binds", "status"}
+type hyprlandOption struct {
+	name string // As Lua names it
+	kind types.HyprlandOptionType
+}
+
+// hyprlandOptions are the config options System Bridge can read and set. Each
+// is a toggle or a number, which suit a switch or slider in Home Assistant.
+var hyprlandOptions = []hyprlandOption{
+	{"animations.enabled", types.HyprlandOptionTypeBool},
+	{"decoration.blur.enabled", types.HyprlandOptionTypeBool},
+	{"decoration.dim_inactive", types.HyprlandOptionTypeBool},
+	{"decoration.rounding", types.HyprlandOptionTypeInt},
+	{"decoration.shadow.enabled", types.HyprlandOptionTypeBool},
+	{"general.border_size", types.HyprlandOptionTypeInt},
+	{"general.gaps_in", types.HyprlandOptionTypeInt},
+	{"general.gaps_out", types.HyprlandOptionTypeInt},
+	{"input.touchpad.natural_scroll", types.HyprlandOptionTypeBool},
+	{"misc.vrr", types.HyprlandOptionTypeInt},
+}
+
+// hyprlandOptionReply is getoption's reply. Gaps come back as CSS, such as
+// "5 5 5 5" for top, right, bottom and left.
+type hyprlandOptionReply struct {
+	Bool *bool   `json:"bool"`
+	Int  *int    `json:"int"`
+	CSS  *string `json:"css"`
+}
+
+// hyprlandConfigRequests are the requests for hyprlandConfig. status and the
+// options are last as older versions may not know them.
+var hyprlandConfigRequests = func() []string {
+	requests := []string{"version", "configerrors", "globalshortcuts", "binds", "status"}
+	for _, option := range hyprlandOptions {
+		// The classic name, which getoption takes with either config
+		requests = append(requests, "getoption "+strings.ReplaceAll(option.name, ".", ":"))
+	}
+	return requests
+}()
+
+// hyprlandConfigOptional is how many of the last config requests older
+// versions may not know
+var hyprlandConfigOptional = 1 + len(hyprlandOptions)
 
 func (c *hyprlandConfig) targets() []any {
-	return []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Binds, &c.Status}
+	targets := []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Binds, &c.Status}
+	c.Options = make([]hyprlandOptionReply, len(hyprlandOptions))
+	for i := range c.Options {
+		targets = append(targets, &c.Options[i])
+	}
+	return targets
+}
+
+// hyprlandOptionValues turns getoption's replies into the options' values,
+// leaving out any Hyprland didn't answer or that has no single value, such as
+// gaps that differ by side
+func hyprlandOptionValues(replies []hyprlandOptionReply) []types.HyprlandOption {
+	options := []types.HyprlandOption{}
+	for i, option := range hyprlandOptions {
+		if i >= len(replies) {
+			break
+		}
+		reply := replies[i]
+		value := types.HyprlandOption{Name: option.name, Type: option.kind}
+		switch {
+		case option.kind == types.HyprlandOptionTypeBool && reply.Bool != nil:
+			value.Bool = reply.Bool
+		case option.kind == types.HyprlandOptionTypeInt && reply.Int != nil:
+			value.Int = reply.Int
+		case option.kind == types.HyprlandOptionTypeInt && reply.CSS != nil:
+			sides := strings.Fields(*reply.CSS)
+			if len(sides) == 0 || slices.ContainsFunc(sides, func(side string) bool { return side != sides[0] }) {
+				continue
+			}
+			number, err := strconv.Atoi(sides[0])
+			if err != nil {
+				continue
+			}
+			value.Int = &number
+		default:
+			continue
+		}
+		options = append(options, value)
+	}
+	return options
 }
 
 // decodeReplies decodes each reply into its target. Only the last optional
@@ -333,6 +412,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		GlobalShortcuts: []types.HyprlandGlobalShortcut{},
 		Windows:         make(map[string]types.HyprlandWindow, len(state.Clients)),
 		Workspaces:      make(map[string]types.HyprlandWorkspace, len(state.Workspaces)),
+		Options:         hyprlandOptionValues(config.Options),
 	}
 	for _, configError := range config.ConfigErrors {
 		if configError != "" {

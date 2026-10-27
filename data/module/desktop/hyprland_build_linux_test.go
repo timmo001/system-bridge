@@ -30,6 +30,32 @@ func TestHyprlandBinds(t *testing.T) {
 	assert.Equal(t, "omarchy:menu.root", *binds[1].Argument)
 }
 
+func TestHyprlandOptionValues(t *testing.T) {
+	replies := make([]hyprlandOptionReply, len(hyprlandOptions))
+	for i, option := range hyprlandOptions {
+		switch option.name {
+		case "animations.enabled":
+			replies[i].Bool = pointer(false)
+		case "decoration.rounding":
+			replies[i].Int = pointer(8)
+		case "general.gaps_in":
+			replies[i].CSS = pointer("5 5 5 5")
+		case "general.gaps_out":
+			replies[i].CSS = pointer("10 0 10 0")
+		}
+	}
+
+	byName := map[string]types.HyprlandOption{}
+	for _, option := range hyprlandOptionValues(replies) {
+		byName[option.Name] = option
+	}
+	assert.Len(t, byName, 3, "options Hyprland didn't answer are left out")
+	assert.False(t, *byName["animations.enabled"].Bool)
+	assert.Equal(t, 8, *byName["decoration.rounding"].Int)
+	assert.Equal(t, 5, *byName["general.gaps_in"].Int, "the same gap on every side is one number")
+	assert.NotContains(t, byName, "general.gaps_out", "gaps that differ by side have no one number")
+}
+
 func TestBuildHyprland(t *testing.T) {
 	var state hyprlandState
 	replies := []json.RawMessage{

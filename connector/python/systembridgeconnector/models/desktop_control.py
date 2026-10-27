@@ -132,6 +132,18 @@ class HyprlandMoveWorkspaceRequest:
 
 
 @dataclass(slots=True)
+class HyprlandOptionRequest:
+    """Hyprland Option Request.
+
+    Sets an option from the desktop module's hyprland.options until the config
+    reloads. value is a bool or a whole number, 0 or more, by its type.
+    """
+
+    name: str
+    value: bool | int
+
+
+@dataclass(slots=True)
 class HyprlandRenameWorkspaceRequest:
     """Hyprland Rename Workspace Request.
 

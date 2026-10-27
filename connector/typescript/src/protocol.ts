@@ -43,6 +43,7 @@ export const EventType = Schema.Literals([
   "HYPRLAND_RELOAD_CONFIG",
   "HYPRLAND_RENAME_WORKSPACE",
   "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+  "HYPRLAND_SET_OPTION",
   "HYPRLAND_SET_SUBMAP",
   "HYPRLAND_SET_WINDOW",
   "KEYBOARD_KEYPRESS",
@@ -105,6 +106,7 @@ export const ResponseType = Schema.Literals([
   "HYPRLAND_DISPATCHED",
   "HYPRLAND_EVENT",
   "HYPRLAND_GLOBAL_SHORTCUT_RUN",
+  "HYPRLAND_OPTION_SET",
   "HYPRLAND_SUBMAP_SET",
   "HYPRLAND_WINDOW_KILLED",
   "HYPRLAND_WINDOW_MOVED",
@@ -573,6 +575,21 @@ export const HyprlandMoveWorkspaceRequest = Schema.Struct({
 
 export interface HyprlandMoveWorkspaceRequest extends Schema.Schema.Type<
   typeof HyprlandMoveWorkspaceRequest
+> {}
+
+/**
+ * Sets an option from the desktop module's `hyprland.options` until the
+ * config reloads.
+ */
+export const HyprlandOptionRequest = Schema.Struct({
+  /** Such as `animations.enabled`. */
+  name: Schema.String,
+  /** A boolean or a whole number, 0 or more, by the option's `type`. */
+  value: Schema.Union([Schema.Boolean, Schema.Int]),
+});
+
+export interface HyprlandOptionRequest extends Schema.Schema.Type<
+  typeof HyprlandOptionRequest
 > {}
 
 /** Renames a workspace, or gives it back its default name when `name` is left out. */

@@ -97,6 +97,11 @@ type hyprlandMoveWorkspaceInput struct {
 	Display string `json:"display"`
 }
 
+type hyprlandOptionInput struct {
+	Name  string `json:"name"`
+	Value any    `json:"value"`
+}
+
 type hyprlandSubmapInput struct {
 	Name string `json:"name,omitempty"`
 }

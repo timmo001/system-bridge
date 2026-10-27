@@ -5,7 +5,9 @@ package desktop
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -415,6 +417,77 @@ func HyprlandSetSubmap(ctx context.Context, name string) error {
 		lua:     "hl.dsp.submap(" + luaString(target) + ")",
 		classic: "submap " + target,
 	})
+}
+
+// HyprlandSetOption sets one of the config options in hyprlandOptions until
+// the config reloads. value is a bool or a whole number, by the option's type.
+func HyprlandSetOption(ctx context.Context, name string, value any) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	index := slices.IndexFunc(hyprlandOptions, func(option hyprlandOption) bool { return option.name == name })
+	if index == -1 {
+		return fmt.Errorf("option %q: %w", name, ErrNotFound)
+	}
+	text, err := hyprlandOptionValue(hyprlandOptions[index].kind, value)
+	if err != nil {
+		return fmt.Errorf("option %q: %w: %w", name, ErrInvalidValue, err)
+	}
+
+	request := "keyword " + strings.ReplaceAll(name, ".", ":") + " " + text
+	if provider := data.Hyprland.Version.ConfigProvider; provider != nil && *provider == "lua" {
+		// hl.config({ animations = { enabled = false } })
+		parts := strings.Split(name, ".")
+		lua := parts[len(parts)-1] + " = " + text
+		for i := len(parts) - 2; i >= 0; i-- {
+			lua = parts[i] + " = { " + lua + " }"
+		}
+		request = "eval hl.config({ " + lua + " })"
+	}
+	if err := hyprlandSend(ctx, request); err != nil {
+		return err
+	}
+	hyprlandSource.forgetConfig()
+	return nil
+}
+
+// hyprlandOptionValue checks a value against an option's type and writes it
+// as both config languages take it
+func hyprlandOptionValue(kind types.HyprlandOptionType, value any) (string, error) {
+	switch kind {
+	case types.HyprlandOptionTypeBool:
+		switch value := value.(type) {
+		case bool:
+			return strconv.FormatBool(value), nil
+		case string:
+			if parsed, err := strconv.ParseBool(value); err == nil {
+				return strconv.FormatBool(parsed), nil
+			}
+		}
+		return "", errors.New("the value must be true or false")
+	case types.HyprlandOptionTypeInt:
+		var number float64
+		switch value := value.(type) {
+		case float64:
+			number = value
+		case int:
+			number = float64(value)
+		case string:
+			parsed, err := strconv.Atoi(value)
+			if err != nil {
+				return "", errors.New("the value must be a whole number")
+			}
+			number = float64(parsed)
+		default:
+			return "", errors.New("the value must be a whole number")
+		}
+		if number != math.Trunc(number) || number < 0 {
+			return "", errors.New("the value must be a whole number, 0 or more")
+		}
+		return strconv.Itoa(int(number)), nil
+	}
+	return "", fmt.Errorf("unknown option type %q", kind)
 }
 
 // HyprlandReloadConfig reloads Hyprland's config

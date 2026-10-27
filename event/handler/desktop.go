@@ -60,6 +60,11 @@ type HyprlandMoveWorkspaceRequestData struct {
 	Display string `json:"display" mapstructure:"display"`
 }
 
+type HyprlandOptionRequestData struct {
+	Name  string `json:"name" mapstructure:"name"`
+	Value any    `json:"value" mapstructure:"value"` // A bool or a whole number, by the option's type
+}
+
 type HyprlandSubmapRequestData struct {
 	Name string `json:"name" mapstructure:"name"`
 }
@@ -172,6 +177,16 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		},
 		func(ctx context.Context, request HyprlandMoveWorkspaceRequestData) error {
 			return desktop.HyprlandMoveWorkspace(ctx, request.ID, request.Display)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetOption, event.ResponseTypeHyprlandOptionSet, "Option set",
+		func(request HyprlandOptionRequestData) string {
+			if request.Value == nil {
+				return "No value provided"
+			}
+			return required(request.Name, "No option name provided")
+		},
+		func(ctx context.Context, request HyprlandOptionRequestData) error {
+			return desktop.HyprlandSetOption(ctx, request.Name, request.Value)
 		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetSubmap, event.ResponseTypeHyprlandSubmapSet, "Submap set",
 		func(HyprlandSubmapRequestData) string { return "" },

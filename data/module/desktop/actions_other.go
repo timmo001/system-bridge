@@ -49,6 +49,11 @@ func HyprlandSetSubmap(context.Context, string) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 }
 
+// HyprlandSetOption isn't possible without Hyprland
+func HyprlandSetOption(context.Context, string, any) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
 // HyprlandReloadConfig isn't possible without Hyprland
 func HyprlandReloadConfig(context.Context) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)

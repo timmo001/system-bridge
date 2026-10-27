@@ -14,6 +14,8 @@ from systembridgeconnector.models.modules.desktop import (
     HyprlandKeyboard,
     HyprlandLayers,
     HyprlandMouse,
+    HyprlandOption,
+    HyprlandOptionType,
     HyprlandReserved,
     HyprlandScreencast,
     HyprlandScreencastType,
@@ -202,6 +204,12 @@ FIXTURE_DESKTOP = Desktop(
                 layout="master", persistent=False, last_window="0x2"
             ),
         },
+        options=[
+            HyprlandOption(
+                name="animations.enabled", type=HyprlandOptionType.BOOL, bool=True
+            ),
+            HyprlandOption(name="general.gaps_in", type=HyprlandOptionType.INT, int=5),
+        ],
     ),
     omarchy=Omarchy(
         menus=[

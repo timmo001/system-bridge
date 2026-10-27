@@ -92,6 +92,7 @@ var handlerPairs = map[string]pairing{
 	"HyprlandGlobalShortcutRequestData":  {[]string{"HyprlandGlobalShortcutRequest"}, []string{"HyprlandGlobalShortcutRequest"}},
 	"HyprlandMoveWindowRequestData":      {[]string{"HyprlandMoveWindowRequest"}, []string{"HyprlandMoveWindowRequest"}},
 	"HyprlandMoveWorkspaceRequestData":   {[]string{"HyprlandMoveWorkspaceRequest"}, []string{"HyprlandMoveWorkspaceRequest"}},
+	"HyprlandOptionRequestData":          {[]string{"HyprlandOptionRequest"}, []string{"HyprlandOptionRequest"}},
 	"HyprlandRenameWorkspaceRequestData": {[]string{"HyprlandRenameWorkspaceRequest"}, []string{"HyprlandRenameWorkspaceRequest"}},
 	"HyprlandSetWindowRequestData":       {[]string{"HyprlandSetWindowRequest"}, []string{"HyprlandSetWindowRequest"}},
 	"HyprlandSubmapRequestData":          {[]string{"HyprlandSubmapRequest"}, []string{"HyprlandSubmapRequest"}},

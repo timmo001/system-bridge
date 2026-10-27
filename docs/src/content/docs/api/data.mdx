@@ -198,6 +198,7 @@ Each workspace has `id`, `name`, `display`, `windows` (how many), and whether it
 | `version` | object | `version`, `tag`, `commit`, `branch`, `config_provider` (`lua` or `hyprlang`) and `backend`. |
 | `windows` | object | More about each window, by `id`: `fullscreen_mode`, `pinned`, `xwayland`, `hidden`, `visible`, `group`, `swallowing`, `tags`, `focus_history`, `stable_id` (never reused, unlike the `id`), `initial_app`, `initial_title` (only with window titles on), `xdg_tag`, `xdg_description` and `tearing_hint`. |
 | `workspaces` | object | More about each workspace, by `id`: `layout`, `persistent` and `last_window`, the window last focused on it. |
+| `options` | array | The config options System Bridge can [set](/api/websocket/control/#hyprland-control), each with its `name`, its `type`, `bool` or `int`, and its value in the field of that name. Gaps that differ by side are left out. |
 | `displays` | object | More about each display, by name: `scale`, `transform`, `format`, `colour_preset`, `reserved`, `layers`, `dpms`, `vrr`, `tearing`, `direct_scanout`, `mirror_of` and `special_workspace`. |
 | `keyboards`, `mice`, `switches`, `tablets`, `touch` | array | The input devices Hyprland sees. |
 | `binds` | array | The config's key bindings, in order. |

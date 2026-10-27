@@ -78,6 +78,10 @@ export const HyprlandFullscreenMode = Schema.Literals([
 
 export type HyprlandFullscreenMode = typeof HyprlandFullscreenMode.Type;
 
+export const HyprlandOptionType = Schema.Literals(["bool", "int"]);
+
+export type HyprlandOptionType = typeof HyprlandOptionType.Type;
+
 export const HyprlandScreencastType = Schema.Literals([
   "monitor",
   "region",
@@ -446,6 +450,17 @@ export interface HyprlandWorkspace extends Schema.Schema.Type<
   typeof HyprlandWorkspace
 > {}
 
+export const HyprlandOption = Schema.Struct({
+  name: Schema.String,
+  type: HyprlandOptionType,
+  bool: Schema.NullOr(Schema.Boolean),
+  int: Schema.NullOr(Schema.Finite),
+});
+
+export interface HyprlandOption extends Schema.Schema.Type<
+  typeof HyprlandOption
+> {}
+
 export const HyprlandData = Schema.Struct({
   version: HyprlandVersion,
   submap: Schema.NullOr(Schema.String),
@@ -462,6 +477,7 @@ export const HyprlandData = Schema.Struct({
   global_shortcuts: Schema.Array(HyprlandGlobalShortcut),
   windows: Schema.Record(Schema.String, HyprlandWindow),
   workspaces: Schema.Record(Schema.String, HyprlandWorkspace),
+  options: Schema.Array(HyprlandOption),
 });
 
 export interface HyprlandData extends Schema.Schema.Type<typeof HyprlandData> {}

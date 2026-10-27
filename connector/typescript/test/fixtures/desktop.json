@@ -335,6 +335,10 @@
         "persistent": false,
         "last_window": "0x555dc01ffeb0"
       }
-    }
+    },
+    "options": [
+      { "name": "animations.enabled", "type": "bool", "bool": true, "int": null },
+      { "name": "general.gaps_in", "type": "int", "bool": null, "int": 5 }
+    ]
   }
 }

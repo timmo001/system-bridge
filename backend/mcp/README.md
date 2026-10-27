@@ -90,6 +90,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_hyprland_rename_workspace` renames a workspace on Hyprland.
 - `system_bridge_hyprland_run_global_shortcut` triggers a global shortcut an
   app registered with Hyprland.
+- `system_bridge_hyprland_set_option` sets one of the allowed Hyprland config
+  options until the config reloads.
 - `system_bridge_hyprland_set_submap` switches Hyprland's binds to a submap,
   or back to the default.
 - `system_bridge_hyprland_set_window` floats or tiles, pins or unpins, and
