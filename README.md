@@ -19,7 +19,9 @@ A bridge for your systems.
   the community.
 - Access your system information via data modules and the API/WebSocket server.
 - Control your system via the API/WebSocket server.
-- Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
+- Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge),
+  with a [dashboard](https://system-bridge.timmo.dev/using/home-assistant/#dashboard)
+  you can install from the Marketplace
 - Optional [Omarchy bar plugin](https://system-bridge.timmo.dev/using/omarchy/)
 
 ## Installation

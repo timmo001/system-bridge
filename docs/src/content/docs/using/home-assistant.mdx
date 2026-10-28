@@ -20,7 +20,9 @@ System Bridge can be auto-discovered by Home Assistant. When an instance is foun
 
 To add it manually:
 
-1. In Home Assistant, go to **Settings > Devices & services**.
+[![Open your Home Assistant instance and start setting up System Bridge.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=system_bridge)
+
+1. In Home Assistant, go to **Settings > Devices & services**, or use the button above.
 2. Select **Add Integration** and choose **System Bridge**.
 3. Enter the host and your token when prompted, then follow the on-screen steps.
 
@@ -65,13 +67,58 @@ Trigger actions on the machine running System Bridge:
 
 A System Bridge dashboard lays out a machine's sensors in Home Assistant the way the web client does, with a view for each page, such as CPU, Disks and GPUs. It's built from the integration's entities, so new disks, GPUs and sensors appear on their own. Each view also has a badge that opens the same page in the web client.
 
-To add it:
+The dashboard needs Home Assistant 2026.10 or later. Disk and network rates, load averages and Wi-Fi details need 2026.11, and are left out on older versions.
+
+### Install from the Marketplace
+
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=timmo001&repository=system-bridge&category=plugin)
+
+1. Use the button above to open the repository in the Marketplace. If it isn't listed, go to **Settings > Marketplace**, select **Add from link**, enter `timmo001/system-bridge` and choose the type **Dashboard**.
+2. Select **Install**. The Marketplace adds the dashboard resource for you.
+3. Reload your browser.
+
+If you manage dashboard resources in YAML, add `/local/community/system-bridge/system-bridge-dashboard.js` as a `module` resource yourself.
+
+The Marketplace comes with Home Assistant 2026.11. On 2026.10, add the repository to [HACS](https://www.hacs.xyz/) as a custom repository of type **Dashboard** instead.
+
+### Install manually
+
+[![Open your Home Assistant instance and show your dashboard resources.](https://my.home-assistant.io/badges/lovelace_resources.svg)](https://my.home-assistant.io/redirect/lovelace_resources/)
 
 1. Download `system-bridge-dashboard.js` from the [latest release](https://github.com/timmo001/system-bridge/releases/latest) and put it in your Home Assistant `config/www/` folder.
-2. Go to **Settings > Dashboards**, open the menu and select **Resources**, then add `/local/system-bridge-dashboard.js` as a **JavaScript module**.
-3. Back in **Settings > Dashboards**, select **Add dashboard** and choose **System Bridge**. With more than one System Bridge device, choose the device in the dashboard's settings.
+2. Use the button above, or go to **Settings > Dashboards**, open the menu and select **Resources**.
+3. Add `/local/system-bridge-dashboard.js` as a **JavaScript module**.
 
-To add part of a page to another sections dashboard, such as a GPU, add a section in YAML:
+### Add the dashboard
+
+[![Open your Home Assistant instance and show your dashboards.](https://my.home-assistant.io/badges/lovelace_dashboards.svg)](https://my.home-assistant.io/redirect/lovelace_dashboards/)
+
+1. Use the button above, or go to **Settings > Dashboards**.
+2. Select **Add dashboard** and choose **System Bridge**.
+3. With more than one System Bridge device, open the dashboard, select **Edit dashboard** and choose the device.
+
+### Options
+
+Select **Edit dashboard** to change these. Options left at their default aren't saved, so they follow any later change to the default.
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| Device | The only System Bridge device | The machine the dashboard shows. |
+| History | 1 hour | How far back graphs go, up to 48 hours. |
+| Percentage tiles | Bar | What tiles for percentages such as CPU and memory usage show under the value: nothing, a bar, or a graph of recent values. |
+| Pages | Every page | The pages shown as views, in tab order. Drag to reorder, remove to hide. |
+| Icon and title | Every page | Pages whose tab shows the icon next to the title. The others show only the icon. |
+| Web client link | Every page | Pages with a badge at the top that opens the page in the web client. |
+
+Pages with no entities, such as Battery on a desktop, are left out.
+
+:::note
+Taking control of the dashboard turns it into ordinary cards. It then stops following new entities, and these options no longer apply.
+:::
+
+### Add a section to another dashboard
+
+Any page's sections can go on another sections dashboard, such as one GPU or the storage of one machine. Add a section in YAML:
 
 ```yaml
 strategy:
@@ -81,7 +128,35 @@ strategy:
   item: card0
 ```
 
-`item` names the disk, mount, GPU, display or network interface, for the sections that show one. The section editor lists every section.
+After that, edit the section to change it in the section editor. It shows a picture of each section to choose from, and only the options that section uses:
+
+- **Item** for sections about one thing: choose the mount, GPU, display or network interface from the device's own.
+- **History** for sections with a graph.
+- **Percentage tiles** for sections with percentage tiles.
+
+| Section | Shows |
+| --- | --- |
+| `storage` | Space used on every mount. |
+| `now-playing` | The media playing, with playback and volume controls. |
+| `overview-load` | CPU and memory load in one graph. |
+| `overview-power` | Power draw, with a graph. |
+| `overview-temperatures` | CPU and GPU temperatures, with a graph. |
+| `battery` | Battery level, time remaining and charging state. |
+| `cpu` | CPU usage, speed, power, load average, temperature and voltage. |
+| `cpu-history` | Graphs of CPU usage, speed, power, load average and temperature. |
+| `cpu-cores` | Load and power of each CPU core. |
+| `memory` | Memory in use, free and used. |
+| `memory-history` | Graph of memory usage. |
+| `mount` | One mount point: space used. |
+| `disk-activity` | Disk read and write rates, in total and per disk. |
+| `display` | One display: resolution and refresh rate. |
+| `gpu` | One GPU: load, memory, power, temperature, clocks and fan. |
+| `network` | Download and upload rates, with a graph. |
+| `interface` | One network interface: rates, Wi-Fi details and a graph. |
+| `processes` | The number of processes, with a graph. |
+| `system` | Device power usage and whether the camera is in use. |
+
+`hours_to_show` and `tile_feature` (`none`, `bar` or `trend`) set History and Percentage tiles in YAML.
 
 ## Next steps
 
