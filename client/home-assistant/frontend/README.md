@@ -1,5 +1,7 @@
 # System Bridge Dashboard
 
+![System Bridge](https://raw.githubusercontent.com/timmo001/system-bridge/dev/.github/assets/banner.png)
+
 A Home Assistant dashboard for [System Bridge](https://system-bridge.timmo.dev).
 It lays out a machine's sensors with a view for each page, such as CPU, Disks
 and GPUs, built from the System Bridge integration's entities.
