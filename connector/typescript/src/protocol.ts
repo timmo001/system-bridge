@@ -38,12 +38,20 @@ export const EventType = Schema.Literals([
   "GET_HISTORY",
   "GET_SETTINGS",
   "HYPRLAND_DISPATCH",
+  "HYPRLAND_DISPATCH_RAW",
+  "HYPRLAND_EVAL",
+  "HYPRLAND_EXEC",
+  "HYPRLAND_GET_CURSOR_POSITION",
+  "HYPRLAND_GET_LOG",
+  "HYPRLAND_GET_OPTION",
   "HYPRLAND_KILL_WINDOW",
+  "HYPRLAND_MOVE_CURSOR",
   "HYPRLAND_MOVE_WINDOW",
   "HYPRLAND_MOVE_WORKSPACE",
   "HYPRLAND_RELOAD_CONFIG",
   "HYPRLAND_RENAME_WORKSPACE",
   "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+  "HYPRLAND_SEND_EVENT",
   "HYPRLAND_SET_OPTION",
   "HYPRLAND_SET_SUBMAP",
   "HYPRLAND_SET_WINDOW",
@@ -109,10 +117,18 @@ export const ResponseType = Schema.Literals([
   "FILES",
   "HISTORY",
   "HYPRLAND_CONFIG_RELOADED",
+  "HYPRLAND_CURSOR_MOVED",
+  "HYPRLAND_CURSOR_POSITION",
   "HYPRLAND_DISPATCHED",
+  "HYPRLAND_EVALUATED",
   "HYPRLAND_EVENT",
+  "HYPRLAND_EVENT_SENT",
+  "HYPRLAND_EXECUTED",
   "HYPRLAND_GLOBAL_SHORTCUT_RUN",
+  "HYPRLAND_LOG",
+  "HYPRLAND_OPTION",
   "HYPRLAND_OPTION_SET",
+  "HYPRLAND_RAW_DISPATCHED",
   "HYPRLAND_SUBMAP_SET",
   "HYPRLAND_WINDOW_KILLED",
   "HYPRLAND_WINDOW_MOVED",
@@ -248,6 +264,11 @@ export interface SettingsMedia extends Schema.Schema.Type<
 export const SettingsDesktop = Schema.Struct({
   /** Whether the desktop module reports window titles, off by default. */
   windowTitles: Schema.Boolean,
+  /**
+   * Whether to run commands, any dispatcher and Lua through Hyprland, off by
+   * default.
+   */
+  hyprlandCode: Schema.Boolean,
 });
 
 export interface SettingsDesktop extends Schema.Schema.Type<
@@ -685,18 +706,98 @@ export interface HyprlandMoveWorkspaceRequest extends Schema.Schema.Type<
 > {}
 
 /**
- * Sets an option from the desktop module's `hyprland.options` until the
- * config reloads.
+ * Sets any config option until the config reloads. Read its `type` first with
+ * `hyprlandGetOption`.
  */
 export const HyprlandOptionRequest = Schema.Struct({
-  /** Such as `animations.enabled`. */
+  /** Such as `animations.enabled` or `general:layout`. */
   name: Schema.String,
-  /** A boolean or a whole number, 0 or more, by the option's `type`. */
-  value: Schema.Union([Schema.Boolean, Schema.Int]),
+  /**
+   * By the option's `type`: a boolean, a whole number, any number, or text.
+   * A `vec2` takes two numbers, as `"5 10"` or `[5, 10]`, and a `css` option up
+   * to four whole numbers, such as `"5 10"`. A `gradient` takes colours and an
+   * optional angle, as `hyprlandGetOption` reports them. The options in
+   * `hyprland.options` only take a number of 0 or more.
+   */
+  value: Schema.Union([
+    Schema.Boolean,
+    Schema.Finite,
+    Schema.String,
+    Schema.Array(Schema.Finite),
+  ]),
 });
 
 export interface HyprlandOptionRequest extends Schema.Schema.Type<
   typeof HyprlandOptionRequest
+> {}
+
+/** Any config option, such as `general.col.active_border` or `general:layout`. */
+export const HyprlandOptionNameRequest = Schema.Struct({
+  name: Schema.String,
+});
+
+export interface HyprlandOptionNameRequest extends Schema.Schema.Type<
+  typeof HyprlandOptionNameRequest
+> {}
+
+/** Moves the pointer, in pixels across every display. */
+export const HyprlandMoveCursorRequest = Schema.Struct({
+  x: Schema.Int,
+  y: Schema.Int,
+});
+
+export interface HyprlandMoveCursorRequest extends Schema.Schema.Type<
+  typeof HyprlandMoveCursorRequest
+> {}
+
+/**
+ * Sends a custom event, as a bind to the event dispatcher would. It comes back
+ * through `hyprlandEvents`.
+ */
+export const HyprlandSendEventRequest = Schema.Struct({
+  name: Schema.String,
+});
+
+export interface HyprlandSendEventRequest extends Schema.Schema.Type<
+  typeof HyprlandSendEventRequest
+> {}
+
+/**
+ * Runs a command through Hyprland, in its environment. Needs
+ * `desktop.hyprlandCode` on in the settings.
+ */
+export const HyprlandExecRequest = Schema.Struct({
+  command: Schema.String,
+});
+
+export interface HyprlandExecRequest extends Schema.Schema.Type<
+  typeof HyprlandExecRequest
+> {}
+
+/**
+ * Runs any dispatch, written as the running config takes it: Lua such as
+ * `hl.dsp.focus({ workspace = "2" })` when `hyprland.version.config_provider`
+ * is `lua`, otherwise classic such as `workspace 2`. Needs
+ * `desktop.hyprlandCode` on in the settings.
+ */
+export const HyprlandDispatchRawRequest = Schema.Struct({
+  dispatch: Schema.String,
+});
+
+export interface HyprlandDispatchRawRequest extends Schema.Schema.Type<
+  typeof HyprlandDispatchRawRequest
+> {}
+
+/**
+ * Runs one line of Lua in Hyprland, with a Lua config. Hyprland only replies
+ * whether it ran. Needs `desktop.hyprlandCode` on in the settings.
+ */
+export const HyprlandEvalRequest = Schema.Struct({
+  code: Schema.String,
+});
+
+export interface HyprlandEvalRequest extends Schema.Schema.Type<
+  typeof HyprlandEvalRequest
 > {}
 
 /** Renames a workspace, or gives it back its default name when `name` is left out. */
