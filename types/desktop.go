@@ -118,7 +118,7 @@ type HyprlandOptionValue struct {
 	Set    bool               `json:"set" mapstructure:"set"` // Set by the config, rather than left at its default
 	Bool   *bool              `json:"bool" mapstructure:"bool"`
 	Int    *int               `json:"int" mapstructure:"int"`
-	Vec2   []float64          `json:"vec2" mapstructure:"vec2"`
+	Vec2   []float64          `json:"vec2" mapstructure:"vec2"` // Empty for other types
 	Float  *float64           `json:"float" mapstructure:"float"`
 	String *string            `json:"string" mapstructure:"string"`
 }

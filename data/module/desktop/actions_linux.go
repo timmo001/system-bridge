@@ -481,7 +481,7 @@ type hyprlandGetOptionReply struct {
 }
 
 func (r hyprlandGetOptionReply) value(name string) *types.HyprlandOptionValue {
-	value := &types.HyprlandOptionValue{Name: name, Set: r.Set}
+	value := &types.HyprlandOptionValue{Name: name, Set: r.Set, Vec2: []float64{}}
 	switch {
 	case r.Bool != nil:
 		value.Type, value.Bool = types.HyprlandOptionTypeBool, r.Bool
