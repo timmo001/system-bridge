@@ -1,0 +1,133 @@
+---
+name: Publish Home Assistant dashboard
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "client/home-assistant/frontend/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - "LICENSE"
+      - ".github/scripts/bash/publish-home-assistant-dashboard.sh"
+      - ".github/workflows/publish-home-assistant-dashboard.yml"
+  pull_request:
+    paths:
+      - ".github/scripts/bash/publish-home-assistant-dashboard.sh"
+      - ".github/workflows/publish-home-assistant-dashboard.yml"
+  release:
+    types:
+      - published
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-home-assistant-dashboard
+  cancel-in-progress: false
+
+env:
+  PUBLISH_REPOSITORY: ${{ github.repository_owner }}/system-bridge-dashboard
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout System Bridge
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Lint publisher
+        run: shellcheck .github/scripts/bash/publish-home-assistant-dashboard.sh
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        working-directory: client/home-assistant/frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build dashboard
+        working-directory: client/home-assistant/frontend
+        run: bun run build
+
+      - name: Upload dashboard
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: system-bridge-dashboard
+          path: client/home-assistant/frontend/dist/system-bridge-dashboard.js
+
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout System Bridge
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Download dashboard
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: system-bridge-dashboard
+          path: client/home-assistant/frontend/dist
+
+      - name: Checkout publish repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ env.PUBLISH_REPOSITORY }}
+          path: _publish
+          token: ${{ secrets.PUSH_TOKEN }}
+
+      - name: Publish dashboard files
+        run: .github/scripts/bash/publish-home-assistant-dashboard.sh client/home-assistant/frontend _publish
+
+      - name: Commit published dashboard
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          git -C _publish config user.name 'github-actions[bot]'
+          git -C _publish config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C _publish add -A
+          if git -C _publish diff --cached --quiet; then
+            echo 'Published dashboard is already current.'
+            exit 0
+          fi
+          if [[ -n $RELEASE_TAG ]]; then
+            git -C _publish commit -m "Publish system-bridge $RELEASE_TAG"
+          else
+            git -C _publish commit -m "Publish from system-bridge@${SOURCE_SHA:0:8}"
+          fi
+          git -C _publish push
+
+      # Tagged after the push, so the release points at a commit whose
+      # hacs.json matches it. Its only asset is the dashboard, which keeps
+      # Marketplace installs small.
+      - name: Mirror release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+          SOURCE_URL: ${{ github.event.release.html_url }}
+        run: |
+          asset=client/home-assistant/frontend/dist/system-bridge-dashboard.js
+          if gh release view "$RELEASE_TAG" --repo "$PUBLISH_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$asset" --repo "$PUBLISH_REPOSITORY" --clobber
+            exit 0
+          fi
+          flags=()
+          if [[ $PRERELEASE == true ]]; then
+            flags+=(--prerelease)
+          fi
+          gh release create "$RELEASE_TAG" "$asset" \
+            --repo "$PUBLISH_REPOSITORY" \
+            --target "$(git -C _publish rev-parse HEAD)" \
+            --title "$RELEASE_TAG" \
+            --notes "Mirrored from $SOURCE_URL" \
+            "${flags[@]}"
