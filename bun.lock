@@ -36,7 +36,7 @@
         "@codemirror/search": "^6.7.2",
         "@codemirror/state": "^6.6.0",
         "@codemirror/view": "^6.42.0",
-        "@effect/platform-browser": "4.0.6",
+        "@effect/platform-browser": "4.0.7",
         "@lezer/highlight": "^1.2.3",
         "@lit/context": "^1.1.6",
         "@mdi/js": "7.4.47",
@@ -44,7 +44,7 @@
         "@tanstack/lit-hotkeys": "0.18.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "effect": "4.0.6",
+        "effect": "4.0.7",
         "lit": "^3.3.2",
       },
       "devDependencies": {
@@ -70,14 +70,14 @@
         "@oxlint/plugins": "1.89.0",
         "@timmo001/oxlint-rules": "0.6.3",
         "@types/bun": "1.4.4",
-        "effect": "4.0.6",
+        "effect": "4.0.7",
         "oxlint": "1.89.0",
         "oxlint-tsgolint": "7.0.2005",
         "prettier": "3.9.10",
         "typescript": "7.0.2",
       },
       "peerDependencies": {
-        "effect": "4.0.6",
+        "effect": "4.0.7",
       },
     },
     "docs": {
@@ -236,7 +236,7 @@
 
     "@cspotcode/source-map-support": ["@cspotcode/source-map-support@0.8.1", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.9" } }, "sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw=="],
 
-    "@effect/platform-browser": ["@effect/platform-browser@4.0.6", "", { "peerDependencies": { "effect": "^4.0.6" } }, "sha512-i4bf1+FlUnZypqK0pQ5cq46KhroTgqFGktFn2WorwIk+yc+RuZO6qsF+Sk6lY5uHwdHTOLGMlnlXSJ8u1UG42g=="],
+    "@effect/platform-browser": ["@effect/platform-browser@4.0.7", "", { "peerDependencies": { "effect": "^4.0.7" } }, "sha512-FHzX6Q8pUwAB8fL8Jw75NXsXcOAe/iT7KVhb5ricaCcCNqVeIrhWUTM677HqVkRONzQPH09RB9r5NbNUa2YtFg=="],
 
     "@effect/tsgo": ["@effect/tsgo@0.62.0", "", { "optionalDependencies": { "@effect/tsgo-darwin-arm64": "0.62.0", "@effect/tsgo-darwin-x64": "0.62.0", "@effect/tsgo-linux-arm": "0.62.0", "@effect/tsgo-linux-arm64": "0.62.0", "@effect/tsgo-linux-x64": "0.62.0", "@effect/tsgo-win32-arm64": "0.62.0", "@effect/tsgo-win32-x64": "0.62.0" }, "bin": { "effect-tsgo": "dist/effect-tsgo.cjs" } }, "sha512-9RU41yXVSoq+HKD1MsmfYH+iQ5wYjqD6rTMLPXqweHGl37wzXRUoGL7ri0DuO1sSAVd/XofDY5VTMhTMv296Xg=="],
 
@@ -1184,7 +1184,7 @@
 
     "ee-first": ["ee-first@1.1.1", "", {}, "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="],
 
-    "effect": ["effect@4.0.6", "", {}, "sha512-Tc3mkzuLR6t6P9dhLt0D2GrxYtmU5td4XEJEiXCmILz53IRIfJyHsKZWjTA3xEjiwpNTtXBgI4iqYPxMztBDrw=="],
+    "effect": ["effect@4.0.7", "", {}, "sha512-47CiUzNAmeLr40pDT9vKMxxtB8o3bdpZEKU4IUM3fVxsK2GYzPsV7fQoZP0I41A308BZd71nMxqJ0KRh3s9u2g=="],
 
     "ejs": ["ejs@3.1.10", "", { "dependencies": { "jake": "^10.8.5" }, "bin": { "ejs": "bin/cli.js" } }, "sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA=="],
 
