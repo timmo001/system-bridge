@@ -71,6 +71,22 @@ websocat "ws://localhost:9170/api/mcp?token=YOUR_TOKEN"
 
 Configure the client to launch `websocat` with the WebSocket URL as its argument. The exact command and argument fields depend on the client.
 
+## Results and Code Mode
+
+Every tool declares an output schema and returns its result as structured content, with the same JSON as text for clients that only read text. Actions return `{ "success": true, "message": "..." }`. `system_bridge_list_commands` and `system_bridge_list_command_prefabs` wrap their lists in an object, as `commands` and `prefabs`, since structured content has to be an object.
+
+Clients with a Code Mode, such as <a href="https://opencode.ai" target="_blank" rel="noopener noreferrer">OpenCode</a>, use the schemas to type each tool, so an agent can chain calls in one script rather than one tool call at a time. For example, with the server named `system-bridge`:
+
+```js
+const sb = tools["system-bridge"]
+const { processes } = await sb.system_bridge_get_data({ modules: ["processes"] })
+const top = processes.toSorted((a, b) => (b.cpu_usage ?? 0) - (a.cpu_usage ?? 0)).slice(0, 3)
+await sb.system_bridge_send_notification({
+  title: "Busiest processes",
+  message: top.map((p) => `${p.name}: ${(p.cpu_usage ?? 0).toFixed(1)}%`).join("\n"),
+})
+```
+
 ## Tools
 
 ### `system_bridge_audio_control`
