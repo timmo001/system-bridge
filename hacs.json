@@ -1,0 +1,8 @@
+{
+  "name": "System Bridge Dashboard",
+  "content_in_root": false,
+  "render_readme": false,
+  "filename": "system-bridge-dashboard.js",
+  "hide_default_branch": true,
+  "homeassistant": "2026.10.0"
+}
