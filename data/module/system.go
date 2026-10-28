@@ -225,12 +225,12 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	versionNewerAvailable := false
 	if buildCommit := version.BuildCommit(); buildCommit != "" {
 		latestVersionURL = version.CompareUserURL(buildCommit)
-		latestCommit, err := version.GetLatestCommit()
+		latest, newer, err := version.GetLatestDevVersion(buildCommit)
 		if err != nil {
-			slog.Warn("Failed to get latest commit", "error", err)
-		} else if version.IsNewerCommitAvailable(buildCommit, latestCommit) {
-			latestVersion = latestCommit[:min(7, len(latestCommit))]
-			versionNewerAvailable = true
+			slog.Warn("Failed to get latest development version", "error", err)
+		} else {
+			latestVersion = latest
+			versionNewerAvailable = newer
 		}
 	} else {
 		latest, err := version.GetLatestVersion()

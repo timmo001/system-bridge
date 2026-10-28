@@ -3,7 +3,9 @@ package version
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,6 +34,16 @@ var (
 	// reBuildCommit matches the commit a development build was made from, in
 	// the Arch -git (.g<sha>) or CI (-dev+<sha>) version formats
 	reBuildCommit = regexp.MustCompile(`(?i)(?:[.\-]g|-dev\+)([0-9a-f]{7,})`)
+
+	// reArchDevVersion matches the Arch -git version format, capturing the
+	// base version, any prerelease part and the commit count
+	reArchDevVersion = regexp.MustCompile(`(?i)^v?(\d+\.\d+\.\d+)(.*?)\.r(\d+)\.g[0-9a-f]{7,}$`)
+
+	// reCIDevVersion matches the CI version format, capturing the tag
+	reCIDevVersion = regexp.MustCompile(`(?i)^v?(\d+\.\d+\.\d+[^+]*?)-dev\+[0-9a-f]{7,}$`)
+
+	// compareAPIURL is the base of the URL comparing two commits
+	compareAPIURL = "https://api.github.com/repos/timmo001/system-bridge/compare/"
 
 	// docsBaseURL is the documentation site root. It is used to build the
 	// per-surface documentation links below and is not linked directly.
@@ -109,6 +121,92 @@ func GetLatestCommit() (string, error) {
 // development build was made from. The build commit may be abbreviated.
 func IsNewerCommitAvailable(buildCommit, latestCommit string) bool {
 	return !strings.HasPrefix(latestCommit, buildCommit)
+}
+
+// compareCommits fetches how many commits head is ahead of and behind base
+func compareCommits(base, head string) (ahead, behind int, err error) {
+	body, err := client.Get(compareAPIURL + base + "..." + head)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to compare commits: %v", err)
+	}
+
+	var comparison struct {
+		AheadBy  int `json:"ahead_by"`
+		BehindBy int `json:"behind_by"`
+	}
+	if err := json.Unmarshal(body, &comparison); err != nil {
+		return 0, 0, fmt.Errorf("failed to parse response: %v", err)
+	}
+
+	return comparison.AheadBy, comparison.BehindBy, nil
+}
+
+// GetLatestDevVersion returns the version a development build of the latest
+// commit on the dev branch would have, in the same format as this build, and
+// whether that commit is newer than the one this build was made from
+func GetLatestDevVersion(buildCommit string) (string, bool, error) {
+	latestCommit, err := GetLatestCommit()
+	if err != nil {
+		return "", false, err
+	}
+	if !IsNewerCommitAvailable(buildCommit, latestCommit) {
+		return APIVersion(), false, nil
+	}
+
+	ahead, behind, err := compareCommits(buildCommit, latestCommit)
+	if err != nil {
+		return "", false, err
+	}
+	if ahead == 0 {
+		// This build has commits dev doesn't, and dev has nothing new
+		return APIVersion(), false, nil
+	}
+
+	latestTag, err := GetLatestVersion()
+	if err != nil {
+		slog.Warn("Failed to get latest version", "error", err)
+		latestTag = ""
+	}
+
+	return normalizeToPEP440(devVersion(Version, latestTag, ahead, behind, latestCommit)), true, nil
+}
+
+// devVersion builds the version of a development build of commit, which is
+// ahead and behind commits from the build with version current, after the
+// release latestTag. It follows current's format: the Arch -git package's
+// <next patch>.r<commit count>.g<sha>, or the CI build's <tag>-dev+<sha>.
+func devVersion(current, latestTag string, ahead, behind int, commit string) string {
+	sha := commit[:min(7, len(commit))]
+
+	if m := reArchDevVersion.FindStringSubmatch(current); m != nil {
+		base, pre := m[1], m[2]
+		count, _ := strconv.Atoi(m[3])
+		// The package's version is the patch after the last tag
+		if next := nextPatch(latestTag); next != "" && IsNewerVersionAvailable(base, next) {
+			base, pre = next, ""
+		}
+		return fmt.Sprintf("%s%s.r%d.g%s", base, pre, count+ahead-behind, sha)
+	}
+
+	if m := reCIDevVersion.FindStringSubmatch(current); m != nil {
+		tag := m[1]
+		if latest := strings.TrimPrefix(latestTag, "v"); latest != "" && IsNewerVersionAvailable(tag, latest) {
+			tag = latest
+		}
+		return fmt.Sprintf("%s-dev+%s", tag, sha)
+	}
+
+	return sha
+}
+
+// nextPatch returns the version after tag's patch, or an empty string when
+// tag isn't a version
+func nextPatch(tag string) string {
+	var major, minor, patch int
+	if _, err := fmt.Sscanf(strings.TrimPrefix(tag, "v"), "%d.%d.%d", &major, &minor, &patch); err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d.%d.%d", major, minor, patch+1)
 }
 
 // CompareUserURL returns the URL showing the user the commits since their build
