@@ -48,6 +48,15 @@ cp %{_stagedir}/share/bash-completion/completions/system-bridge %{buildroot}/usr
 cp %{_stagedir}/share/zsh/site-functions/_system-bridge %{buildroot}/usr/share/zsh/site-functions/
 cp %{_stagedir}/share/fish/vendor_completions.d/system-bridge.fish %{buildroot}/usr/share/fish/vendor_completions.d/
 
+mkdir -p %{buildroot}/usr/lib/udev/rules.d
+cp %{_stagedir}/lib/udev/rules.d/60-system-bridge-rapl.rules %{buildroot}/usr/lib/udev/rules.d/
+
+%post
+if command -v udevadm >/dev/null 2>&1; then
+  udevadm control --reload || :
+  udevadm trigger --subsystem-match=powercap --action=change || :
+fi
+
 %files
 /usr/bin/system-bridge
 /usr/share/applications/system-bridge.desktop
@@ -61,3 +70,4 @@ cp %{_stagedir}/share/fish/vendor_completions.d/system-bridge.fish %{buildroot}/
 /usr/share/bash-completion/completions/system-bridge
 /usr/share/zsh/site-functions/_system-bridge
 /usr/share/fish/vendor_completions.d/system-bridge.fish
+/usr/lib/udev/rules.d/60-system-bridge-rapl.rules

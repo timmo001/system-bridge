@@ -82,6 +82,7 @@ mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/512x512/apps"
 
 install -Dm755 system-bridge-linux "$STAGING_DIR/usr/bin/system-bridge"
 install -Dm644 "$SCRIPT_DIR/system-bridge.desktop" "$STAGING_DIR/usr/share/applications/system-bridge.desktop"
+install -Dm644 "$SCRIPT_DIR/60-system-bridge-rapl.rules" "$STAGING_DIR/usr/lib/udev/rules.d/60-system-bridge-rapl.rules"
 install -Dm644 .resources/system-bridge-dimmed.svg "$STAGING_DIR/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
 install -Dm644 .resources/system-bridge-dimmed-16.png "$STAGING_DIR/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
 install -Dm644 .resources/system-bridge-dimmed-32.png "$STAGING_DIR/usr/share/icons/hicolor/32x32/apps/system-bridge.png"

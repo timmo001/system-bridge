@@ -6,6 +6,7 @@
   nodejs,
   pkg-config,
   installShellFiles,
+  coreutils,
   libX11,
   libXi,
   libXtst,
@@ -131,6 +132,9 @@ buildGoModule {
     install -Dm644 .scripts/linux/system-bridge.desktop $out/share/applications/system-bridge.desktop
     substituteInPlace $out/share/applications/system-bridge.desktop \
       --replace-fail /usr/bin/system-bridge $out/bin/system-bridge
+    install -Dm644 .scripts/linux/60-system-bridge-rapl.rules $out/lib/udev/rules.d/60-system-bridge-rapl.rules
+    substituteInPlace $out/lib/udev/rules.d/60-system-bridge-rapl.rules \
+      --replace-fail /bin/chmod ${coreutils}/bin/chmod
     install -Dm644 .resources/system-bridge-dimmed.svg $out/share/icons/hicolor/scalable/apps/system-bridge.svg
     for size in 16 32 48 128 256 512; do
       install -Dm644 .resources/system-bridge-dimmed-$size.png \

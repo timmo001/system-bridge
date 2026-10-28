@@ -82,6 +82,21 @@ rm -rf "$sb_completions_tmp"
 install -Dm644 "$SCRIPT_DIR/system-bridge.desktop" \
   deb-structure/usr/share/applications/system-bridge.desktop
 
+# Install the udev rule that makes the RAPL power counters readable
+install -Dm644 "$SCRIPT_DIR/60-system-bridge-rapl.rules" \
+  deb-structure/usr/lib/udev/rules.d/60-system-bridge-rapl.rules
+
+# Apply the udev rule without a reboot
+cat >deb-structure/DEBIAN/postinst <<'EOF'
+#!/bin/sh
+set -e
+if [ "$1" = configure ] && command -v udevadm >/dev/null 2>&1; then
+  udevadm control --reload || true
+  udevadm trigger --subsystem-match=powercap --action=change || true
+fi
+EOF
+chmod 755 deb-structure/DEBIAN/postinst
+
 # Install icons
 install -Dm644 .resources/system-bridge-dimmed.svg \
   deb-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
