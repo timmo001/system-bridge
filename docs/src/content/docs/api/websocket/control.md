@@ -220,36 +220,30 @@ The response type is `DISPLAY_CONTROLLED`, and the displays module updates strai
 
 ## Hyprland control
 
-On Hyprland, float, pin, move, resize and kill windows, rename workspaces and move them between displays, run dispatchers on the focused window, trigger global shortcuts, switch the submap, set some config options, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+On Hyprland, float, pin, move, resize and kill windows, rename workspaces and move them between displays, run dispatchers on the focused window, trigger global shortcuts, switch the submap, read and set any config option, read and move the cursor, read the log, send custom events, and reload the config. With the `desktop.hyprlandCode` setting on, run commands, any dispatch and Lua too. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
 
 | Event | Data | Response |
 | --- | --- | --- |
 | `HYPRLAND_DISPATCH` | `dispatcher`, a `direction` for `move_focus` and `swap_window`, and optionally the `id` of a window to run it on | `HYPRLAND_DISPATCHED` |
+| `HYPRLAND_DISPATCH_RAW` | `dispatch`, written as the running config takes it | `HYPRLAND_RAW_DISPATCHED` |
+| `HYPRLAND_EVAL` | `code`, one line of Lua | `HYPRLAND_EVALUATED` |
+| `HYPRLAND_EXEC` | `command` | `HYPRLAND_EXECUTED` |
+| `HYPRLAND_GET_CURSOR_POSITION` | None | `HYPRLAND_CURSOR_POSITION`, with `x` and `y` |
+| `HYPRLAND_GET_LOG` | None | `HYPRLAND_LOG`, with `lines`, oldest first |
+| `HYPRLAND_GET_OPTION` | `name`, any option | `HYPRLAND_OPTION`, with the option's value |
 | `HYPRLAND_KILL_WINDOW` | `id` | `HYPRLAND_WINDOW_KILLED` |
+| `HYPRLAND_MOVE_CURSOR` | `x` and `y`, in pixels across every display | `HYPRLAND_CURSOR_MOVED` |
 | `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
 | `HYPRLAND_MOVE_WORKSPACE` | `id`, a workspace `id`, and the `display` to move it to, from the [`displays`](/api/data/#displays) data | `HYPRLAND_WORKSPACE_MOVED` |
 | `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
 | `HYPRLAND_RENAME_WORKSPACE` | `id`, a workspace `id`, and its new `name`, or none for the default | `HYPRLAND_WORKSPACE_RENAMED` |
 | `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
-| `HYPRLAND_SET_OPTION` | `name`, an option from the `options` in the [`desktop`](/api/data/#desktop) data's `hyprland`, and its `value` | `HYPRLAND_OPTION_SET` |
+| `HYPRLAND_SEND_EVENT` | `name`, the event's text | `HYPRLAND_EVENT_SENT` |
+| `HYPRLAND_SET_OPTION` | `name`, any option, and its `value` | `HYPRLAND_OPTION_SET` |
 | `HYPRLAND_SET_SUBMAP` | `name`, a submap the `binds` in the [`desktop`](/api/data/#desktop) data's `hyprland` are in, or none for the default | `HYPRLAND_SUBMAP_SET` |
 | `HYPRLAND_SET_WINDOW` | `id`, and any of `floating` and `pinned` as `true` or `false`, `x` and `y`, and `width` and `height` | `HYPRLAND_WINDOW_SET` |
 
-Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. `x` and `y` place the window's top-left corner in pixels across every display, and `width` and `height` size it, each as a pair. Hyprland only places a floating window exactly, so float it in the same request. Killing a window ends its app without asking, unlike `DESKTOP_CLOSE_WINDOW`, so anything unsaved is lost. Only the global shortcuts apps have registered, the dispatchers below and the options listed in `options` can run or change, and there's no way to send Hyprland any other command.
-
-The options are `animations.enabled`, `decoration.blur.enabled`, `decoration.dim_inactive`, `decoration.rounding`, `decoration.shadow.enabled`, `general.border_size`, `general.gaps_in`, `general.gaps_out`, `input.touchpad.natural_scroll` and `misc.vrr`. Each has a `type`: `bool` takes `true` or `false`, and `int` a whole number, 0 or more. A value set this way lasts until Hyprland's config reloads.
-
-```json title="Request"
-{
-    "id": "abc123",
-    "token": "abc123",
-    "event": "HYPRLAND_SET_OPTION",
-    "data": {
-        "name": "animations.enabled",
-        "value": false
-    }
-}
-```
+Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. `x` and `y` place the window's top-left corner in pixels across every display, and `width` and `height` size it, each as a pair. Hyprland only places a floating window exactly, so float it in the same request. Killing a window ends its app without asking, unlike `DESKTOP_CLOSE_WINDOW`, so anything unsaved is lost. Only the global shortcuts apps have registered and the dispatchers below can run, unless the [`desktop.hyprlandCode`](#running-code) setting is on.
 
 ```json title="Request"
 {
@@ -261,6 +255,8 @@ The options are `animations.enabled`, `decoration.blur.enabled`, `decoration.dim
     }
 }
 ```
+
+### Dispatchers
 
 The dispatchers act on the focused window, as their binds would. With an `id`, that window is focused first:
 
@@ -291,6 +287,70 @@ The direction is `down`, `left`, `right` or `up`. When Hyprland refuses, such as
         "dispatcher": "move_focus",
         "direction": "left"
     }
+}
+```
+
+### Options
+
+Option names take dots or colons, such as `general.col.active_border` or `general:layout`. An option Hyprland doesn't have gets an `ERROR` with the subtype `NOT_FOUND`. `HYPRLAND_OPTION` replies with its `name`, its `type`, `set` for whether the config sets it rather than leaving the default, and its value in the field for its type: `bool`, `int`, `float`, `vec2` as two numbers, or `string` for `string`, `css`, `gradient` and `custom` options.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_GET_OPTION",
+    "data": { "name": "general.col.active_border" }
+}
+```
+
+```json title="Response"
+{
+    "id": "abc123",
+    "type": "HYPRLAND_OPTION",
+    "subtype": "NONE",
+    "data": {
+        "name": "general.col.active_border",
+        "type": "gradient",
+        "set": true,
+        "bool": null,
+        "int": null,
+        "vec2": [],
+        "float": null,
+        "string": "66cccccc 0deg"
+    }
+}
+```
+
+`HYPRLAND_SET_OPTION` reads the option's type first, then takes a `value` to match: `true` or `false` for `bool`, a whole number for `int`, any number for `float`, and text for `string`. A `vec2` takes two numbers, as `"5 10"` or `[5, 10]`, a `css` option up to four whole numbers, such as `"5 10"`, and a `gradient` colours and an optional angle, as `HYPRLAND_OPTION` reports them, such as `"ff33ccff 00ff99ee 45deg"`. A value set this way lasts until Hyprland's config reloads.
+
+The [`desktop`](/api/data/#desktop) data's `hyprland.options` reports `animations.enabled`, `decoration.blur.enabled`, `decoration.dim_inactive`, `decoration.rounding`, `decoration.shadow.enabled`, `general.border_size`, `general.gaps_in`, `general.gaps_out`, `input.touchpad.natural_scroll` and `misc.vrr` as they change. Those only take a number of 0 or more.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_SET_OPTION",
+    "data": {
+        "name": "animations.enabled",
+        "value": false
+    }
+}
+```
+
+### Running code
+
+`HYPRLAND_EXEC`, `HYPRLAND_DISPATCH_RAW` and `HYPRLAND_EVAL` can do anything you can, so they only run with the `desktop.hyprlandCode` setting on. It's off by default, and otherwise they get an `ERROR` with the subtype `INVALID_ACTION`. Turn on **Run commands, dispatches and Lua through Hyprland** on the web client's **Desktop** page, or use [`UPDATE_SETTINGS`](/api/websocket/system/).
+
+- `HYPRLAND_EXEC` runs a command in Hyprland's environment, as a bind to `exec` would.
+- `HYPRLAND_DISPATCH_RAW` runs any dispatch, written as the running config takes it: Lua such as `hl.dsp.focus({ workspace = "2" })` when the `desktop` data's `hyprland.version.config_provider` is `lua`, otherwise classic such as `workspace 2`.
+- `HYPRLAND_EVAL` runs one line of Lua, with a Lua config. Hyprland only replies whether it ran, not what it returned.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_EVAL",
+    "data": { "code": "hl.notification.create({ text = \"Hi\" })" }
 }
 ```
 

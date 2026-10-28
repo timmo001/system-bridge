@@ -147,7 +147,7 @@ The id is the display's `id` from the [`displays`](/api/data/#displays) data. Th
 
 ## Hyprland
 
-On Hyprland, float, pin, place, resize or kill a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, rename a workspace or move it to another display, switch the submap, set a config option, or reload the config:
+On Hyprland, float, pin, place, resize or kill a window, move it to another workspace, run a dispatcher on the focused window, trigger a global shortcut an app registered, rename a workspace or move it to another display, switch the submap, read or set any config option, read or move the cursor, read the log, send a custom event, or reload the config:
 
 ```bash
 system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
@@ -159,11 +159,24 @@ system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
 system-bridge client hyprland workspace rename 2 Music
 system-bridge client hyprland workspace move 2 HDMI-A-1
 system-bridge client hyprland submap resize
+system-bridge client hyprland option general.col.active_border
 system-bridge client hyprland option animations.enabled false
+system-bridge client hyprland cursor
+system-bridge client hyprland cursor 960 540
+system-bridge client hyprland log
+system-bridge client hyprland event dock
 system-bridge client hyprland reload
 ```
 
-`set` takes `--floating` and `--pinned`, each turned off with `=false`, `--x` and `--y` to place the window, and `--width` and `--height` to size it, in pixels. `kill` ends the window's app without asking it to close. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `group_next`, `group_previous`, `lock_group`, `lock_groups`, `move_focus`, `swap_window`, `toggle_group`, `toggle_split`, `unlock_group` or `unlock_groups`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. `--window` focuses a window first and runs the dispatcher on it. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`. `submap` with no name goes back to the default. `option` takes a name from the [`desktop`](/api/data/#desktop) data's `hyprland.options`, and lasts until the config reloads.
+`set` takes `--floating` and `--pinned`, each turned off with `=false`, `--x` and `--y` to place the window, and `--width` and `--height` to size it, in pixels. `kill` ends the window's app without asking it to close. The dispatcher is one of `center_window`, `cycle_next_window`, `cycle_previous_window`, `group_next`, `group_previous`, `lock_group`, `lock_groups`, `move_focus`, `swap_window`, `toggle_group`, `toggle_split`, `unlock_group` or `unlock_groups`, and `move_focus` and `swap_window` take `down`, `left`, `right` or `up`. `--window` focuses a window first and runs the dispatcher on it. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`. `submap` with no name goes back to the default. `option` prints any config option by its name, such as `general.gaps_in` or `general:layout`, and with a value sets it until the config reloads. See [options](/api/websocket/control/#options) for the values each type takes. `cursor` prints the pointer's position, or moves it to x and y in pixels across every display.
+
+With the `desktop.hyprlandCode` setting on, run a command through Hyprland, any dispatch written as the running config takes it, or a line of Lua with a Lua config. See [running code](/api/websocket/control/#running-code):
+
+```bash
+system-bridge client hyprland exec kitty
+system-bridge client hyprland raw 'hl.dsp.focus({ workspace = "2" })'
+system-bridge client hyprland eval 'hl.notification.create({ text = "Hi" })'
+```
 
 ## Omarchy
 

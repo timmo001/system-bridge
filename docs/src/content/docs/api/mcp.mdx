@@ -280,10 +280,54 @@ Trigger a global shortcut an app registered with Hyprland, such as one that open
 
 ### `system_bridge_hyprland_set_option`
 
-Set one of the Hyprland config options System Bridge allows, such as turning animations off, until the config reloads. See [Hyprland control](/api/websocket/control/#hyprland-control) for the list.
+Set any Hyprland config option, such as turning animations off, until the config reloads. Read its type first with `system_bridge_hyprland_get_option`. See [options](/api/websocket/control/#options) for the values each type takes.
 
-- `name` (required): A `name` from the `desktop` module's `hyprland.options`.
-- `value` (required): `true` or `false` for a `bool` option, or a whole number, 0 or more, for an `int` option.
+- `name` (required): The option, such as `animations.enabled` or `general:layout`.
+- `value` (required): `true` or `false`, a number, text, or two numbers as `[5, 10]`, by the option's type. The options in the `desktop` module's `hyprland.options` only take a number of 0 or more.
+
+### `system_bridge_hyprland_get_option`
+
+Read any Hyprland config option: its type, its value, and whether the config sets it rather than leaving the default.
+
+- `name` (required): The option, such as `general.col.active_border` or `general:layout`.
+
+### `system_bridge_hyprland_get_cursor_position`
+
+Get where the pointer is on Hyprland, in pixels across every display. It takes no arguments.
+
+### `system_bridge_hyprland_move_cursor`
+
+Move the pointer on Hyprland.
+
+- `x` and `y` (required): Where to put it, in pixels across every display.
+
+### `system_bridge_hyprland_get_log`
+
+Get the end of Hyprland's log, oldest line first. It takes no arguments.
+
+### `system_bridge_hyprland_send_event`
+
+Send a custom Hyprland event, as a bind to the event dispatcher would. Listeners get it as a [Hyprland event](/api/websocket/data/#hyprland-events).
+
+- `name` (required): The event's text.
+
+### `system_bridge_hyprland_exec`
+
+Run a command through Hyprland, in its environment. Needs the `desktop.hyprlandCode` setting on. See [running code](/api/websocket/control/#running-code).
+
+- `command` (required): The command line, such as `kitty --class scratch`.
+
+### `system_bridge_hyprland_dispatch_raw`
+
+Run any Hyprland dispatch, written as the running config takes it: Lua when the `desktop` module's `hyprland.version.config_provider` is `lua`, otherwise classic. Needs the `desktop.hyprlandCode` setting on.
+
+- `dispatch` (required): The dispatch, such as `hl.dsp.focus({ workspace = "2" })` or `workspace 2`.
+
+### `system_bridge_hyprland_eval`
+
+Run one line of Lua in Hyprland, with a Lua config. Hyprland only replies whether it ran. Needs the `desktop.hyprlandCode` setting on.
+
+- `code` (required): The Lua.
 
 ### `system_bridge_hyprland_set_submap`
 
