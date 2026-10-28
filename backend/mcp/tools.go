@@ -230,15 +230,77 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_option",
-		Description: "Set one of Hyprland's config options that System Bridge allows, until the config reloads. Get them and their types from the desktop module's hyprland.options.",
+		Description: "Set any Hyprland config option until the config reloads. Read its type and value first with system_bridge_hyprland_get_option.",
 		InputSchema: objectSchema(map[string]any{
-			"name": map[string]any{"type": "string", "description": "Option name from hyprland.options, such as animations.enabled"},
+			"name": map[string]any{"type": "string", "description": "Option name, such as animations.enabled or general:layout"},
 			"value": map[string]any{
-				"type":        []string{"boolean", "integer"},
-				"description": "true or false for a bool option, or a whole number, 0 or more, for an int option",
+				"type":        []string{"boolean", "number", "string", "array"},
+				"description": "true or false for a bool option, a whole number for an int, any number for a float, and text for a string. A vec2 takes two numbers, such as \"5 10\" or [5, 10]. A css option takes up to four whole numbers, such as \"5 10\". A gradient takes colours and an optional angle, as get_option reports them, such as \"ff33ccff 00ff99ee 45deg\". The options in the desktop module's hyprland.options only take a number of 0 or more.",
+				"items":       map[string]any{"type": "number"},
 			},
 		}, []string{"name", "value"}),
 	}, eventTool[hyprlandOptionInput](handlers, event.EventHyprlandSetOption))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_get_option",
+		Description: "Read any Hyprland config option: its type, its value, and whether the config sets it rather than leaving the default",
+		InputSchema: objectSchema(map[string]any{
+			"name": map[string]any{"type": "string", "description": "Option name, such as general.col.active_border or general:layout"},
+		}, []string{"name"}),
+	}, queryTool[hyprlandOptionNameInput, types.HyprlandOptionValue](handlers, event.EventHyprlandGetOption))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_get_cursor_position",
+		Description: "Get where the pointer is on Hyprland, in pixels across every display",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, queryTool[struct{}, types.HyprlandCursorPosition](handlers, event.EventHyprlandGetCursorPosition))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_move_cursor",
+		Description: "Move the pointer on Hyprland, in pixels across every display",
+		InputSchema: objectSchema(map[string]any{
+			"x": map[string]any{"type": "integer", "description": "Pixels from the left of the leftmost display"},
+			"y": map[string]any{"type": "integer", "description": "Pixels from the top of the topmost display"},
+		}, []string{"x", "y"}),
+	}, eventTool[hyprlandMoveCursorInput](handlers, event.EventHyprlandMoveCursor))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_get_log",
+		Description: "Get the end of Hyprland's log, oldest line first",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, queryTool[struct{}, types.HyprlandLog](handlers, event.EventHyprlandGetLog))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_send_event",
+		Description: "Send a custom Hyprland event, as a bind to the event dispatcher would. Listeners on Hyprland's event socket get it as custom>><name>.",
+		InputSchema: objectSchema(map[string]any{
+			"name": map[string]any{"type": "string", "description": "The event's text"},
+		}, []string{"name"}),
+	}, eventTool[hyprlandSendEventInput](handlers, event.EventHyprlandSendEvent))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_exec",
+		Description: "Run a command through Hyprland, in its environment, as a bind to exec would. Needs desktop.hyprlandCode turned on in the settings.",
+		InputSchema: objectSchema(map[string]any{
+			"command": map[string]any{"type": "string", "description": "The command line, such as kitty --class scratch"},
+		}, []string{"command"}),
+	}, eventTool[hyprlandExecInput](handlers, event.EventHyprlandExec))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_dispatch_raw",
+		Description: "Run any Hyprland dispatch, written as the running config takes it: Lua such as hl.dsp.focus({ workspace = \"2\" }) when the desktop module's hyprland.version.config_provider is lua, otherwise classic such as workspace 2. Needs desktop.hyprlandCode turned on in the settings.",
+		InputSchema: objectSchema(map[string]any{
+			"dispatch": map[string]any{"type": "string", "description": "The dispatch"},
+		}, []string{"dispatch"}),
+	}, eventTool[hyprlandDispatchRawInput](handlers, event.EventHyprlandDispatchRaw))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_eval",
+		Description: "Run one line of Lua in Hyprland, with a Lua config. Hyprland only replies whether it ran, not what it returned. Needs desktop.hyprlandCode turned on in the settings.",
+		InputSchema: objectSchema(map[string]any{
+			"code": map[string]any{"type": "string", "description": "The Lua, such as hl.config({ general = { layout = \"dwindle\" } })"},
+		}, []string{"code"}),
+	}, eventTool[hyprlandEvalInput](handlers, event.EventHyprlandEval))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_set_submap",

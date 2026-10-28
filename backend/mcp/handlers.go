@@ -103,6 +103,31 @@ type hyprlandOptionInput struct {
 	Value any    `json:"value"`
 }
 
+type hyprlandOptionNameInput struct {
+	Name string `json:"name"`
+}
+
+type hyprlandMoveCursorInput struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+type hyprlandSendEventInput struct {
+	Name string `json:"name"`
+}
+
+type hyprlandExecInput struct {
+	Command string `json:"command"`
+}
+
+type hyprlandDispatchRawInput struct {
+	Dispatch string `json:"dispatch"`
+}
+
+type hyprlandEvalInput struct {
+	Code string `json:"code"`
+}
+
 type hyprlandSubmapInput struct {
 	Name string `json:"name,omitempty"`
 }
@@ -294,6 +319,35 @@ func eventTool[T any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHand
 		}
 
 		return actionResult(response.Message)
+	}
+}
+
+// queryTool is a tool handler that sends its input as an event's data and
+// returns the reply's data
+func queryTool[T any, R any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHandlerFor[T, R] {
+	return func(_ context.Context, _ *sdkmcp.CallToolRequest, input T) (*sdkmcp.CallToolResult, R, error) {
+		var zero R
+		encoded, err := json.Marshal(input)
+		if err != nil {
+			return nil, zero, fmt.Errorf("encode tool input: %w", err)
+		}
+		arguments := map[string]interface{}{}
+		if err := json.Unmarshal(encoded, &arguments); err != nil {
+			return nil, zero, fmt.Errorf("encode tool input: %w", err)
+		}
+		response := h.eventRouter.HandleMessage("mcp", event.Message{
+			ID:    generateID(),
+			Event: eventType,
+			Data:  arguments,
+		})
+		if response.Type == event.ResponseTypeError {
+			return nil, zero, fmt.Errorf("%s", response.Message)
+		}
+		output, ok := response.Data.(*R)
+		if !ok || output == nil {
+			return nil, zero, fmt.Errorf("unexpected reply data %T", response.Data)
+		}
+		return toolResult(*output, *output)
 	}
 }
 
