@@ -56,6 +56,34 @@ func TestHyprlandOptionValues(t *testing.T) {
 	assert.NotContains(t, byName, "general.gaps_out", "gaps that differ by side have no one number")
 }
 
+func TestHyprlandOptionValueFormats(t *testing.T) {
+	for _, tc := range []struct {
+		kind    types.HyprlandOptionType
+		value   any
+		lua     string
+		classic string
+	}{
+		{types.HyprlandOptionTypeFloat, 0.85, "0.85", "0.85"},
+		{types.HyprlandOptionTypeString, `dwin"dle`, `"dwin\"dle"`, `dwin"dle`},
+		{types.HyprlandOptionTypeVec2, []any{2.0, -3.0}, `"2 -3"`, "2 -3"},
+		{types.HyprlandOptionTypeCSS, 5.0, "5", "5"},
+		{types.HyprlandOptionTypeCSS, "5 10", "{ top = 5, right = 10, bottom = 5, left = 10 }", "5 10"},
+		{types.HyprlandOptionTypeGradient, "66cccccc rgba(ff0000ff) 45deg", `{ colors = { "0x66cccccc", "rgba(ff0000ff)" }, angle = 45 }`, "0x66cccccc rgba(ff0000ff) 45deg"},
+	} {
+		lua, err := hyprlandOptionValue(tc.kind, tc.value, true)
+		require.NoError(t, err)
+		assert.Equal(t, tc.lua, lua)
+		classic, err := hyprlandOptionValue(tc.kind, tc.value, false)
+		require.NoError(t, err)
+		assert.Equal(t, tc.classic, classic)
+	}
+
+	_, err := hyprlandOptionValue(types.HyprlandOptionTypeInt, 1.5, true)
+	assert.Error(t, err)
+	_, err = hyprlandOptionValue(types.HyprlandOptionTypeString, "a\nb", true)
+	assert.Error(t, err, "a new line would end the request")
+}
+
 func TestBuildHyprland(t *testing.T) {
 	var state hyprlandState
 	replies := []json.RawMessage{

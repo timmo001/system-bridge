@@ -59,6 +59,49 @@ func HyprlandReloadConfig(context.Context) error {
 	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 }
 
+// HyprlandGetOption isn't possible without Hyprland
+func HyprlandGetOption(context.Context, string) (*types.HyprlandOptionValue, error) {
+	return nil, fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandCursorPosition isn't possible without Hyprland
+func HyprlandCursorPosition(context.Context) (*types.HyprlandCursorPosition, error) {
+	return nil, fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandLog isn't possible without Hyprland
+func HyprlandLog(context.Context) (*types.HyprlandLog, error) {
+	return nil, fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandMoveCursor isn't possible without Hyprland
+func HyprlandMoveCursor(context.Context, int, int) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandSendEvent isn't possible without Hyprland
+func HyprlandSendEvent(context.Context, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandExec isn't possible without Hyprland
+func HyprlandExec(context.Context, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandDispatchRaw isn't possible without Hyprland
+func HyprlandDispatchRaw(context.Context, string) error {
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
+// HyprlandEval isn't possible without Hyprland
+func HyprlandEval(context.Context, string) error {
+	if !hyprlandCodeEnabled() {
+		return ErrNotAllowed
+	}
+	return fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
+}
+
 // OmarchyMenu isn't possible without the Omarchy shell
 func OmarchyMenu(context.Context, string, types.OmarchyAction) error {
 	return fmt.Errorf("the Omarchy shell isn't running: %w", ErrUnsupported)

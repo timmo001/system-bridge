@@ -86,12 +86,19 @@ type HyprlandData struct {
 	Options         []HyprlandOption             `json:"options" mapstructure:"options"`
 }
 
-// HyprlandOptionType is the type of an option's value
+// HyprlandOptionType is the type of an option's value. The desktop data's
+// options are only bool or int.
 type HyprlandOptionType string
 
 const (
-	HyprlandOptionTypeBool HyprlandOptionType = "bool"
-	HyprlandOptionTypeInt  HyprlandOptionType = "int"
+	HyprlandOptionTypeBool     HyprlandOptionType = "bool"
+	HyprlandOptionTypeInt      HyprlandOptionType = "int"
+	HyprlandOptionTypeFloat    HyprlandOptionType = "float"
+	HyprlandOptionTypeString   HyprlandOptionType = "string"
+	HyprlandOptionTypeVec2     HyprlandOptionType = "vec2"     // Two numbers, such as an offset
+	HyprlandOptionTypeCSS      HyprlandOptionType = "css"      // Sizes for each side, such as "5 10 5 10"
+	HyprlandOptionTypeGradient HyprlandOptionType = "gradient" // Colours and an angle, such as "ff33ccff 45deg"
+	HyprlandOptionTypeCustom   HyprlandOptionType = "custom"
 )
 
 // HyprlandOption is one of the config options System Bridge can read and set,
@@ -101,6 +108,31 @@ type HyprlandOption struct {
 	Type HyprlandOptionType `json:"type" mapstructure:"type"`
 	Bool *bool              `json:"bool" mapstructure:"bool"`
 	Int  *int               `json:"int" mapstructure:"int"`
+}
+
+// HyprlandOptionValue is any config option's value, by its name. Only the
+// field for its type is set: string for string, css, gradient and custom.
+type HyprlandOptionValue struct {
+	Name   string             `json:"name" mapstructure:"name"`
+	Type   HyprlandOptionType `json:"type" mapstructure:"type"`
+	Set    bool               `json:"set" mapstructure:"set"` // Set by the config, rather than left at its default
+	Bool   *bool              `json:"bool" mapstructure:"bool"`
+	Int    *int               `json:"int" mapstructure:"int"`
+	Vec2   []float64          `json:"vec2" mapstructure:"vec2"`
+	Float  *float64           `json:"float" mapstructure:"float"`
+	String *string            `json:"string" mapstructure:"string"`
+}
+
+// HyprlandCursorPosition is where the pointer is, in pixels across every
+// display
+type HyprlandCursorPosition struct {
+	X int `json:"x" mapstructure:"x"`
+	Y int `json:"y" mapstructure:"y"`
+}
+
+// HyprlandLog is the end of Hyprland's log, oldest line first
+type HyprlandLog struct {
+	Lines []string `json:"lines" mapstructure:"lines"`
 }
 
 // HyprlandVersion is the running Hyprland's build and setup

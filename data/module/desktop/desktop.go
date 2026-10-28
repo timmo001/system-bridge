@@ -29,6 +29,17 @@ func windowTitlesEnabled() bool {
 	return cfg.Desktop.WindowTitles
 }
 
+// hyprlandCodeEnabled is whether to run commands, any dispatcher and Lua
+// through Hyprland, which is off by default
+func hyprlandCodeEnabled() bool {
+	cfg, err := settings.Load()
+	if err != nil {
+		slog.Warn("Failed to load settings, leaving running code through Hyprland off", "error", err)
+		return false
+	}
+	return cfg.Desktop.HyprlandCode
+}
+
 func pointer[T any](value T) *T {
 	return &value
 }

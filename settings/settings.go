@@ -110,9 +110,11 @@ type SettingsDisks struct {
 }
 
 // SettingsDesktop holds the desktop module's options. Window titles are off by
-// default, as they can hold private information.
+// default, as they can hold private information. Hyprland code, running
+// commands, any dispatcher and Lua through Hyprland, is off by default too.
 type SettingsDesktop struct {
 	WindowTitles bool `json:"windowTitles" mapstructure:"windowTitles"`
+	HyprlandCode bool `json:"hyprlandCode" mapstructure:"hyprlandCode"`
 }
 
 type Settings struct {
@@ -146,6 +148,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelWarn)
 	viper.SetDefault("desktop.windowTitles", false)
+	viper.SetDefault("desktop.hyprlandCode", false)
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
@@ -259,6 +262,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
 	viper.Set("desktop.windowTitles", cfg.Desktop.WindowTitles)
+	viper.Set("desktop.hyprlandCode", cfg.Desktop.HyprlandCode)
 	viper.Set("disks.allowedSecondaryMountPoints", cfg.Disks.AllowedSecondaryMountPoints)
 	viper.Set("media.directories", cfg.Media.Directories)
 

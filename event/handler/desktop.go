@@ -62,7 +62,32 @@ type HyprlandMoveWorkspaceRequestData struct {
 
 type HyprlandOptionRequestData struct {
 	Name  string `json:"name" mapstructure:"name"`
-	Value any    `json:"value" mapstructure:"value"` // A bool or a whole number, by the option's type
+	Value any    `json:"value" mapstructure:"value"` // A bool, a number or text, by the option's type
+}
+
+type HyprlandOptionNameRequestData struct {
+	Name string `json:"name" mapstructure:"name"`
+}
+
+type HyprlandMoveCursorRequestData struct {
+	X *int `json:"x" mapstructure:"x"`
+	Y *int `json:"y" mapstructure:"y"`
+}
+
+type HyprlandSendEventRequestData struct {
+	Name string `json:"name" mapstructure:"name"`
+}
+
+type HyprlandExecRequestData struct {
+	Command string `json:"command" mapstructure:"command"`
+}
+
+type HyprlandDispatchRawRequestData struct {
+	Dispatch string `json:"dispatch" mapstructure:"dispatch"` // In the running config's language
+}
+
+type HyprlandEvalRequestData struct {
+	Code string `json:"code" mapstructure:"code"`
 }
 
 type HyprlandSubmapRequestData struct {
@@ -223,6 +248,57 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		func(request DesktopWindowRequestData) string { return required(request.ID, "No window id provided") },
 		func(ctx context.Context, request DesktopWindowRequestData) error {
 			return desktop.HyprlandKillWindow(ctx, request.ID)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandMoveCursor, event.ResponseTypeHyprlandCursorMoved, "Cursor moved",
+		func(request HyprlandMoveCursorRequestData) string {
+			if request.X == nil || request.Y == nil {
+				return "Provide both x and y"
+			}
+			return ""
+		},
+		func(ctx context.Context, request HyprlandMoveCursorRequestData) error {
+			return desktop.HyprlandMoveCursor(ctx, *request.X, *request.Y)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSendEvent, event.ResponseTypeHyprlandEventSent, "Event sent",
+		func(request HyprlandSendEventRequestData) string {
+			return required(request.Name, "No event name provided")
+		},
+		func(ctx context.Context, request HyprlandSendEventRequestData) error {
+			return desktop.HyprlandSendEvent(ctx, request.Name)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandExec, event.ResponseTypeHyprlandExecuted, "Command started",
+		func(request HyprlandExecRequestData) string { return required(request.Command, "No command provided") },
+		func(ctx context.Context, request HyprlandExecRequestData) error {
+			return desktop.HyprlandExec(ctx, request.Command)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandDispatchRaw, event.ResponseTypeHyprlandRawDispatched, "Dispatched",
+		func(request HyprlandDispatchRawRequestData) string {
+			return required(request.Dispatch, "No dispatch provided")
+		},
+		func(ctx context.Context, request HyprlandDispatchRawRequestData) error {
+			return desktop.HyprlandDispatchRaw(ctx, request.Dispatch)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandEval, event.ResponseTypeHyprlandEvaluated, "Evaluated",
+		func(request HyprlandEvalRequestData) string { return required(request.Code, "No code provided") },
+		func(ctx context.Context, request HyprlandEvalRequestData) error {
+			return desktop.HyprlandEval(ctx, request.Code)
+		})
+	registerQuery(router, desktopTimeout, event.EventHyprlandGetOption, event.ResponseTypeHyprlandOption, "Got option",
+		func(request HyprlandOptionNameRequestData) string {
+			return required(request.Name, "No option name provided")
+		},
+		func(ctx context.Context, request HyprlandOptionNameRequestData) (*types.HyprlandOptionValue, error) {
+			return desktop.HyprlandGetOption(ctx, request.Name)
+		})
+	registerQuery(router, desktopTimeout, event.EventHyprlandGetCursorPosition, event.ResponseTypeHyprlandCursorPosition, "Got cursor position",
+		func(struct{}) string { return "" },
+		func(ctx context.Context, _ struct{}) (*types.HyprlandCursorPosition, error) {
+			return desktop.HyprlandCursorPosition(ctx)
+		})
+	registerQuery(router, desktopTimeout, event.EventHyprlandGetLog, event.ResponseTypeHyprlandLog, "Got log",
+		func(struct{}) string { return "" },
+		func(ctx context.Context, _ struct{}) (*types.HyprlandLog, error) {
+			return desktop.HyprlandLog(ctx)
 		})
 }
 
