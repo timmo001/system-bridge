@@ -86,8 +86,8 @@ mise run package:windows-installer
 
 - Edit `client/home-assistant/frontend/` in this repository. Do not edit the
   generated `timmo001/system-bridge-dashboard` repository directly.
-- `hacs.json` and `README.md` in that directory are only for the generated
-  repository.
+- `hacs.json`, `README.md` and `.github/workflows/validate.yml` in that
+  directory are only for the generated repository.
 - `.github/workflows/publish-home-assistant-dashboard.yml` builds the dashboard
   and publishes it with the root `LICENSE` on each `dev` push that changes it.
   For each System Bridge release it creates a release with the same tag there,
