@@ -632,6 +632,68 @@ export const setHyprlandOption = Atom.family((name: string) =>
   ),
 );
 
+/** A Hyprland query or action from the tools card, by what it needs. */
+export type HyprlandTool =
+  | { readonly _tag: "getOption"; readonly name: string }
+  | {
+      readonly _tag: "setOption";
+      readonly name: string;
+      readonly value: string;
+    }
+  | { readonly _tag: "cursor" }
+  | { readonly _tag: "moveCursor"; readonly x: number; readonly y: number }
+  | { readonly _tag: "log" }
+  | { readonly _tag: "event"; readonly name: string }
+  | { readonly _tag: "exec"; readonly command: string }
+  | { readonly _tag: "raw"; readonly dispatch: string }
+  | { readonly _tag: "eval"; readonly code: string };
+
+/** Runs a Hyprland tool, with what it read or did as text for the page. */
+export const hyprlandTool = Atom.fn((tool: HyprlandTool, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge): Effect.Effect<string, BridgeError> => {
+      switch (tool._tag) {
+        case "getOption":
+          return bridge
+            .hyprlandGetOption({ name: tool.name })
+            .pipe(Effect.map((option) => JSON.stringify(option, null, 2)));
+        case "setOption":
+          return bridge
+            .hyprlandSetOption({ name: tool.name, value: tool.value })
+            .pipe(Effect.as(`Set ${tool.name} until the config reloads`));
+        case "cursor":
+          return bridge.hyprlandGetCursorPosition.pipe(
+            Effect.map((position) => `${position.x}, ${position.y}`),
+          );
+        case "moveCursor":
+          return bridge
+            .hyprlandMoveCursor({ x: tool.x, y: tool.y })
+            .pipe(Effect.as(`Moved the pointer to ${tool.x}, ${tool.y}`));
+        case "log":
+          return bridge.hyprlandGetLog.pipe(
+            Effect.map((log) => log.lines.join("\n")),
+          );
+        case "event":
+          return bridge
+            .hyprlandSendEvent({ name: tool.name })
+            .pipe(Effect.as(`Sent ${tool.name}`));
+        case "exec":
+          return bridge
+            .hyprlandExec({ command: tool.command })
+            .pipe(Effect.as("Ran the command"));
+        case "raw":
+          return bridge
+            .hyprlandDispatchRaw({ dispatch: tool.dispatch })
+            .pipe(Effect.as("Ran the dispatch"));
+        case "eval":
+          return bridge
+            .hyprlandEval({ code: tool.code })
+            .pipe(Effect.as("Ran the Lua"));
+      }
+    }),
+  ),
+);
+
 /** A custom event from Hyprland, and when it arrived. */
 export interface ReceivedHyprlandEvent extends HyprlandEvent {
   readonly received: number;

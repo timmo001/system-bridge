@@ -13,28 +13,53 @@ const placeholder = html`<span
   style="min-height: 6rem; border-radius: var(--sb-radius-l)"
 ></span>`;
 
-/** Whether the Desktop module reports window titles. */
+/** Whether the Desktop module reports window titles and runs Hyprland code. */
 @customElement("page-settings-desktop")
 export class PageSettingsDesktop extends SbSettingsPage {
   @state() private titles = false;
 
-  protected readonly pageTitle = "Window titles";
+  @state() private hyprlandCode = false;
+
+  protected readonly pageTitle = "Desktop";
 
   protected settingsLoaded(settings: Settings): void {
     this.titles = settings.desktop.windowTitles;
+    this.hyprlandCode = settings.desktop.hyprlandCode;
   }
 
-  #onChange = (event: Event) => {
+  #save() {
     const current = this.settings;
 
-    if (current === undefined || !(event.target instanceof HTMLInputElement)) {
+    if (current === undefined) {
+      return;
+    }
+
+    this.saveSettings(
+      Struct.assign(current, {
+        desktop: {
+          windowTitles: this.titles,
+          hyprlandCode: this.hyprlandCode,
+        },
+      }),
+    );
+  }
+
+  #onTitlesChange = (event: Event) => {
+    if (!(event.target instanceof HTMLInputElement)) {
       return;
     }
 
     this.titles = event.target.checked;
-    this.saveSettings(
-      Struct.assign(current, { desktop: { windowTitles: this.titles } }),
-    );
+    this.#save();
+  };
+
+  #onHyprlandCodeChange = (event: Event) => {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.hyprlandCode = event.target.checked;
+    this.#save();
   };
 
   #renderContent() {
@@ -58,7 +83,28 @@ export class PageSettingsDesktop extends SbSettingsPage {
             aria-describedby="window-titles-hint"
             .checked=${this.titles}
             ?disabled=${this.isSaving}
-            @change=${this.#onChange}
+            @change=${this.#onTitlesChange}
+          />
+        </label>
+        <label class="setting">
+          <span class="stack" style="--sb-stack-gap: 0">
+            <span class="label" id="hyprland-code-label"
+              >Run commands, dispatches and Lua through Hyprland</span
+            >
+            <span class="hint" id="hyprland-code-hint"
+              >Lets clients run any command, dispatch or line of Lua in
+              Hyprland, so it's off unless you turn it on.</span
+            >
+          </span>
+          <input
+            class="switch"
+            type="checkbox"
+            role="switch"
+            aria-labelledby="hyprland-code-label"
+            aria-describedby="hyprland-code-hint"
+            .checked=${this.hyprlandCode}
+            ?disabled=${this.isSaving}
+            @change=${this.#onHyprlandCodeChange}
           />
         </label>
       </sb-card>
@@ -69,8 +115,9 @@ export class PageSettingsDesktop extends SbSettingsPage {
     return html`
       <div class="page narrow">
         ${this.renderHeader({
-          heading: "Window titles",
-          description: "Choose whether windows' titles are reported",
+          heading: "Desktop",
+          description:
+            "Choose whether windows' titles are reported and Hyprland code runs",
           icon: mdiApplicationOutline,
         })}
         ${this.renderResult(this.saveResult)}

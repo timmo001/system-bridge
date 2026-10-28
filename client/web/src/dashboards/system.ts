@@ -51,6 +51,7 @@ import { html, nothing, type TemplateResult } from "lit";
 import "~/components/sb-action-alert";
 import "~/components/sb-action-button";
 import "~/components/sb-hyprland-events";
+import "~/components/sb-hyprland-tools";
 import "~/components/sb-hyprland-option";
 import "~/components/sb-select";
 import "~/components/sb-system-power";
@@ -1373,6 +1374,13 @@ const hyprlandCards = (hyprland: HyprlandData) => {
     }
     <sb-card class="half" heading="Custom events" subheading="Sent by binds">
       <sb-hyprland-events></sb-hyprland-events>
+    </sb-card>
+    <sb-card
+      class="half"
+      heading="Tools"
+      subheading="Options, the cursor, the log and code"
+    >
+      <sb-hyprland-tools></sb-hyprland-tools>
     </sb-card>
     <sb-card heading="Displays" subheading="As Hyprland sees them">
       <sb-data-table
