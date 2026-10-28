@@ -71,21 +71,23 @@ The dashboard needs Home Assistant 2026.10 or later. Sensors added to the integr
 
 ### Install from the Marketplace
 
-[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=timmo001&repository=system-bridge&category=plugin)
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=timmo001&repository=system-bridge-dashboard&category=plugin)
 
-1. Use the button above to open the repository in the Marketplace. If it isn't listed, go to **Settings > Marketplace**, select **Add from link**, enter `timmo001/system-bridge` and choose the type **Dashboard**.
+1. Use the button above to open the repository in the Marketplace. If it isn't listed, go to **Settings > Marketplace**, select **Add from link**, enter `timmo001/system-bridge-dashboard` and choose the type **Dashboard**.
 2. Select **Install**. The Marketplace adds the dashboard resource for you.
 3. Reload your browser.
 
-If you manage dashboard resources in YAML, add `/local/community/system-bridge/system-bridge-dashboard.js` as a `module` resource yourself.
+If you manage dashboard resources in YAML, add `/local/community/system-bridge-dashboard/system-bridge-dashboard.js` as a `module` resource yourself.
 
-The Marketplace comes with Home Assistant 2026.11. On 2026.10, add the repository to [HACS](https://www.hacs.xyz/) as a custom repository of type **Dashboard** instead.
+The Marketplace comes with Home Assistant 2026.11. On 2026.10, add `timmo001/system-bridge-dashboard` to [HACS](https://www.hacs.xyz/) as a custom repository of type **Dashboard** instead.
+
+If you installed the dashboard from `timmo001/system-bridge` before, remove it and install it again from `timmo001/system-bridge-dashboard`. The dashboard now has a repository of its own, and new versions are only published there.
 
 ### Install manually
 
 [![Open your Home Assistant instance and show your dashboard resources.](https://my.home-assistant.io/badges/lovelace_resources.svg)](https://my.home-assistant.io/redirect/lovelace_resources/)
 
-1. Download `system-bridge-dashboard.js` from the [latest release](https://github.com/timmo001/system-bridge/releases/latest) and put it in your Home Assistant `config/www/` folder.
+1. Download `system-bridge-dashboard.js` from the [latest release](https://github.com/timmo001/system-bridge-dashboard/releases/latest) and put it in your Home Assistant `config/www/` folder.
 2. Use the button above, or go to **Settings > Dashboards**, open the menu and select **Resources**.
 3. Add `/local/system-bridge-dashboard.js` as a **JavaScript module**.
 

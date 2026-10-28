@@ -23,7 +23,7 @@ mise tasks
 - **Backend**: Go application (HTTP/WebSocket APIs)
 - **MCP Server**: Model Context Protocol server
 - **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`)
-- **Home Assistant frontend**: Lovelace dashboard, view and section strategies (`custom:system-bridge`) at `client/home-assistant/frontend/`, built into `system-bridge-dashboard.js` and attached to each release. It reads the integration's entities by their unique ID keys, so check `src/registry.ts` when Core changes them; `TODO(Core)` comments mark pages and sections waiting on Core entities
+- **Home Assistant frontend**: Lovelace dashboard, view and section strategies (`custom:system-bridge`) at `client/home-assistant/frontend/`, built into `system-bridge-dashboard.js` and published to the generated mirror `timmo001/system-bridge-dashboard`, with a release for each System Bridge release. It reads the integration's entities by their unique ID keys, so check `src/registry.ts` when Core changes them; `TODO(Core)` comments mark pages and sections waiting on Core entities
 - **CLI**: Command-line interface
 - **Docs**: Blume site at `docs/`, using `@timmo001/docs-kit`, deployed separately as a Cloudflare Worker with a docs MCP server at `/mcp`
 - **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
@@ -81,6 +81,17 @@ mise run package:windows-installer
   `mise run omarchy-plugin:validate` after changing it.
 - A validated push to `dev` publishes the directory and root `LICENSE` to the
   generated repository through `.github/workflows/publish-omarchy-plugin.yml`.
+
+## Home Assistant Dashboard
+
+- Edit `client/home-assistant/frontend/` in this repository. Do not edit the
+  generated `timmo001/system-bridge-dashboard` repository directly.
+- `hacs.json` and `README.md` in that directory are only for the generated
+  repository.
+- `.github/workflows/publish-home-assistant-dashboard.yml` builds the dashboard
+  and publishes it with the root `LICENSE` on each `dev` push that changes it.
+  For each System Bridge release it creates a release with the same tag there,
+  with `system-bridge-dashboard.js` as its only asset.
 
 ## Additional Documentation
 
