@@ -22,7 +22,7 @@ The scripts are a starting point, not a drop-in. They may be out of date or miss
 2. **Pick the narrowest tasks.** Map the changed files to the tasks that cover them: a YAML edit needs the YAML linter, not the test suite. Use a tool's changed-file selection where it exists (`bun test --changed`, `deno test --changed`, pnpm `--filter "...[origin/main]"`, `mise run --affected`). Don't run a repository-wide aggregate such as `check` or `validate` for a narrow change.
 3. **Run them together.** Pass independent tasks to one invocation (`mise run a ::: b`, `bun run --parallel a b`, `pnpm run "/^(a|b)$/"`), or start separate commands as parallel tool calls. Never chain independent checks with `&&`.
 4. **Write first, then check.** Formatters, code generators and anything else that rewrites files run on their own before the read-only checks, so the checks see the final files.
-5. **Background long runs.** Start slow builds and full suites in a background shell and keep working; start dev servers through the project's daemon workflow rather than in the foreground.
+5. **Background long runs.** Start slow builds and full suites in a background shell and keep working; start dev servers through the project's daemon workflow rather than in the foreground. A typed tool call, such as a Code Mode tool that runs tasks, blocks the turn until it returns, so use one only for runs short enough to wait on. Where the agent has no background shell, or a run must outlive the agent's host restarting, use a detached-job tool when the host provides one.
 6. **Rerun narrowly.** After a failure, rerun only what failed (`pytest --lf`, a single task, a single test file) and widen again only when the fix could affect more.
 
 ## Writing tasks
