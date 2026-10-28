@@ -186,7 +186,42 @@ type runCommandInput struct {
 	ID string `json:"id"`
 }
 
-func (h toolHandlers) handleAudioControl(_ context.Context, _ *sdkmcp.CallToolRequest, input audioControlInput) (*sdkmcp.CallToolResult, any, error) {
+// actionOutput is what a tool that changes something returns
+type actionOutput struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+// getDataOutput holds the data of each module asked for. A module that
+// isn't ready yet is left out.
+type getDataOutput struct {
+	Audio     *types.AudioData     `json:"audio,omitempty"`
+	Battery   *types.BatteryData   `json:"battery,omitempty"`
+	Bluetooth *types.BluetoothData `json:"bluetooth,omitempty"`
+	CPU       *types.CPUData       `json:"cpu,omitempty"`
+	Desktop   *types.DesktopData   `json:"desktop,omitempty"`
+	Disks     *types.DisksData     `json:"disks,omitempty"`
+	Displays  *types.DisplaysData  `json:"displays,omitempty"`
+	GPUs      *types.GPUsData      `json:"gpus,omitempty"`
+	Media     *types.MediaData     `json:"media,omitempty"`
+	Memory    *types.MemoryData    `json:"memory,omitempty"`
+	Networks  *types.NetworksData  `json:"networks,omitempty"`
+	Processes *types.ProcessesData `json:"processes,omitempty"`
+	Sensors   *types.SensorsData   `json:"sensors,omitempty"`
+	System    *types.SystemData    `json:"system,omitempty"`
+}
+
+// commandsOutput wraps the allowlist, as structured output must be an object
+type commandsOutput struct {
+	Commands []settings.SettingsCommandDefinition `json:"commands"`
+}
+
+// commandPrefabsOutput wraps the prefabs, as structured output must be an object
+type commandPrefabsOutput struct {
+	Prefabs []types.CommandPrefab `json:"prefabs"`
+}
+
+func (h toolHandlers) handleAudioControl(_ context.Context, _ *sdkmcp.CallToolRequest, input audioControlInput) (*sdkmcp.CallToolResult, actionOutput, error) {
 	arguments := map[string]interface{}{"id": input.ID}
 	if input.Volume != nil {
 		arguments["volume"] = *input.Volume
@@ -208,16 +243,13 @@ func (h toolHandlers) handleAudioControl(_ context.Context, _ *sdkmcp.CallToolRe
 
 	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
+		return nil, actionOutput{}, fmt.Errorf("%s", response.Message)
 	}
 
-	return formatToolResult(map[string]interface{}{
-		"success": true,
-		"message": response.Message,
-	})
+	return actionResult(response.Message)
 }
 
-func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallToolRequest, input displayControlInput) (*sdkmcp.CallToolResult, any, error) {
+func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallToolRequest, input displayControlInput) (*sdkmcp.CallToolResult, actionOutput, error) {
 	arguments := map[string]interface{}{"id": input.ID}
 	if input.Brightness != nil {
 		arguments["brightness"] = *input.Brightness
@@ -233,25 +265,22 @@ func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallTool
 
 	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
+		return nil, actionOutput{}, fmt.Errorf("%s", response.Message)
 	}
 
-	return formatToolResult(map[string]interface{}{
-		"success": true,
-		"message": response.Message,
-	})
+	return actionResult(response.Message)
 }
 
 // eventTool is a tool handler that sends its input as an event's data
-func eventTool[T any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHandlerFor[T, any] {
-	return func(_ context.Context, _ *sdkmcp.CallToolRequest, input T) (*sdkmcp.CallToolResult, any, error) {
+func eventTool[T any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHandlerFor[T, actionOutput] {
+	return func(_ context.Context, _ *sdkmcp.CallToolRequest, input T) (*sdkmcp.CallToolResult, actionOutput, error) {
 		encoded, err := json.Marshal(input)
 		if err != nil {
-			return nil, nil, fmt.Errorf("encode tool input: %w", err)
+			return nil, actionOutput{}, fmt.Errorf("encode tool input: %w", err)
 		}
 		arguments := map[string]interface{}{}
 		if err := json.Unmarshal(encoded, &arguments); err != nil {
-			return nil, nil, fmt.Errorf("encode tool input: %w", err)
+			return nil, actionOutput{}, fmt.Errorf("encode tool input: %w", err)
 		}
 		message := event.Message{
 			ID:    generateID(),
@@ -261,31 +290,88 @@ func eventTool[T any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHand
 
 		response := h.eventRouter.HandleMessage("mcp", message)
 		if response.Type == event.ResponseTypeError {
-			return nil, nil, fmt.Errorf("%s", response.Message)
+			return nil, actionOutput{}, fmt.Errorf("%s", response.Message)
 		}
 
-		return formatToolResult(map[string]interface{}{
-			"success": true,
-			"message": response.Message,
-		})
+		return actionResult(response.Message)
 	}
 }
 
-func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, any, error) {
-	result := make(map[string]interface{})
+func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, getDataOutput, error) {
+	var output getDataOutput
 	for _, moduleName := range input.Modules {
 		module, err := h.dataStore.GetModule(moduleName)
 		if err != nil {
 			slog.Warn("Module not found", "module", moduleName, "error", err)
 			continue
 		}
-		result[string(moduleName)] = module.Data
+		if module.Data == nil {
+			continue
+		}
+		if err := setModuleData(&output, moduleName, module.Data); err != nil {
+			slog.Warn("Module data doesn't match its type", "module", moduleName, "error", err)
+		}
 	}
 
-	return formatToolResult(result)
+	return toolResult(output, output)
 }
 
-func (h toolHandlers) handleGetHistory(_ context.Context, _ *sdkmcp.CallToolRequest, input getHistoryInput) (*sdkmcp.CallToolResult, any, error) {
+// setModuleData puts a module's data in its field of the output. Data read
+// back from the cache is a generic map, so it's decoded into the module's
+// type.
+func setModuleData(output *getDataOutput, name types.ModuleName, data any) error {
+	var err error
+	switch name {
+	case types.ModuleAudio:
+		output.Audio, err = moduleData[types.AudioData](data)
+	case types.ModuleBattery:
+		output.Battery, err = moduleData[types.BatteryData](data)
+	case types.ModuleBluetooth:
+		output.Bluetooth, err = moduleData[types.BluetoothData](data)
+	case types.ModuleCPU:
+		output.CPU, err = moduleData[types.CPUData](data)
+	case types.ModuleDesktop:
+		output.Desktop, err = moduleData[types.DesktopData](data)
+	case types.ModuleDisks:
+		output.Disks, err = moduleData[types.DisksData](data)
+	case types.ModuleDisplays:
+		output.Displays, err = moduleData[types.DisplaysData](data)
+	case types.ModuleGPUs:
+		output.GPUs, err = moduleData[types.GPUsData](data)
+	case types.ModuleMedia:
+		output.Media, err = moduleData[types.MediaData](data)
+	case types.ModuleMemory:
+		output.Memory, err = moduleData[types.MemoryData](data)
+	case types.ModuleNetworks:
+		output.Networks, err = moduleData[types.NetworksData](data)
+	case types.ModuleProcesses:
+		output.Processes, err = moduleData[types.ProcessesData](data)
+	case types.ModuleSensors:
+		output.Sensors, err = moduleData[types.SensorsData](data)
+	case types.ModuleSystem:
+		output.System, err = moduleData[types.SystemData](data)
+	default:
+		err = fmt.Errorf("unknown module")
+	}
+	return err
+}
+
+func moduleData[T any](data any) (*T, error) {
+	if value, ok := data.(T); ok {
+		return &value, nil
+	}
+	encoded, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	var value T
+	if err := json.Unmarshal(encoded, &value); err != nil {
+		return nil, err
+	}
+	return &value, nil
+}
+
+func (h toolHandlers) handleGetHistory(_ context.Context, _ *sdkmcp.CallToolRequest, input getHistoryInput) (*sdkmcp.CallToolResult, types.MetricHistory, error) {
 	arguments := map[string]interface{}{"since": input.Since}
 	if len(input.Modules) > 0 {
 		arguments["modules"] = input.Modules
@@ -298,30 +384,35 @@ func (h toolHandlers) handleGetHistory(_ context.Context, _ *sdkmcp.CallToolRequ
 
 	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
+		return nil, types.MetricHistory{}, fmt.Errorf("%s", response.Message)
+	}
+	history, ok := response.Data.(types.MetricHistory)
+	if !ok {
+		return nil, types.MetricHistory{}, fmt.Errorf("unexpected history data %T", response.Data)
 	}
 
-	return formatToolResult(response.Data)
+	return toolResult(history, history)
 }
 
-func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, any, error) {
+func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, commandsOutput, error) {
 	cfg, err := h.loadSettings()
 	if err != nil {
-		return nil, nil, fmt.Errorf("load settings: %w", err)
+		return nil, commandsOutput{}, fmt.Errorf("load settings: %w", err)
 	}
 
 	commands := cfg.Commands.Allowlist
 	if commands == nil {
 		commands = []settings.SettingsCommandDefinition{}
 	}
-	return formatToolResult(commands)
+	return toolResult(commands, commandsOutput{Commands: commands})
 }
 
-func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, any, error) {
-	return formatToolResult(prefab.List())
+func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, commandPrefabsOutput, error) {
+	prefabs := prefab.List()
+	return toolResult(prefabs, commandPrefabsOutput{Prefabs: prefabs})
 }
 
-func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRequest, input notificationInput) (*sdkmcp.CallToolResult, any, error) {
+func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRequest, input notificationInput) (*sdkmcp.CallToolResult, actionOutput, error) {
 	arguments := map[string]interface{}{"title": input.Title, "message": input.Message}
 	if input.Icon != "" {
 		arguments["icon"] = input.Icon
@@ -337,37 +428,42 @@ func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRe
 
 	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, nil, fmt.Errorf("%s", response.Message)
+		return nil, actionOutput{}, fmt.Errorf("%s", response.Message)
 	}
 
-	return formatToolResult(map[string]interface{}{
-		"success": true,
-		"message": response.Message,
-	})
+	return actionResult(response.Message)
 }
 
-func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRequest, input runCommandInput) (*sdkmcp.CallToolResult, any, error) {
+func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRequest, input runCommandInput) (*sdkmcp.CallToolResult, command.ExecuteResult, error) {
 	cfg, err := h.loadSettings()
 	if err != nil {
-		return nil, nil, fmt.Errorf("load settings: %w", err)
+		return nil, command.ExecuteResult{}, fmt.Errorf("load settings: %w", err)
 	}
 
 	result, err := command.Run(ctx, command.ExecuteRequest{CommandID: input.ID, RequestID: generateID(), Connection: "mcp"}, cfg)
 	if err != nil {
-		return nil, nil, err
+		return nil, command.ExecuteResult{}, err
 	}
 
-	return formatToolResult(result)
+	return toolResult(result, result)
 }
 func generateID() string {
 	return fmt.Sprintf("mcp-%d", time.Now().UnixNano())
 }
 
-func formatToolResult(result interface{}) (*sdkmcp.CallToolResult, any, error) {
-	resultJSON, err := json.MarshalIndent(result, "", "  ")
+func actionResult(message string) (*sdkmcp.CallToolResult, actionOutput, error) {
+	output := actionOutput{Success: true, Message: message}
+	return toolResult(output, output)
+}
+
+// toolResult returns the output as structured content, for clients such as
+// code mode that read it, with text as indented JSON for those that don't
+func toolResult[Out any](text any, output Out) (*sdkmcp.CallToolResult, Out, error) {
+	resultJSON, err := json.MarshalIndent(text, "", "  ")
 	if err != nil {
-		return nil, nil, fmt.Errorf("format tool result: %v", err)
+		var zero Out
+		return nil, zero, fmt.Errorf("format tool result: %v", err)
 	}
 
-	return &sdkmcp.CallToolResult{Content: []sdkmcp.Content{&sdkmcp.TextContent{Text: string(resultJSON)}}}, nil, nil
+	return &sdkmcp.CallToolResult{Content: []sdkmcp.Content{&sdkmcp.TextContent{Text: string(resultJSON)}}}, output, nil
 }

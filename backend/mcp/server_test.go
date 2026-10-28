@@ -241,6 +241,10 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 	require.NoError(t, json.Unmarshal([]byte(content.Text), &data))
 	assert.Contains(t, data, "cpu")
 	assert.Contains(t, data, "memory")
+	structured, ok := result.StructuredContent.(map[string]any)
+	require.True(t, ok)
+	assert.Contains(t, structured, "cpu")
+	assert.Contains(t, structured, "memory")
 }
 
 func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
@@ -248,6 +252,9 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	byName := make(map[string]*sdkmcp.Tool, len(tools))
 	for _, tool := range tools {
 		byName[tool.Name] = tool
+		output, ok := tool.OutputSchema.(map[string]any)
+		require.True(t, ok, "%s has no output schema", tool.Name)
+		assert.Equal(t, "object", output["type"], tool.Name)
 	}
 
 	getData := schemaMap(t, byName["system_bridge_get_data"])
@@ -286,7 +293,7 @@ func TestTypedEventHandlers(t *testing.T) {
 		eventType    event.EventType
 		responseType event.ResponseType
 		responseText string
-		invoke       func() (*sdkmcp.CallToolResult, any, error)
+		invoke       func() (*sdkmcp.CallToolResult, actionOutput, error)
 		wantData     map[string]any
 	}{
 		{
@@ -294,7 +301,7 @@ func TestTypedEventHandlers(t *testing.T) {
 			eventType:    event.EventAudioControl,
 			responseType: event.ResponseTypeAudioControlled,
 			responseText: "audio controlled",
-			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+			invoke: func() (*sdkmcp.CallToolResult, actionOutput, error) {
 				muted := false
 				return handlers.handleAudioControl(t.Context(), nil, audioControlInput{ID: "speakers", Muted: &muted, Default: true})
 			},
@@ -305,7 +312,7 @@ func TestTypedEventHandlers(t *testing.T) {
 			eventType:    event.EventDesktopSetWindowState,
 			responseType: event.ResponseTypeDesktopWindowStateSet,
 			responseText: "window state set",
-			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+			invoke: func() (*sdkmcp.CallToolResult, actionOutput, error) {
 				maximised := false
 				return eventTool[desktopWindowStateInput](handlers, event.EventDesktopSetWindowState)(t.Context(), nil, desktopWindowStateInput{ID: "0x1", Maximised: &maximised})
 			},
@@ -316,7 +323,7 @@ func TestTypedEventHandlers(t *testing.T) {
 			eventType:    event.EventDisplayControl,
 			responseType: event.ResponseTypeDisplayControlled,
 			responseText: "display controlled",
-			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+			invoke: func() (*sdkmcp.CallToolResult, actionOutput, error) {
 				brightness := 40.0
 				return handlers.handleDisplayControl(t.Context(), nil, displayControlInput{ID: "HDMI-A-2", Brightness: &brightness})
 			},
@@ -327,7 +334,7 @@ func TestTypedEventHandlers(t *testing.T) {
 			eventType:    event.EventMediaControl,
 			responseType: event.ResponseTypeMediaControlled,
 			responseText: "media controlled",
-			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+			invoke: func() (*sdkmcp.CallToolResult, actionOutput, error) {
 				position := 30.5
 				return eventTool[mediaControlInput](handlers, event.EventMediaControl)(t.Context(), nil, mediaControlInput{Action: "SEEK", Player: "vlc", Position: &position})
 			},
@@ -338,7 +345,7 @@ func TestTypedEventHandlers(t *testing.T) {
 			eventType:    event.EventNotification,
 			responseType: event.ResponseTypeNotificationSent,
 			responseText: "notification sent",
-			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+			invoke: func() (*sdkmcp.CallToolResult, actionOutput, error) {
 				return handlers.handleNotification(t.Context(), nil, notificationInput{Title: "Title", Message: "Body", Icon: "info"})
 			},
 			wantData: map[string]any{"title": "Title", "message": "Body", "icon": "info"},
@@ -356,7 +363,7 @@ func TestTypedEventHandlers(t *testing.T) {
 
 			result, output, err := tt.invoke()
 			require.NoError(t, err)
-			assert.Nil(t, output)
+			assert.Equal(t, actionOutput{Success: true, Message: tt.responseText}, output)
 			assert.Equal(t, tt.eventType, received.Event)
 			assert.Equal(t, tt.wantData, received.Data)
 			require.NotEmpty(t, received.ID)

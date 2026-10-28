@@ -131,6 +131,11 @@ Keep tool schemas, typed handler inputs, and the
 [public tools reference](https://system-bridge.timmo.dev/api/mcp/#tools) in sync
 when changing a tool.
 
+Each handler returns a typed output as well as the JSON text, and the SDK infers
+the tool's output schema from that type and checks results against it. A type
+that nests itself can't be inferred, so `getDataOutputSchema` in `tools.go`
+replaces it, and lets maps be null as a nil map encodes as null.
+
 ## Testing
 
 `server_test.go` covers authentication, Streamable HTTP and WebSocket SDK

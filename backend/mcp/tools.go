@@ -1,11 +1,16 @@
 package mcp
 
 import (
+	"fmt"
+	"reflect"
+
+	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 )
 
 func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, dataStore *data.DataStore) {
@@ -134,6 +139,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 				},
 			},
 		}, []string{"modules"}),
+		OutputSchema: getDataOutputSchema(),
 	}, handlers.handleGetData)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
@@ -459,4 +465,44 @@ func historyModuleNames() []string {
 
 func objectSchema(properties map[string]any, required []string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required}
+}
+
+// getDataOutputSchema infers get_data's output schema as the SDK would,
+// except that maps may be null too, as a nil map encodes as null, and
+// Windows sensor hardware, which nests itself, leaves its subhardware untyped
+func getDataOutputSchema() *jsonschema.Schema {
+	type windowsHardware struct {
+		ID          string                       `json:"id"`
+		Name        string                       `json:"name"`
+		Type        string                       `json:"type"`
+		Subhardware []any                        `json:"subhardware"`
+		Sensors     []types.SensorsWindowsSensor `json:"sensors"`
+	}
+	hardware, err := jsonschema.For[windowsHardware](nil)
+	if err != nil {
+		panic(fmt.Sprintf("output schema: %v", err))
+	}
+	schema, err := jsonschema.For[getDataOutput](&jsonschema.ForOptions{
+		TypeSchemas: map[reflect.Type]*jsonschema.Schema{reflect.TypeFor[types.SensorsWindowsHardware](): hardware},
+	})
+	if err != nil {
+		panic(fmt.Sprintf("output schema: %v", err))
+	}
+	allowNullMaps(schema)
+	return schema
+}
+
+func allowNullMaps(schema *jsonschema.Schema) {
+	if schema == nil {
+		return
+	}
+	if schema.Type == "object" && schema.Properties == nil && schema.AdditionalProperties != nil {
+		schema.Types = []string{"null", "object"}
+		schema.Type = ""
+	}
+	for _, property := range schema.Properties {
+		allowNullMaps(property)
+	}
+	allowNullMaps(schema.Items)
+	allowNullMaps(schema.AdditionalProperties)
 }
