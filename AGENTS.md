@@ -91,7 +91,9 @@ mise run package:windows-installer
 - `.github/workflows/publish-home-assistant-dashboard.yml` builds the dashboard
   and publishes it with the root `LICENSE` on each `dev` push that changes it.
   For each System Bridge release it creates a release with the same tag there,
-  with `system-bridge-dashboard.js` as its only asset.
+  with `system-bridge-dashboard.js` and its attestation's Sigstore bundle as
+  the only assets. The attestation itself is stored in this repository. To
+  mirror an existing release again, run the workflow with its `release-tag`.
 
 ## Additional Documentation
 

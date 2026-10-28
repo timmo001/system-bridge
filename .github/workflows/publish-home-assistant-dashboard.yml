@@ -21,7 +21,13 @@ on:
   release:
     types:
       - published
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: >-
+          Mirror this existing System Bridge release again, built from its tag
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -32,6 +38,7 @@ concurrency:
 
 env:
   PUBLISH_REPOSITORY: ${{ github.repository_owner }}/system-bridge-dashboard
+  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release-tag }}
 
 jobs:
   build:
@@ -39,6 +46,8 @@ jobs:
     steps:
       - name: Checkout System Bridge
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Lint publisher
         run: shellcheck .github/scripts/bash/publish-home-assistant-dashboard.sh
@@ -66,9 +75,15 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout System Bridge
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Download dashboard
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -89,7 +104,6 @@ jobs:
       - name: Commit published dashboard
         env:
           SOURCE_SHA: ${{ github.sha }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           git -C _publish config user.name 'github-actions[bot]'
           git -C _publish config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -105,27 +119,39 @@ jobs:
           fi
           git -C _publish push
 
+      # The attestation is stored in this repository, as the build ran here.
+      # Verify with: gh attestation verify system-bridge-dashboard.js -R timmo001/system-bridge
+      - name: Attest dashboard
+        id: attest
+        if: env.RELEASE_TAG != ''
+        uses: timmo001/workflows/.github/actions/attest-release-assets@de4221cd9b24ad3d61aa1db87b6e4864cf56d5a1 # 20261027.0
+        with:
+          subject-patterns: client/home-assistant/frontend/dist/system-bridge-dashboard.js
+          bundle-path: dist/system-bridge-dashboard-${{ env.RELEASE_TAG }}.sigstore.json
+
       # Tagged after the push, so the release points at a commit whose
-      # hacs.json matches it. Its only asset is the dashboard, which keeps
-      # Marketplace installs small.
+      # hacs.json matches it. Its only assets are the dashboard and its
+      # Sigstore bundle, which keeps Marketplace installs small.
       - name: Mirror release
-        if: github.event_name == 'release'
+        if: env.RELEASE_TAG != ''
         env:
           GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
           PRERELEASE: ${{ github.event.release.prerelease }}
-          SOURCE_URL: ${{ github.event.release.html_url }}
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
+          ASSETS: |
+            ${{ steps.attest.outputs.subjects }}
+            ${{ steps.attest.outputs.bundle-path }}
         run: |
-          asset=client/home-assistant/frontend/dist/system-bridge-dashboard.js
+          mapfile -t assets < <(grep -v '^$' <<< "$ASSETS")
           if gh release view "$RELEASE_TAG" --repo "$PUBLISH_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "$asset" --repo "$PUBLISH_REPOSITORY" --clobber
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --repo "$PUBLISH_REPOSITORY" --clobber
             exit 0
           fi
           flags=()
           if [[ $PRERELEASE == true ]]; then
             flags+=(--prerelease)
           fi
-          gh release create "$RELEASE_TAG" "$asset" \
+          gh release create "$RELEASE_TAG" "${assets[@]}" \
             --repo "$PUBLISH_REPOSITORY" \
             --target "$(git -C _publish rev-parse HEAD)" \
             --title "$RELEASE_TAG" \

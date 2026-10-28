@@ -89,7 +89,7 @@ gh run list -R timmo001/arch-repo --limit 3                         # "Publish s
 curl -s https://aur.archlinux.org/rpc/v5/info/system-bridge | jq -r '.results[0].Version'
 ```
 
-A finished release has nine assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-linux-x86_64.tar.gz`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>-windows-x86_64.zip`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI, npm, JSR and the AUR show the new version once their jobs finish. The Home Assistant dashboard gets a release with the same tag in `timmo001/system-bridge-dashboard`, with `system-bridge-dashboard.js` as its only asset.
+A finished release has nine assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-linux-x86_64.tar.gz`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>-windows-x86_64.zip`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI, npm, JSR and the AUR show the new version once their jobs finish. The Home Assistant dashboard gets a release with the same tag in `timmo001/system-bridge-dashboard`, with `system-bridge-dashboard.js` and `system-bridge-dashboard-<version>.sigstore.json` as its only assets.
 
 ## Setup
 
