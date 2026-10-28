@@ -835,7 +835,7 @@ func HyprlandEval(ctx context.Context, code string) error {
 		return err
 	}
 	if !hyprlandUsesLua(data) {
-		return fmt.Errorf("Lua without a Lua config: %w", ErrUnsupported)
+		return fmt.Errorf("running Lua without a Lua config: %w", ErrUnsupported)
 	}
 	if strings.ContainsAny(code, "\n\r") {
 		return fmt.Errorf("code: %w: must be one line", ErrInvalidValue)
