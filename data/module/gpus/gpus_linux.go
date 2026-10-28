@@ -15,6 +15,7 @@ import (
 
 	"log/slog"
 
+	"github.com/timmo001/system-bridge/data/module/powercap"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -193,6 +194,12 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 		}
 		gpu.Temperature = hwmon.temperature
 		gpu.PowerUsage = hwmon.power
+		// Integrated Intel GPUs have no hwmon, but RAPL measures them in
+		// the uncore zone, which the kernel's perf events call energy-gpu.
+		// They always sit at 00:02.0 on the first PCI bus.
+		if gpu.PowerUsage == nil && vendor == pciVendorIntel && strings.HasSuffix(pciAddr, ":00:02.0") {
+			gpu.PowerUsage = powercap.Watts(powercap.ZonePath("uncore"))
+		}
 		gpu.PowerLimit = hwmon.powerLimit
 		gpu.FanSpeed = hwmon.fanSpeed
 		gpu.FanSpeedPercent = hwmon.fanSpeedPercent
