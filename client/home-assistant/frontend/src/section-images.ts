@@ -47,6 +47,13 @@ const DRAWINGS: Record<SectionName, string> = {
     outline(24, 11, 44, 22, 4) +
     rect(70, 18, 4, 8, 0.48, 1) +
     rect(28, 15, 26, 14, 0.48),
+  "device-batteries": columns(
+    3,
+    (i) =>
+      outline(10 + i * 26, 14, 18, 12, 3) +
+      rect(29 + i * 26, 18, 2, 4, 0.48, 1) +
+      rect(13 + i * 26, 17, [12, 6, 9][i] ?? 8, 6, 0.48, 1),
+  ),
   cpu:
     outline(34, 10, 26, 24, 4) +
     rect(41, 17, 12, 10, 0.48) +

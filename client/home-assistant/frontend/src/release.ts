@@ -28,6 +28,13 @@ export const RELEASE_GATES = new Map([
   ["network_interface_ssid", "2026.11"],
   ["network_interface_signal_strength", "2026.11"],
   ["network_interface_link_rate", "2026.11"],
+  // Core #188564
+  ["ac_connected", "2026.11"],
+  ["battery_info", "2026.11"],
+  ["battery_info_state", "2026.11"],
+  ["battery_power", "2026.11"],
+  ["battery_state", "2026.11"],
+  ["battery_voltage", "2026.11"],
 ]);
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */

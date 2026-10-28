@@ -132,7 +132,10 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   "overview-load": "CPU and memory load in one graph.",
   "overview-power": "Power draw, with a graph.",
   "overview-temperatures": "CPU and GPU temperatures, with a graph.",
-  battery: "Battery level, time remaining and charging state.",
+  battery:
+    "Battery level, state, time remaining, AC power, power draw and voltage.",
+  "device-batteries":
+    "Battery level and state of connected devices, such as a wireless mouse.",
   cpu: "CPU usage, speed, power, load average, temperature and voltage.",
   "cpu-history":
     "Graphs of CPU usage, speed, power, load average and temperature.",
@@ -189,6 +192,7 @@ const HISTORY_SECTIONS = new Set<string>([
 
 const PERCENTAGE_SECTIONS = new Set<string>([
   "battery",
+  "device-batteries",
   "cpu",
   "memory",
   "mount",

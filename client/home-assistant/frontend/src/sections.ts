@@ -148,16 +148,30 @@ export const SECTIONS = {
     ]);
   },
 
-  // TODO(Core): add per-device batteries and the AC power binary sensor once
-  // Core #188564 merges, with their translation keys in release.ts's
-  // RELEASE_GATES at the release that ships it
   battery: ({ entities, percentage }) =>
     grid([
       heading("Battery", "mdi:battery"),
       percentageOf(entities.single.get("battery"), percentage),
-      ...singles(entities, "battery_time_remaining", "battery_is_charging").map(
-        (entity) => tile(entity),
-      ),
+      ...singles(
+        entities,
+        "battery_state",
+        "battery_time_remaining",
+        "battery_is_charging",
+        "ac_connected",
+        "battery_power",
+        "battery_voltage",
+      ).map((entity) => tile(entity)),
+    ]),
+
+  "device-batteries": ({ entities, percentage }) =>
+    grid([
+      heading("Devices", "mdi:battery-bluetooth"),
+      ...[...entities.items.battery.values()].flatMap((battery) => [
+        ...fields(battery, "battery_info").map((entity) =>
+          tile(entity, percentage),
+        ),
+        ...fields(battery, "state").map((entity) => tile(entity)),
+      ]),
     ]),
 
   cpu: ({ entities, percentage }) =>

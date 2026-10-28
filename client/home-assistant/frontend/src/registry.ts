@@ -8,7 +8,7 @@ import type {
 const DOMAIN = "system_bridge";
 
 export type ItemKind =
-  "core" | "disk" | "display" | "gpu" | "interface" | "mount";
+  "battery" | "core" | "disk" | "display" | "gpu" | "interface" | "mount";
 
 /**
  * Core gives every System Bridge entity the unique ID `<system uuid>_<key>`.
@@ -30,6 +30,13 @@ const ITEM_RULES: readonly {
   },
   { kind: "gpu", translationPrefix: "gpu_", keyPrefix: "gpu_" },
   { kind: "display", translationPrefix: "display_", keyPrefix: "display_" },
+  // A battery's state before its level, whose translation key is a prefix of it
+  {
+    kind: "battery",
+    translationPrefix: "battery_info_",
+    keyPrefix: "battery_",
+  },
+  { kind: "battery", translationPrefix: "battery_info", keyPrefix: "battery_" },
   {
     kind: "core",
     translationPrefix: "processes_load_cpu",
@@ -158,6 +165,7 @@ export const groupEntities = (
   const single = new Map<string, string>();
 
   const items: SystemBridgeEntities["items"] = {
+    battery: new Map(),
     core: new Map(),
     disk: new Map(),
     display: new Map(),

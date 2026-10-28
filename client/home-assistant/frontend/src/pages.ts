@@ -59,7 +59,7 @@ export const PAGES: readonly Page[] = [
     page: "battery",
     title: "Battery",
     icon: "mdi:battery",
-    sections: () => [{ section: "battery" }],
+    sections: () => [{ section: "battery" }, { section: "device-batteries" }],
   },
   // TODO(Core): uncomment if Core adds a connected binary sensor per paired
   // device (Core roadmap note, low priority). Device control is not for Core.
