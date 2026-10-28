@@ -135,12 +135,81 @@ class HyprlandMoveWorkspaceRequest:
 class HyprlandOptionRequest:
     """Hyprland Option Request.
 
-    Sets an option from the desktop module's hyprland.options until the config
-    reloads. value is a bool or a whole number, 0 or more, by its type.
+    Sets any config option until the config reloads. value is a bool, a whole
+    number, any number or text, by its type. A vec2 takes two numbers, as
+    "5 10" or [5, 10], and a css option up to four whole numbers, such as
+    "5 10". A gradient takes colours and an optional angle, as
+    hyprland_get_option reports them. The options in hyprland.options only
+    take a number of 0 or more.
     """
 
     name: str
-    value: bool | int
+    value: bool | int | float | str | list[float]
+
+
+@dataclass(slots=True)
+class HyprlandOptionNameRequest:
+    """Hyprland Option Name Request.
+
+    Any config option, such as general.col.active_border or general:layout.
+    """
+
+    name: str
+
+
+@dataclass(slots=True)
+class HyprlandMoveCursorRequest:
+    """Hyprland Move Cursor Request.
+
+    Moves the pointer, in pixels across every display.
+    """
+
+    x: int
+    y: int
+
+
+@dataclass(slots=True)
+class HyprlandSendEventRequest:
+    """Hyprland Send Event Request.
+
+    Sends a custom event, as a bind to the event dispatcher would.
+    """
+
+    name: str
+
+
+@dataclass(slots=True)
+class HyprlandExecRequest:
+    """Hyprland Exec Request.
+
+    Runs a command through Hyprland, in its environment. Needs the
+    desktop.hyprlandCode setting on.
+    """
+
+    command: str
+
+
+@dataclass(slots=True)
+class HyprlandDispatchRawRequest:
+    """Hyprland Dispatch Raw Request.
+
+    Runs any dispatch, written as the running config takes it: Lua when
+    hyprland.version.config_provider is lua, otherwise classic. Needs the
+    desktop.hyprlandCode setting on.
+    """
+
+    dispatch: str
+
+
+@dataclass(slots=True)
+class HyprlandEvalRequest:
+    """Hyprland Eval Request.
+
+    Runs one line of Lua in Hyprland, with a Lua config. Hyprland only replies
+    whether it ran. Needs the desktop.hyprlandCode setting on.
+    """
+
+    code: str
 
 
 @dataclass(slots=True)
