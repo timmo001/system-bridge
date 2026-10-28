@@ -457,7 +457,10 @@ func mapKeys(values map[string]any) []string {
 
 func newTestServer(t *testing.T) *MCPServer {
 	t.Helper()
+	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", t.TempDir())
 	dataStore, err := data.NewDataStore()
 	require.NoError(t, err)
+	require.NoError(t, dataStore.SetModuleData(types.ModuleCPU, types.CPUData{}))
+	require.NoError(t, dataStore.SetModuleData(types.ModuleMemory, types.MemoryData{}))
 	return NewMCPServer(testToken, event.NewMessageRouter(), dataStore)
 }
