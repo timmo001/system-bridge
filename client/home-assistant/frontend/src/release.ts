@@ -35,6 +35,22 @@ export const RELEASE_GATES = new Map([
   ["battery_power", "2026.11"],
   ["battery_state", "2026.11"],
   ["battery_voltage", "2026.11"],
+  // Core #189338
+  ["display_brightness", "2026.12"],
+  ["display_power", "2026.12"],
+  // Core #189319
+  ["gpu_decoder_usage_percentage", "2026.12"],
+  ["gpu_encoder_usage_percentage", "2026.12"],
+  ["gpu_fan_speed_percentage", "2026.12"],
+  ["gpu_memory_total", "2026.12"],
+  ["gpu_performance_state", "2026.12"],
+  ["gpu_power_limit", "2026.12"],
+  // Core #189326
+  ["swap_used", "2026.12"],
+  ["swap_used_percentage", "2026.12"],
+  // Core #189331
+  ["idle_time", "2026.12"],
+  ["locked", "2026.12"],
 ]);
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */

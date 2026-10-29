@@ -140,16 +140,17 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   "cpu-history":
     "Graphs of CPU usage, speed, power, load average and temperature.",
   "cpu-cores": "Load and power of each CPU core.",
-  memory: "Memory in use, free and used.",
-  "memory-history": "Graph of memory usage.",
+  memory: "Memory and swap in use, free and used.",
+  "memory-history": "Graph of memory and swap usage.",
   mount: "One mount point: space used. Set the item to the mount point.",
   "disk-activity": "Disk read and write rates, in total and per disk.",
   display:
-    "One display: resolution and refresh rate. Set the item to the display name.",
-  gpu: "One GPU: load, memory, power, temperature, clocks and fan. Set the item to the GPU name.",
+    "One display: power, brightness, resolution and refresh rate. Set the item to the display name.",
+  gpu: "One GPU: load, encoder and decoder, memory, power, temperature, clocks, fan and performance state. Set the item to the GPU name.",
   network: "Download and upload rates, with a graph.",
   interface:
     "One network interface: rates, Wi-Fi details and a graph. Set the item to the interface name.",
+  desktop: "Whether the session is locked, and how long it's been idle.",
   processes: "The number of processes, with a graph.",
   system: "Device power usage and whether the camera is in use.",
 };
@@ -187,6 +188,7 @@ const HISTORY_SECTIONS = new Set<string>([
   "gpu",
   "network",
   "interface",
+  "desktop",
   "processes",
 ]);
 

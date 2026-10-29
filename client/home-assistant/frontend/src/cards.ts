@@ -111,6 +111,7 @@ const DIAGNOSTIC_BADGES: readonly [key: string, name: string][] = [
   ["kernel", "Kernel"],
   ["boot_time", "Booted"],
   ["pending_reboot", "Pending reboot"],
+  ["displays_connected", "Displays"],
 ];
 
 export const diagnosticBadges = (

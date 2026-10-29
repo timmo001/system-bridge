@@ -40,6 +40,12 @@ const ENTRIES: [
     "Display eDP-1 refresh rate",
   ],
   [
+    "number.host_display_edp_1_brightness",
+    "display_eDP-1_brightness",
+    "display_brightness",
+    "Display eDP-1 brightness",
+  ],
+  [
     "sensor.host_arc_usage",
     "gpu_card0_usage_percentage",
     "gpu_usage_percentage",
@@ -113,4 +119,16 @@ test("leaves out entities from a newer Core release", () => {
   expect(items.disk.size).toBe(0);
   expect(items.interface.size).toBe(0);
   expect(items.mount.size).toBe(1);
+});
+
+test("adds display controls from 2026.12", () => {
+  const brightness = (version: string) =>
+    groupEntities({ config: { version }, states }, device, entries)
+      .items.display.get("eDP-1")
+      ?.fields.get("brightness");
+
+  expect(brightness("2026.11.0")).toBeUndefined();
+  expect(brightness("2026.12.0.dev0")).toBe(
+    "number.host_display_edp_1_brightness",
+  );
 });

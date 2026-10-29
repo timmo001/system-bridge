@@ -221,8 +221,6 @@ export const SECTIONS = {
       ),
     ]),
 
-  // TODO(Core): add a swap gauge when Core has a swap used sensor (Core
-  // roadmap note, "Gaps from the dashboards")
   memory: ({ entities, percentage }) =>
     grid([
       heading("In use", "mdi:memory"),
@@ -230,13 +228,18 @@ export const SECTIONS = {
       ...singles(entities, "memory_free", "memory_used").map((entity) =>
         tile(entity),
       ),
+      percentageOf(entities.single.get("swap_used_percentage"), percentage),
+      tileOf(entities.single.get("swap_used")),
     ]),
 
   "memory-history": ({ entities, hours }) =>
     grid(
       [
         heading("Usage over time"),
-        graph(singles(entities, "memory_used_percentage"), hours),
+        graph(
+          singles(entities, "memory_used_percentage", "swap_used_percentage"),
+          hours,
+        ),
       ],
       2,
     ),
@@ -272,7 +275,6 @@ export const SECTIONS = {
     ]);
   },
 
-  // TODO(Core): add brightness and power controls with roadmap item 5
   display: ({ entities, item }) => {
     const display =
       item === undefined ? undefined : entities.items.display.get(item);
@@ -281,6 +283,13 @@ export const SECTIONS = {
 
     return grid([
       heading(name, "mdi:monitor"),
+      ...itemTiles(display, name, ["power"], [{ type: "toggle" }]),
+      ...itemTiles(
+        display,
+        name,
+        ["brightness"],
+        [{ type: "numeric-input", style: "slider" }],
+      ),
       ...itemTiles(display, name, [
         "resolution_x",
         "resolution_y",
@@ -289,8 +298,6 @@ export const SECTIONS = {
     ]);
   },
 
-  // TODO(Core): add encoder and decoder load, memory load, performance state,
-  // power limit and fan speed % with roadmap item 3c
   gpu: ({ entities, item, hours, percentage }) => {
     const gpu = item === undefined ? undefined : entities.items.gpu.get(item);
 
@@ -301,19 +308,35 @@ export const SECTIONS = {
       ...itemTiles(
         gpu,
         name,
-        ["usage_percentage", "memory_used_percentage"],
+        [
+          "usage_percentage",
+          "memory_used_percentage",
+          "encoder_usage_percentage",
+          "decoder_usage_percentage",
+        ],
         percentage,
       ),
       ...itemTiles(gpu, name, [
+        "memory_used",
         "memory_free",
+        "memory_total",
         "power_usage",
+        "power_limit",
         "temperature",
         "core_clock_speed",
         "memory_clock_speed",
         "fan_speed",
+        "fan_speed_percentage",
+        "performance_state",
       ]),
       graph(
-        fields(gpu, "usage_percentage", "memory_used_percentage"),
+        fields(
+          gpu,
+          "usage_percentage",
+          "memory_used_percentage",
+          "encoder_usage_percentage",
+          "decoder_usage_percentage",
+        ),
         hours,
         "Load over time",
       ),
@@ -357,6 +380,13 @@ export const SECTIONS = {
       graph(fields(networkInterface, "download_rate", "upload_rate"), hours),
     ]);
   },
+
+  desktop: ({ entities, hours }) =>
+    grid([
+      heading("Session", "mdi:account-clock-outline"),
+      ...singles(entities, "locked", "idle_time").map((entity) => tile(entity)),
+      graph(singles(entities, "idle_time"), hours),
+    ]),
 
   processes: ({ entities, hours }) =>
     grid([

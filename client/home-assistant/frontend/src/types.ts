@@ -43,6 +43,7 @@ export interface EntityNameItem {
 
 export interface TileFeatureConfig {
   type: string;
+  style?: "buttons" | "slider";
 }
 
 export interface ActionConfig {

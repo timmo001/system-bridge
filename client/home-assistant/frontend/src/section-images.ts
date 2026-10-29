@@ -111,6 +111,9 @@ const DRAWINGS: Record<SectionName, string> = {
     dot(74, 22, 6, 0.48) +
     rect(26, 21, 42, 2, 0.32, 1) +
     rect(43, 14, 8, 16, 0.24, 2),
+  desktop:
+    rect(36, 20, 22, 16, 0.48, 3) +
+    `<path d="M41 20 V15 A6 6 0 0 1 53 15 V20" stroke="currentColor" stroke-opacity="0.48" stroke-width="2"/>`,
   processes: columns(
     4,
     (i) =>

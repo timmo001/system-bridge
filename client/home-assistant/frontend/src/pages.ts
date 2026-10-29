@@ -79,15 +79,13 @@ export const PAGES: readonly Page[] = [
       { section: "cpu-cores" },
     ],
   },
-  // TODO(Core): uncomment with roadmap item 4, once a Core release or beta has
-  // the idle time sensor and locked binary sensor. Windows, workspaces and the
-  // keyboard layout are not for Core.
-  // {
-  //   page: "desktop",
-  //   title: "Desktop",
-  //   icon: "mdi:application-outline",
-  //   sections: () => [{ section: "desktop" }],
-  // },
+  // Windows, workspaces and the keyboard layout are not for Core
+  {
+    page: "desktop",
+    title: "Desktop",
+    icon: "mdi:application-outline",
+    sections: () => [{ section: "desktop" }],
+  },
   // Discord has no page: its controls are not for Core.
   {
     page: "disks",
