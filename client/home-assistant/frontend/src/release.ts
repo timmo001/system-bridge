@@ -59,7 +59,7 @@ export const RELEASE_GATES = new Map([
   ["power_restart", "2026.12"],
   ["power_shutdown", "2026.12"],
   ["power_sleep", "2026.12"],
-  // Core #TBD, full media player
+  // Core #189509, full media player
   ["audio", "2026.12"],
   ["audio_input", "2026.12"],
   ["audio_input_mute", "2026.12"],
