@@ -29,7 +29,7 @@ if ($VERSION -match "^(\d+)\.(\d+)\.(\d+)") {
 $rcContent = @"
 1 ICON ".resources/system-bridge-dimmed.ico"
 
-VS_VERSION_INFO VERSIONINFO
+1 VERSIONINFO
  FILEVERSION $NUMERIC_VERSION
  PRODUCTVERSION $NUMERIC_VERSION
  FILEFLAGSMASK 0x3fL
