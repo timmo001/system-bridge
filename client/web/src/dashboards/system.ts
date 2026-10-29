@@ -385,7 +385,7 @@ const failedUnitTableState = {
  * A process's usage as a percentage. CPU usage already is one, but the
  * backend reports memory as a fraction of the total.
  */
-const usage = (process: Process, key: "cpu_usage" | "memory_usage") =>
+export const usage = (process: Process, key: "cpu_usage" | "memory_usage") =>
   key === "memory_usage"
     ? (process.memory_usage ?? 0) * 100
     : (process.cpu_usage ?? 0);
@@ -435,14 +435,15 @@ const processColumns = (() => {
 
 const processId = (row: Process) => String(row.id);
 
-const top = (
+export const top = (
   processes: readonly Process[],
   key: "cpu_usage" | "memory_usage",
+  count = 6,
 ) =>
   [...processes]
     .filter((process) => usage(process, key) > 0)
     .sort((a, b) => usage(b, key) - usage(a, key))
-    .slice(0, 6);
+    .slice(0, count);
 
 export const processesDashboard = ({ data, location }: DashboardContext) => {
   const processes = data.processes;

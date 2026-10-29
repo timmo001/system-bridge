@@ -29,6 +29,7 @@ import {
   powerSeries,
   temperatureSeries,
 } from "~/dashboards/shared";
+import { top, usage } from "~/dashboards/system";
 import { actionResult, mediaControl, moduleState, registry } from "~/lib/atoms";
 import {
   formatBytes,
@@ -352,6 +353,47 @@ export class PageOverview extends SbPage {
     `;
   }
 
+  /** The five busiest processes by CPU, as on the Processes page. */
+  #renderProcesses(data: ModulesData) {
+    if (data.processes === undefined) return nothing;
+
+    const busiest = top(data.processes, "cpu_usage", 5);
+
+    const max = Math.max(
+      1,
+      ...busiest.map((process) => process.cpu_usage ?? 0),
+    );
+
+    const meters = busiest.map(
+      (process) =>
+        html`<sb-meter
+          label=${process.name ?? "Unknown"}
+          .value=${process.cpu_usage ?? 0}
+          .max=${max}
+          display="${formatPercent(process.cpu_usage ?? 0, 1)} CPU · ${formatPercent(usage(process, "memory_usage"), 1)} memory"
+          .warning=${Number.POSITIVE_INFINITY}
+          .danger=${Number.POSITIVE_INFINITY}
+        ></sb-meter>`,
+    );
+
+    return html`
+      <sb-card
+        class="half"
+        heading="Top processes"
+        subheading="By CPU"
+        href=${href("module", { params: { module: "processes" } })}
+      >
+        ${
+          busiest.length === 0
+            ? html`<p class="muted small">Nothing busy right now.</p>`
+            : html`<div class="stack" style="--sb-stack-gap: var(--sb-space-3)">
+                ${meters}
+              </div>`
+        }
+      </sb-card>
+    `;
+  }
+
   #renderMedia(data: ModulesData) {
     const media =
       data.media &&
@@ -608,7 +650,7 @@ export class PageOverview extends SbPage {
           }
           ${this.#renderMedia(data)}
         </div>
-        ${this.#renderStorage(data)}
+        ${this.#renderStorage(data)} ${this.#renderProcesses(data)}
         <sb-card
           heading="Modules"
           subheading="All the data System Bridge reports"
