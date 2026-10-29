@@ -39,7 +39,9 @@ system-bridge client clipboard set "Some text"
 echo "Some text" | system-bridge client clipboard set
 ```
 
-It needs wl-clipboard on Wayland, or xclip or xsel on X11. To read the clipboard, add the **Get the clipboard** [command prefab](/features/commands/#prefab-commands).
+It needs wl-clipboard on Wayland, or xclip or xsel on X11.
+
+Read the clipboard's text with [`CLIPBOARD_GET_TEXT`](/api/websocket/input/#clipboard), the MCP server's `system_bridge_get_clipboard` tool, or `system-bridge client clipboard get`. Reading works on Windows and macOS too, and uses the same tools on Linux.
 
 ## Power
 

@@ -195,6 +195,10 @@ Example arguments:
 { "id": "HDMI-A-2", "brightness": 40 }
 ```
 
+### `system_bridge_get_clipboard`
+
+Read the text on the clipboard. It takes no arguments. Works on Linux, with wl-clipboard, xclip or xsel, on Windows and on macOS. See [clipboard](/api/websocket/input/#clipboard).
+
 ### `system_bridge_get_data`
 
 Get current system information from one or more data modules. The tool returns each requested module's latest data as JSON.
