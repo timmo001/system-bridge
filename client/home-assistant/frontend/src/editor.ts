@@ -159,6 +159,7 @@ const sectionLabel = (name: string) => {
 
 const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   storage: "Space used on every mount.",
+  audio: "The default audio output, with its output picker and volume.",
   "now-playing": "The media playing, with source and playback controls.",
   "audio-outputs": "Volume of each audio output, such as speakers.",
   "audio-inputs": "Volume of each audio input, such as a microphone.",
@@ -261,6 +262,7 @@ const MEDIA_OPTIONS: readonly MediaOption[] = [
 
 /** The media and audio options each section has. */
 const SECTION_MEDIA_OPTIONS = new Map<string, readonly MediaOption[]>([
+  ["audio", ["audio_features"]],
   ["now-playing", ["media_features"]],
   ["audio-outputs", ["audio_features"]],
   ["audio-inputs", ["show_input_source"]],
@@ -268,7 +270,7 @@ const SECTION_MEDIA_OPTIONS = new Map<string, readonly MediaOption[]>([
 
 /** The media and audio options each page has, from its sections. */
 const PAGE_MEDIA_OPTIONS = new Map<string, readonly MediaOption[]>([
-  ["overview", ["media_features"]],
+  ["overview", ["media_features", "audio_features"]],
   ["media", ["media_features"]],
   ["audio", ["audio_features", "show_input_source"]],
 ]);

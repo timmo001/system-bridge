@@ -29,6 +29,11 @@ const DRAWINGS: Record<SectionName, string> = {
     rect(8, 19, 30, 6, 0.4, 3) +
     rect(8, 28, 78, 6, 0.12, 3) +
     rect(8, 28, 64, 6, 0.4, 3),
+  audio:
+    area("M14 17 L20 17 L28 10 L28 34 L20 27 L14 27 Z", 0.48) +
+    rect(36, 17, 50, 4, 0.12, 2) +
+    rect(36, 17, 34, 4, 0.4, 2) +
+    rect(36, 25, 30, 3, 0.24, 1.5),
   "now-playing":
     area("M12 12 L12 32 L28 22 Z", 0.48) +
     rect(36, 17, 50, 3, 0.12, 1.5) +

@@ -38,6 +38,7 @@ export const PAGES: readonly Page[] = [
     diagnostics: true,
     sections: () => [
       { section: "storage" },
+      { section: "audio" },
       { section: "now-playing" },
       { section: "overview-load" },
       { section: "network" },

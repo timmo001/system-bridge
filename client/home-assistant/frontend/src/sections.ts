@@ -91,6 +91,12 @@ const MEDIA_FEATURE_CONFIGS: Record<MediaFeature, TileFeatureConfig> = {
 const mediaFeatures = (features: readonly MediaFeature[]) =>
   features.map((feature) => MEDIA_FEATURE_CONFIGS[feature]);
 
+/** A player tile with its first feature inline, so it fills the section's width. */
+const playerTile = (entity: string, features: readonly MediaFeature[]) => ({
+  ...tile(entity, mediaFeatures(features)),
+  features_position: "inline" as const,
+});
+
 /**
  * Tiles for an item's fields, named without the heading above them, so a
  * GPU's tiles read "Usage %" rather than repeating the GPU's name.
@@ -132,20 +138,22 @@ export const SECTIONS = {
       ),
     ]),
 
+  audio: ({ entities, audioFeatures: audio }) =>
+    grid([
+      heading("Audio", "mdi:volume-high"),
+      ...singles(entities, "audio").map((entity) => playerTile(entity, audio)),
+    ]),
+
   "now-playing": ({ entities, mediaFeatures: media }) =>
     grid([
       heading("Now playing", "mdi:play-circle-outline"),
-      ...singles(entities, "media").map((entity) =>
-        tile(entity, mediaFeatures(media)),
-      ),
+      ...singles(entities, "media").map((entity) => playerTile(entity, media)),
     ]),
 
   "audio-outputs": ({ entities, audioFeatures: audio }) =>
     grid([
       heading("Outputs", "mdi:speaker"),
-      ...singles(entities, "audio").map((entity) =>
-        tile(entity, mediaFeatures(audio)),
-      ),
+      ...singles(entities, "audio").map((entity) => playerTile(entity, audio)),
       // Each output has no source of its own
       ...fromItems(entities, "audio_output", "audio_output").map((entity) =>
         tile(

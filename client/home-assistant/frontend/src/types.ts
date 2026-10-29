@@ -64,6 +64,7 @@ export interface TileCardConfig {
   entity: string;
   name?: string | EntityNameItem[];
   features?: TileFeatureConfig[];
+  features_position?: "bottom" | "inline";
   state_content?: string | string[];
 }
 
