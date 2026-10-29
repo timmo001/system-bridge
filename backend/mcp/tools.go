@@ -445,6 +445,12 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, eventTool[struct{}](handlers, event.EventPowerLock))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_get_clipboard",
+		Description: "Read the text on the system's clipboard",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, queryTool[struct{}, types.ClipboardText](handlers, event.EventClipboardGetText))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_set_clipboard",
 		Description: "Put text on the system's clipboard, so it can be pasted there. Linux only.",
 		InputSchema: objectSchema(map[string]any{

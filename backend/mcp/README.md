@@ -72,6 +72,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   maximised or minimised, or not.
 - `system_bridge_discord_control` controls Discord through `DISCORD_CONTROL`.
 - `system_bridge_display_control` sets a display's brightness or power state.
+- `system_bridge_get_clipboard` reads the clipboard's text through
+  `prefab.GetClipboard`.
 - `system_bridge_get_data` returns the latest data for requested modules.
   Supported modules are `audio`, `battery`, `bluetooth`, `cpu`, `desktop`,
   `disks`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`,

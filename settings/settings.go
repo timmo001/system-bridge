@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 
@@ -195,6 +196,14 @@ func Load() (*Settings, error) {
 	if err := decoder.Decode(viper.AllSettings()); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
+
+	cfg.Commands.Allowlist = slices.DeleteFunc(cfg.Commands.Allowlist, func(cmd SettingsCommandDefinition) bool {
+		if cmd.Command != "" || !slices.Contains(prefab.Retired, cmd.Prefab) {
+			return false
+		}
+		slog.Warn("Dropping a saved command whose prefab was removed", "id", cmd.ID, "prefab", cmd.Prefab)
+		return true
+	})
 
 	// Validate settings after loading
 	if err := cfg.Validate(); err != nil {

@@ -312,6 +312,20 @@ func TestSave(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), `unknown prefab "nothing"`)
 	})
+
+	t.Run("Load drops commands whose prefab was removed", func(t *testing.T) {
+		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		require.NoError(t, os.WriteFile(configPath, []byte(`{"commands":{"allowlist":[
+			{"id":"cmd1","name":"Get the clipboard","prefab":"clipboard"},
+			{"id":"cmd2","name":"Lock","prefab":"lock"}
+		]}}`), 0644))
+
+		loadedSettings, err := Load()
+		require.NoError(t, err)
+		require.Len(t, loadedSettings.Commands.Allowlist, 1)
+		assert.Equal(t, "cmd2", loadedSettings.Commands.Allowlist[0].ID)
+	})
 }
 
 func TestSettingsStructs(t *testing.T) {

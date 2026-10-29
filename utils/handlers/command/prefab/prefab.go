@@ -166,20 +166,6 @@ var catalogue = []Prefab{
 		},
 	},
 	{
-		ID:          "clipboard",
-		Name:        "Get the clipboard",
-		Description: "Return the text on the clipboard",
-		candidates: map[string][]candidate{
-			"linux": {
-				{program: "wl-paste", arguments: []string{"--no-newline"}, when: onWayland},
-				{program: "xclip", arguments: []string{"-selection", "clipboard", "-o"}, when: onX11},
-				{program: "xsel", arguments: []string{"--clipboard", "--output"}, when: onX11},
-			},
-			"windows": {{program: "powershell.exe", arguments: []string{"-NoProfile", "-NonInteractive", "-Command", "Get-Clipboard -Raw"}}},
-			"darwin":  {{program: "pbpaste"}},
-		},
-	},
-	{
 		ID:          "screenshot",
 		Name:        "Screenshot",
 		Description: "Capture the screen to a file and return its path",
@@ -238,6 +224,11 @@ var catalogue = []Prefab{
 	},
 	omarchyIPCPrefab,
 }
+
+// Retired lists prefabs that have been removed, so saved commands that use
+// them can be dropped rather than failing the settings. The clipboard is read
+// with the CLIPBOARD_GET_TEXT event now.
+var Retired = []string{"clipboard"}
 
 var (
 	lookPath = exec.LookPath
