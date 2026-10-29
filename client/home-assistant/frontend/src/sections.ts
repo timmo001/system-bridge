@@ -3,6 +3,7 @@ import type { Item, ItemKind, SystemBridgeEntities } from "./registry";
 import type {
   LovelaceCardConfig,
   LovelaceSectionConfig,
+  SourceOption,
   TileFeatureConfig,
 } from "./types";
 
@@ -12,6 +13,8 @@ export interface SectionContext {
   hours: number;
   /** The features percentage tiles show, from the tile feature option. */
   percentage: TileFeatureConfig[] | undefined;
+  /** Which source pickers the media and audio tiles show. */
+  sources: Record<SourceOption, boolean>;
 }
 
 type SectionBuilder = (
@@ -62,6 +65,9 @@ const percentageOf = (
   percentage: TileFeatureConfig[] | undefined,
 ) => (entity ? tile(entity, percentage) : undefined);
 
+const sourceFeature = (shown: boolean, type: string): TileFeatureConfig[] =>
+  shown ? [{ type }] : [];
+
 /**
  * Tiles for an item's fields, named without the heading above them, so a
  * GPU's tiles read "Usage %" rather than repeating the GPU's name.
@@ -103,27 +109,31 @@ export const SECTIONS = {
       ),
     ]),
 
-  "now-playing": ({ entities }) =>
+  "now-playing": ({ entities, sources }) =>
     grid([
       heading("Now playing", "mdi:play-circle-outline"),
       ...singles(entities, "media").map((entity) =>
         tile(entity, [
           { type: "media-player-playback" },
           { type: "media-player-volume-slider" },
+          ...sourceFeature(sources.show_player_source, "media-player-source"),
         ]),
       ),
       ...singles(entities, "audio").map((entity) =>
-        tile(entity, [{ type: "media-player-volume-slider" }]),
+        tile(entity, [
+          { type: "media-player-volume-slider" },
+          ...sourceFeature(sources.show_output_source, "media-player-source"),
+        ]),
       ),
     ]),
 
-  "audio-outputs": ({ entities }) =>
+  "audio-outputs": ({ entities, sources }) =>
     grid([
       heading("Outputs", "mdi:speaker"),
       ...singles(entities, "audio").map((entity) =>
         tile(entity, [
           { type: "media-player-volume-slider" },
-          { type: "media-player-source" },
+          ...sourceFeature(sources.show_output_source, "media-player-source"),
         ]),
       ),
       ...fromItems(entities, "audio_output", "audio_output").map((entity) =>
@@ -131,11 +141,14 @@ export const SECTIONS = {
       ),
     ]),
 
-  "audio-inputs": ({ entities }) =>
+  "audio-inputs": ({ entities, sources }) =>
     grid([
       heading("Inputs", "mdi:microphone"),
       ...singles(entities, "audio_input").map((entity) =>
-        tile(entity, [{ type: "select-options" }]),
+        tile(
+          entity,
+          sourceFeature(sources.show_input_source, "select-options"),
+        ),
       ),
       ...[...entities.items.audio_input.values()].flatMap((item) => [
         ...fields(item, "volume").map((entity) =>

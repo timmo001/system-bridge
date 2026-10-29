@@ -19,6 +19,7 @@ import {
   type LovelaceViewConfig,
   type SectionOptions,
   type SectionStrategyConfig,
+  SOURCE_OPTIONS,
   STRATEGY_TYPE,
   type ViewStrategyConfig,
 } from "./types";
@@ -46,6 +47,12 @@ export const pageSections = (
 
       if (options.tile_feature !== undefined) {
         strategy.tile_feature = options.tile_feature;
+      }
+
+      for (const option of SOURCE_OPTIONS) {
+        if (options[option] !== undefined) {
+          strategy[option] = options[option];
+        }
       }
 
       return { strategy };

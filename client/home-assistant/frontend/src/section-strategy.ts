@@ -53,6 +53,11 @@ export const buildSection = (
     percentage: percentageFeatures(
       options.tile_feature ?? DEFAULT_TILE_FEATURE,
     ),
+    sources: {
+      show_player_source: options.show_player_source ?? true,
+      show_output_source: options.show_output_source ?? true,
+      show_input_source: options.show_input_source ?? true,
+    },
   });
 
 const message = (content: string): LovelaceSectionConfig => ({

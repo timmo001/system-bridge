@@ -14,6 +14,8 @@ import {
   type DashboardStrategyConfig,
   type HomeAssistant,
   type SectionStrategyConfig,
+  SOURCE_OPTIONS,
+  type SourceOption,
   TILE_FEATURES,
   type ViewStrategyConfig,
 } from "./types";
@@ -34,6 +36,9 @@ const LABELS = new Map([
   ["pages", "Pages"],
   ["icon_and_title_pages", "Icon and title"],
   ["top_links_pages", "Web client link"],
+  ["show_player_source", "Player picker"],
+  ["show_output_source", "Audio output picker"],
+  ["show_input_source", "Audio input picker"],
 ]);
 
 const TILE_FEATURE_LABELS = new Map([
@@ -78,6 +83,9 @@ const DEFAULTS = {
   tile_feature: DEFAULT_TILE_FEATURE,
   show_icon_and_title: true,
   show_top_links: true,
+  show_player_source: true,
+  show_output_source: true,
+  show_input_source: true,
 };
 
 const ALL_PAGES = PAGES.map(({ page }) => page);
@@ -173,6 +181,12 @@ const HELPERS = new Map([
   ["pages", "In tab order. Drag to reorder, remove to hide."],
   ["icon_and_title_pages", "Pages whose tab shows the icon next to the title."],
   ["top_links_pages", "Pages with a link to the web client at the top."],
+  [
+    "show_player_source",
+    "Choose which app the Media player shows and controls.",
+  ],
+  ["show_output_source", "Choose the default audio output."],
+  ["show_input_source", "Choose the default audio input."],
 ]);
 
 interface SelectOption {
@@ -211,6 +225,18 @@ const ITEM_KINDS = new Map<string, ItemKind>([
   ["display", "display"],
   ["interface", "interface"],
 ]);
+
+/** The source pickers each section has. */
+const SECTION_SOURCES = new Map<string, readonly SourceOption[]>([
+  ["now-playing", ["show_player_source", "show_output_source"]],
+  ["audio-outputs", ["show_output_source"]],
+  ["audio-inputs", ["show_input_source"]],
+]);
+
+const sourceOptions = (config: StrategyConfig): readonly SourceOption[] =>
+  "section" in config
+    ? (SECTION_SOURCES.get(config.section) ?? [])
+    : SOURCE_OPTIONS;
 
 const sameList = (a: readonly string[], b: readonly string[]) =>
   a.length === b.length && a.every((value, index) => value === b[index]);
@@ -336,6 +362,20 @@ const generalSchema = (
               })),
             },
           },
+        },
+      ]
+    : []),
+  ...(sourceOptions(config).length > 0
+    ? [
+        {
+          name: "source_pickers",
+          type: "grid",
+          flatten: true,
+          column_min_width: "200px",
+          schema: sourceOptions(config).map((name) => ({
+            name,
+            selector: { boolean: {} },
+          })),
         },
       ]
     : []),
@@ -476,6 +516,18 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
     if ("show_top_links" in config && config.show_top_links) {
       delete config.show_top_links;
+    }
+
+    if (config.show_player_source) {
+      delete config.show_player_source;
+    }
+
+    if (config.show_output_source) {
+      delete config.show_output_source;
+    }
+
+    if (config.show_input_source) {
+      delete config.show_input_source;
     }
 
     if (isDashboardConfig(config)) {

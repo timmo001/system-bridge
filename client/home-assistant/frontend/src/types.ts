@@ -136,7 +136,21 @@ export interface SectionOptions {
   hours_to_show?: number;
   /** What percentage tiles, such as CPU usage, show below their state. */
   tile_feature?: TileFeature;
+  /** Show the Media player's player picker. Defaults to on. */
+  show_player_source?: boolean;
+  /** Show the Audio player's output picker. Defaults to on. */
+  show_output_source?: boolean;
+  /** Show the audio input picker. Defaults to on. */
+  show_input_source?: boolean;
 }
+
+export const SOURCE_OPTIONS = [
+  "show_player_source",
+  "show_output_source",
+  "show_input_source",
+] as const;
+
+export type SourceOption = (typeof SOURCE_OPTIONS)[number];
 
 interface StrategyOptions extends SectionOptions {
   type: typeof STRATEGY_TYPE;
