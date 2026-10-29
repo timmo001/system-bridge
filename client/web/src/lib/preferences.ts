@@ -60,6 +60,14 @@ export const historyRange = Atom.kvs({
   defaultValue: (): HistoryRange => "1h",
 }).pipe(Atom.keepAlive);
 
+/** The media player picked on the Media page, or null for the backend's pick. */
+export const mediaPlayer = Atom.kvs({
+  runtime: storage,
+  key: "system-bridge-media-player",
+  schema: Schema.NullOr(Schema.String),
+  defaultValue: (): string | null => null,
+}).pipe(Atom.keepAlive);
+
 /** Applies the chosen themes to the page whenever they change. */
 export const appliedTheme = Atom.make((get) => {
   const { mode, light, dark } = get(appearance);

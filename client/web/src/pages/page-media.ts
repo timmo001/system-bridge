@@ -27,6 +27,8 @@ import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "~/components/sb-card";
+import "~/components/sb-select";
+import type { SelectOption } from "~/components/sb-select";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -40,8 +42,9 @@ import {
   formatDuration,
   formatPercent,
   formatPlayerStatus as statusLabel,
-  formatQuantity,
 } from "~/lib/format";
+import { type ShownMedia, shownMedia } from "~/lib/media";
+import { mediaPlayer } from "~/lib/preferences";
 
 import { SbPage } from "./sb-page";
 
@@ -165,25 +168,43 @@ export class PageMedia extends SbPage {
       }
 
       .players {
-        display: flex;
-        flex-direction: column;
-        gap: var(--sb-space-3);
-        margin: 0;
-        padding: 0;
-        list-style: none;
+        display: grid;
+        gap: var(--sb-space-4);
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+        margin-top: var(--sb-space-4);
       }
 
-      .players li {
+      .other {
         display: flex;
         align-items: center;
         gap: var(--sb-space-3);
       }
 
-      .players .details {
+      .other .details {
         display: flex;
         flex: 1;
         flex-direction: column;
         min-width: 0;
+      }
+
+      .art.small {
+        flex: none;
+        width: 3rem;
+        border-radius: var(--sb-radius-m);
+        box-shadow: none;
+        --sb-icon-size: 1.5rem;
+      }
+
+      .picker {
+        width: 20rem;
+        max-width: calc(100% - 6.5rem);
+        margin-bottom: var(--sb-space-2);
+      }
+
+      @media (max-width: 40rem) {
+        .picker {
+          max-width: 100%;
+        }
       }
 
       .art {
@@ -401,15 +422,54 @@ export class PageMedia extends SbPage {
   /** Where the position slider is while it's dragged, before it's sent. */
   @state() private seekingTo: number | null = null;
 
+  /** The player picked to show, or null for the one the backend picks. */
+  readonly #chosen = new AtomController(this, () => mediaPlayer);
+
   protected readonly pageTitle = "Media controls";
 
   /** Redraws each second while playing, so the position moves. */
   #tick: ReturnType<typeof setInterval> | undefined;
 
+  /** The picked player, while it's still running. */
+  get #chosenPlayer(): MediaPlayer | undefined {
+    return this.#data.value.media?.players.find(
+      (player) => player.id === this.#chosen.value,
+    );
+  }
+
+  /** What the player card shows: the picked player, or the backend's pick. */
+  get #media(): ShownMedia | undefined {
+    const media = this.#data.value.media;
+
+    return media && shownMedia(media, this.#chosen.value);
+  }
+
+  /** Sends a control to the picked player, or the backend's pick without one. */
+  get #playerKey(): { readonly player?: string } {
+    const player = this.#chosenPlayer;
+
+    return player === undefined ? {} : { player: player.id };
+  }
+
+  #choose(id: string | null) {
+    registry.set(mediaPlayer, id);
+  }
+
+  protected override willUpdate(): void {
+    // A picked player that's closed goes back to the backend's pick
+    if (
+      this.#chosen.value !== null &&
+      this.#data.value.media !== undefined &&
+      this.#chosenPlayer === undefined
+    ) {
+      this.#choose(null);
+    }
+  }
+
   protected override updated(): void {
     super.updated();
 
-    const playing = this.#data.value.media?.status?.toLowerCase() === "playing";
+    const playing = this.#media?.status?.toLowerCase() === "playing";
 
     if (playing && this.#tick === undefined) {
       this.#tick = setInterval(() => this.requestUpdate(), 1000);
@@ -430,6 +490,16 @@ export class PageMedia extends SbPage {
     registry.set(mediaControl, control);
   }
 
+  #onPlayerChange = (event: CustomEvent<{ readonly value: string }>) => {
+    this.#choose(event.detail.value || null);
+  };
+
+  #onShowClick = (event: MouseEvent) => {
+    if (event.currentTarget instanceof HTMLButtonElement) {
+      this.#choose(event.currentTarget.dataset.player ?? null);
+    }
+  };
+
   #onControlClick = (event: MouseEvent) => {
     if (!(event.currentTarget instanceof HTMLButtonElement)) return;
 
@@ -437,22 +507,24 @@ export class PageMedia extends SbPage {
 
     if (!isMediaAction(action)) return;
 
-    this.#send(player ? { action, player } : { action });
+    this.#send(player ? { action, player } : { action, ...this.#playerKey });
   };
 
   #onShuffleClick = () => {
     this.#send({
       action: "SET_SHUFFLE",
-      shuffle: this.#data.value.media?.shuffle !== true,
+      shuffle: this.#media?.shuffle !== true,
+      ...this.#playerKey,
     });
   };
 
   #onRepeatClick = () => {
-    const repeat = this.#data.value.media?.repeat;
+    const repeat = this.#media?.repeat;
 
     this.#send({
       action: "SET_REPEAT",
       repeat: repeatModes[isRepeat(repeat) ? repeat : "NONE"].next,
+      ...this.#playerKey,
     });
   };
 
@@ -466,7 +538,11 @@ export class PageMedia extends SbPage {
   #onSeek = (event: Event) => {
     if (!(event.currentTarget instanceof HTMLInputElement)) return;
 
-    this.#send({ action: "SEEK", position: event.currentTarget.valueAsNumber });
+    this.#send({
+      action: "SEEK",
+      position: event.currentTarget.valueAsNumber,
+      ...this.#playerKey,
+    });
     this.seekingTo = null;
   };
 
@@ -485,13 +561,15 @@ export class PageMedia extends SbPage {
     const pending =
       this.#control.value.waiting &&
       this.sent?.action === action &&
-      this.sent.player === options.player;
+      this.sent.player === (options.player ?? this.#chosenPlayer?.id);
 
     // With no player there's nothing to control
     const disabled =
       options.disabled === true ||
       pending ||
-      (options.player === undefined && !this.#data.value.media?.title);
+      (options.player === undefined &&
+        this.#chosenPlayer === undefined &&
+        !this.#media?.title);
 
     const label = options.label ?? actionLabels[action];
 
@@ -533,8 +611,33 @@ export class PageMedia extends SbPage {
     </button>`;
   }
 
+  /** Picks which player the card shows, when there's more than one. */
+  #renderPicker() {
+    const players = this.#data.value.media?.players ?? [];
+
+    if (players.length < 2) return nothing;
+
+    const options: readonly SelectOption[] = [
+      { value: "", label: "Automatic" },
+      ...players.map((player) => ({
+        value: player.id,
+        label: player.name,
+        description: player.title || undefined,
+      })),
+    ];
+
+    return html`<sb-select
+      class="picker"
+      label="Player"
+      search-placeholder="Search players"
+      .options=${options}
+      .value=${this.#chosenPlayer?.id ?? ""}
+      @value-changed=${this.#onPlayerChange}
+    ></sb-select>`;
+  }
+
   #renderPlayer() {
-    const media = this.#data.value.media;
+    const media = this.#media;
     const playing = media?.status?.toLowerCase() === "playing";
 
     // The backend reports the position when it last read the player, so
@@ -584,6 +687,7 @@ export class PageMedia extends SbPage {
             >${statusLabel(media?.status)}</span
           >
           <div class="info">
+            ${this.#renderPicker()}
             <h2 class="title truncate">
               ${media?.title ?? "Nothing is playing"}
             </h2>
@@ -751,54 +855,68 @@ export class PageMedia extends SbPage {
     `;
   }
 
-  /** The players other than the one shown, each with play or pause. */
+  /** The players other than the one shown, each as a smaller card. */
   #renderOtherPlayers() {
-    const media = this.#data.value.media;
+    const shown = this.#media?.player;
 
-    const others = (media?.players ?? []).filter(
-      (player) => player.id !== media?.player,
+    const others = (this.#data.value.media?.players ?? []).filter(
+      (player) => player.id !== shown,
     );
 
     if (others.length === 0) return nothing;
 
-    const items = others.map((player) => this.#renderOtherPlayer(player));
+    const cards = others.map((player) => this.#renderOtherPlayer(player));
 
-    return html`
-      <sb-card
-        heading="Other players"
-        subheading=${formatQuantity(others.length, "player")}
-      >
-        <ul class="players">
-          ${items}
-        </ul>
-      </sb-card>
-    `;
+    return html`<div class="players">${cards}</div>`;
   }
 
   #renderOtherPlayer(player: MediaPlayer) {
     const playing = player.status === "PLAYING";
     const name = player.title || player.name;
 
-    return html`<li>
-      <span class="details">
-        <span class="truncate">${name}</span>
-        <span class="muted small truncate"
-          >${
-            [player.artist, player.title ? player.name : ""]
+    return html`<sb-card>
+      <div class="other" role="region" aria-label=${name}>
+        ${
+          player.thumbnail
+            ? html`<img class="art small" src=${player.thumbnail} alt="" />`
+            : html`<div class="art small" aria-hidden="true">
+                ${icon(mdiMusicNote)}
+              </div>`
+        }
+        <span class="details">
+          <span class="truncate">${name}</span>
+          <span class="muted small truncate"
+            >${[
+              statusLabel(player.status),
+              player.artist,
+              player.title ? player.name : "",
+            ]
               .filter(Boolean)
-              .join(" · ") || " "
-          }</span
+              .join(" · ")}</span
+          >
+        </span>
+        ${this.#button(
+          playing ? "PAUSE" : "PLAY",
+          playing ? mdiPause : mdiPlay,
+          {
+            disabled: playing
+              ? player.is_pause_enabled === false
+              : player.is_play_enabled === false,
+            small: true,
+            player: player.id,
+            label: `${playing ? "Pause" : "Play"} ${name}`,
+          },
+        )}
+        <button
+          class="button plain small"
+          type="button"
+          data-player=${player.id}
+          @click=${this.#onShowClick}
         >
-      </span>
-      <span class="chip ${playing ? "success" : ""}"
-        >${statusLabel(player.status)}</span
-      >
-      ${this.#button(playing ? "PAUSE" : "PLAY", playing ? mdiPause : mdiPlay, {
-        small: true,
-        player: player.id,
-        label: `${playing ? "Pause" : "Play"} ${name}`,
-      })}
-    </li>`;
+          Show
+        </button>
+      </div>
+    </sb-card>`;
   }
 
   override render() {

@@ -82,6 +82,7 @@ import {
   formatUptime,
   formatWatts,
 } from "~/lib/format";
+import { shownMedia } from "~/lib/media";
 import { href } from "~/lib/router";
 
 import {
@@ -499,12 +500,12 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
   `;
 };
 
-export const mediaDashboard = ({ data }: DashboardContext) => {
-  const media = data.media;
+export const mediaDashboard = ({ data, mediaPlayer }: DashboardContext) => {
+  if (data.media === undefined) return noData("media");
 
-  if (media === undefined) return noData("media");
+  // The player picked above it on the page, or the backend's pick
+  const media = shownMedia(data.media, mediaPlayer);
 
-  // The player above it on the page shows what's playing
   return html`
     <div class="dashboard">
       <sb-card heading="Details">

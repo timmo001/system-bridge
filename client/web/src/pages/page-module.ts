@@ -4,6 +4,7 @@ import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import "~/components/sb-audio-device";
+import "~/components/sb-audio-main";
 import "~/components/sb-card";
 import "~/components/sb-data-table";
 import "~/components/sb-display-controls";
@@ -39,6 +40,7 @@ import {
 import { actionResult, moduleState } from "~/lib/atoms";
 import { exportHistory, historyModules, metricHistory } from "~/lib/history";
 import { moduleInfo } from "~/lib/navigation";
+import { mediaPlayer } from "~/lib/preferences";
 import {
   type DataView,
   href,
@@ -207,6 +209,8 @@ export class PageModule extends SbPage {
 
   readonly #export = new AtomController(this, () => exportHistory);
 
+  readonly #mediaPlayer = new AtomController(this, () => mediaPlayer);
+
   protected get pageTitle(): string {
     return moduleInfo[this.location.params.module].label;
   }
@@ -245,6 +249,7 @@ export class PageModule extends SbPage {
         data,
         history: this.#history.value,
         location: this.location,
+        mediaPlayer: this.#mediaPlayer.value,
       })}
       ${
         extra?.after === undefined

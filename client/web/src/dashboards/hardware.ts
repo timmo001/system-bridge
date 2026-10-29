@@ -744,20 +744,30 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
   `;
 };
 
-const audioCard = (heading: string, devices: readonly AudioDevice[]) => {
-  const rows = [...devices]
+/** The default device's main card, with the others as smaller cards under it. */
+const audioColumn = (
+  kind: "output" | "input",
+  heading: string,
+  devices: readonly AudioDevice[],
+) => {
+  if (devices.length === 0) return nothing;
+
+  const fallback = devices.find((device) => device.default) ?? devices[0];
+
+  const others = [...devices]
+    .filter((device) => device !== fallback)
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
-      (device) => html`<sb-audio-device .device=${device}></sb-audio-device>`,
+      (device) =>
+        html`<sb-card subheading=${heading}>
+          <sb-audio-device .device=${device}></sb-audio-device>
+        </sb-card>`,
     );
 
-  return html`<sb-card class="half" heading=${heading}>
-    ${
-      devices.length === 0
-        ? html`<p class="muted small">None reported.</p>`
-        : html`<div class="audio-devices">${rows}</div>`
-    }
-  </sb-card>`;
+  return html`<div class="audio-column">
+    <sb-audio-main kind=${kind} .devices=${devices}></sb-audio-main>
+    ${others.length === 0 ? nothing : html`<div class="audio-others">${others}</div>`}
+  </div>`;
 };
 
 export const audioDashboard = ({ data }: DashboardContext) => {
@@ -790,8 +800,10 @@ export const audioDashboard = ({ data }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      ${audioCard("Outputs", audio.outputs)}
-      ${audioCard("Inputs", audio.inputs)}
+      <div class="audio-columns">
+        ${audioColumn("output", "Output", audio.outputs)}
+        ${audioColumn("input", "Input", audio.inputs)}
+      </div>
       ${
         apps.length === 0
           ? nothing

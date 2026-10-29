@@ -11,6 +11,8 @@ export interface DashboardContext {
   readonly data: ModulesData;
   readonly history: MetricHistory;
   readonly location: LocationOf<"module">;
+  /** The media player picked on the Media page, or null for the backend's. */
+  readonly mediaPlayer: string | null;
 }
 
 /** Styles for the dashboards, on top of the shared ones. */
@@ -65,6 +67,45 @@ export const dashboardStyles = css`
     margin-top: var(--sb-space-3);
     padding-top: var(--sb-space-3);
     border-top: 1px solid var(--sb-color-border);
+  }
+
+  /* Outputs and inputs side by side, each with its other devices under its
+     main card, split by a line */
+  .audio-columns {
+    display: grid;
+    gap: var(--sb-space-4);
+  }
+
+  .audio-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sb-space-4);
+    min-width: 0;
+  }
+
+  .audio-column + .audio-column {
+    padding-top: var(--sb-space-4);
+    border-top: 1px solid var(--sb-color-border);
+  }
+
+  .audio-others {
+    display: grid;
+    gap: var(--sb-space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  }
+
+  @media (min-width: 56rem) {
+    .audio-columns {
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: var(--sb-space-6);
+    }
+
+    .audio-column + .audio-column {
+      padding-top: 0;
+      padding-left: var(--sb-space-6);
+      border-top: 0;
+      border-left: 1px solid var(--sb-color-border);
+    }
   }
 
   .stat {

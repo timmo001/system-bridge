@@ -29,7 +29,7 @@ Open the **Media** page in the [web client](/using/web-client/). The player at t
 
 A button is greyed out when the player says it can't do that, such as skipping on the last track.
 
-On Linux, any other players are listed under **Other players**, each with play or pause.
+On Linux, with more than one player open, a picker at the top of the player chooses which one it shows and controls. **Automatic** follows the one System Bridge picks, and your choice is kept in this browser. The other players sit below as smaller cards, each with play or pause and **Show** to pick it.
 
 ### Elsewhere
 
