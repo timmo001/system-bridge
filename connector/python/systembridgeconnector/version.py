@@ -8,7 +8,7 @@ from .exceptions import ConnectionErrorException
 from .http_client import HTTPClient
 from .models.modules.system import System
 
-SUPPORTED_VERSION = "4.0.2"
+SUPPORTED_VERSION = "5.0.0"
 
 
 class Version(Base):
@@ -37,15 +37,11 @@ class Version(Base):
         return False
 
     async def check_version(self) -> str | None:
-        """Check the system version for 3.x.x and above."""
+        """Check the system version."""
         try:
             response = await self._http_client.get("/api/data/system")
             system = System(**response)
-            if (
-                system
-                and system.version is not None
-                and parse(system.version) >= parse("3.0.0")
-            ):
+            if system and system.version is not None:
                 return system.version
         except ConnectionErrorException as exception:
             error: dict = exception.args[0]
