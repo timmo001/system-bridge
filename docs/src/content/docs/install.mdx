@@ -117,6 +117,16 @@ Or add it to your NixOS configuration as a flake input:
 }
 ```
 
+`system-bridge-full` is the same package with most of the [optional dependencies](#optional-dependencies) added to its `PATH`: `lm_sensors`, `pciutils`, `pipewire`, `pulseaudio` (for `pactl` and `paplay`, which work with PipeWire's `pipewire-pulse` too), `alsa-utils`, `zenity` and `ddcutil`. Use `system-bridge.packages.x86_64-linux.system-bridge-full` instead of `default` to get them, or add whichever you want to `environment.systemPackages` with the plain package.
+
+The rest come from NixOS options, with either package:
+
+- `nvidia-smi` comes with the NVIDIA driver, from `hardware.nvidia` and `services.xserver.videoDrivers = [ "nvidia" ]`, so it always matches the driver that's running.
+- Bluetooth devices need `hardware.bluetooth.enable = true`.
+- `ddcutil` needs `hardware.i2c.enable = true`, with your user in the `i2c` group.
+
+If you run System Bridge from `systemd.user.services` in your configuration, NixOS gives the service a minimal `PATH`, so it won't find tools from `environment.systemPackages`. Use `system-bridge-full`, or list the tools in the service's `path`.
+
 </Tab>
 <Tab title="mise">
 
