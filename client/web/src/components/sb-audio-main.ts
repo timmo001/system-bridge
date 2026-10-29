@@ -47,6 +47,11 @@ export class SbAudioMain extends LitElement {
         display: block;
       }
 
+      /* Fills the host when a grid stretches it beside another card */
+      sb-card {
+        height: 100%;
+      }
+
       .main {
         display: grid;
         gap: var(--sb-space-6);
@@ -111,12 +116,46 @@ export class SbAudioMain extends LitElement {
         white-space: nowrap;
         text-align: end;
       }
+
+      /* Beside another card: smaller art, and the picker names the device */
+      :host([compact]) .main {
+        gap: var(--sb-space-4);
+        grid-template-columns: 5rem minmax(0, 1fr);
+        justify-items: stretch;
+        text-align: start;
+      }
+
+      :host([compact]) .art {
+        border-radius: var(--sb-radius-m);
+        box-shadow: none;
+        --sb-icon-size: 2rem;
+      }
+
+      :host([compact]) .title {
+        display: none;
+      }
+
+      :host([compact]) .level {
+        margin-top: 0;
+      }
+
+      :host([compact]) .button.large {
+        width: 2.5rem;
+        --sb-icon-size: 1.25rem;
+      }
     `,
   ];
 
   @property() kind: keyof typeof kinds = "output";
 
   @property({ attribute: false }) devices: readonly AudioDevice[] = [];
+
+  /** The card's heading and link, for when it stands in for the Audio page. */
+  @property() heading = "";
+
+  @property() href = "";
+
+  @property({ type: Boolean, reflect: true }) compact = false;
 
   get #device(): AudioDevice | undefined {
     return this.devices.find((device) => device.default) ?? this.devices[0];
@@ -178,7 +217,7 @@ export class SbAudioMain extends LitElement {
     const waiting = this.#control.value.waiting;
     const result = actionResult(this.#control.value, "");
 
-    return html`<sb-card>
+    return html`<sb-card heading=${this.heading} href=${this.href}>
       <div class="main" role="region" aria-label=${kind.label}>
         <div class="art" aria-hidden="true">${icon(kind.art)}</div>
         <div class="info">

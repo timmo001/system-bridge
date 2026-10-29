@@ -1,12 +1,26 @@
-import { mdiAlertCircleOutline, mdiMusicNote } from "@mdi/js";
-import type { ModuleName, ModulesData } from "@timmo001/effect-system-bridge";
+import {
+  mdiAlertCircleOutline,
+  mdiMusicNote,
+  mdiPause,
+  mdiPlay,
+  mdiSkipNext,
+  mdiSkipPrevious,
+} from "@mdi/js";
+import {
+  MediaAction,
+  type ModuleName,
+  type ModulesData,
+} from "@timmo001/effect-system-bridge";
+import { Schema } from "effect";
 import { css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 
+import "~/components/sb-audio-main";
 import "~/components/sb-card";
 import "~/components/sb-gauge";
 import "~/components/sb-history-export";
 import "~/components/sb-meter";
+import "~/components/sb-select";
 import "~/components/sb-timeseries";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -15,7 +29,7 @@ import {
   powerSeries,
   temperatureSeries,
 } from "~/dashboards/shared";
-import { actionResult, moduleState } from "~/lib/atoms";
+import { actionResult, mediaControl, moduleState, registry } from "~/lib/atoms";
 import {
   formatBytes,
   formatFrequency,
@@ -28,10 +42,14 @@ import {
   formatWatts,
 } from "~/lib/format";
 import { exportHistory, metricHistory } from "~/lib/history";
+import { shownMedia } from "~/lib/media";
 import { moduleInfo, moduleOrder } from "~/lib/navigation";
+import { mediaPlayer } from "~/lib/preferences";
 import { href } from "~/lib/router";
 
 import { SbPage } from "./sb-page";
+
+const isMediaAction = Schema.is(MediaAction);
 
 const percent = (value: number) => formatPercent(value);
 
@@ -149,6 +167,65 @@ export class PageOverview extends SbPage {
       .gauges sb-gauge {
         --sb-gauge-size: 8rem;
       }
+
+      /* Audio and Now playing side by side, the same height */
+      .playback {
+        display: grid;
+        gap: var(--sb-space-4);
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+      }
+
+      .player-picker {
+        width: 20rem;
+        max-width: 100%;
+      }
+
+      /* Art beside the picker and the track, as in the Audio card */
+      .now-playing {
+        display: grid;
+        gap: var(--sb-space-4);
+        grid-template-columns: 5rem minmax(0, 1fr);
+        align-items: center;
+      }
+
+      .now-playing .art {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        background: var(--sb-color-sunken);
+        border-radius: var(--sb-radius-m);
+        color: var(--sb-color-muted);
+        --sb-icon-size: 2rem;
+      }
+
+      .now-playing .info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sb-space-2);
+        min-width: 0;
+      }
+
+      .now-playing .track {
+        display: flex;
+        align-items: center;
+        gap: var(--sb-space-3);
+      }
+
+      .now-playing .details {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .now-playing .controls {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: var(--sb-space-1);
+      }
     `,
   ];
 
@@ -157,6 +234,10 @@ export class PageOverview extends SbPage {
   readonly #history = new AtomController(this, () => metricHistory);
 
   readonly #export = new AtomController(this, () => exportHistory);
+
+  readonly #control = new AtomController(this, () => mediaControl);
+
+  readonly #chosen = new AtomController(this, () => mediaPlayer);
 
   protected readonly pageTitle = "Overview";
 
@@ -272,48 +353,140 @@ export class PageOverview extends SbPage {
   }
 
   #renderMedia(data: ModulesData) {
-    const media = data.media;
+    const media =
+      data.media &&
+      shownMedia(data.media, this.#chosenPlayer(data)?.id ?? null);
+
+    const playing = media?.status?.toLowerCase() === "playing";
+    const waiting = this.#control.value.waiting;
+
+    const button = (
+      action: MediaAction,
+      path: string,
+      label: string,
+      enabled: boolean | null | undefined,
+      main = false,
+    ) =>
+      html`<button
+        class="button round icon-only ${main ? "filled" : "plain"}"
+        type="button"
+        aria-label=${label}
+        title=${label}
+        ?disabled=${waiting || enabled === false}
+        data-action=${action}
+        @click=${this.#onControlClick}
+      >
+        ${icon(path)}
+      </button>`;
+
+    const players = data.media?.players ?? [];
+
+    // Like the Media page's picker: the backend's pick, or a player by name
+    const picker =
+      players.length === 0
+        ? nothing
+        : html`<sb-select
+            class="player-picker"
+            label="Player"
+            search-placeholder="Search players"
+            .options=${[
+              { value: "", label: "Automatic" },
+              ...players.map((player) => ({
+                value: player.id,
+                label: player.name,
+                description: player.title || undefined,
+              })),
+            ]}
+            .value=${this.#chosenPlayer(data)?.id ?? ""}
+            @value-changed=${this.#onPlayerChange}
+          ></sb-select>`;
+
+    const nothingPlaying = !media?.title;
 
     return html`
       <sb-card
-        class="half"
         heading="Now playing"
         href=${href("module", { params: { module: "media" } })}
       >
-        ${
-          media?.title
-            ? html`<div class="row" style="--sb-row-gap: var(--sb-space-4)">
+        <div class="now-playing">
+          ${
+            media?.thumbnail
+              ? html`<img class="art" src=${media.thumbnail} alt="" />`
+              : html`<div class="art" aria-hidden="true">
+                  ${icon(mdiMusicNote)}
+                </div>`
+          }
+          <div class="info">
+            ${picker}
+            <div class="track">
+              <span class="details">
+                <strong class="truncate"
+                  >${media?.title || "Nothing is playing"}</strong
+                >
+                <span class="muted small truncate"
+                  >${
+                    nothingPlaying
+                      ? ""
+                      : [media.artist, formatPlayerStatus(media.status)]
+                          .filter(Boolean)
+                          .join(" · ")
+                  }</span
+                >
+              </span>
+              <span class="controls" role="group" aria-label="Playback">
+                ${button("PREVIOUS", mdiSkipPrevious, "Previous", !nothingPlaying && media.is_previous_enabled)}
                 ${
-                  media.thumbnail
-                    ? html`<img
-                        src=${media.thumbnail}
-                        alt=""
-                        width="64"
-                        height="64"
-                        style="border-radius: var(--sb-radius-m); object-fit: cover"
-                      />`
-                    : icon(mdiMusicNote)
+                  playing
+                    ? button(
+                        "PAUSE",
+                        mdiPause,
+                        "Pause",
+                        media.is_pause_enabled,
+                        true,
+                      )
+                    : button(
+                        "PLAY",
+                        mdiPlay,
+                        "Play",
+                        !nothingPlaying && media.is_play_enabled,
+                        true,
+                      )
                 }
-                <div class="stack" style="min-width: 0; --sb-stack-gap: 0">
-                  <strong class="truncate">${media.title}</strong>
-                  <span class="muted small truncate"
-                    >${media.artist ?? ""}</span
-                  >
-                  <span
-                    class="chip"
-                    style="align-self: flex-start; margin-top: var(--sb-space-1)"
-                    >${formatPlayerStatus(media.status)}</span
-                  >
-                </div>
-              </div>`
-            : html`<div class="empty" style="padding: var(--sb-space-4)">
-                ${icon(mdiMusicNote)}
-                <p class="small">Nothing is playing.</p>
-              </div>`
-        }
+                ${button("NEXT", mdiSkipNext, "Next", !nothingPlaying && media.is_next_enabled)}
+              </span>
+            </div>
+          </div>
+        </div>
       </sb-card>
     `;
   }
+
+  /** The player picked on the Media page, while it's still running. */
+  #chosenPlayer(data: ModulesData) {
+    return data.media?.players.find(
+      (player) => player.id === this.#chosen.value,
+    );
+  }
+
+  #onPlayerChange = (event: CustomEvent<{ readonly value: string }>) => {
+    registry.set(mediaPlayer, event.detail.value || null);
+  };
+
+  /** Sends to the player the card shows, or the backend's pick without one. */
+  #onControlClick = (event: MouseEvent) => {
+    if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+
+    const { action } = event.currentTarget.dataset;
+
+    if (!isMediaAction(action)) return;
+
+    const player = this.#chosenPlayer(this.#modules.value.data);
+
+    registry.set(
+      mediaControl,
+      player === undefined ? { action } : { action, player: player.id },
+    );
+  };
 
   #renderContent() {
     const { data, settled } = this.#modules.value;
@@ -421,7 +594,21 @@ export class PageOverview extends SbPage {
                 ></sb-timeseries>
               </sb-card>`
         }
-        ${this.#renderStorage(data)} ${this.#renderMedia(data)}
+        <div class="playback">
+          ${
+            data.audio && data.audio.outputs.length > 0
+              ? html`<sb-audio-main
+                  compact
+                  kind="output"
+                  heading="Audio"
+                  href=${href("module", { params: { module: "audio" } })}
+                  .devices=${data.audio.outputs}
+                ></sb-audio-main>`
+              : nothing
+          }
+          ${this.#renderMedia(data)}
+        </div>
+        ${this.#renderStorage(data)}
         <sb-card
           heading="Modules"
           subheading="All the data System Bridge reports"
