@@ -34,6 +34,7 @@ var refreshEvents = map[string]bool{
 	"activespecialv2":    true,
 	"activewindowv2":     true,
 	"changefloatingmode": true,
+	"changeworkspaceid":  true,
 	"closelayer":         true,
 	"closewindow":        true,
 	"configreloaded":     true,
