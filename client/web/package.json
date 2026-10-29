@@ -21,7 +21,7 @@
     "@codemirror/search": "^6.7.2",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.42.0",
-    "@effect/platform-browser": "4.0.7",
+    "@effect/platform-browser": "4.1.0",
     "@lezer/highlight": "^1.2.3",
     "@lit/context": "^1.1.6",
     "@mdi/js": "7.4.47",
@@ -29,7 +29,7 @@
     "@tanstack/lit-hotkeys": "0.18.0",
     "@tanstack/lit-table": "9.3.1",
     "@timmo001/effect-system-bridge": "workspace:*",
-    "effect": "4.0.7",
+    "effect": "4.1.0",
     "lit": "^3.3.2"
   },
   "devDependencies": {
