@@ -6,13 +6,22 @@
   nodejs,
   pkg-config,
   installShellFiles,
+  makeWrapper,
   coreutils,
   libX11,
   libXi,
   libXtst,
   libxkbcommon,
+  alsa-utils,
+  ddcutil,
+  lm_sensors,
+  pciutils,
+  pipewire,
+  pulseaudio,
+  zenity,
   src,
   version,
+  withOptionalTools ? false,
 }:
 
 let
@@ -93,7 +102,8 @@ buildGoModule {
   nativeBuildInputs = [
     pkg-config
     installShellFiles
-  ];
+  ]
+  ++ lib.optional withOptionalTools makeWrapper;
 
   # libXi provides the XInput header that XTest.h includes
   buildInputs = [
@@ -140,6 +150,21 @@ buildGoModule {
       install -Dm644 .resources/system-bridge-dimmed-$size.png \
         $out/share/icons/hicolor/''${size}x''${size}/apps/system-bridge.png
     done
+  ''
+  # Appended, so tools the system already provides still come first
+  + lib.optionalString withOptionalTools ''
+    wrapProgram $out/bin/system-bridge \
+      --suffix PATH : ${
+        lib.makeBinPath [
+          alsa-utils
+          ddcutil
+          lm_sensors
+          pciutils
+          pipewire
+          pulseaudio
+          zenity
+        ]
+      }
   '';
 
   passthru = { inherit webClient webClientModules; };

@@ -15,6 +15,7 @@
           src = self;
           version = "0-unstable-${self.shortRev or "dirty"}";
         };
+        system-bridge-full = system-bridge.override { withOptionalTools = true; };
         default = system-bridge;
       };
     };
