@@ -75,7 +75,7 @@ jobs:
 
       - name: Lint rpm spec
         run: |
-          rpmlint .scripts/linux/system-bridge.spec
+          rpmlint -r .scripts/linux/rpmlintrc .scripts/linux/system-bridge.spec
 
   lint-nsis:
     name: Lint nsis script

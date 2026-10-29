@@ -1,0 +1,2 @@
+# udev only reads rules from /usr/lib/udev/rules.d, whatever the library directory
+addFilter(r"hardcoded-library-path in .*/usr/lib/udev/rules\.d")
