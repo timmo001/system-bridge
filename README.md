@@ -2,11 +2,6 @@
 
 ![System Bridge](.github/assets/banner.png)
 
-> [!IMPORTANT]
-> Any version 4 users will need to remove any integrations, and uninstall the
-> old application before installing v5 to avoid conflicts. Your token and
-> settings will not carry over to the new version.
-
 A bridge for your systems.
 
 > [!NOTE]
