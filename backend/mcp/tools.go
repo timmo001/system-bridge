@@ -355,7 +355,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_media_control",
-		Description: "Control media playback on the system. SEEK needs position, SET_VOLUME volume, SET_SHUFFLE shuffle and SET_REPEAT repeat. Get player ids from the media module's players; on Windows only the actions up to MUTE work, and not with a player.",
+		Description: "Control media playback on the system. SEEK needs position, SET_VOLUME volume, SET_SHUFFLE shuffle and SET_REPEAT repeat. Get player ids from the media module's players, which each give their own state and capabilities; on Windows only the actions up to MUTE work, and not with a player.",
 		InputSchema: objectSchema(map[string]any{
 			"action": map[string]any{
 				"type":        "string",

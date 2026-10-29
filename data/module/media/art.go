@@ -18,15 +18,16 @@ import (
 	"time"
 )
 
-const maxArtFileSize = 5 * 1024 * 1024 // 5 MB
+const (
+	maxArtFileSize = 5 * 1024 * 1024 // 5 MB
+	maxCachedArt   = 8
+)
 
-// artCache holds the last local artwork resolved. Only one player's artwork
-// is reported at a time, so one entry is enough, and it bounds the memory the
-// cache uses.
+// artCache holds local artwork already resolved. Each player can report its
+// own, so it holds a few, and starts over when full to bound its memory.
 var artCache struct {
 	sync.Mutex
-	key     artKey
-	dataURL string
+	dataURLs map[artKey]string
 }
 
 // artKey identifies a version of an artwork file, so rewriting the file with
@@ -99,8 +100,7 @@ func resolveArtURL(rawURL string) string {
 
 	key := artKey{path: filePath, size: info.Size(), modTime: info.ModTime()}
 	artCache.Lock()
-	if artCache.key == key {
-		dataURL := artCache.dataURL
+	if dataURL, ok := artCache.dataURLs[key]; ok {
 		artCache.Unlock()
 		return dataURL
 	}
@@ -126,7 +126,10 @@ func resolveArtURL(rawURL string) string {
 	dataURL := fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(data))
 
 	artCache.Lock()
-	artCache.key, artCache.dataURL = key, dataURL
+	if artCache.dataURLs == nil || len(artCache.dataURLs) >= maxCachedArt {
+		artCache.dataURLs = make(map[artKey]string, maxCachedArt)
+	}
+	artCache.dataURLs[key] = dataURL
 	artCache.Unlock()
 
 	return dataURL

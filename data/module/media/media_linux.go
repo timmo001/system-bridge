@@ -23,81 +23,103 @@ func getMediaData(ctx context.Context, mediaData types.MediaData) (types.MediaDa
 		slog.Info("Failed to list media players", "error", err)
 		return mediaData, nil
 	}
+	picked := pickPlayer(players)
 	for _, player := range players {
-		mediaData.Players = append(mediaData.Players, types.MediaPlayer{
-			ID:     player.instance,
-			Name:   player.name(),
-			Status: player.state(),
-			Title:  player.title(),
-			Artist: player.text("xesam:artist"),
-		})
+		described := describePlayer(player)
+		mediaData.Players = append(mediaData.Players, described)
+		if picked != nil && player.instance == picked.instance {
+			describeTopLevel(&mediaData, described)
+		}
 	}
-	player := pickPlayer(players)
-	if player == nil {
-		return mediaData, nil
-	}
-	mediaData.Player = &player.instance
+	return mediaData, nil
+}
 
-	title := player.title()
-	artist := player.text("xesam:artist")
+// describeTopLevel fills the media data's own fields from the picked player,
+// as clients that don't read players expect
+func describeTopLevel(mediaData *types.MediaData, player types.MediaPlayer) {
+	mediaData.Player = &player.ID
+	mediaData.Title = &player.Title
+	mediaData.Artist = &player.Artist
+	mediaData.AlbumTitle = player.AlbumTitle
+	mediaData.AlbumArtist = player.AlbumArtist
+	mediaData.Type = &player.Name
+	mediaData.TrackNumber = player.TrackNumber
+	mediaData.Thumbnail = player.Thumbnail
+	mediaData.Status = &player.Status
+	mediaData.Duration = player.Duration
+	mediaData.Position = player.Position
+	mediaData.Volume = player.Volume
+	mediaData.PlaybackRate = player.PlaybackRate
+	mediaData.Shuffle = player.Shuffle
+	mediaData.Repeat = player.Repeat
+	mediaData.IsSeekEnabled = player.IsSeekEnabled
+	mediaData.IsPlayEnabled = player.IsPlayEnabled
+	mediaData.IsPauseEnabled = player.IsPauseEnabled
+	mediaData.IsStopEnabled = player.IsStopEnabled
+	mediaData.IsNextEnabled = player.IsNextEnabled
+	mediaData.IsPreviousEnabled = player.IsPreviousEnabled
+}
+
+// describePlayer is what clients get about one MPRIS player
+func describePlayer(player mprisPlayer) types.MediaPlayer {
 	album := player.text("xesam:album")
-	name := player.name()
-	mediaData.Title = &title
-	mediaData.Artist = &artist
-	mediaData.AlbumTitle = &album
-	mediaData.Type = &name
+	described := types.MediaPlayer{
+		ID:         player.instance,
+		Name:       player.name(),
+		Status:     player.state(),
+		Title:      player.title(),
+		Artist:     player.text("xesam:artist"),
+		AlbumTitle: &album,
+	}
 	if albumArtist := player.text("xesam:albumArtist"); albumArtist != "" {
-		mediaData.AlbumArtist = &albumArtist
+		described.AlbumArtist = &albumArtist
 	}
 	if trackNumber, ok := player.metadata["xesam:trackNumber"].Value().(int32); ok {
 		number := int(trackNumber)
-		mediaData.TrackNumber = &number
+		described.TrackNumber = &number
 	}
 
 	// A file URL points at this machine's disk, which clients can't load, so
 	// resolveArtURL turns it into a data URL
 	if artURL := resolveArtURL(player.text("mpris:artUrl")); artURL != "" {
-		mediaData.Thumbnail = &artURL
+		described.Thumbnail = &artURL
 	}
-
-	status := player.state()
-	mediaData.Status = &status
 
 	if duration, ok := microseconds(player.metadata["mpris:length"]); ok {
-		mediaData.Duration = &duration
+		described.Duration = &duration
 	}
 	if position, ok := microseconds(player.properties["Position"]); ok {
-		mediaData.Position = &position
+		described.Position = &position
 	}
 	if volume, ok := player.properties["Volume"].Value().(float64); ok {
-		mediaData.Volume = &volume
+		described.Volume = &volume
 	}
 	if rate, ok := player.properties["Rate"].Value().(float64); ok {
-		mediaData.PlaybackRate = &rate
+		described.PlaybackRate = &rate
 	}
 	if shuffle, ok := player.properties["Shuffle"].Value().(bool); ok {
-		mediaData.Shuffle = &shuffle
+		described.Shuffle = &shuffle
 	}
 	if loopStatus, ok := player.properties["LoopStatus"].Value().(string); ok {
 		if repeat, known := loopStatuses[loopStatus]; known {
-			mediaData.Repeat = &repeat
+			described.Repeat = &repeat
 		}
 	}
 
-	isPlaying := status == "PLAYING"
+	isPlaying := described.Status == "PLAYING"
 	canPlay := player.can("CanPlay") && !isPlaying
 	canPause := player.can("CanPause") && isPlaying
 	canStop := player.flag("CanControl")
 	canNext := player.can("CanGoNext")
 	canPrevious := player.can("CanGoPrevious")
 	_, hasTrack := player.trackID()
-	canSeek := player.can("CanSeek") && hasTrack && mediaData.Duration != nil
-	mediaData.IsSeekEnabled = &canSeek
-	mediaData.IsPlayEnabled = &canPlay
-	mediaData.IsPauseEnabled = &canPause
-	mediaData.IsStopEnabled = &canStop
-	mediaData.IsNextEnabled = &canNext
-	mediaData.IsPreviousEnabled = &canPrevious
+	canSeek := player.can("CanSeek") && hasTrack && described.Duration != nil
+	described.IsSeekEnabled = &canSeek
+	described.IsPlayEnabled = &canPlay
+	described.IsPauseEnabled = &canPause
+	described.IsStopEnabled = &canStop
+	described.IsNextEnabled = &canNext
+	described.IsPreviousEnabled = &canPrevious
 
-	return mediaData, nil
+	return described
 }
