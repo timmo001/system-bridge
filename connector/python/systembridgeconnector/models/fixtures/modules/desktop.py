@@ -120,6 +120,7 @@ FIXTURE_DESKTOP = Desktop(
             HyprlandScreencast(type=HyprlandScreencastType.WINDOW, window="0x1"),
         ],
         config_errors=[],
+        config_notices=[],
         group_lock=False,
         displays={
             "DP-1": HyprlandDisplay(

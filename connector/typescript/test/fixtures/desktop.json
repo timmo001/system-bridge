@@ -137,6 +137,7 @@
       }
     ],
     "config_errors": [],
+    "config_notices": [],
     "group_lock": false,
     "displays": {
       "DP-1": {

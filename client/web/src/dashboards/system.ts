@@ -1489,6 +1489,10 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     (error) => html`<li>${error}</li>`,
   );
 
+  const configNotices = (hyprland?.config_notices ?? []).map(
+    (notice) => html`<li>${notice}</li>`,
+  );
+
   const screencasts = (hyprland?.screencasts ?? [])
     .map((screencast) => screencastLabel(screencast, desktop.windows))
     .join(", ");
@@ -1546,6 +1550,19 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
                 <strong>Hyprland's config has errors</strong>
                 <ul>
                   ${configErrors}
+                </ul>
+              </div>
+            </div>`
+      }
+      ${
+        configNotices.length === 0
+          ? nothing
+          : html`<div class="alert">
+              ${icon(mdiAlertCircleOutline)}
+              <div>
+                <strong>Hyprland's config uses deprecated settings</strong>
+                <ul>
+                  ${configNotices}
                 </ul>
               </div>
             </div>`

@@ -72,6 +72,7 @@ type HyprlandData struct {
 	Submap          *string                      `json:"submap" mapstructure:"submap"` // null for the default
 	Screencasts     []HyprlandScreencast         `json:"screencasts" mapstructure:"screencasts"`
 	ConfigErrors    []string                     `json:"config_errors" mapstructure:"config_errors"`
+	ConfigNotices   []string                     `json:"config_notices" mapstructure:"config_notices"` // Deprecated config, from Hyprland 0.57
 	GroupLock       bool                         `json:"group_lock" mapstructure:"group_lock"`
 	Displays        map[string]HyprlandDisplay   `json:"displays" mapstructure:"displays"`
 	Keyboards       []HyprlandKeyboard           `json:"keyboards" mapstructure:"keyboards"`

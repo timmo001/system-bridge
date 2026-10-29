@@ -164,7 +164,8 @@ type hyprlandConfig struct {
 		ConfigProvider string `json:"configProvider"`
 		Backend        string `json:"backend"`
 	}
-	Options []hyprlandOptionReply // In hyprlandOptions' order
+	ConfigNotices []string
+	Options       []hyprlandOptionReply // In hyprlandOptions' order
 }
 
 type hyprlandBind struct {
@@ -226,10 +227,11 @@ type hyprlandOptionReply struct {
 	CSS  *string `json:"css"`
 }
 
-// hyprlandConfigRequests are the requests for hyprlandConfig. status and the
-// options are last as older versions may not know them.
+// hyprlandConfigRequests are the requests for hyprlandConfig. status,
+// deprecated-config and the options are last as older versions may not know
+// them.
 var hyprlandConfigRequests = func() []string {
-	requests := []string{"version", "configerrors", "globalshortcuts", "binds", "status"}
+	requests := []string{"version", "configerrors", "globalshortcuts", "binds", "status", "deprecated-config"}
 	for _, option := range hyprlandOptions {
 		// The classic name, which getoption takes with either config
 		requests = append(requests, "getoption "+strings.ReplaceAll(option.name, ".", ":"))
@@ -239,10 +241,10 @@ var hyprlandConfigRequests = func() []string {
 
 // hyprlandConfigOptional is how many of the last config requests older
 // versions may not know
-var hyprlandConfigOptional = 1 + len(hyprlandOptions)
+var hyprlandConfigOptional = 2 + len(hyprlandOptions)
 
 func (c *hyprlandConfig) targets() []any {
-	targets := []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Binds, &c.Status}
+	targets := []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Binds, &c.Status, &c.ConfigNotices}
 	c.Options = make([]hyprlandOptionReply, len(hyprlandOptions))
 	for i := range c.Options {
 		targets = append(targets, &c.Options[i])
@@ -422,6 +424,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		Submap:          nonEmpty(events.submap),
 		Screencasts:     []types.HyprlandScreencast{},
 		ConfigErrors:    []string{},
+		ConfigNotices:   []string{},
 		GroupLock:       events.groupLock,
 		Displays:        make(map[string]types.HyprlandDisplay, len(state.Monitors)),
 		Keyboards:       make([]types.HyprlandKeyboard, 0, len(state.Devices.Keyboards)),
@@ -438,6 +441,11 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 	for _, configError := range config.ConfigErrors {
 		if configError != "" {
 			hyprland.ConfigErrors = append(hyprland.ConfigErrors, configError)
+		}
+	}
+	for _, notice := range config.ConfigNotices {
+		if notice != "" {
+			hyprland.ConfigNotices = append(hyprland.ConfigNotices, notice)
 		}
 	}
 	if config.GlobalShortcuts != nil {

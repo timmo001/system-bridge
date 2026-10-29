@@ -488,6 +488,7 @@ export const HyprlandData = Schema.Struct({
   submap: Schema.NullOr(Schema.String),
   screencasts: Schema.Array(HyprlandScreencast),
   config_errors: Schema.Array(Schema.String),
+  config_notices: Schema.Array(Schema.String),
   group_lock: Schema.Boolean,
   displays: Schema.Record(Schema.String, HyprlandDisplay),
   keyboards: Schema.Array(HyprlandKeyboard),

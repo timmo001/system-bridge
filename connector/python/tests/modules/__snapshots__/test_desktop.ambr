@@ -26,6 +26,8 @@
       ]),
       config_errors=list([
       ]),
+      config_notices=list([
+      ]),
       displays=dict({
         'DP-1': HyprlandDisplay(
           colour_preset='srgb',

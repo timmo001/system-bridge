@@ -339,6 +339,7 @@ class Hyprland:
     submap: str | None = None
     screencasts: list[HyprlandScreencast] = field(default_factory=list)
     config_errors: list[str] = field(default_factory=list)
+    config_notices: list[str] = field(default_factory=list)
     displays: dict[str, HyprlandDisplay] = field(default_factory=dict)
     keyboards: list[HyprlandKeyboard] = field(default_factory=list)
     mice: list[HyprlandMouse] = field(default_factory=list)
