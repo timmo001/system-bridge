@@ -124,6 +124,7 @@ var catalogue = []Prefab{
 		candidates: map[string][]candidate{
 			"linux": {
 				{program: "omarchy-system", arguments: []string{"logout"}, when: onHyprland},
+				{program: "hyprctl", arguments: []string{"dispatch", "hl.dsp.exit()"}, when: onHyprlandLua},
 				{program: "hyprctl", arguments: []string{"dispatch", "exit"}, when: onHyprland},
 				{program: "qdbus6", arguments: []string{"org.kde.Shutdown", "/Shutdown", "logout"}, when: onKDE},
 				{program: "qdbus", arguments: []string{"org.kde.Shutdown", "/Shutdown", "logout"}, when: onKDE},

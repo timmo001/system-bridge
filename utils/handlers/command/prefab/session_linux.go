@@ -3,6 +3,8 @@
 package prefab
 
 import (
+	"encoding/json"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,6 +46,36 @@ func onWayland() bool {
 func onHyprland() bool { return desktop() == "hyprland" }
 func onKDE() bool      { return desktop() == "kde" }
 func onGNOME() bool    { return desktop() == "gnome" }
+
+// onHyprlandLua is Hyprland with a Lua config, which takes its dispatches
+// as Lua. Every config is Lua from Hyprland 0.57.
+func onHyprlandLua() bool {
+	if !onHyprland() {
+		return false
+	}
+	runtimeDir, signature := os.Getenv("XDG_RUNTIME_DIR"), hyprlandSignature()
+	if runtimeDir == "" || signature == "" {
+		return false
+	}
+	conn, err := net.DialTimeout("unix", filepath.Join(runtimeDir, "hypr", signature, ".socket.sock"), time.Second)
+	if err != nil {
+		return false
+	}
+	defer func() { _ = conn.Close() }()
+	if err := conn.SetDeadline(time.Now().Add(2 * time.Second)); err != nil {
+		return false
+	}
+	if _, err := conn.Write([]byte("j/status")); err != nil {
+		return false
+	}
+	var status struct {
+		ConfigProvider string `json:"configProvider"`
+	}
+	if err := json.NewDecoder(conn).Decode(&status); err != nil {
+		return false
+	}
+	return status.ConfigProvider == "lua"
+}
 
 // onWlroots is a Wayland session on a compositor grim can capture, which
 // GNOME and KDE aren't
