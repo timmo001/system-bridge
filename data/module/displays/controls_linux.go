@@ -186,7 +186,7 @@ func readVCP(ctx context.Context, bus string) (*float64, *types.DisplayPowerStat
 	out, err := ddcutil(ctx, "--bus", bus, "getvcp", "10", "D6", "--brief")
 	var brightness *float64
 	if current, maximum, ok := parseBrightness(out); ok && maximum > 0 {
-		percent := current / maximum * 100
+		percent := math.Round(current / maximum * 100)
 		brightness = &percent
 	}
 	state := parsePowerState(out)
@@ -274,7 +274,7 @@ func readBacklight(dir string) *float64 {
 	if err != nil || errMaximum != nil || maximum <= 0 {
 		return nil
 	}
-	percent := current / maximum * 100
+	percent := math.Round(current / maximum * 100)
 	return &percent
 }
 
