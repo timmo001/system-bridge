@@ -71,7 +71,7 @@ func readControls(handle syscall.Handle) (*float64, *types.DisplayPowerState) {
 			ret, _, _ := getMonitorBrightness.Call(uintptr(monitor),
 				uintptr(unsafe.Pointer(&minimum)), uintptr(unsafe.Pointer(&current)), uintptr(unsafe.Pointer(&maximum)))
 			if ret != 0 && maximum > minimum {
-				percent := float64(current-minimum) / float64(maximum-minimum) * 100
+				percent := math.Round(float64(current-minimum) / float64(maximum-minimum) * 100)
 				brightness = &percent
 			}
 		}
