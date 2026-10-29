@@ -99,6 +99,7 @@ Section "Uninstall"
   Delete "$INSTDIR\system-bridge.exe"
   Delete "$INSTDIR\system-bridge.ico"
   Delete "$INSTDIR\uninstall.exe"
+  RMDir /r "$INSTDIR\now-playing"
 
   RMDir "$INSTDIR"
 
