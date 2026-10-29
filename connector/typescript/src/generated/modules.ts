@@ -948,6 +948,22 @@ export const MediaPlayer = Schema.Struct({
   status: Schema.String,
   title: Schema.String,
   artist: Schema.String,
+  album_artist: Schema.NullOr(Schema.String),
+  album_title: Schema.NullOr(Schema.String),
+  duration: Schema.NullOr(Schema.Finite),
+  is_next_enabled: Schema.NullOr(Schema.Boolean),
+  is_pause_enabled: Schema.NullOr(Schema.Boolean),
+  is_play_enabled: Schema.NullOr(Schema.Boolean),
+  is_previous_enabled: Schema.NullOr(Schema.Boolean),
+  is_seek_enabled: Schema.NullOr(Schema.Boolean),
+  is_stop_enabled: Schema.NullOr(Schema.Boolean),
+  playback_rate: Schema.NullOr(Schema.Finite),
+  position: Schema.NullOr(Schema.Finite),
+  repeat: Schema.NullOr(Schema.String),
+  shuffle: Schema.NullOr(Schema.Boolean),
+  thumbnail: Schema.NullOr(Schema.String),
+  track_number: Schema.NullOr(Schema.Finite),
+  volume: Schema.NullOr(Schema.Finite),
 });
 
 export interface MediaPlayer extends Schema.Schema.Type<typeof MediaPlayer> {}

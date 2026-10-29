@@ -280,7 +280,7 @@ Returns an array of objects, one per GPU. Full metrics require an NVIDIA GPU; ot
 
 Details of the current media session: `title`, `artist`, `album_title`, `album_artist`, `subtitle`, `type`, and `status`; playback state `position`, `duration`, `playback_rate`, `volume`, `shuffle`, `repeat`, and `track_number`; capability flags `is_play_enabled`, `is_pause_enabled`, `is_stop_enabled`, `is_next_enabled`, `is_previous_enabled`, `is_seek_enabled`, `is_fast_forward_enabled`, and `is_rewind_enabled`; a `thumbnail`; and `updated_at`. Available fields vary by operating system and media player.
 
-On Linux, `players` lists every media player, each with an `id`, `name`, `status` (`PLAYING`, `PAUSED` or `STOPPED`), `title` and `artist`. `player` is the `id` of the one the other fields describe, and [`MEDIA_CONTROL`](/api/websocket/control/#media-control) takes an `id` to control another. On Windows, `players` is empty and `player` is `null`.
+On Linux, `players` lists every media player, each with an `id`, `name`, `status` (`PLAYING`, `PAUSED` or `STOPPED`), `title` and `artist`, plus the same track, playback, capability and `thumbnail` fields as above, so a client can show any of them. `player` is the `id` of the one the other fields describe, and [`MEDIA_CONTROL`](/api/websocket/control/#media-control) takes an `id` to control another. On Windows, `players` is empty and `player` is `null`.
 
 ### `memory`
 

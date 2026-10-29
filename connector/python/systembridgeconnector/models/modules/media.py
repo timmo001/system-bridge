@@ -16,6 +16,22 @@ class MediaPlayer:
     status: str
     title: str = ""
     artist: str = ""
+    album_artist: str | None = None
+    album_title: str | None = None
+    duration: float | None = None
+    is_next_enabled: bool | None = None
+    is_pause_enabled: bool | None = None
+    is_play_enabled: bool | None = None
+    is_previous_enabled: bool | None = None
+    is_seek_enabled: bool | None = None
+    is_stop_enabled: bool | None = None
+    playback_rate: float | None = None
+    position: float | None = None
+    repeat: str | None = None
+    shuffle: bool | None = None
+    thumbnail: str | None = None
+    track_number: int | None = None
+    volume: float | None = None
 
 
 @filter_unexpected_fields
