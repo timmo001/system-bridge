@@ -1,9 +1,10 @@
 import { heading, history, tile } from "./cards";
 import type { Item, ItemKind, SystemBridgeEntities } from "./registry";
 import type {
+  AudioFeature,
   LovelaceCardConfig,
   LovelaceSectionConfig,
-  SourceOption,
+  MediaFeature,
   TileFeatureConfig,
 } from "./types";
 
@@ -13,8 +14,12 @@ export interface SectionContext {
   hours: number;
   /** The features percentage tiles show, from the tile feature option. */
   percentage: TileFeatureConfig[] | undefined;
-  /** Which source pickers the media and audio tiles show. */
-  sources: Record<SourceOption, boolean>;
+  /** The Media tile's features, in order. */
+  mediaFeatures: MediaFeature[];
+  /** The Audio tiles' features, in order. */
+  audioFeatures: AudioFeature[];
+  /** Whether the audio input tile has its picker. */
+  inputSource: boolean;
 }
 
 type SectionBuilder = (
@@ -65,8 +70,26 @@ const percentageOf = (
   percentage: TileFeatureConfig[] | undefined,
 ) => (entity ? tile(entity, percentage) : undefined);
 
-const sourceFeature = (shown: boolean, type: string): TileFeatureConfig[] =>
-  shown ? [{ type }] : [];
+const MEDIA_FEATURE_CONFIGS: Record<MediaFeature, TileFeatureConfig> = {
+  source: { type: "media-player-source" },
+  // Controls the player can't use are left out by the feature itself
+  playback: {
+    type: "media-player-playback",
+    controls: [
+      "shuffle",
+      "media_previous_track",
+      "media_play_pause",
+      "media_stop",
+      "media_next_track",
+      "repeat",
+    ],
+  },
+  volume_buttons: { type: "media-player-volume-buttons" },
+  volume_slider: { type: "media-player-volume-slider" },
+};
+
+const mediaFeatures = (features: readonly MediaFeature[]) =>
+  features.map((feature) => MEDIA_FEATURE_CONFIGS[feature]);
 
 /**
  * Tiles for an item's fields, named without the heading above them, so a
@@ -109,46 +132,37 @@ export const SECTIONS = {
       ),
     ]),
 
-  "now-playing": ({ entities, sources }) =>
+  "now-playing": ({ entities, mediaFeatures: media, audioFeatures: audio }) =>
     grid([
       heading("Now playing", "mdi:play-circle-outline"),
       ...singles(entities, "media").map((entity) =>
-        tile(entity, [
-          { type: "media-player-playback" },
-          { type: "media-player-volume-slider" },
-          ...sourceFeature(sources.show_player_source, "media-player-source"),
-        ]),
+        tile(entity, mediaFeatures(media)),
       ),
       ...singles(entities, "audio").map((entity) =>
-        tile(entity, [
-          { type: "media-player-volume-slider" },
-          ...sourceFeature(sources.show_output_source, "media-player-source"),
-        ]),
+        tile(entity, mediaFeatures(audio)),
       ),
     ]),
 
-  "audio-outputs": ({ entities, sources }) =>
+  "audio-outputs": ({ entities, audioFeatures: audio }) =>
     grid([
       heading("Outputs", "mdi:speaker"),
       ...singles(entities, "audio").map((entity) =>
-        tile(entity, [
-          { type: "media-player-volume-slider" },
-          ...sourceFeature(sources.show_output_source, "media-player-source"),
-        ]),
+        tile(entity, mediaFeatures(audio)),
       ),
+      // Each output has no source of its own
       ...fromItems(entities, "audio_output", "audio_output").map((entity) =>
-        tile(entity, [{ type: "media-player-volume-slider" }]),
+        tile(
+          entity,
+          mediaFeatures(audio.filter((feature) => feature !== "source")),
+        ),
       ),
     ]),
 
-  "audio-inputs": ({ entities, sources }) =>
+  "audio-inputs": ({ entities, inputSource }) =>
     grid([
       heading("Inputs", "mdi:microphone"),
       ...singles(entities, "audio_input").map((entity) =>
-        tile(
-          entity,
-          sourceFeature(sources.show_input_source, "select-options"),
-        ),
+        tile(entity, inputSource ? [{ type: "select-options" }] : []),
       ),
       ...[...entities.items.audio_input.values()].flatMap((item) => [
         ...fields(item, "volume").map((entity) =>

@@ -17,6 +17,8 @@ import {
 import { isAtLeast, MINIMUM_RELEASE } from "./release";
 import { isSectionName, SECTIONS } from "./sections";
 import {
+  DEFAULT_AUDIO_FEATURES,
+  DEFAULT_MEDIA_FEATURES,
   type HomeAssistant,
   type LovelaceSectionConfig,
   type SectionOptions,
@@ -53,11 +55,9 @@ export const buildSection = (
     percentage: percentageFeatures(
       options.tile_feature ?? DEFAULT_TILE_FEATURE,
     ),
-    sources: {
-      show_player_source: options.show_player_source ?? true,
-      show_output_source: options.show_output_source ?? true,
-      show_input_source: options.show_input_source ?? true,
-    },
+    mediaFeatures: options.media_features ?? DEFAULT_MEDIA_FEATURES,
+    audioFeatures: options.audio_features ?? DEFAULT_AUDIO_FEATURES,
+    inputSource: options.show_input_source ?? true,
   });
 
 const message = (content: string): LovelaceSectionConfig => ({

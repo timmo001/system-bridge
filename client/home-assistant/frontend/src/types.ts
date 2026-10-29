@@ -44,6 +44,7 @@ export interface EntityNameItem {
 export interface TileFeatureConfig {
   type: string;
   style?: "buttons" | "slider";
+  controls?: string[];
 }
 
 export interface ActionConfig {
@@ -136,21 +137,37 @@ export interface SectionOptions {
   hours_to_show?: number;
   /** What percentage tiles, such as CPU usage, show below their state. */
   tile_feature?: TileFeature;
-  /** Show the Media player's player picker. Defaults to on. */
-  show_player_source?: boolean;
-  /** Show the Audio player's output picker. Defaults to on. */
-  show_output_source?: boolean;
+  /** The Media tile's features, in order. */
+  media_features?: MediaFeature[];
+  /** The Audio tiles' features, in order. */
+  audio_features?: AudioFeature[];
   /** Show the audio input picker. Defaults to on. */
   show_input_source?: boolean;
 }
 
-export const SOURCE_OPTIONS = [
-  "show_player_source",
-  "show_output_source",
-  "show_input_source",
+export const MEDIA_FEATURES = [
+  "source",
+  "playback",
+  "volume_buttons",
+  "volume_slider",
 ] as const;
 
-export type SourceOption = (typeof SOURCE_OPTIONS)[number];
+export type MediaFeature = (typeof MEDIA_FEATURES)[number];
+
+export const AUDIO_FEATURES = [
+  "source",
+  "volume_buttons",
+  "volume_slider",
+] as const;
+
+export type AudioFeature = (typeof AUDIO_FEATURES)[number];
+
+export const DEFAULT_MEDIA_FEATURES: MediaFeature[] = ["source", "playback"];
+
+export const DEFAULT_AUDIO_FEATURES: AudioFeature[] = [
+  "source",
+  "volume_buttons",
+];
 
 interface StrategyOptions extends SectionOptions {
   type: typeof STRATEGY_TYPE;

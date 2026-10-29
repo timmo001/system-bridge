@@ -19,7 +19,6 @@ import {
   type LovelaceViewConfig,
   type SectionOptions,
   type SectionStrategyConfig,
-  SOURCE_OPTIONS,
   STRATEGY_TYPE,
   type ViewStrategyConfig,
 } from "./types";
@@ -49,10 +48,16 @@ export const pageSections = (
         strategy.tile_feature = options.tile_feature;
       }
 
-      for (const option of SOURCE_OPTIONS) {
-        if (options[option] !== undefined) {
-          strategy[option] = options[option];
-        }
+      if (options.media_features !== undefined) {
+        strategy.media_features = options.media_features;
+      }
+
+      if (options.audio_features !== undefined) {
+        strategy.audio_features = options.audio_features;
+      }
+
+      if (options.show_input_source !== undefined) {
+        strategy.show_input_source = options.show_input_source;
       }
 
       return { strategy };
