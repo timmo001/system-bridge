@@ -56,7 +56,7 @@ On Linux, System Bridge works out which desktop is running, even when it's start
 | --- | --- | --- | --- | --- | --- |
 | **Lock screen** | `omarchy-system-lock`, `loginctl` | `loginctl` | `loginctl` | `loginctl` | `loginctl` |
 | **Sleep** | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` |
-| **Log out** | `omarchy-system logout`, `hyprctl dispatch exit`, `loginctl` | `qdbus6` or `qdbus`, `loginctl` | `gnome-session-quit`, `loginctl` | `loginctl` | `loginctl` |
+| **Log out** | `omarchy-system logout`, `hyprctl dispatch 'hl.dsp.exit()'` with a Lua config or `hyprctl dispatch exit`, `loginctl` | `qdbus6` or `qdbus`, `loginctl` | `gnome-session-quit`, `loginctl` | `loginctl` | `loginctl` |
 | **Open the file manager** | `omarchy-launch-nautilus`, `xdg-open` | `xdg-open` | `xdg-open` | `xdg-open` | `xdg-open` |
 | **Open a terminal** | `omarchy-launch-terminal`, `xdg-terminal-exec` | `konsole`, `xdg-terminal-exec` | `kgx` or `gnome-terminal`, `xdg-terminal-exec` | `xdg-terminal-exec` | `xdg-terminal-exec`, `x-terminal-emulator` |
 | **Get the clipboard** | `wl-paste` | `wl-paste` | `wl-paste` | `wl-paste` | `xclip`, `xsel` |

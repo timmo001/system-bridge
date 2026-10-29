@@ -14,8 +14,28 @@ import (
 )
 
 type hyprlandWorkspaceRef struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID      int    `json:"id"`
+	Address string `json:"address"`
+	Type    string `json:"type"`
+	Name    string `json:"name"`
+}
+
+// key identifies the workspace, or is empty for none. From Hyprland 0.57
+// it's the address, as only numbered workspaces still have an ID, and a
+// numbered one's address is its ID. Before 0.57 it's the ID, which no
+// workspace has as 0.
+func (w hyprlandWorkspaceRef) key() string {
+	if w.Address != "" {
+		return w.Address
+	}
+	if w.ID == 0 {
+		return ""
+	}
+	return strconv.Itoa(w.ID)
+}
+
+func (w hyprlandWorkspaceRef) special() bool {
+	return w.Type == "special" || strings.HasPrefix(w.Name, "special:")
 }
 
 type hyprlandClient struct {
@@ -49,8 +69,7 @@ type hyprlandClient struct {
 }
 
 type hyprlandWorkspace struct {
-	ID            int    `json:"id"`
-	Name          string `json:"name"`
+	hyprlandWorkspaceRef
 	Monitor       string `json:"monitor"`
 	Windows       int    `json:"windows"`
 	HasFullscreen bool   `json:"hasfullscreen"`
@@ -364,12 +383,14 @@ func hyprlandFullscreenMode(mode int) types.HyprlandFullscreenMode {
 // out window titles unless titles is set
 func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEvents, titles bool) types.DesktopData {
 	monitorNames := make(map[int]string, len(state.Monitors))
-	visibleWorkspaces := map[int]bool{}
+	visibleWorkspaces := map[string]bool{}
 	for _, monitor := range state.Monitors {
 		monitorNames[monitor.ID] = monitor.Name
-		visibleWorkspaces[monitor.ActiveWorkspace.ID] = true
-		if monitor.SpecialWorkspace.ID != 0 {
-			visibleWorkspaces[monitor.SpecialWorkspace.ID] = true
+		if key := monitor.ActiveWorkspace.key(); key != "" {
+			visibleWorkspaces[key] = true
+		}
+		if key := monitor.SpecialWorkspace.key(); key != "" {
+			visibleWorkspaces[key] = true
 		}
 	}
 	monitorName := func(id int) *string {
@@ -386,7 +407,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		Workspaces: make([]types.DesktopWorkspace, 0, len(state.Workspaces)),
 	}
 	if state.ActiveWorkspace.Name != "" {
-		data.FocusedWorkspace = pointer(strconv.Itoa(state.ActiveWorkspace.ID))
+		data.FocusedWorkspace = nonEmpty(state.ActiveWorkspace.key())
 	}
 
 	hyprland := types.HyprlandData{
@@ -408,7 +429,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		Tablets:         deviceNames(state.Devices.Tablets),
 		Touch:           deviceNames(state.Devices.Touch),
 		Switches:        deviceNames(state.Devices.Switches),
-		Binds:           hyprlandBinds(config.Binds),
+		Binds:           hyprlandBinds(config.Binds, config.Status.ConfigProvider == "lua"),
 		GlobalShortcuts: []types.HyprlandGlobalShortcut{},
 		Windows:         make(map[string]types.HyprlandWindow, len(state.Clients)),
 		Workspaces:      make(map[string]types.HyprlandWorkspace, len(state.Workspaces)),
@@ -453,7 +474,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 			window.PID = pointer(client.PID)
 		}
 		if client.Workspace.Name != "" {
-			window.Workspace = pointer(strconv.Itoa(client.Workspace.ID))
+			window.Workspace = nonEmpty(client.Workspace.key())
 		}
 		if client.ContentType != "none" {
 			window.ContentType = nonEmpty(client.ContentType)
@@ -487,14 +508,17 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 	slices.SortFunc(data.Windows, func(a, b types.DesktopWindow) int { return cmp.Compare(a.ID, b.ID) })
 
 	for _, workspace := range state.Workspaces {
-		id := strconv.Itoa(workspace.ID)
+		id := workspace.key()
+		if id == "" {
+			continue
+		}
 		data.Workspaces = append(data.Workspaces, types.DesktopWorkspace{
 			ID:         id,
 			Name:       nonEmpty(workspace.Name),
 			Display:    nonEmpty(workspace.Monitor),
-			Active:     visibleWorkspaces[workspace.ID],
+			Active:     visibleWorkspaces[id],
 			Focused:    data.FocusedWorkspace != nil && *data.FocusedWorkspace == id,
-			Special:    pointer(strings.HasPrefix(workspace.Name, "special:")),
+			Special:    pointer(workspace.special()),
 			Windows:    pointer(workspace.Windows),
 			Fullscreen: pointer(workspace.HasFullscreen),
 		})
@@ -507,10 +531,19 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		}
 		hyprland.Workspaces[id] = extra
 	}
+	// Numbered workspaces come first in order, then named and special ones
 	slices.SortStableFunc(data.Workspaces, func(a, b types.DesktopWorkspace) int {
-		left, _ := strconv.Atoi(a.ID)
-		right, _ := strconv.Atoi(b.ID)
-		return cmp.Compare(left, right)
+		left, leftErr := strconv.Atoi(a.ID)
+		right, rightErr := strconv.Atoi(b.ID)
+		switch {
+		case leftErr == nil && rightErr == nil:
+			return cmp.Compare(left, right)
+		case leftErr == nil:
+			return -1
+		case rightErr == nil:
+			return 1
+		}
+		return cmp.Compare(a.ID, b.ID)
 	})
 
 	for _, monitor := range state.Monitors {
@@ -545,9 +578,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		if mirrorID, err := strconv.Atoi(monitor.MirrorOf); err == nil {
 			display.MirrorOf = monitorName(mirrorID)
 		}
-		if monitor.SpecialWorkspace.ID != 0 {
-			display.SpecialWorkspace = pointer(strconv.Itoa(monitor.SpecialWorkspace.ID))
-		}
+		display.SpecialWorkspace = nonEmpty(monitor.SpecialWorkspace.key())
 		hyprland.Displays[monitor.Name] = display
 	}
 
@@ -612,7 +643,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 
 // hyprlandBinds turns Hyprland's binds into the module's, naming their
 // modifiers and keys
-func hyprlandBinds(binds []hyprlandBind) []types.HyprlandBind {
+func hyprlandBinds(binds []hyprlandBind, lua bool) []types.HyprlandBind {
 	out := make([]types.HyprlandBind, 0, len(binds))
 	for _, bind := range binds {
 		modifiers := []string{}
@@ -639,8 +670,10 @@ func hyprlandBinds(binds []hyprlandBind) []types.HyprlandBind {
 			LongPress:    bind.LongPress,
 			NonConsuming: bind.NonConsuming,
 		}
-		// A Lua bind's dispatcher and argument are only its function's number
-		if bind.Dispatcher != "__lua" {
+		// A Lua bind's dispatcher only names its function, such as
+		// HL.Dispatcher(window.close) from Hyprland 0.57 or __lua before, and
+		// its argument is the function's number
+		if !lua && bind.Dispatcher != "__lua" {
 			item.Dispatcher = nonEmpty(bind.Dispatcher)
 			item.Argument = nonEmpty(bind.Arg)
 		}

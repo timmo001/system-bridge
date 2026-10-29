@@ -29,7 +29,7 @@ tools:
     prereleases: true
     review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, omarchy-system logout, omarchy-launch-terminal, omarchy-launch-nautilus, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes). Also check data/module/system/keep_awake_linux.go, which runs omarchy-toggle-idle stay-awake, allow-idle and status, and reads enabled from the status JSON.
   - repo: hyprwm/Hyprland
-    reviewed: v0.56.2
+    reviewed: v0.57.0
     review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers. Also check the Hyprland tools the command prefabs run in utils/handlers/command/prefab/prefab.go (hyprctl dispatch exit, grimblast save screen, active and area, and hyprshot's window and region modes).
   - repo: OpenAsar/arrpc
     reviewed: 3.7.0
