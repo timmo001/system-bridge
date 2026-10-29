@@ -234,18 +234,35 @@ func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, 
 		command = hyprlandCommand{lua: "hl.dsp.group.next()", classic: "changegroupactive f"}
 	case types.HyprlandDispatcherGroupPrevious:
 		command = hyprlandCommand{lua: "hl.dsp.group.prev()", classic: "changegroupactive b"}
-	case types.HyprlandDispatcherLockGroup:
-		command = hyprlandCommand{lua: `hl.dsp.group.lock_active({ action = "on" })`, classic: "lockactivegroup lock"}
-	case types.HyprlandDispatcherLockGroups:
-		command = hyprlandCommand{lua: `hl.dsp.group.lock({ action = "on" })`, classic: "lockgroups lock"}
+	case types.HyprlandDispatcherLockGroup, types.HyprlandDispatcherUnlockGroup:
+		action, classic := `"on"`, "lockactivegroup lock"
+		if dispatcher == types.HyprlandDispatcherUnlockGroup {
+			action, classic = `"off"`, "lockactivegroup unlock"
+		}
+		// Hyprland 0.57 deprecates group.lock_active, as group.lock now
+		// locks the active group. TODO(Omarchy): drop the 0.56 form once
+		// Omarchy ships Hyprland 0.57.
+		lua := "hl.dsp.group.lock_active({ action = " + action + " })"
+		if hyprlandAtLeast(data, 0, 57) {
+			lua = "hl.dsp.group.lock({ action = " + action + " })"
+		}
+		command = hyprlandCommand{lua: lua, classic: classic}
+	case types.HyprlandDispatcherLockGroups, types.HyprlandDispatcherUnlockGroups:
+		action, classic := `"on"`, "lockgroups lock"
+		if dispatcher == types.HyprlandDispatcherUnlockGroups {
+			action, classic = `"off"`, "lockgroups unlock"
+		}
+		// group.lock locks every group before Hyprland 0.57, which needs all.
+		// TODO(Omarchy): drop the 0.56 form once Omarchy ships Hyprland 0.57.
+		lua := "hl.dsp.group.lock({ action = " + action + " })"
+		if hyprlandAtLeast(data, 0, 57) {
+			lua = "hl.dsp.group.lock({ action = " + action + ", all = true })"
+		}
+		command = hyprlandCommand{lua: lua, classic: classic}
 	case types.HyprlandDispatcherToggleGroup:
 		command = hyprlandCommand{lua: "hl.dsp.group.toggle()", classic: "togglegroup"}
 	case types.HyprlandDispatcherToggleSplit:
 		command = hyprlandCommand{lua: `hl.dsp.layout("togglesplit")`, classic: "layoutmsg togglesplit"}
-	case types.HyprlandDispatcherUnlockGroup:
-		command = hyprlandCommand{lua: `hl.dsp.group.lock_active({ action = "off" })`, classic: "lockactivegroup unlock"}
-	case types.HyprlandDispatcherUnlockGroups:
-		command = hyprlandCommand{lua: `hl.dsp.group.lock({ action = "off" })`, classic: "lockgroups unlock"}
 	default:
 		return fmt.Errorf("dispatcher %q: %w", dispatcher, ErrNotFound)
 	}
@@ -435,6 +452,21 @@ var hyprlandOptionName = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_]
 func hyprlandUsesLua(data *types.DesktopData) bool {
 	provider := data.Hyprland.Version.ConfigProvider
 	return provider != nil && *provider == "lua"
+}
+
+// hyprlandAtLeast is whether the running Hyprland is major.minor or newer.
+// An unknown version counts as older.
+func hyprlandAtLeast(data *types.DesktopData, major int, minor int) bool {
+	parts := strings.SplitN(strings.TrimPrefix(data.Hyprland.Version.Version, "v"), ".", 3)
+	if len(parts) < 2 {
+		return false
+	}
+	gotMajor, majorErr := strconv.Atoi(parts[0])
+	gotMinor, minorErr := strconv.Atoi(parts[1])
+	if majorErr != nil || minorErr != nil {
+		return false
+	}
+	return gotMajor > major || gotMajor == major && gotMinor >= minor
 }
 
 // HyprlandGetOption reads any config option by name, such as
