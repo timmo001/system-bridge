@@ -121,6 +121,36 @@ test("leaves out entities from a newer Core release", () => {
   expect(items.mount.size).toBe(1);
 });
 
+test("gates an entity with no translation key by its unique ID key", () => {
+  const restart: EntityRegistryEntry = {
+    entity_id: "button.host_restart",
+    device_id: device.id,
+    platform: "system_bridge",
+    unique_id: `${UUID}_power_restart`,
+    translation_key: null,
+    original_name: "Restart",
+    hidden_by: null,
+  };
+
+  const restartButton = (version: string) =>
+    groupEntities(
+      {
+        config: { version },
+        states: {
+          [restart.entity_id]: {
+            entity_id: restart.entity_id,
+            state: "unknown",
+          },
+        },
+      },
+      device,
+      [restart],
+    ).single.get("power_restart");
+
+  expect(restartButton("2026.11.0")).toBeUndefined();
+  expect(restartButton("2026.12.0b0")).toBe("button.host_restart");
+});
+
 test("adds display controls from 2026.12", () => {
   const brightness = (version: string) =>
     groupEntities({ config: { version }, states }, device, entries)

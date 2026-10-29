@@ -395,10 +395,24 @@ export const SECTIONS = {
       graph(singles(entities, "processes_count"), hours),
     ]),
 
+  // TODO(Core): add the saved command buttons with roadmap item 7b
+  commands: ({ entities }) =>
+    grid([
+      heading("Commands", "mdi:power"),
+      ...singles(
+        entities,
+        "power_lock",
+        "power_logout",
+        "power_sleep",
+        "power_hibernate",
+        "power_restart",
+        "power_shutdown",
+      ).map((entity) => tile(entity)),
+    ]),
+
   // TODO(Core): add a "Power" section for the power profile select and keep
-  // awake switch (connector 5.20.0 follow-ups), a "Commands" section of button
-  // tiles with roadmap items 7 and 7b, and a "Health" section for failed units
-  // and pending packages with roadmap item 8
+  // awake switch (connector 5.20.0 follow-ups), and a "Health" section for
+  // failed units and pending packages with roadmap item 8
   system: ({ entities }) =>
     grid([
       heading("Device", "mdi:information-outline"),

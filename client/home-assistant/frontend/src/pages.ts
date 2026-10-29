@@ -148,6 +148,6 @@ export const PAGES: readonly Page[] = [
     title: "System",
     icon: "mdi:information-outline",
     diagnostics: true,
-    sections: () => [{ section: "system" }],
+    sections: () => [{ section: "system" }, { section: "commands" }],
   },
 ];

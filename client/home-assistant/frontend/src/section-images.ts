@@ -120,6 +120,9 @@ const DRAWINGS: Record<SectionName, string> = {
       rect(8, 9 + i * 8, 6, 5, 0.4, 1) +
       rect(18, 9 + i * 8, [60, 44, 52, 30][i] ?? 40, 5, 0.24),
   ),
+  commands: columns(3, (i) =>
+    rect(10 + i * 26, 12, 22, 20, i === 0 ? 0.48 : 0.24, 4),
+  ),
   system:
     `<circle cx="47" cy="22" r="13" stroke="currentColor" stroke-opacity="0.48" stroke-width="2"/>` +
     dot(47, 15.5, 2, 0.48) +

@@ -175,9 +175,8 @@ export const groupEntities = (
   };
 
   for (const entry of entries) {
-    const release = entry.translation_key
-      ? RELEASE_GATES.get(entry.translation_key)
-      : undefined;
+    const key = entry.unique_id.slice(uuid.length + 1);
+    const release = RELEASE_GATES.get(entry.translation_key ?? key);
 
     if (
       (release !== undefined && !isAtLeast(hass.config.version, release)) ||
@@ -190,7 +189,6 @@ export const groupEntities = (
       continue;
     }
 
-    const key = entry.unique_id.slice(uuid.length + 1);
     const item = itemOf(key, entry.translation_key);
 
     if (!item) {

@@ -8,7 +8,8 @@ export const MINIMUM_RELEASE = "2026.10";
 /**
  * Entities, by translation key, that Core adds after the minimum release, with
  * the release that adds them. They're only used once Home Assistant is at that
- * release.
+ * release. Entities named by their device class have no translation key, so
+ * they go by the key in their unique ID instead.
  */
 export const RELEASE_GATES = new Map([
   // Core #188678
@@ -51,6 +52,13 @@ export const RELEASE_GATES = new Map([
   // Core #189331
   ["idle_time", "2026.12"],
   ["locked", "2026.12"],
+  // Core #189489
+  ["power_hibernate", "2026.12"],
+  ["power_lock", "2026.12"],
+  ["power_logout", "2026.12"],
+  ["power_restart", "2026.12"],
+  ["power_shutdown", "2026.12"],
+  ["power_sleep", "2026.12"],
 ]);
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */
