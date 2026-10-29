@@ -66,10 +66,10 @@
     },
     "task-runners": {
       "source": "timmo001/skills",
-      "ref": "715e8a36194bc9f3ca6b95a5f367e328b369a799",
+      "ref": "66b5d1d400f89faebf1db2add5e058db3f9da002",
       "sourceType": "github",
       "skillPath": "task-runners/SKILL.md",
-      "computedHash": "43ed5ed5d8a2083051d74c42e0e78e68ca1f3df6aabfe2dde7f0c6ca1df6bff8"
+      "computedHash": "9152aaa03ed6081d69d0294c9d351053514a700db3afc854af38198007a4130c"
     },
     "testing": {
       "source": "timmo001/skills",
@@ -87,10 +87,10 @@
     },
     "writing-style": {
       "source": "timmo001/skills",
-      "ref": "00525681b1bb4a17f361df8cd7f76b8c3f6cd066",
+      "ref": "59909fee61d81bf5151e913da62340d1719d48b5",
       "sourceType": "github",
       "skillPath": "writing-style/SKILL.md",
-      "computedHash": "3628c2f1a2b4427ad19ca7920afa6404026e424c05604f1f518ceec6669551ef"
+      "computedHash": "e5332625f2e963ff1ad66b0d8b05bc576c6dc237ce704a80101710235a2e1432"
     }
   }
 }

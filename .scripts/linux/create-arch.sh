@@ -45,6 +45,7 @@ cd build/arch
 # Copy necessary files
 cp ../../system-bridge-linux system-bridge
 cp ../../.scripts/linux/system-bridge.desktop .
+cp ../../.scripts/linux/60-system-bridge-rapl.rules .
 cp ../../LICENSE .
 cp ../../.scripts/linux/PKGBUILD .
 

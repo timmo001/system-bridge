@@ -81,8 +81,18 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_hyprland_dispatch` runs a named Hyprland dispatcher, such as
   moving focus, toggling the split or locking groups, on the focused window
   or one it focuses first.
+- `system_bridge_hyprland_dispatch_raw` runs any Hyprland dispatch, in the
+  running config's language, when `desktop.hyprlandCode` is on.
+- `system_bridge_hyprland_eval` runs a line of Lua in Hyprland, when
+  `desktop.hyprlandCode` is on.
+- `system_bridge_hyprland_exec` runs a command through Hyprland, when
+  `desktop.hyprlandCode` is on.
+- `system_bridge_hyprland_get_cursor_position` gets where the pointer is.
+- `system_bridge_hyprland_get_log` gets the end of Hyprland's log.
+- `system_bridge_hyprland_get_option` reads any Hyprland config option.
 - `system_bridge_hyprland_kill_window` kills a window's app on Hyprland,
   without asking it to close.
+- `system_bridge_hyprland_move_cursor` moves the pointer on Hyprland.
 - `system_bridge_hyprland_move_window` moves a window to a workspace on
   Hyprland.
 - `system_bridge_hyprland_move_workspace` moves a workspace to another display
@@ -91,8 +101,9 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_hyprland_rename_workspace` renames a workspace on Hyprland.
 - `system_bridge_hyprland_run_global_shortcut` triggers a global shortcut an
   app registered with Hyprland.
-- `system_bridge_hyprland_set_option` sets one of the allowed Hyprland config
-  options until the config reloads.
+- `system_bridge_hyprland_send_event` sends a custom Hyprland event.
+- `system_bridge_hyprland_set_option` sets any Hyprland config option until
+  the config reloads.
 - `system_bridge_hyprland_set_submap` switches Hyprland's binds to a submap,
   or back to the default.
 - `system_bridge_hyprland_set_window` floats or tiles, pins or unpins, and

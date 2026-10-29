@@ -123,6 +123,9 @@ func computePowercapPower(sample time.Duration) *float64 {
 	}
 	type domain struct{ energyPath string }
 	domains := make([]domain, 0)
+	// intel-rapl and intel-rapl-mmio can both report the same package, so
+	// count each package name once
+	seen := make(map[string]bool)
 	for _, dir := range capDirs {
 		// Only consider top-level rapl-like domains (exclude :subzones if needed; energy_uj existence filters sufficiently)
 		nameB, _ := os.ReadFile(filepath.Join(dir, "name"))
@@ -130,7 +133,8 @@ func computePowercapPower(sample time.Duration) *float64 {
 		energyPath := filepath.Join(dir, "energy_uj")
 		if _, err := os.Stat(energyPath); err == nil {
 			// Prefer package-level domains (common across Intel+AMD)
-			if name == "" || strings.Contains(strings.ToLower(name), "package") {
+			if name == "" || (strings.Contains(strings.ToLower(name), "package") && !seen[name]) {
+				seen[name] = true
 				domains = append(domains, domain{energyPath: energyPath})
 			}
 		}

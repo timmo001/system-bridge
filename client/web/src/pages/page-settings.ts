@@ -227,7 +227,7 @@ const elsewhere = [
     section: "media-directories",
   },
   {
-    label: "Window titles",
+    label: "Desktop",
     icon: mdiApplicationOutline,
     module: "desktop",
     section: "window-titles",

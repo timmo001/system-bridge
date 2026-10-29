@@ -1,0 +1,4 @@
+# System Bridge reads CPU, integrated GPU and platform power from the RAPL
+# energy counters. Since CVE-2020-8694 (PLATYPUS) the kernel makes them
+# readable only by root, so this rule lets every local user read them again.
+SUBSYSTEM=="powercap", KERNEL=="intel-rapl:*|intel-rapl-mmio:*", ACTION=="add|change", RUN+="/bin/chmod a+r /sys%p/energy_uj"

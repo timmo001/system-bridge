@@ -103,6 +103,32 @@ func TestIsNewerCommitAvailable(t *testing.T) {
 	}
 }
 
+func TestDevVersion(t *testing.T) {
+	commit := "bfe166d8ce7d74fcc2b04e37eb6fcad45dfb0dad"
+	cases := []struct {
+		name      string
+		current   string
+		latestTag string
+		ahead     int
+		behind    int
+		expected  string
+	}{
+		{"Arch -git build", "5.21.2.r7060.g5221168", "5.21.1", 1, 0, "5.21.2.dev7061+gbfe166d"},
+		{"Arch -git build after a release", "5.21.2.r7060.g5221168", "5.22.0", 3, 0, "5.22.1.dev7063+gbfe166d"},
+		{"Arch -git build with local commits", "5.21.2.r7060.g5221168", "5.21.1", 2, 1, "5.21.2.dev7061+gbfe166d"},
+		{"Arch -git build without the latest release", "5.21.2.r7060.g5221168", "", 1, 0, "5.21.2.dev7061+gbfe166d"},
+		{"CI dev build", "5.21.1-dev+5221168", "5.21.1", 1, 0, "5.21.1.dev0+bfe166d"},
+		{"CI dev build after a release", "5.21.1-dev+5221168", "5.22.0", 1, 0, "5.22.0.dev0+bfe166d"},
+	}
+
+	for _, tc := range cases {
+		got := normalizeToPEP440(devVersion(tc.current, tc.latestTag, tc.ahead, tc.behind, commit))
+		if got != tc.expected {
+			t.Errorf("%s: devVersion() = %q, want %q", tc.name, got, tc.expected)
+		}
+	}
+}
+
 func TestIsNewerVersionAvailable(t *testing.T) {
 	cases := []struct {
 		name    string

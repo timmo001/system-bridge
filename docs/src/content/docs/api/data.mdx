@@ -211,7 +211,7 @@ Each workspace has `id`, `name`, `display`, `windows` (how many), and whether it
 | `version` | object | `version`, `tag`, `commit`, `branch`, `config_provider` (`lua` or `hyprlang`) and `backend`. |
 | `windows` | object | More about each window, by `id`: `fullscreen_mode`, `pinned`, `xwayland`, `hidden`, `visible`, `group`, `swallowing`, `tags`, `focus_history`, `stable_id` (never reused, unlike the `id`), `initial_app`, `initial_title` (only with window titles on), `xdg_tag`, `xdg_description` and `tearing_hint`. |
 | `workspaces` | object | More about each workspace, by `id`: `layout`, `persistent` and `last_window`, the window last focused on it. |
-| `options` | array | The config options System Bridge can [set](/api/websocket/control/#hyprland-control), each with its `name`, its `type`, `bool` or `int`, and its value in the field of that name. Gaps that differ by side are left out. |
+| `options` | array | Common config options, each with its `name`, its `type`, `bool` or `int`, and its value in the field of that name. Gaps that differ by side are left out. Any option can be [read and set](/api/websocket/control/#options). |
 | `displays` | object | More about each display, by name: `scale`, `transform`, `format`, `colour_preset`, `reserved`, `layers`, `dpms`, `vrr`, `tearing`, `direct_scanout`, `mirror_of` and `special_workspace`. |
 | `keyboards`, `mice`, `switches`, `tablets`, `touch` | array | The input devices Hyprland sees. |
 | `binds` | array | The config's key bindings, in order. |
@@ -343,7 +343,7 @@ Returns an array of objects, one per process.
 | `uuid` | string | Stable machine identifier. |
 | `users` | array | Logged-in users with `name`, `active`, `terminal`, `host`, `started`, and `pid`. |
 | `version` | string | Installed System Bridge version. |
-| `version_latest` | string | Latest available version. Development builds track the `dev` branch, so this is the latest commit when there's a newer one. |
+| `version_latest` | string | Latest available version. Development builds track the `dev` branch, so this is the version a build of its latest commit would have, in the same format as `version`, when there's a newer one. |
 | `version_latest_url` | string | URL for the latest release, or the commits since the build for development builds. |
 | `version_newer_available` | boolean | Whether a newer version, or a newer commit for development builds, is available. |
 | `camera_usage` | array | Apps using the camera. Linux only. |

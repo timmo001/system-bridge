@@ -12,6 +12,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/process"
+	"github.com/timmo001/system-bridge/data/module/battery"
 	"github.com/timmo001/system-bridge/data/module/system"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -205,6 +206,10 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		}
 		if pu := system.GetPSUPowerUsage(); pu != nil {
 			systemData.PowerUsage = pu
+		} else if pu := system.GetPlatformPowerUsage(); pu != nil {
+			systemData.PowerUsage = pu
+		} else {
+			systemData.PowerUsage = batteryDischargePower(battery.Gather())
 		}
 		if di := system.GetDeviceInfo(); di != nil {
 			systemData.DeviceInfo = di
@@ -220,12 +225,12 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	versionNewerAvailable := false
 	if buildCommit := version.BuildCommit(); buildCommit != "" {
 		latestVersionURL = version.CompareUserURL(buildCommit)
-		latestCommit, err := version.GetLatestCommit()
+		latest, newer, err := version.GetLatestDevVersion(buildCommit)
 		if err != nil {
-			slog.Warn("Failed to get latest commit", "error", err)
-		} else if version.IsNewerCommitAvailable(buildCommit, latestCommit) {
-			latestVersion = latestCommit[:min(7, len(latestCommit))]
-			versionNewerAvailable = true
+			slog.Warn("Failed to get latest development version", "error", err)
+		} else {
+			latestVersion = latest
+			versionNewerAvailable = newer
 		}
 	} else {
 		latest, err := version.GetLatestVersion()
@@ -243,6 +248,26 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	systemData.VersionNewerAvailable = &versionNewerAvailable
 
 	return systemData, nil
+}
+
+// batteryDischargePower is the system's power draw while it runs on battery:
+// the total power of its own batteries that are discharging. It's nil on mains
+// power, where the batteries don't carry the load.
+func batteryDischargePower(data types.BatteryData) *float64 {
+	if data.ACConnected != nil && *data.ACConnected {
+		return nil
+	}
+	var total *float64
+	for _, bat := range data.Batteries {
+		if bat.Scope != types.BatteryScopeSystem || bat.State != types.BatteryStateDischarging || bat.Power == nil {
+			continue
+		}
+		if total == nil {
+			total = new(float64)
+		}
+		*total += *bat.Power
+	}
+	return total
 }
 
 // getIPv6Address gets the primary IPv6 address

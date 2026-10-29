@@ -13,6 +13,10 @@ var ErrNotFound = errors.New("not found on the desktop")
 // number for an option that's true or false
 var ErrInvalidValue = errors.New("invalid value")
 
+// ErrNotAllowed is returned for running code through Hyprland while it's
+// turned off in the settings
+var ErrNotAllowed = errors.New("running code through Hyprland is turned off in the settings (desktop.hyprlandCode)")
+
 // WindowState is the states to set on a window. Nil leaves a state as it is.
 type WindowState struct {
 	Fullscreen *bool

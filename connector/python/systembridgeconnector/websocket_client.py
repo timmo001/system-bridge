@@ -30,13 +30,19 @@ from .models.desktop_control import (
     DesktopWindowRequest,
     DesktopWindowStateRequest,
     DesktopWorkspaceRequest,
+    HyprlandDispatchRawRequest,
     HyprlandDispatchRequest,
+    HyprlandEvalRequest,
     HyprlandEvent,
+    HyprlandExecRequest,
     HyprlandGlobalShortcutRequest,
+    HyprlandMoveCursorRequest,
     HyprlandMoveWindowRequest,
     HyprlandMoveWorkspaceRequest,
+    HyprlandOptionNameRequest,
     HyprlandOptionRequest,
     HyprlandRenameWorkspaceRequest,
+    HyprlandSendEventRequest,
     HyprlandSetWindowRequest,
     HyprlandSubmapRequest,
     OmarchyMenuRequest,
@@ -54,6 +60,11 @@ from .models.media_files import FileInfo, MediaFile, MediaFiles
 from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.modules import GetData, Module, ModulesData, RegisterDataListener
+from .models.modules.desktop import (
+    HyprlandCursorPosition,
+    HyprlandLog,
+    HyprlandOptionValue,
+)
 from .models.modules.disks import DiskMounts
 from .models.notification import (
     Notification,
@@ -905,6 +916,115 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.HYPRLAND_SET_OPTION,
             EventType.HYPRLAND_OPTION_SET,
+            model,
+            request_id,
+        )
+
+    async def hyprland_get_option(
+        self,
+        model: HyprlandOptionNameRequest,
+        request_id: str | None = None,
+    ) -> HyprlandOptionValue:
+        """Read any config option, such as general.col.active_border."""
+        response = await self._action(
+            EventType.HYPRLAND_GET_OPTION,
+            EventType.HYPRLAND_OPTION,
+            model,
+            request_id,
+        )
+        return HyprlandOptionValue(**self._response_dict(response, "Hyprland option"))
+
+    async def hyprland_get_cursor_position(
+        self,
+        request_id: str | None = None,
+    ) -> HyprlandCursorPosition:
+        """Get where the pointer is, in pixels across every display."""
+        response = await self.send_message(
+            EventType.HYPRLAND_GET_CURSOR_POSITION,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.HYPRLAND_CURSOR_POSITION,
+        )
+        return HyprlandCursorPosition(
+            **self._response_dict(response, "Hyprland cursor position")
+        )
+
+    async def hyprland_move_cursor(
+        self,
+        model: HyprlandMoveCursorRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Move the pointer, in pixels across every display."""
+        return await self._action(
+            EventType.HYPRLAND_MOVE_CURSOR,
+            EventType.HYPRLAND_CURSOR_MOVED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_get_log(
+        self,
+        request_id: str | None = None,
+    ) -> HyprlandLog:
+        """Get the end of Hyprland's log, oldest line first."""
+        response = await self.send_message(
+            EventType.HYPRLAND_GET_LOG,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.HYPRLAND_LOG,
+        )
+        return HyprlandLog(**self._response_dict(response, "Hyprland log"))
+
+    async def hyprland_send_event(
+        self,
+        model: HyprlandSendEventRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Send a custom event, as a bind to the event dispatcher would."""
+        return await self._action(
+            EventType.HYPRLAND_SEND_EVENT,
+            EventType.HYPRLAND_EVENT_SENT,
+            model,
+            request_id,
+        )
+
+    async def hyprland_exec(
+        self,
+        model: HyprlandExecRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Run a command through Hyprland. Needs desktop.hyprlandCode."""
+        return await self._action(
+            EventType.HYPRLAND_EXEC,
+            EventType.HYPRLAND_EXECUTED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_dispatch_raw(
+        self,
+        model: HyprlandDispatchRawRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Run any dispatch in the config's language. Needs desktop.hyprlandCode."""
+        return await self._action(
+            EventType.HYPRLAND_DISPATCH_RAW,
+            EventType.HYPRLAND_RAW_DISPATCHED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_eval(
+        self,
+        model: HyprlandEvalRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Run a line of Lua in Hyprland. Needs desktop.hyprlandCode."""
+        return await self._action(
+            EventType.HYPRLAND_EVAL,
+            EventType.HYPRLAND_EVALUATED,
             model,
             request_id,
         )

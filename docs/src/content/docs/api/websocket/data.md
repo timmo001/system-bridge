@@ -99,7 +99,7 @@ While registered as a listener for the `desktop` module on Hyprland, you also re
 hl.bind("SUPER + F12", hl.dsp.event("dock"))
 ```
 
-With a classic config, bind to `event, dock`, or send one from a script with `hyprctl dispatch event dock`. Each arrives with the `HYPRLAND_EVENT` type, and `data` is what the bind passed:
+With a classic config, bind to `event, dock`, or send one from a script with `hyprctl dispatch event dock`. A client can send one with [`HYPRLAND_SEND_EVENT`](/api/websocket/control/#hyprland-control). Each arrives with the `HYPRLAND_EVENT` type, and `data` is what the bind passed:
 
 ```json title="Response"
 {

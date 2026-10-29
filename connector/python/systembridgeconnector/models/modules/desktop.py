@@ -28,6 +28,12 @@ class HyprlandOptionType(StrEnum):
 
     BOOL = "bool"
     INT = "int"
+    FLOAT = "float"
+    STRING = "string"
+    VEC2 = "vec2"
+    CSS = "css"
+    GRADIENT = "gradient"
+    CUSTOM = "custom"
 
 
 class HyprlandScreencastType(StrEnum):
@@ -278,6 +284,46 @@ class HyprlandOption:
     type: HyprlandOptionType
     bool: bool | None = None
     int: int | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class HyprlandOptionValue:
+    """Hyprland Option Value.
+
+    Any config option's value, by its name. Only the field for its type is
+    set: string for string, css, gradient and custom. set is whether the
+    config sets it, rather than leaving its default.
+    """
+
+    name: str
+    type: HyprlandOptionType
+    set: bool = False
+    bool: bool | None = None
+    int: int | None = None
+    vec2: list[float] = field(default_factory=list)
+    float: float | None = None
+    string: str | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class HyprlandCursorPosition:
+    """Hyprland Cursor Position.
+
+    Where the pointer is, in pixels across every display.
+    """
+
+    x: int
+    y: int
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class HyprlandLog:
+    """Hyprland Log. The end of Hyprland's log, oldest line first."""
+
+    lines: list[str] = field(default_factory=list)
 
 
 @filter_unexpected_fields

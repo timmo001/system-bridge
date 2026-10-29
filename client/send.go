@@ -36,6 +36,12 @@ func SendWithin(ctx context.Context, timeout time.Duration, eventType event.Even
 	return err
 }
 
+// Request sends one event to the local backend and returns the data of its
+// answer as JSON
+func Request(ctx context.Context, eventType event.EventType, data any) (json.RawMessage, error) {
+	return request(ctx, sendTimeout, eventType, data)
+}
+
 // request sends one event to the local backend and returns the data of its
 // answer, undecoded.
 func request(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {

@@ -195,6 +195,19 @@ Please do not submit feedback or bug reports for macOS, as it is not supported. 
 </Tab>
 </Tabs>
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+The Windows executable and installer are built from this repository on GitHub Actions and signed through SignPath, so Windows shows SignPath Foundation as the publisher. The NowPlaying helper bundled with them comes from [dotnet-now-playing](https://github.com/timmo001/dotnet-now-playing) and isn't signed.
+
+- Committers and reviewers: [Aidan Timson (timmo001)](https://github.com/timmo001)
+- Approvers: [Aidan Timson (timmo001)](https://github.com/timmo001)
+
+Pull requests from anyone else are reviewed by a committer before they're merged, and every release is approved by hand before it's signed.
+
+System Bridge doesn't send any information to other networked systems unless you ask it to, apart from what's listed on [Privacy and security](/privacy).
+
 ## Updating
 
 On Linux, System Bridge restarts itself within a minute of a package update replacing it, so the new version runs without you restarting it. Flatpak keeps running the version it started with, so restart System Bridge after updating it there.
@@ -222,6 +235,27 @@ The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire, `zenity` and `pul
 The [command prefabs](/features/commands/#prefab-commands) run tools for the desktop you're on, such as `wl-clipboard` for the clipboard or `grim` for screenshots. A prefab that can't run says which tools it looks for. [Setting the clipboard](/features/remote-control/#clipboard) uses the same clipboard tools.
 
 On Windows, the waiting package update count needs [winget](https://learn.microsoft.com/windows/package-manager/winget/), which Windows 11 includes. Nothing else is needed.
+
+## Power readings on Linux
+
+CPU power, integrated Intel GPU power and, on laptops, system power come from the kernel's RAPL energy counters. Since [CVE-2020-8694](https://nvd.nist.gov/vuln/detail/CVE-2020-8694) the kernel lets only root read them, so the Arch, `.deb` and `.rpm` packages install a udev rule, `60-system-bridge-rapl.rules`, that makes them readable by every local user.
+
+:::warning
+Readable counters let local programs measure power use, which CVE-2020-8694 showed can leak data from the CPU, mostly from SGX enclaves. If that matters on your system, delete or override the rule with an empty `/etc/udev/rules.d/60-system-bridge-rapl.rules`. Those readings then stay empty; on battery, system power still comes from the battery.
+:::
+
+mise, the archive and Flatpak can't install the rule. Add it yourself, then apply it without a reboot:
+
+```ini title="/etc/udev/rules.d/60-system-bridge-rapl.rules"
+SUBSYSTEM=="powercap", KERNEL=="intel-rapl:*|intel-rapl-mmio:*", ACTION=="add|change", RUN+="/bin/chmod a+r /sys%p/energy_uj"
+```
+
+```bash
+sudo udevadm control --reload
+sudo udevadm trigger --subsystem-match=powercap --action=change
+```
+
+On NixOS, add the package to `services.udev.packages` as well.
 
 ## Next steps
 

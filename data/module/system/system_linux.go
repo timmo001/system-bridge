@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/shirou/gopsutil/v4/process"
+	"github.com/timmo001/system-bridge/data/module/powercap"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -432,6 +433,13 @@ func GetPSUPowerUsage() *float64 {
 
 	slog.Debug("No PSU power usage sensors found")
 	return nil
+}
+
+// GetPlatformPowerUsage reads the whole platform's power from the RAPL psys
+// zone, which Intel laptops have. It's nil on the first call and when the
+// counter isn't readable.
+func GetPlatformPowerUsage() *float64 {
+	return powercap.Watts(powercap.ZonePath("psys"))
 }
 
 // GetDeviceInfo reads hardware and firmware identity from the DMI/SMBIOS sysfs

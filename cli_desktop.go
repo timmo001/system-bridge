@@ -2,13 +2,26 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/urfave/cli/v3"
 )
+
+// printReply sends an event and prints its reply's data as one line of JSON
+func printReply(ctx context.Context, cmd *cli.Command, eventType event.EventType, data any) error {
+	raw, err := client.Request(ctx, eventType, data)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintln(cmd.Root().Writer, string(raw))
+	return err
+}
 
 // setFlags adds each of the bool flags that was given to data
 func setFlags(cmd *cli.Command, data map[string]any, flags ...string) {
@@ -95,7 +108,7 @@ func desktopCommand() *cli.Command {
 func hyprlandCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "hyprland",
-		Usage: "Control Hyprland windows, global shortcuts and config",
+		Usage: "Control Hyprland windows, the cursor, global shortcuts and config",
 		Commands: []*cli.Command{
 			{
 				Name:      "dispatch",
@@ -201,21 +214,107 @@ func hyprlandCommand() *cli.Command {
 			},
 			{
 				Name:      "option",
-				Usage:     "Set a config option from the desktop data's hyprland.options, until the config reloads",
-				ArgsUsage: "<name> <true|false|number>",
+				Usage:     "Print any config option, or set it until the config reloads, by its name such as general.gaps_in or general:layout",
+				ArgsUsage: "<name> [true|false|number|text]",
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					name, text := cmd.Args().Get(0), cmd.Args().Get(1)
-					if name == "" || text == "" {
-						return fmt.Errorf("an option name and a value are required")
+					name := cmd.Args().Get(0)
+					if name == "" {
+						return fmt.Errorf("an option name is required")
 					}
+					if cmd.Args().Len() < 2 {
+						return printReply(cmdCtx, cmd, event.EventHyprlandGetOption, map[string]any{"name": name})
+					}
+					text := strings.Join(cmd.Args().Slice()[1:], " ")
 					// A number first, as ParseBool would take 0 and 1 as false and true
 					var value any = text
-					if number, err := strconv.Atoi(text); err == nil {
+					if number, err := strconv.ParseFloat(text, 64); err == nil {
 						value = number
 					} else if parsed, err := strconv.ParseBool(text); err == nil {
 						value = parsed
 					}
 					return client.Send(cmdCtx, event.EventHyprlandSetOption, map[string]any{"name": name, "value": value})
+				},
+			},
+			{
+				Name:      "cursor",
+				Usage:     "Print where the pointer is, or move it to x and y across every display",
+				ArgsUsage: "[x y]",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					if cmd.Args().Len() == 0 {
+						return printReply(cmdCtx, cmd, event.EventHyprlandGetCursorPosition, map[string]any{})
+					}
+					x, errX := strconv.Atoi(cmd.Args().Get(0))
+					y, errY := strconv.Atoi(cmd.Args().Get(1))
+					if errX != nil || errY != nil {
+						return fmt.Errorf("x and y must be whole numbers")
+					}
+					return client.Send(cmdCtx, event.EventHyprlandMoveCursor, map[string]any{"x": x, "y": y})
+				},
+			},
+			{
+				Name:  "log",
+				Usage: "Print the end of Hyprland's log",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					raw, err := client.Request(cmdCtx, event.EventHyprlandGetLog, map[string]any{})
+					if err != nil {
+						return err
+					}
+					var log types.HyprlandLog
+					if err := json.Unmarshal(raw, &log); err != nil {
+						return fmt.Errorf("decode log: %w", err)
+					}
+					for _, line := range log.Lines {
+						_, _ = fmt.Fprintln(cmd.Root().Writer, line)
+					}
+					return nil
+				},
+			},
+			{
+				Name:      "event",
+				Usage:     "Send a custom event, as a bind to the event dispatcher would",
+				ArgsUsage: "<name>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					name := strings.Join(cmd.Args().Slice(), " ")
+					if name == "" {
+						return fmt.Errorf("an event name is required")
+					}
+					return client.Send(cmdCtx, event.EventHyprlandSendEvent, map[string]any{"name": name})
+				},
+			},
+			{
+				Name:      "exec",
+				Usage:     "Run a command through Hyprland, when desktop.hyprlandCode is on in the settings",
+				ArgsUsage: "<command>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					command := strings.Join(cmd.Args().Slice(), " ")
+					if command == "" {
+						return fmt.Errorf("a command is required")
+					}
+					return client.Send(cmdCtx, event.EventHyprlandExec, map[string]any{"command": command})
+				},
+			},
+			{
+				Name:      "raw",
+				Usage:     "Run any dispatch, as the running config writes it, when desktop.hyprlandCode is on in the settings",
+				ArgsUsage: "<dispatch>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					dispatch := strings.Join(cmd.Args().Slice(), " ")
+					if dispatch == "" {
+						return fmt.Errorf("a dispatch is required")
+					}
+					return client.Send(cmdCtx, event.EventHyprlandDispatchRaw, map[string]any{"dispatch": dispatch})
+				},
+			},
+			{
+				Name:      "eval",
+				Usage:     "Run Lua in Hyprland, with a Lua config, when desktop.hyprlandCode is on in the settings",
+				ArgsUsage: "<code>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					code := strings.Join(cmd.Args().Slice(), " ")
+					if code == "" {
+						return fmt.Errorf("code is required")
+					}
+					return client.Send(cmdCtx, event.EventHyprlandEval, map[string]any{"code": code})
 				},
 			},
 			{

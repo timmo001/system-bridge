@@ -29,7 +29,10 @@ import {
 import {
   CommandPrefab,
   DiskMountsResponse,
+  HyprlandCursorPosition,
   HyprlandEvent,
+  HyprlandLog,
+  HyprlandOptionValue,
   MetricHistory,
   ModuleDataUpdate,
   type ModuleName,
@@ -59,12 +62,18 @@ import {
   FileInfo,
   GetFilesRequest,
   HistoryRequest,
+  HyprlandDispatchRawRequest,
   HyprlandDispatchRequest,
+  HyprlandEvalRequest,
+  HyprlandExecRequest,
   HyprlandGlobalShortcutRequest,
+  HyprlandMoveCursorRequest,
   HyprlandMoveWindowRequest,
   HyprlandMoveWorkspaceRequest,
+  HyprlandOptionNameRequest,
   HyprlandOptionRequest,
   HyprlandRenameWorkspaceRequest,
+  HyprlandSendEventRequest,
   HyprlandSetWindowRequest,
   HyprlandSubmapRequest,
   KeepAwakeRequest,
@@ -283,9 +292,40 @@ export interface Interface {
   readonly hyprlandRenameWorkspace: (
     rename: HyprlandRenameWorkspaceRequest,
   ) => Effect.Effect<void, WebSocketError>;
-  /** Sets a config option from `hyprland.options` until the config reloads. */
+  /** Sets any config option until the config reloads. */
   readonly hyprlandSetOption: (
     option: HyprlandOptionRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Reads any config option, such as `general.col.active_border`. */
+  readonly hyprlandGetOption: (
+    option: HyprlandOptionNameRequest,
+  ) => Effect.Effect<HyprlandOptionValue, WebSocketError>;
+  /** Where the pointer is, in pixels across every display. */
+  readonly hyprlandGetCursorPosition: Effect.Effect<
+    HyprlandCursorPosition,
+    WebSocketError
+  >;
+  /** Moves the pointer, in pixels across every display. */
+  readonly hyprlandMoveCursor: (
+    position: HyprlandMoveCursorRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** The end of Hyprland's log, oldest line first. */
+  readonly hyprlandGetLog: Effect.Effect<HyprlandLog, WebSocketError>;
+  /** Sends a custom event, as a bind to the event dispatcher would. */
+  readonly hyprlandSendEvent: (
+    event: HyprlandSendEventRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Runs a command through Hyprland. Needs `desktop.hyprlandCode`. */
+  readonly hyprlandExec: (
+    exec: HyprlandExecRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Runs any dispatch in the config's language. Needs `desktop.hyprlandCode`. */
+  readonly hyprlandDispatchRaw: (
+    dispatch: HyprlandDispatchRawRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Runs a line of Lua in Hyprland. Needs `desktop.hyprlandCode`. */
+  readonly hyprlandEval: (
+    code: HyprlandEvalRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Switches binds to a submap, or back to the default. */
   readonly hyprlandSetSubmap: (
@@ -1285,6 +1325,94 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const hyprlandGetOption = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandGetOption",
+  )(function* (option: HyprlandOptionNameRequest) {
+    return yield* call(
+      "HYPRLAND_GET_OPTION",
+      "HYPRLAND_OPTION",
+      HyprlandOptionNameRequest,
+      option,
+      HyprlandOptionValue,
+    );
+  });
+
+  const hyprlandGetCursorPosition = call(
+    "HYPRLAND_GET_CURSOR_POSITION",
+    "HYPRLAND_CURSOR_POSITION",
+    Empty,
+    {},
+    HyprlandCursorPosition,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.hyprlandGetCursorPosition"));
+
+  const hyprlandMoveCursor = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandMoveCursor",
+  )(function* (position: HyprlandMoveCursorRequest) {
+    yield* call(
+      "HYPRLAND_MOVE_CURSOR",
+      "HYPRLAND_CURSOR_MOVED",
+      HyprlandMoveCursorRequest,
+      position,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandGetLog = call(
+    "HYPRLAND_GET_LOG",
+    "HYPRLAND_LOG",
+    Empty,
+    {},
+    HyprlandLog,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.hyprlandGetLog"));
+
+  const hyprlandSendEvent = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandSendEvent",
+  )(function* (event: HyprlandSendEventRequest) {
+    yield* call(
+      "HYPRLAND_SEND_EVENT",
+      "HYPRLAND_EVENT_SENT",
+      HyprlandSendEventRequest,
+      event,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandExec = Effect.fn("SystemBridgeWebSocket.hyprlandExec")(
+    function* (exec: HyprlandExecRequest) {
+      yield* call(
+        "HYPRLAND_EXEC",
+        "HYPRLAND_EXECUTED",
+        HyprlandExecRequest,
+        exec,
+        ignoreReply,
+      );
+    },
+  );
+
+  const hyprlandDispatchRaw = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandDispatchRaw",
+  )(function* (dispatch: HyprlandDispatchRawRequest) {
+    yield* call(
+      "HYPRLAND_DISPATCH_RAW",
+      "HYPRLAND_RAW_DISPATCHED",
+      HyprlandDispatchRawRequest,
+      dispatch,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandEval = Effect.fn("SystemBridgeWebSocket.hyprlandEval")(
+    function* (code: HyprlandEvalRequest) {
+      yield* call(
+        "HYPRLAND_EVAL",
+        "HYPRLAND_EVALUATED",
+        HyprlandEvalRequest,
+        code,
+        ignoreReply,
+      );
+    },
+  );
+
   const hyprlandSetSubmap = Effect.fn(
     "SystemBridgeWebSocket.hyprlandSetSubmap",
   )(function* (submap: HyprlandSubmapRequest) {
@@ -1441,6 +1569,14 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     hyprlandMoveWorkspace,
     hyprlandRenameWorkspace,
     hyprlandSetOption,
+    hyprlandGetOption,
+    hyprlandGetCursorPosition,
+    hyprlandMoveCursor,
+    hyprlandGetLog,
+    hyprlandSendEvent,
+    hyprlandExec,
+    hyprlandDispatchRaw,
+    hyprlandEval,
     hyprlandSetSubmap,
     mediaControl,
     sendNotification,

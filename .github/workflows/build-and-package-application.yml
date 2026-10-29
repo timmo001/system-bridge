@@ -248,8 +248,86 @@ jobs:
             exit 1
           fi
 
+      # Releases use release-signing once SIGNPATH_RELEASE_SIGNING is true.
+      # Manual runs use test-signing to check the pipeline. Nothing else signs
+      - name: Choose signing policy
+        id: signing
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_SIGNING: ${{ vars.SIGNPATH_RELEASE_SIGNING }}
+        run: |
+          if [[ "${EVENT_NAME}" == "release" && "${RELEASE_SIGNING}" == "true" ]]; then
+            echo "policy=release-signing" >>"${GITHUB_OUTPUT}"
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "policy=test-signing" >>"${GITHUB_OUTPUT}"
+          fi
+
+      - name: Upload unsigned executable
+        id: upload_unsigned_exe
+        if: steps.signing.outputs.policy
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          path: system-bridge.exe
+          archive: false
+          overwrite: true
+          retention-days: 1
+
+      - name: Sign executable
+        if: steps.signing.outputs.policy
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: a343f0c2-03a8-4040-a811-c98b7b78a89f
+          project-slug: system-bridge
+          signing-policy-slug: ${{ steps.signing.outputs.policy }}
+          artifact-configuration-slug: exe
+          github-artifact-id: ${{ steps.upload_unsigned_exe.outputs.artifact-id }}
+          parameters: |
+            version: ${{ toJSON(env.VERSION) }}
+          # Release signing waits for manual approval
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed-exe
+          skip-decompress: true
+
+      - name: Use signed executable
+        if: steps.signing.outputs.policy
+        shell: pwsh
+        run: Move-Item signed-exe/system-bridge.exe system-bridge.exe -Force
+
       - name: Package for Windows
         run: ./.github/scripts/pwsh/package-windows.ps1
+
+      - name: Upload unsigned installer
+        id: upload_unsigned_installer
+        if: steps.signing.outputs.policy
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          path: dist/system-bridge-${{ env.VERSION }}-setup.exe
+          archive: false
+          overwrite: true
+          retention-days: 1
+
+      - name: Sign installer
+        if: steps.signing.outputs.policy
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: a343f0c2-03a8-4040-a811-c98b7b78a89f
+          project-slug: system-bridge
+          signing-policy-slug: ${{ steps.signing.outputs.policy }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.upload_unsigned_installer.outputs.artifact-id }}
+          parameters: |
+            version: ${{ toJSON(env.VERSION) }}
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed-installer
+          skip-decompress: true
+
+      - name: Use signed installer
+        if: steps.signing.outputs.policy
+        shell: pwsh
+        run: Move-Item "signed-installer/system-bridge-$env:VERSION-setup.exe" dist/ -Force
 
       - name: Upload packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

@@ -78,7 +78,16 @@ export const HyprlandFullscreenMode = Schema.Literals([
 
 export type HyprlandFullscreenMode = typeof HyprlandFullscreenMode.Type;
 
-export const HyprlandOptionType = Schema.Literals(["bool", "int"]);
+export const HyprlandOptionType = Schema.Literals([
+  "bool",
+  "int",
+  "float",
+  "string",
+  "vec2",
+  "css",
+  "gradient",
+  "custom",
+]);
 
 export type HyprlandOptionType = typeof HyprlandOptionType.Type;
 
@@ -886,12 +895,42 @@ export const GPUsData = Schema.Array(GPU);
 
 export type GPUsData = typeof GPUsData.Type;
 
+export const HyprlandCursorPosition = Schema.Struct({
+  x: Schema.Finite,
+  y: Schema.Finite,
+});
+
+export interface HyprlandCursorPosition extends Schema.Schema.Type<
+  typeof HyprlandCursorPosition
+> {}
+
 export const HyprlandEvent = Schema.Struct({
   data: Schema.String,
 });
 
 export interface HyprlandEvent extends Schema.Schema.Type<
   typeof HyprlandEvent
+> {}
+
+export const HyprlandLog = Schema.Struct({
+  lines: Schema.Array(Schema.String),
+});
+
+export interface HyprlandLog extends Schema.Schema.Type<typeof HyprlandLog> {}
+
+export const HyprlandOptionValue = Schema.Struct({
+  name: Schema.String,
+  type: HyprlandOptionType,
+  set: Schema.Boolean,
+  bool: Schema.NullOr(Schema.Boolean),
+  int: Schema.NullOr(Schema.Finite),
+  vec2: Schema.Array(Schema.Finite),
+  float: Schema.NullOr(Schema.Finite),
+  string: Schema.NullOr(Schema.String),
+});
+
+export interface HyprlandOptionValue extends Schema.Schema.Type<
+  typeof HyprlandOptionValue
 > {}
 
 export const MediaPlayer = Schema.Struct({

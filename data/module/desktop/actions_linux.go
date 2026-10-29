@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -428,31 +429,116 @@ func HyprlandSetSubmap(ctx context.Context, name string) error {
 	})
 }
 
-// HyprlandSetOption sets one of the config options in hyprlandOptions until
-// the config reloads. value is a bool or a whole number, by the option's type.
+var hyprlandOptionName = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$`)
+
+// hyprlandUsesLua is whether the running config is Lua rather than classic
+func hyprlandUsesLua(data *types.DesktopData) bool {
+	provider := data.Hyprland.Version.ConfigProvider
+	return provider != nil && *provider == "lua"
+}
+
+// HyprlandGetOption reads any config option by name, such as
+// general.col.active_border or general:layout
+func HyprlandGetOption(ctx context.Context, name string) (*types.HyprlandOptionValue, error) {
+	if _, err := hyprlandCurrent(ctx); err != nil {
+		return nil, err
+	}
+	dir, err := hyprlandDir()
+	if err != nil {
+		return nil, err
+	}
+	name = strings.ReplaceAll(name, ":", ".")
+	// The name goes into Lua as it is when setting the option
+	if !hyprlandOptionName.MatchString(name) {
+		return nil, fmt.Errorf("option %q: %w", name, ErrNotFound)
+	}
+	// The classic name, which getoption takes with either config
+	reply, err := hyprlandRequest(ctx, dir, "j/getoption "+strings.ReplaceAll(name, ".", ":"))
+	if err != nil {
+		return nil, err
+	}
+	var option hyprlandGetOptionReply
+	if err := json.Unmarshal(reply, &option); err != nil {
+		if text := strings.TrimSpace(string(reply)); text == "no such option" {
+			return nil, fmt.Errorf("option %q: %w", name, ErrNotFound)
+		}
+		return nil, fmt.Errorf("reading option %q: %s", name, strings.TrimSpace(string(reply)))
+	}
+	return option.value(name), nil
+}
+
+// hyprlandGetOptionReply is getoption's reply, keyed by the option's type
+type hyprlandGetOptionReply struct {
+	Set      bool      `json:"set"`
+	Bool     *bool     `json:"bool"`
+	Int      *int      `json:"int"`
+	Float    *float64  `json:"float"`
+	Str      *string   `json:"str"`
+	CSS      *string   `json:"css"`
+	Gradient *string   `json:"gradient"`
+	Vec2     []float64 `json:"vec2"`
+	Custom   *string   `json:"custom"`
+}
+
+func (r hyprlandGetOptionReply) value(name string) *types.HyprlandOptionValue {
+	value := &types.HyprlandOptionValue{Name: name, Set: r.Set, Vec2: []float64{}}
+	switch {
+	case r.Bool != nil:
+		value.Type, value.Bool = types.HyprlandOptionTypeBool, r.Bool
+	case r.Int != nil:
+		value.Type, value.Int = types.HyprlandOptionTypeInt, r.Int
+	case r.Float != nil:
+		value.Type, value.Float = types.HyprlandOptionTypeFloat, r.Float
+	case r.Str != nil:
+		value.Type, value.String = types.HyprlandOptionTypeString, r.Str
+	case r.CSS != nil:
+		value.Type, value.String = types.HyprlandOptionTypeCSS, r.CSS
+	case r.Gradient != nil:
+		value.Type, value.String = types.HyprlandOptionTypeGradient, r.Gradient
+	case r.Vec2 != nil:
+		value.Type, value.Vec2 = types.HyprlandOptionTypeVec2, r.Vec2
+	default:
+		value.Type, value.String = types.HyprlandOptionTypeCustom, r.Custom
+	}
+	return value
+}
+
+// HyprlandSetOption sets any config option until the config reloads. value
+// is a bool, a number or text, by the option's type. The options in
+// hyprlandOptions only take a whole number of 0 or more for a number.
 func HyprlandSetOption(ctx context.Context, name string, value any) error {
 	data, err := hyprlandCurrent(ctx)
 	if err != nil {
 		return err
 	}
-	index := slices.IndexFunc(hyprlandOptions, func(option hyprlandOption) bool { return option.name == name })
-	if index == -1 {
-		return fmt.Errorf("option %q: %w", name, ErrNotFound)
+	current, err := HyprlandGetOption(ctx, name)
+	if err != nil {
+		return err
 	}
-	text, err := hyprlandOptionValue(hyprlandOptions[index].kind, value)
+	name = current.Name
+	kind := current.Type
+	lua := hyprlandUsesLua(data)
+	text, err := hyprlandOptionValue(kind, value, lua)
+	// Sizes such as the gaps are listed as numbers, though Hyprland reads
+	// them as CSS
+	if err == nil && strings.Contains(text, "-") && slices.ContainsFunc(hyprlandOptions, func(option hyprlandOption) bool {
+		return option.name == name && option.kind == types.HyprlandOptionTypeInt
+	}) {
+		err = errors.New("the value must be a whole number, 0 or more")
+	}
 	if err != nil {
 		return fmt.Errorf("option %q: %w: %w", name, ErrInvalidValue, err)
 	}
 
 	request := "keyword " + strings.ReplaceAll(name, ".", ":") + " " + text
-	if provider := data.Hyprland.Version.ConfigProvider; provider != nil && *provider == "lua" {
+	if lua {
 		// hl.config({ animations = { enabled = false } })
 		parts := strings.Split(name, ".")
-		lua := parts[len(parts)-1] + " = " + text
+		config := parts[len(parts)-1] + " = " + text
 		for i := len(parts) - 2; i >= 0; i-- {
-			lua = parts[i] + " = { " + lua + " }"
+			config = parts[i] + " = { " + config + " }"
 		}
-		request = "eval hl.config({ " + lua + " })"
+		request = "eval hl.config({ " + config + " })"
 	}
 	if err := hyprlandSend(ctx, request); err != nil {
 		return err
@@ -462,8 +548,8 @@ func HyprlandSetOption(ctx context.Context, name string, value any) error {
 }
 
 // hyprlandOptionValue checks a value against an option's type and writes it
-// as both config languages take it
-func hyprlandOptionValue(kind types.HyprlandOptionType, value any) (string, error) {
+// as the running config language takes it
+func hyprlandOptionValue(kind types.HyprlandOptionType, value any, lua bool) (string, error) {
 	switch kind {
 	case types.HyprlandOptionTypeBool:
 		switch value := value.(type) {
@@ -476,27 +562,288 @@ func hyprlandOptionValue(kind types.HyprlandOptionType, value any) (string, erro
 		}
 		return "", errors.New("the value must be true or false")
 	case types.HyprlandOptionTypeInt:
-		var number float64
-		switch value := value.(type) {
-		case float64:
-			number = value
-		case int:
-			number = float64(value)
-		case string:
-			parsed, err := strconv.Atoi(value)
-			if err != nil {
-				return "", errors.New("the value must be a whole number")
-			}
-			number = float64(parsed)
-		default:
+		number, ok := optionNumber(value)
+		if !ok || number != math.Trunc(number) {
 			return "", errors.New("the value must be a whole number")
 		}
-		if number != math.Trunc(number) || number < 0 {
-			return "", errors.New("the value must be a whole number, 0 or more")
-		}
 		return strconv.Itoa(int(number)), nil
+	case types.HyprlandOptionTypeFloat:
+		number, ok := optionNumber(value)
+		if !ok {
+			return "", errors.New("the value must be a number")
+		}
+		return strconv.FormatFloat(number, 'f', -1, 64), nil
+	case types.HyprlandOptionTypeVec2:
+		var parts []string
+		switch value := value.(type) {
+		case string:
+			parts = strings.Fields(value)
+		case []any:
+			for _, part := range value {
+				number, ok := optionNumber(part)
+				if !ok {
+					return "", errors.New("the value must be two numbers")
+				}
+				parts = append(parts, strconv.FormatFloat(number, 'f', -1, 64))
+			}
+		}
+		if len(parts) != 2 {
+			return "", errors.New("the value must be two numbers, such as \"5 10\"")
+		}
+		for _, part := range parts {
+			if _, err := strconv.ParseFloat(part, 64); err != nil {
+				return "", errors.New("the value must be two numbers, such as \"5 10\"")
+			}
+		}
+		if lua {
+			return luaString(parts[0] + " " + parts[1]), nil
+		}
+		return parts[0] + " " + parts[1], nil
+	case types.HyprlandOptionTypeCSS:
+		return hyprlandCSSValue(value, lua)
+	case types.HyprlandOptionTypeGradient:
+		text, ok := value.(string)
+		if !ok {
+			return "", errors.New("the value must be colours and an optional angle, such as \"ff33ccff 45deg\"")
+		}
+		return hyprlandGradientValue(text, lua)
+	case types.HyprlandOptionTypeString, types.HyprlandOptionTypeCustom:
+		var text string
+		switch value := value.(type) {
+		case string:
+			text = value
+		case bool:
+			text = strconv.FormatBool(value)
+		case float64:
+			text = strconv.FormatFloat(value, 'f', -1, 64)
+		default:
+			return "", errors.New("the value must be text")
+		}
+		if strings.ContainsAny(text, "\n\r") {
+			return "", errors.New("the value must be one line")
+		}
+		if lua {
+			return luaString(text), nil
+		}
+		return text, nil
 	}
 	return "", fmt.Errorf("unknown option type %q", kind)
+}
+
+// optionNumber is a value as a number, from a number or its text
+func optionNumber(value any) (float64, bool) {
+	switch value := value.(type) {
+	case float64:
+		return value, true
+	case int:
+		return float64(value), true
+	case string:
+		number, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+		return number, err == nil && !math.IsNaN(number) && !math.IsInf(number, 0)
+	}
+	return 0, false
+}
+
+// hyprlandCSSValue writes sizes for each side, from one number or up to four
+// in CSS order, such as "5 10 5 10". Lua takes them as a table.
+func hyprlandCSSValue(value any, lua bool) (string, error) {
+	var sides []string
+	switch value := value.(type) {
+	case string:
+		sides = strings.Fields(value)
+	default:
+		number, ok := optionNumber(value)
+		if !ok {
+			return "", errors.New("the value must be up to four whole numbers, such as \"5 10\"")
+		}
+		sides = []string{strconv.FormatFloat(number, 'f', -1, 64)}
+	}
+	if len(sides) == 0 || len(sides) > 4 {
+		return "", errors.New("the value must be up to four whole numbers, such as \"5 10\"")
+	}
+	for _, side := range sides {
+		if _, err := strconv.Atoi(side); err != nil {
+			return "", errors.New("the value must be up to four whole numbers, such as \"5 10\"")
+		}
+	}
+	if !lua {
+		return strings.Join(sides, " "), nil
+	}
+	if len(sides) == 1 {
+		return sides[0], nil
+	}
+	// As CSS spreads them: top, right, bottom and left
+	for len(sides) < 4 {
+		sides = append(sides, sides[len(sides)-2])
+	}
+	return "{ top = " + sides[0] + ", right = " + sides[1] + ", bottom = " + sides[2] + ", left = " + sides[3] + " }", nil
+}
+
+// hyprlandGradientValue writes colours and an optional angle, as getoption
+// reports them, such as "ff33ccff 00ff99ee 45deg". getoption gives colours as
+// bare ARGB hex, which the configs take with 0x.
+func hyprlandGradientValue(text string, lua bool) (string, error) {
+	var colours []string
+	angle := ""
+	for _, part := range strings.Fields(text) {
+		if degrees, ok := strings.CutSuffix(part, "deg"); ok {
+			if _, err := strconv.ParseFloat(degrees, 64); err != nil || angle != "" {
+				return "", fmt.Errorf("angle %q: must be one number of degrees, such as 45deg", part)
+			}
+			angle = degrees
+			continue
+		}
+		if len(part) == 8 || len(part) == 6 {
+			if _, err := strconv.ParseUint(part, 16, 32); err == nil {
+				part = "0x" + part
+			}
+		}
+		colours = append(colours, part)
+	}
+	if len(colours) == 0 {
+		return "", errors.New("the value must have at least one colour")
+	}
+	if !lua {
+		if angle != "" {
+			return strings.Join(colours, " ") + " " + angle + "deg", nil
+		}
+		return strings.Join(colours, " "), nil
+	}
+	quoted := make([]string, len(colours))
+	for i, colour := range colours {
+		quoted[i] = luaString(colour)
+	}
+	gradient := "{ colors = { " + strings.Join(quoted, ", ") + " }"
+	if angle != "" {
+		gradient += ", angle = " + angle
+	}
+	return gradient + " }", nil
+}
+
+// HyprlandCursorPosition is where the pointer is, across every display
+func HyprlandCursorPosition(ctx context.Context) (*types.HyprlandCursorPosition, error) {
+	if _, err := hyprlandCurrent(ctx); err != nil {
+		return nil, err
+	}
+	dir, err := hyprlandDir()
+	if err != nil {
+		return nil, err
+	}
+	reply, err := hyprlandRequest(ctx, dir, "j/cursorpos")
+	if err != nil {
+		return nil, err
+	}
+	var position types.HyprlandCursorPosition
+	if err := json.Unmarshal(reply, &position); err != nil {
+		return nil, fmt.Errorf("reading the cursor position: %w", err)
+	}
+	return &position, nil
+}
+
+// HyprlandLog is the end of Hyprland's log. It reads the text form, as the
+// JSON one isn't valid JSON.
+func HyprlandLog(ctx context.Context) (*types.HyprlandLog, error) {
+	if _, err := hyprlandCurrent(ctx); err != nil {
+		return nil, err
+	}
+	dir, err := hyprlandDir()
+	if err != nil {
+		return nil, err
+	}
+	reply, err := hyprlandRequest(ctx, dir, "/rollinglog")
+	if err != nil {
+		return nil, err
+	}
+	lines := []string{}
+	for line := range strings.SplitSeq(string(reply), "\n") {
+		if line = strings.TrimRight(line, "\r"); strings.TrimSpace(line) != "" {
+			lines = append(lines, line)
+		}
+	}
+	return &types.HyprlandLog{Lines: lines}, nil
+}
+
+// HyprlandMoveCursor moves the pointer to a position across every display
+func HyprlandMoveCursor(ctx context.Context, x int, y int) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.cursor.move({ x = " + strconv.Itoa(x) + ", y = " + strconv.Itoa(y) + " })",
+		classic: "movecursor " + strconv.Itoa(x) + " " + strconv.Itoa(y),
+	})
+}
+
+// HyprlandSendEvent sends a custom event, as a bind to the event dispatcher
+// would. Listeners, such as System Bridge's own Hyprland events, get it.
+func HyprlandSendEvent(ctx context.Context, name string) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if strings.ContainsAny(name, "\n\r") {
+		return fmt.Errorf("event %q: %w: must be one line", name, ErrInvalidValue)
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.event(" + luaString(name) + ")",
+		classic: "event " + name,
+	})
+}
+
+// hyprlandCodeCurrent is the desktop, when running code through Hyprland is
+// turned on in the settings
+func hyprlandCodeCurrent(ctx context.Context) (*types.DesktopData, error) {
+	if !hyprlandCodeEnabled() {
+		return nil, ErrNotAllowed
+	}
+	return hyprlandCurrent(ctx)
+}
+
+// HyprlandExec runs a command through Hyprland, as a bind to exec would, so
+// it starts in Hyprland's environment
+func HyprlandExec(ctx context.Context, command string) error {
+	data, err := hyprlandCodeCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if strings.ContainsAny(command, "\n\r") {
+		return fmt.Errorf("command: %w: must be one line", ErrInvalidValue)
+	}
+	return hyprlandDispatch(ctx, data, hyprlandCommand{
+		lua:     "hl.dsp.exec_cmd(" + luaString(command) + ")",
+		classic: "exec " + command,
+	})
+}
+
+// HyprlandDispatchRaw runs any dispatch as the running config writes it: Lua,
+// such as hl.dsp.focus({ workspace = "2" }), or classic, such as workspace 2
+func HyprlandDispatchRaw(ctx context.Context, dispatch string) error {
+	if _, err := hyprlandCodeCurrent(ctx); err != nil {
+		return err
+	}
+	if strings.ContainsAny(dispatch, "\n\r") {
+		return fmt.Errorf("dispatch: %w: must be one line", ErrInvalidValue)
+	}
+	return hyprlandSend(ctx, "dispatch "+dispatch)
+}
+
+// HyprlandEval runs Lua in Hyprland. Only a Lua config takes it.
+func HyprlandEval(ctx context.Context, code string) error {
+	data, err := hyprlandCodeCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if !hyprlandUsesLua(data) {
+		return fmt.Errorf("running Lua without a Lua config: %w", ErrUnsupported)
+	}
+	if strings.ContainsAny(code, "\n\r") {
+		return fmt.Errorf("code: %w: must be one line", ErrInvalidValue)
+	}
+	err = hyprlandSend(ctx, "eval "+code)
+	// Lua can change the config, so read it again
+	hyprlandSource.forgetConfig()
+	return err
 }
 
 // HyprlandReloadConfig reloads Hyprland's config
@@ -646,8 +993,7 @@ type hyprlandCommand struct {
 
 // hyprlandDispatch sends dispatches in the form the running config takes
 func hyprlandDispatch(ctx context.Context, data *types.DesktopData, commands ...hyprlandCommand) error {
-	provider := data.Hyprland.Version.ConfigProvider
-	lua := provider != nil && *provider == "lua"
+	lua := hyprlandUsesLua(data)
 	for _, command := range commands {
 		dispatch := command.classic
 		if lua {

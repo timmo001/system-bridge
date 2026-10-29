@@ -87,6 +87,7 @@ package() {
   install -Dm644 _system-bridge "$pkgdir/usr/share/zsh/site-functions/_system-bridge"
   install -Dm644 system-bridge.fish "$pkgdir/usr/share/fish/vendor_completions.d/system-bridge.fish"
   install -Dm644 .scripts/linux/system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
+  install -Dm644 .scripts/linux/60-system-bridge-rapl.rules "$pkgdir/usr/lib/udev/rules.d/60-system-bridge-rapl.rules"
   install -Dm644 .resources/system-bridge-dimmed.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
   install -Dm644 .resources/system-bridge-dimmed-16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
   install -Dm644 .resources/system-bridge-dimmed-32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"

@@ -107,9 +107,14 @@ class SettingsCommands:
 
 @dataclass
 class SettingsDesktop:
-    """Settings Desktop. Window titles are off by default, as they can be private."""
+    """Settings Desktop.
+
+    Window titles are off by default, as they can be private. Running
+    commands, any dispatcher and Lua through Hyprland is off by default too.
+    """
 
     windowTitles: bool = False  # noqa: N815
+    hyprlandCode: bool = False  # noqa: N815
 
 
 @dataclass

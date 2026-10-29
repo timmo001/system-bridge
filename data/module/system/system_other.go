@@ -20,6 +20,10 @@ func GetPSUPowerUsage() *float64 {
 	return nil
 }
 
+func GetPlatformPowerUsage() *float64 {
+	return nil
+}
+
 func GetDeviceInfo() *types.DeviceInfo {
 	return nil
 }
