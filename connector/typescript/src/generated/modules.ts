@@ -263,6 +263,14 @@ export const CPUData = Schema.Struct({
 
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
 
+export const ClipboardText = Schema.Struct({
+  text: Schema.String,
+});
+
+export interface ClipboardText extends Schema.Schema.Type<
+  typeof ClipboardText
+> {}
+
 export const CommandPrefab = Schema.Struct({
   id: Schema.String,
   name: Schema.String,

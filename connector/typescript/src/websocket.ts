@@ -27,6 +27,7 @@ import {
   RequestTimeoutError,
 } from "./errors.js";
 import {
+  ClipboardText,
   CommandPrefab,
   DiskMountsResponse,
   HyprlandCursorPosition,
@@ -223,6 +224,8 @@ export interface Interface {
   readonly bluetoothSetPower: (
     power: BluetoothPowerRequest,
   ) => Effect.Effect<void, WebSocketError>;
+  /** The text on the clipboard. */
+  readonly getClipboard: Effect.Effect<ClipboardText, WebSocketError>;
   /** Puts text on the clipboard. Linux only. */
   readonly setClipboard: (
     request: ClipboardTextRequest,
@@ -1072,6 +1075,14 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const getClipboard = call(
+    "CLIPBOARD_GET_TEXT",
+    "CLIPBOARD_TEXT",
+    Empty,
+    {},
+    ClipboardText,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.getClipboard"));
+
   const setClipboard = Effect.fn("SystemBridgeWebSocket.setClipboard")(
     function* (request: ClipboardTextRequest) {
       yield* call(
@@ -1548,6 +1559,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothDisconnect,
     bluetoothForget,
     bluetoothSetPower,
+    getClipboard,
     setClipboard,
     setPowerProfile,
     setKeepAwake,

@@ -21,7 +21,7 @@ from .exceptions import (
 )
 from .models.audio_control import AudioControl
 from .models.bluetooth_control import BluetoothDeviceRequest, BluetoothPowerRequest
-from .models.clipboard import ClipboardTextRequest
+from .models.clipboard import ClipboardText, ClipboardTextRequest
 from .models.command_execute import ExecuteRequest
 from .models.command_prefab import CommandPrefab
 from .models.command_result import ExecuteResult
@@ -1054,6 +1054,20 @@ class WebSocketClient(Base):
             model,
             request_id,
         )
+
+    async def get_clipboard(
+        self,
+        request_id: str | None = None,
+    ) -> ClipboardText:
+        """Get the text on the clipboard."""
+        response = await self.send_message(
+            EventType.CLIPBOARD_GET_TEXT,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.CLIPBOARD_TEXT,
+        )
+        return ClipboardText(**self._response_dict(response, "clipboard"))
 
     async def set_clipboard(
         self,
