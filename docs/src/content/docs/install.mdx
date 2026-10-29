@@ -195,6 +195,19 @@ Please do not submit feedback or bug reports for macOS, as it is not supported. 
 </Tab>
 </Tabs>
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+The Windows executable and installer are built from this repository on GitHub Actions and signed through SignPath, so Windows shows SignPath Foundation as the publisher. The NowPlaying helper bundled with them comes from [dotnet-now-playing](https://github.com/timmo001/dotnet-now-playing) and isn't signed.
+
+- Committers and reviewers: [Aidan Timson (timmo001)](https://github.com/timmo001)
+- Approvers: [Aidan Timson (timmo001)](https://github.com/timmo001)
+
+Pull requests from anyone else are reviewed by a committer before they're merged, and every release is approved by hand before it's signed.
+
+System Bridge doesn't send any information to other networked systems unless you ask it to, apart from what's listed on [Privacy and security](/privacy).
+
 ## Updating
 
 On Linux, System Bridge restarts itself within a minute of a package update replacing it, so the new version runs without you restarting it. Flatpak keeps running the version it started with, so restart System Bridge after updating it there.
