@@ -132,14 +132,11 @@ export const SECTIONS = {
       ),
     ]),
 
-  "now-playing": ({ entities, mediaFeatures: media, audioFeatures: audio }) =>
+  "now-playing": ({ entities, mediaFeatures: media }) =>
     grid([
       heading("Now playing", "mdi:play-circle-outline"),
       ...singles(entities, "media").map((entity) =>
         tile(entity, mediaFeatures(media)),
-      ),
-      ...singles(entities, "audio").map((entity) =>
-        tile(entity, mediaFeatures(audio)),
       ),
     ]),
 

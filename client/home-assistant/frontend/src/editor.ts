@@ -38,7 +38,9 @@ const LABELS = new Map([
   ["pages", "Pages"],
   ["icon_and_title_pages", "Icon and title"],
   ["top_links_pages", "Web client link"],
+  ["media_options", "Media"],
   ["media_features", "Media tile"],
+  ["audio_options", "Audio"],
   ["audio_features", "Audio tiles"],
   ["show_input_source", "Audio input picker"],
 ]);
@@ -157,8 +159,7 @@ const sectionLabel = (name: string) => {
 
 const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   storage: "Space used on every mount.",
-  "now-playing":
-    "The media playing, with playback and volume controls, and the system volume.",
+  "now-playing": "The media playing, with source and playback controls.",
   "audio-outputs": "Volume of each audio output, such as speakers.",
   "audio-inputs": "Volume of each audio input, such as a microphone.",
   "overview-load": "CPU and memory load in one graph.",
@@ -260,15 +261,62 @@ const MEDIA_OPTIONS: readonly MediaOption[] = [
 
 /** The media and audio options each section has. */
 const SECTION_MEDIA_OPTIONS = new Map<string, readonly MediaOption[]>([
-  ["now-playing", ["media_features", "audio_features"]],
+  ["now-playing", ["media_features"]],
   ["audio-outputs", ["audio_features"]],
   ["audio-inputs", ["show_input_source"]],
 ]);
 
-const mediaOptions = (config: StrategyConfig): readonly MediaOption[] =>
-  "section" in config
-    ? (SECTION_MEDIA_OPTIONS.get(config.section) ?? [])
-    : MEDIA_OPTIONS;
+/** The media and audio options each page has, from its sections. */
+const PAGE_MEDIA_OPTIONS = new Map<string, readonly MediaOption[]>([
+  ["overview", ["media_features"]],
+  ["media", ["media_features"]],
+  ["audio", ["audio_features", "show_input_source"]],
+]);
+
+/** The expandables the media and audio options go in. */
+const MEDIA_GROUPS: readonly {
+  name: string;
+  options: readonly MediaOption[];
+}[] = [
+  { name: "media_options", options: ["media_features"] },
+  { name: "audio_options", options: ["audio_features", "show_input_source"] },
+];
+
+const mediaOptions = (config: StrategyConfig): readonly MediaOption[] => {
+  if ("section" in config) {
+    return SECTION_MEDIA_OPTIONS.get(config.section) ?? [];
+  }
+
+  if ("page" in config) {
+    return PAGE_MEDIA_OPTIONS.get(config.page) ?? [];
+  }
+
+  return MEDIA_OPTIONS;
+};
+
+const mediaSchema = (config: StrategyConfig) => {
+  const available = mediaOptions(config);
+
+  return MEDIA_GROUPS.flatMap(({ name, options }) => {
+    const shown = options.filter((option) => available.includes(option));
+
+    return shown.length > 0
+      ? [
+          {
+            name,
+            type: "expandable",
+            flatten: true,
+            // A section has nothing else to edit, so its options start open
+            expanded: "section" in config,
+            schema: shown.map((option) => ({
+              name: option,
+              selector: mediaOptionSelector(option),
+            })),
+          },
+        ]
+      : [];
+  });
+};
 
 const mediaOptionSelector = (name: MediaOption) => {
   switch (name) {
@@ -408,10 +456,7 @@ const generalSchema = (
         },
       ]
     : []),
-  ...mediaOptions(config).map((name) => ({
-    name,
-    selector: mediaOptionSelector(name),
-  })),
+  ...mediaSchema(config),
 ];
 
 const isDashboardConfig = (
