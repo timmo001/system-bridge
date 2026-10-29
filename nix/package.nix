@@ -42,7 +42,7 @@ let
 
     dontFixup = true;
 
-    outputHash = "sha256-JPBlknRkiphU4/f7dPHHzoanlQQhRZtOBlpqam5JvJ4=";
+    outputHash = "sha256-swrvETwLwGMBzBCGwAl2aklY2luVSMP4aQfsiU/5Obo=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
