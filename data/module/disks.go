@@ -13,6 +13,7 @@ import (
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type DiskModule struct{}
@@ -115,7 +116,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 				Total:   usage.Total,
 				Used:    usage.Used,
 				Free:    usage.Free,
-				Percent: usage.UsedPercent,
+				Percent: utils.Round2(usage.UsedPercent),
 			}
 		}
 
@@ -231,7 +232,7 @@ func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
 				Total:   usage.Total,
 				Used:    usage.Used,
 				Free:    usage.Free,
-				Percent: usage.UsedPercent,
+				Percent: utils.Round2(usage.UsedPercent),
 			}
 		}
 

@@ -120,7 +120,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, 0, true)
 	overallTimes, overallTimesErr := cpu.TimesWithContext(ctx, false)
 	if percents, err := cpu.PercentWithContext(ctx, 0, false); err == nil && len(percents) > 0 {
-		usage := percents[0]
+		usage := utils.Round2(percents[0])
 		cpuData.Usage = &usage
 	}
 
@@ -153,7 +153,10 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 
 	sampleWG.Wait()
 
-	cpuData.Power = overallPower
+	if overallPower != nil {
+		power := utils.Round2(*overallPower)
+		cpuData.Power = &power
+	}
 
 	// Distribute overall package power across cores weighted by usage
 	var perCorePowers []float64
@@ -217,12 +220,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 
 		// Get per CPU usage percentage
 		if i < len(percentsPerCPU) {
-			usage := percentsPerCPU[i]
+			usage := utils.Round2(percentsPerCPU[i])
 			perCpuData.Usage = &usage
 		}
 
 		if i < len(perCorePowers) {
-			val := perCorePowers[i]
+			val := utils.Round2(perCorePowers[i])
 			perCpuData.Power = &val
 		}
 
@@ -264,7 +267,7 @@ func buildCPUTimes(stat cpu.TimesStat, pct *types.CPUTimes, dpcPct *float64, dpc
 		if timesPercent == nil {
 			timesPercent = &types.CPUTimes{}
 		}
-		d := *dpcPct
+		d := utils.Round2(*dpcPct)
 		timesPercent.DPC = &d
 	}
 	return times, timesPercent
@@ -302,10 +305,10 @@ func timesPercentDelta(t1, t2 cpu.TimesStat) *types.CPUTimes {
 	if dTot <= 0 {
 		return &types.CPUTimes{}
 	}
-	u := ((t2.User - t1.User) / dTot) * 100
-	s := ((t2.System - t1.System) / dTot) * 100
-	id := ((t2.Idle - t1.Idle) / dTot) * 100
-	irq := ((t2.Irq - t1.Irq) / dTot) * 100
+	u := utils.Round2((t2.User - t1.User) / dTot * 100)
+	s := utils.Round2((t2.System - t1.System) / dTot * 100)
+	id := utils.Round2((t2.Idle - t1.Idle) / dTot * 100)
+	irq := utils.Round2((t2.Irq - t1.Irq) / dTot * 100)
 	return &types.CPUTimes{User: &u, System: &s, Idle: &id, Interrupt: &irq}
 }
 

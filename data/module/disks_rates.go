@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"math"
 	"sync"
 	"time"
 )
@@ -68,6 +69,6 @@ func diskByteRate(previous, current uint64, seconds float64) *float64 {
 	if current < previous {
 		return nil
 	}
-	rate := float64(current-previous) / seconds
+	rate := math.Round(float64(current-previous) / seconds)
 	return &rate
 }

@@ -402,7 +402,7 @@ func GetPSUPowerUsage() *float64 {
 				valueStr := strings.TrimSpace(string(powerData))
 				if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
 					// Convert from microwatts to watts
-					powerWatts := value / 1_000_000
+					powerWatts := utils.Round2(value / 1_000_000)
 					slog.Debug("Found PSU power usage", "hwmon", hwmonDir, "name", name, "power_watts", powerWatts)
 					return &powerWatts
 				}
@@ -422,7 +422,7 @@ func GetPSUPowerUsage() *float64 {
 				if strings.Contains(label, "psu") || strings.Contains(label, "power") {
 					valueStr := strings.TrimSpace(string(powerData))
 					if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
-						powerWatts := value / 1_000_000
+						powerWatts := utils.Round2(value / 1_000_000)
 						slog.Debug("Found PSU power usage via label", "hwmon", hwmonDir, "label", label, "power_watts", powerWatts)
 						return &powerWatts
 					}

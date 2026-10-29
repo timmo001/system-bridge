@@ -2,6 +2,7 @@ package networks
 
 import (
 	"log/slog"
+	"math"
 	"slices"
 	"sync"
 	"time"
@@ -68,7 +69,7 @@ func byteRate(previous, current uint64, seconds float64) *float64 {
 	if current < previous {
 		return nil
 	}
-	rate := float64(current-previous) / seconds
+	rate := math.Round(float64(current-previous) / seconds)
 	return &rate
 }
 

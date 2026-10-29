@@ -7,6 +7,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type MemoryModule struct{}
@@ -21,6 +22,7 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 	if err != nil {
 		slog.Error("Failed to get virtual memory", "error", err)
 	} else {
+		virtualMem.UsedPercent = utils.Round2(virtualMem.UsedPercent)
 		memoryData.Virtual = &types.MemoryVirtual{
 			Total:     &virtualMem.Total,
 			Available: &virtualMem.Available,
@@ -41,6 +43,7 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 	if err != nil {
 		slog.Error("Failed to get swap memory", "error", err)
 	} else {
+		swapMem.UsedPercent = utils.Round2(swapMem.UsedPercent)
 		memoryData.Swap = &types.MemorySwap{
 			Total:   &swapMem.Total,
 			Used:    &swapMem.Used,

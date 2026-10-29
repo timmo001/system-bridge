@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/timmo001/system-bridge/utils"
 )
 
 const root = "/sys/class/powercap"
@@ -81,7 +83,7 @@ func watts(zone string, now time.Time) *float64 {
 		}
 		delta += maxRange
 	}
-	w := delta / 1_000_000 / seconds
+	w := utils.Round2(delta / 1_000_000 / seconds)
 	return &w
 }
 

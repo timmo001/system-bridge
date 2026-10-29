@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type ProcessModule struct{}
@@ -68,7 +69,7 @@ func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 		if times, err := p.TimesWithContext(ctx); err == nil && createErr == nil {
 			cpuPercent := 0.0
 			if elapsed := now.Sub(time.UnixMilli(createTime)).Seconds(); elapsed > 0 {
-				cpuPercent = 100 * timesTotal(*times) / elapsed
+				cpuPercent = utils.Round2(100 * timesTotal(*times) / elapsed)
 			}
 			proc.CPUUsage = &cpuPercent
 		}

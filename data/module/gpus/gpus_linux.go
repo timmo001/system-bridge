@@ -81,7 +81,7 @@ func getNVIDIAGPUs() []types.GPU {
 
 		memoryLoad := 0.0
 		if memoryTotal > 0 {
-			memoryLoad = (memoryUsed / memoryTotal) * 100.0
+			memoryLoad = utils.Round2(memoryUsed / memoryTotal * 100.0)
 		}
 
 		gpuList = append(gpuList, types.GPU{
@@ -210,7 +210,7 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 				free := *total - *used
 				gpu.MemoryFree = &free
 				if *total > 0 {
-					load := (*used / *total) * 100.0
+					load := utils.Round2(*used / *total * 100.0)
 					gpu.MemoryLoad = &load
 				}
 			}
@@ -424,7 +424,7 @@ func readMicrowatts(path string) *float64 {
 	if v == nil {
 		return nil
 	}
-	watts := *v / 1_000_000.0
+	watts := utils.Round2(*v / 1_000_000.0)
 	return &watts
 }
 
@@ -614,13 +614,9 @@ func globSorted(pattern string) []string {
 	return matches
 }
 
-// clampPercent constrains a value to the 0-100 range and returns a pointer.
+// clampPercent constrains a value to the 0-100 range, rounded to 2 decimal
+// places, and returns a pointer.
 func clampPercent(v float64) *float64 {
-	if v < 0 {
-		v = 0
-	}
-	if v > 100 {
-		v = 100
-	}
+	v = utils.Round2(min(max(v, 0), 100))
 	return &v
 }
