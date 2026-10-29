@@ -16,7 +16,7 @@ func TestHyprlandBinds(t *testing.T) {
 	binds := hyprlandBinds([]hyprlandBind{
 		{ModMask: 65, Key: "V", Dispatcher: "__lua", Arg: "12", Description: "Paste"},
 		{ModMask: 0, KeyCode: 172, Submap: "resize", Dispatcher: "global", Arg: "omarchy:menu.root"},
-	})
+	}, false)
 	require.Len(t, binds, 2)
 
 	assert.Equal(t, []string{"SUPER", "SHIFT"}, binds[0].Modifiers)
@@ -28,6 +28,10 @@ func TestHyprlandBinds(t *testing.T) {
 	assert.Equal(t, "code:172", binds[1].Key)
 	assert.Equal(t, "resize", *binds[1].Submap)
 	assert.Equal(t, "omarchy:menu.root", *binds[1].Argument)
+
+	lua := hyprlandBinds([]hyprlandBind{{Key: "Q", Dispatcher: "HL.Dispatcher(window.close)", Arg: "3"}}, true)
+	assert.Nil(t, lua[0].Dispatcher, "Hyprland 0.57 names a Lua bind's function")
+	assert.Nil(t, lua[0].Argument)
 }
 
 func TestHyprlandOptionValues(t *testing.T) {
@@ -165,4 +169,42 @@ func TestBuildHyprland(t *testing.T) {
 	data = buildHyprland(state, hyprlandConfig{}, events, false)
 	assert.False(t, *data.Windows[0].Urgent)
 	assert.Len(t, data.Hyprland.Screencasts, 1)
+}
+
+// Hyprland 0.57 gives every workspace an address, and an ID only to
+// numbered ones
+func TestBuildHyprlandWorkspaceAddresses(t *testing.T) {
+	var state hyprlandState
+	replies := []json.RawMessage{
+		json.RawMessage(`{"address":"0x1"}`),
+		json.RawMessage(`{"address":"web","type":"normal","name":"web"}`),
+		json.RawMessage(`[
+			{"address":"0x1","mapped":true,"workspace":{"address":"web","type":"normal","name":"web"},"monitor":0},
+			{"address":"0x2","mapped":true,"workspace":{"address":"special:scratch","type":"special","name":"special:scratch"},"monitor":0}
+		]`),
+		json.RawMessage(`{"keyboards":[],"mice":[],"tablets":[],"touch":[],"switches":[]}`),
+		json.RawMessage(`{}`),
+		json.RawMessage(`[{"id":0,"name":"DP-1","focused":true,"activeWorkspace":{"address":"web","type":"normal","name":"web"},"specialWorkspace":{"address":"special:scratch","type":"special","name":"special:scratch"}}]`),
+		json.RawMessage(`[
+			{"address":"special:scratch","type":"special","name":"special:scratch","monitor":"DP-1","windows":1},
+			{"address":"web","type":"normal","name":"web","monitor":"DP-1","windows":1},
+			{"address":"2","id":2,"type":"normal","name":"2","monitor":"DP-1","windows":0}
+		]`),
+	}
+	require.NoError(t, decodeReplies(replies, state.targets(), 0))
+
+	data := buildHyprland(state, hyprlandConfig{}, newHyprlandEvents(), false)
+
+	assert.Equal(t, "web", *data.FocusedWorkspace)
+	assert.Equal(t, "web", *data.Windows[0].Workspace)
+	assert.Equal(t, "special:scratch", *data.Windows[1].Workspace)
+	assert.Equal(t, "special:scratch", *data.Hyprland.Displays["DP-1"].SpecialWorkspace)
+
+	require.Len(t, data.Workspaces, 3)
+	assert.Equal(t, []string{"2", "special:scratch", "web"}, []string{data.Workspaces[0].ID, data.Workspaces[1].ID, data.Workspaces[2].ID})
+	assert.False(t, data.Workspaces[0].Active)
+	assert.True(t, data.Workspaces[1].Active)
+	assert.True(t, *data.Workspaces[1].Special)
+	assert.True(t, data.Workspaces[2].Focused)
+	assert.False(t, *data.Workspaces[2].Special)
 }
