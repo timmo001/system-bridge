@@ -45,16 +45,13 @@ export const PAGES: readonly Page[] = [
       { section: "overview-temperatures" },
     ],
   },
-  // TODO(Core): uncomment with roadmap item 6, once a Core release or beta
-  // has entities for the default output and input volume and mute (and maybe
-  // per-app volume, from connector 5.20.0). Add an "audio" section that shows
-  // them with a volume feature, whichever entity type Core ships.
-  // {
-  //   page: "audio",
-  //   title: "Audio",
-  //   icon: "mdi:volume-high",
-  //   sections: () => [{ section: "audio" }],
-  // },
+  // Per-app volume is not for Core: apps come and go too often for entities
+  {
+    page: "audio",
+    title: "Audio",
+    icon: "mdi:volume-high",
+    sections: () => [{ section: "audio-outputs" }, { section: "audio-inputs" }],
+  },
   {
     page: "battery",
     title: "Battery",

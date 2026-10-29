@@ -8,7 +8,15 @@ import type {
 const DOMAIN = "system_bridge";
 
 export type ItemKind =
-  "battery" | "core" | "disk" | "display" | "gpu" | "interface" | "mount";
+  | "audio_input"
+  | "audio_output"
+  | "battery"
+  | "core"
+  | "disk"
+  | "display"
+  | "gpu"
+  | "interface"
+  | "mount";
 
 /**
  * Core gives every System Bridge entity the unique ID `<system uuid>_<key>`.
@@ -46,6 +54,16 @@ const ITEM_RULES: readonly {
     kind: "core",
     translationPrefix: "cpu_power_core",
     keyPrefix: "cpu_power_core_",
+  },
+  {
+    kind: "audio_output",
+    translationPrefix: "audio_output",
+    keyPrefix: "audio_output_",
+  },
+  {
+    kind: "audio_input",
+    translationPrefix: "audio_input_",
+    keyPrefix: "audio_input_",
   },
 ];
 
@@ -165,6 +183,8 @@ export const groupEntities = (
   const single = new Map<string, string>();
 
   const items: SystemBridgeEntities["items"] = {
+    audio_input: new Map(),
+    audio_output: new Map(),
     battery: new Map(),
     core: new Map(),
     disk: new Map(),

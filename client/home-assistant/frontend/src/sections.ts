@@ -112,6 +112,37 @@ export const SECTIONS = {
           { type: "media-player-volume-slider" },
         ]),
       ),
+      ...singles(entities, "audio").map((entity) =>
+        tile(entity, [{ type: "media-player-volume-slider" }]),
+      ),
+    ]),
+
+  "audio-outputs": ({ entities }) =>
+    grid([
+      heading("Outputs", "mdi:speaker"),
+      ...singles(entities, "audio").map((entity) =>
+        tile(entity, [
+          { type: "media-player-volume-slider" },
+          { type: "media-player-source" },
+        ]),
+      ),
+      ...fromItems(entities, "audio_output", "audio_output").map((entity) =>
+        tile(entity, [{ type: "media-player-volume-slider" }]),
+      ),
+    ]),
+
+  "audio-inputs": ({ entities }) =>
+    grid([
+      heading("Inputs", "mdi:microphone"),
+      ...singles(entities, "audio_input").map((entity) =>
+        tile(entity, [{ type: "select-options" }]),
+      ),
+      ...[...entities.items.audio_input.values()].flatMap((item) => [
+        ...fields(item, "volume").map((entity) =>
+          tile(entity, [{ type: "numeric-input", style: "slider" }]),
+        ),
+        ...fields(item, "mute").map((entity) => tile(entity)),
+      ]),
     ]),
 
   "overview-load": ({ entities, hours }) =>

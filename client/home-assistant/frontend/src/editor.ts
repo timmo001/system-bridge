@@ -128,7 +128,10 @@ const sectionLabel = (name: string) => {
 
 const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   storage: "Space used on every mount.",
-  "now-playing": "The media playing, with playback and volume controls.",
+  "now-playing":
+    "The media playing, with playback and volume controls, and the system volume.",
+  "audio-outputs": "Volume of each audio output, such as speakers.",
+  "audio-inputs": "Volume of each audio input, such as a microphone.",
   "overview-load": "CPU and memory load in one graph.",
   "overview-power": "Power draw, with a graph.",
   "overview-temperatures": "CPU and GPU temperatures, with a graph.",
