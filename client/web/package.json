@@ -33,13 +33,13 @@
     "lit": "^3.3.2"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.89.0",
+    "@oxlint/plugins": "1.90.0",
     "@timmo001/oxlint-rules": "0.6.3",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
-    "oxlint": "1.89.0",
+    "oxlint": "1.90.0",
     "oxlint-tsgolint": "7.0.2005",
     "prettier": "^3.8.3",
     "typescript": "7.0.2",
