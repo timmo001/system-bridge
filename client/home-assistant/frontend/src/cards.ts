@@ -10,9 +10,13 @@ import type {
 
 export const DEFAULT_HOURS_TO_SHOW = 1;
 
+/** Features that already show the entity's state, such as the chosen option. */
+const STATE_FEATURES = new Set(["select-options", "toggle"]);
+
 /**
  * A tile named after the entity alone, without the device name in front, or
- * after `name` when given.
+ * after `name` when given. When a feature already shows the state, the tile
+ * shows when it was last updated instead.
  */
 export const tile = (
   entity: string,
@@ -27,6 +31,10 @@ export const tile = (
 
   if (features) {
     card.features = features;
+  }
+
+  if (features?.some(({ type }) => STATE_FEATURES.has(type))) {
+    card.state_content = "last_updated";
   }
 
   return card;

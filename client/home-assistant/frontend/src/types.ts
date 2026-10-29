@@ -64,6 +64,7 @@ export interface TileCardConfig {
   entity: string;
   name?: string | EntityNameItem[];
   features?: TileFeatureConfig[];
+  state_content?: string | string[];
 }
 
 export interface HistoryGraphCardConfig {
