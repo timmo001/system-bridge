@@ -751,15 +751,35 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
     return noData("cameras");
   }
 
-  const cards = cameras.map(
-    (camera) => html`
-      <sb-card class="half" heading=${camera.name} subheading=${camera.device}>
+  const cards = cameras.map((camera) => {
+    // In the order the camera lists them
+    const groups = [
+      ...new Set(camera.controls.map((control) => control.group)),
+    ];
+
+    const sets = groups.map(
+      (group) => html`
+        <sb-card
+          class="half"
+          heading=${group || "Controls"}
+          subheading=${camera.name}
+        >
+          <sb-camera-controls
+            .camera=${camera}
+            group=${group}
+          ></sb-camera-controls>
+        </sb-card>
+      `,
+    );
+
+    return html`
+      <sb-card heading=${camera.name} subheading=${camera.device}>
         ${facts([["Driver", camera.driver]])}
-        <sb-camera-controls .camera=${camera}></sb-camera-controls>
         <sb-camera-capture slot="footer" .camera=${camera}></sb-camera-capture>
       </sb-card>
-    `,
-  );
+      ${sets}
+    `;
+  });
 
   return html`<div class="dashboard">${cards}</div>`;
 };

@@ -491,11 +491,12 @@ export const bluetoothAction = Atom.family((address: string) =>
   ),
 );
 
-/** Sets one of a camera's controls, one atom per camera. */
-export const cameraControl = Atom.family((id: string) =>
-  Atom.fn((control: Omit<CameraControlRequest, "id">, get) =>
+/** Sets one of a camera's controls, one atom per set of controls, keyed by the
+ * camera's id and the set's name. */
+export const cameraControl = Atom.family((_key: string) =>
+  Atom.fn((control: CameraControlRequest, get) =>
     fnSocket(get).pipe(
-      Effect.flatMap((bridge) => bridge.cameraControl({ ...control, id })),
+      Effect.flatMap((bridge) => bridge.cameraControl(control)),
     ),
   ),
 );

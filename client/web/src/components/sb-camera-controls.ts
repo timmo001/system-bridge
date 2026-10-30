@@ -10,7 +10,8 @@ import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, cameraControl, registry } from "~/lib/atoms";
 import { formatNumber } from "~/lib/format";
 
-/** A camera's controls: sliders, switches and menus, by the kind of value. */
+/** One set of a camera's controls: sliders, switches and menus, by the kind of
+ * value. */
 @customElement("sb-camera-controls")
 export class SbCameraControls extends LitElement {
   static override styles = [
@@ -53,13 +54,22 @@ export class SbCameraControls extends LitElement {
 
   @property({ attribute: false }) camera: Camera | null = null;
 
-  readonly #control = new AtomController(this, () =>
-    cameraControl(this.camera?.id ?? ""),
-  );
+  /** The set of controls to show, such as User Controls. */
+  @property() group = "";
+
+  get #key() {
+    return `${this.camera?.id ?? ""}\n${this.group}`;
+  }
+
+  readonly #control = new AtomController(this, () => cameraControl(this.#key));
 
   #set(control: string, value: number) {
     if (this.camera) {
-      registry.set(cameraControl(this.camera.id), { control, value });
+      registry.set(cameraControl(this.#key), {
+        id: this.camera.id,
+        control,
+        value,
+      });
     }
   }
 
@@ -173,9 +183,9 @@ export class SbCameraControls extends LitElement {
     const waiting = this.#control.value.waiting;
     const result = actionResult(this.#control.value, "");
 
-    const controls = camera.controls.map((control) =>
-      this.#renderControl(camera, control, waiting),
-    );
+    const controls = camera.controls
+      .filter((control) => control.group === this.group)
+      .map((control) => this.#renderControl(camera, control, waiting));
 
     return html`
       ${controls}
