@@ -73,6 +73,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"id", "control", "value"}),
 	}, eventTool[cameraControlInput](handlers, event.EventCameraControl))
 
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_camera_capture",
+		Description: "Take a picture with a camera and return it as a JPEG. Get camera ids from the cameras module. Only works when the cameras.capture setting is on, and not while another app has the camera to itself. Only use this when the user asks to see through the camera. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"id": map[string]any{"type": "string", "description": "Camera id from the cameras module"},
+		}, []string{"id"}),
+	}, handlers.handleCameraCapture)
+
 	windowID := map[string]any{"type": "string", "description": "Window id from the desktop module's windows"}
 	boolean := func(description string) map[string]any {
 		return map[string]any{"type": "boolean", "description": description}

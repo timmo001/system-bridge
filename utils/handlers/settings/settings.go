@@ -23,6 +23,7 @@ func Update(current *Settings, new *Settings) error {
 	current.SystemTray = new.SystemTray
 	current.Hotkeys = new.Hotkeys
 	current.LogLevel = new.LogLevel
+	current.Cameras = new.Cameras
 	current.Desktop = new.Desktop
 	current.Disks = new.Disks
 	current.Media = new.Media

@@ -13,6 +13,7 @@ export const EventType = Schema.Literals([
   "BLUETOOTH_DISCONNECT",
   "BLUETOOTH_FORGET",
   "BLUETOOTH_SET_POWER",
+  "CAMERA_CAPTURE",
   "CAMERA_CONTROL",
   "CLIPBOARD_GET_TEXT",
   "CLIPBOARD_SET_TEXT",
@@ -90,6 +91,7 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_DISCONNECTED",
   "BLUETOOTH_FORGOTTEN",
   "BLUETOOTH_POWER_SET",
+  "CAMERA_CAPTURED",
   "CAMERA_CONTROLLED",
   "CLIPBOARD_TEXT",
   "CLIPBOARD_TEXT_SET",
@@ -279,6 +281,15 @@ export interface SettingsDesktop extends Schema.Schema.Type<
   typeof SettingsDesktop
 > {}
 
+export const SettingsCameras = Schema.Struct({
+  /** Whether cameras can take pictures, off by default. */
+  capture: Schema.Boolean,
+});
+
+export interface SettingsCameras extends Schema.Schema.Type<
+  typeof SettingsCameras
+> {}
+
 export const SettingsDisks = Schema.Struct({
   allowedSecondaryMountPoints: Schema.Array(Schema.String),
 });
@@ -292,6 +303,7 @@ export const Settings = Schema.Struct({
   systemTray: Schema.Boolean,
   hotkeys: Schema.Array(SettingsHotkey),
   logLevel: LogLevel,
+  cameras: SettingsCameras,
   commands: SettingsCommands,
   desktop: SettingsDesktop,
   disks: SettingsDisks,
@@ -542,6 +554,13 @@ export const CameraControlRequest = Schema.Struct({
 
 export interface CameraControlRequest extends Schema.Schema.Type<
   typeof CameraControlRequest
+> {}
+
+/** Takes a picture with a camera, by its `id` from the cameras module. */
+export const CameraCaptureRequest = Schema.Struct({ id: Schema.String });
+
+export interface CameraCaptureRequest extends Schema.Schema.Type<
+  typeof CameraCaptureRequest
 > {}
 
 /** Names a window by its `id` from the desktop module. */

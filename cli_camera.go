@@ -2,19 +2,52 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/urfave/cli/v3"
 )
 
 func cameraCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "camera",
-		Usage: "Control webcams",
+		Usage: "Control webcams and take pictures with them",
 		Commands: []*cli.Command{
+			{
+				Name:      "capture",
+				Usage:     "Take a picture with a camera and save it as a JPEG, or write it to the output with -",
+				ArgsUsage: "<camera id> <file>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					if cmd.Args().Len() != 2 {
+						return fmt.Errorf("give a camera id and a file to save the picture to")
+					}
+					reply, err := client.RequestWithin(cmdCtx, client.SlowSendTimeout, event.EventCameraCapture, map[string]any{
+						"id": cmd.Args().Get(0),
+					})
+					if err != nil {
+						return err
+					}
+					var picture types.CameraPicture
+					if err := json.Unmarshal(reply, &picture); err != nil {
+						return fmt.Errorf("decode picture: %w", err)
+					}
+					image, err := base64.StdEncoding.DecodeString(picture.Image)
+					if err != nil {
+						return fmt.Errorf("decode picture: %w", err)
+					}
+					if path := cmd.Args().Get(1); path != "-" {
+						return os.WriteFile(path, image, 0o600)
+					}
+					_, err = os.Stdout.Write(image)
+					return err
+				},
+			},
 			{
 				Name:      "control",
 				Usage:     "Set one of a camera's controls, such as its brightness or zoom",

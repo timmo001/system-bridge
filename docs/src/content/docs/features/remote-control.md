@@ -193,6 +193,14 @@ system-bridge client camera control usb-Insta360_Insta360_Link_2C-video-index0 z
 
 The [`cameras`](/api/data/#cameras) data lists each camera's controls with their ranges and options. Controls can be set while another app is using the camera. Linux only, through V4L2.
 
+With the `cameras.capture` setting on, take a picture with [`CAMERA_CAPTURE`](/api/websocket/control/#camera-capture), the MCP server's `system_bridge_camera_capture` tool, or the CLI, which saves it as a JPEG, or writes it to the output with `-`:
+
+```bash title="Terminal"
+system-bridge client camera capture usb-Insta360_Insta360_Link_2C-video-index0 picture.jpg
+```
+
+Pictures need ffmpeg, and GStreamer's PipeWire plugin to share a camera another app is using through PipeWire.
+
 ## Processes
 
 End a process from the [`processes`](/api/data/#processes) data with [`PROCESS_KILL`](/api/websocket/control/#process-control), the [MCP server](/api/mcp/)'s `system_bridge_kill_process` tool, or the CLI:

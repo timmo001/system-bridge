@@ -165,6 +165,43 @@ Send the `CAMERA_CONTROL` event to set one of a webcam's controls, such as its b
 
 The response type is `CAMERA_CONTROLLED`, and the cameras module updates straight after. An unknown camera or control, a read-only control or a value it can't take gets an `ERROR` with the subtype `BAD_REQUEST`. A control another one sets automatically, such as focus while autofocus is on, can't be set until that one is turned off.
 
+## Camera capture
+
+Send the `CAMERA_CAPTURE` event to take a picture with a webcam. Linux only, and needs ffmpeg.
+
+- `id` (required): The camera's `id` from the [`cameras`](/api/data/#cameras) data.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "CAMERA_CAPTURE",
+    "data": {
+        "id": "usb-Insta360_Insta360_Link_2C-video-index0"
+    }
+}
+```
+
+The response type is `CAMERA_CAPTURED`, with the picture as a base64 JPEG:
+
+```json title="Response"
+{
+    "id": "abc123",
+    "type": "CAMERA_CAPTURED",
+    "subtype": "NONE",
+    "data": {
+        "id": "usb-Insta360_Insta360_Link_2C-video-index0",
+        "content_type": "image/jpeg",
+        "image": "/9j/4AAQSkZJRgABAQ..."
+    },
+    "message": "Picture taken"
+}
+```
+
+A camera can see the room it's in, so this only works with the `cameras.capture` setting on. It's off by default, and otherwise gets an `ERROR` with the subtype `INVALID_ACTION`. Turn it on with [`UPDATE_SETTINGS`](/api/websocket/system/).
+
+A camera nothing is using is started for the picture, at the size it's set to, and stopped again, which takes a second or two. While another app streams it through PipeWire, as browsers and most video call apps do, the picture is shared from that stream, which needs GStreamer's PipeWire plugin. An app with the camera open directly has it to itself, so that gets an `ERROR` naming the app. The cameras and [`system`](/api/data/#system) modules update after each picture, as starting the camera shows in `camera_usage`.
+
 ## System control
 
 Change system settings. Linux only.

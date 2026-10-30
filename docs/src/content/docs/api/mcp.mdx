@@ -129,6 +129,12 @@ Turn Bluetooth on or off.
 
 - `powered` (required): `true` to turn it on, `false` to turn it off.
 
+### `system_bridge_camera_capture`
+
+Take a picture with a webcam, returned as an image and as its base64 JPEG. Needs the `cameras.capture` setting on. See [camera capture](/api/websocket/control/#camera-capture). Linux only.
+
+- `id` (required): The camera's `id` from the `cameras` module.
+
 ### `system_bridge_camera_control`
 
 Set one of a webcam's controls, such as its brightness or zoom. See [camera control](/api/websocket/control/#camera-control). Linux only.

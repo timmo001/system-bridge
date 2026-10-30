@@ -309,6 +309,16 @@ export const Camera = Schema.Struct({
 
 export interface Camera extends Schema.Schema.Type<typeof Camera> {}
 
+export const CameraPicture = Schema.Struct({
+  id: Schema.String,
+  content_type: Schema.String,
+  image: Schema.String,
+});
+
+export interface CameraPicture extends Schema.Schema.Type<
+  typeof CameraPicture
+> {}
+
 export const CamerasData = Schema.Struct({
   cameras: Schema.Array(Camera),
 });

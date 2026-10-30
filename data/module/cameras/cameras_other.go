@@ -20,3 +20,11 @@ func Watch(context.Context, func()) {}
 func SetControl(context.Context, string, string, int64) error {
 	return ErrUnsupported
 }
+
+// Capture isn't supported on this platform yet
+func Capture(context.Context, string) ([]byte, error) {
+	if !captureEnabled() {
+		return nil, ErrNotAllowed
+	}
+	return nil, ErrUnsupported
+}

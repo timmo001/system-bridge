@@ -8,6 +8,7 @@ func settingsToFrontend(s *settings.Settings) map[string]interface{} {
 	return map[string]interface{}{
 		"autostart":  s.Autostart,
 		"systemTray": s.SystemTray,
+		"cameras":    s.Cameras,
 		"commands":   s.Commands,
 		"desktop":    s.Desktop,
 		"disks":      s.Disks,

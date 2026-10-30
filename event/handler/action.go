@@ -128,7 +128,7 @@ func decodeRequest[T any](eventType event.EventType, message event.Message, vali
 func requestError(message event.Message, err error) event.MessageResponse {
 	subtype := event.ResponseSubtypeNone
 	switch {
-	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, cameras.ErrUnsupported), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed):
+	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, cameras.ErrUnsupported), errors.Is(err, cameras.ErrNotAllowed), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed):
 		subtype = event.ResponseSubtypeInvalidAction
 	case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, cameras.ErrNotFound), errors.Is(err, cameras.ErrInvalidValue),
 		errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue),

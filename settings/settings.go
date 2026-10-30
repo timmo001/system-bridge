@@ -118,11 +118,18 @@ type SettingsDesktop struct {
 	HyprlandCode bool `json:"hyprlandCode" mapstructure:"hyprlandCode"`
 }
 
+// SettingsCameras holds the cameras module's options. Taking pictures with a
+// camera is off by default, as it can see the room it's in.
+type SettingsCameras struct {
+	Capture bool `json:"capture" mapstructure:"capture"`
+}
+
 type Settings struct {
 	Autostart  bool             `json:"autostart" mapstructure:"autostart"`
 	SystemTray bool             `json:"systemTray" mapstructure:"systemTray"`
 	Hotkeys    []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel   LogLevel         `json:"logLevel" mapstructure:"logLevel"`
+	Cameras    SettingsCameras  `json:"cameras" mapstructure:"cameras"`
 	Commands   SettingsCommands `json:"commands" mapstructure:"commands"`
 	Desktop    SettingsDesktop  `json:"desktop" mapstructure:"desktop"`
 	Disks      SettingsDisks    `json:"disks" mapstructure:"disks"`
@@ -148,6 +155,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("systemTray", true)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelWarn)
+	viper.SetDefault("cameras.capture", false)
 	viper.SetDefault("desktop.windowTitles", false)
 	viper.SetDefault("desktop.hyprlandCode", false)
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
@@ -270,6 +278,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
+	viper.Set("cameras.capture", cfg.Cameras.Capture)
 	viper.Set("desktop.windowTitles", cfg.Desktop.WindowTitles)
 	viper.Set("desktop.hyprlandCode", cfg.Desktop.HyprlandCode)
 	viper.Set("disks.allowedSecondaryMountPoints", cfg.Disks.AllowedSecondaryMountPoints)

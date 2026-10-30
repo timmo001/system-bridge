@@ -42,6 +42,11 @@ func Request(ctx context.Context, eventType event.EventType, data any) (json.Raw
 	return request(ctx, sendTimeout, eventType, data)
 }
 
+// RequestWithin is Request, waiting up to timeout for the answer.
+func RequestWithin(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {
+	return request(ctx, timeout, eventType, data)
+}
+
 // request sends one event to the local backend and returns the data of its
 // answer, undecoded.
 func request(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {

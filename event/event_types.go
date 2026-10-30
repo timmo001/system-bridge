@@ -10,6 +10,7 @@ const (
 	EventBluetoothForget           EventType = "BLUETOOTH_FORGET"
 	EventBluetoothSetPower         EventType = "BLUETOOTH_SET_POWER"
 	EventCameraControl             EventType = "CAMERA_CONTROL"
+	EventCameraCapture             EventType = "CAMERA_CAPTURE"
 	EventClipboardGetText          EventType = "CLIPBOARD_GET_TEXT"
 	EventClipboardSetText          EventType = "CLIPBOARD_SET_TEXT"
 	EventCommandAdd                EventType = "COMMAND_ADD"

@@ -48,6 +48,11 @@ tools are not required. Installing them improves detection on some systems:
   - `bluez`: Bluetooth devices and controls.
   - `ddcutil`: brightness and power for external monitors over DDC/CI. Needs
     access to `/dev/i2c-*`, usually by being in the `i2c` group.
+  - `ffmpeg`: takes pictures with webcams, when the `cameras.capture` setting
+    is on.
+  - `gst-plugin-pipewire` (`gstreamer1.0-pipewire` on Ubuntu,
+    `pipewire-gstreamer` on Fedora): takes pictures with a webcam another app
+    is using through PipeWire.
 
   Install with pacman (`sudo pacman -S pciutils lm_sensors ddcutil`) or apt
   (`sudo apt install pciutils lm-sensors ddcutil`).

@@ -44,3 +44,10 @@ type Camera struct {
 type CamerasData struct {
 	Cameras []Camera `json:"cameras" mapstructure:"cameras"` // Linux only, empty elsewhere
 }
+
+// CameraPicture is a picture taken with a camera
+type CameraPicture struct {
+	ID          string `json:"id" mapstructure:"id"`                     // The camera's id
+	ContentType string `json:"content_type" mapstructure:"content_type"` // Such as image/jpeg
+	Image       string `json:"image" mapstructure:"image"`               // Base64
+}

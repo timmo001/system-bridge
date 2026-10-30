@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -43,6 +44,10 @@ type cameraControlInput struct {
 	ID      string `json:"id"`
 	Control string `json:"control"`
 	Value   int64  `json:"value"`
+}
+
+type cameraCaptureInput struct {
+	ID string `json:"id"`
 }
 
 type displayControlInput struct {
@@ -510,6 +515,32 @@ func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRe
 
 	return toolResult(result, result)
 }
+
+// handleCameraCapture returns the picture as image content, so the client
+// can see it, and as structured content, for clients such as code mode that
+// save it
+func (h toolHandlers) handleCameraCapture(_ context.Context, _ *sdkmcp.CallToolRequest, input cameraCaptureInput) (*sdkmcp.CallToolResult, types.CameraPicture, error) {
+	response := h.eventRouter.HandleMessage("mcp", event.Message{
+		ID:    generateID(),
+		Event: event.EventCameraCapture,
+		Data:  map[string]interface{}{"id": input.ID},
+	})
+	if response.Type == event.ResponseTypeError {
+		return nil, types.CameraPicture{}, fmt.Errorf("%s", response.Message)
+	}
+	picture, ok := response.Data.(*types.CameraPicture)
+	if !ok || picture == nil {
+		return nil, types.CameraPicture{}, fmt.Errorf("unexpected reply data %T", response.Data)
+	}
+	image, err := base64.StdEncoding.DecodeString(picture.Image)
+	if err != nil {
+		return nil, types.CameraPicture{}, fmt.Errorf("decode picture: %w", err)
+	}
+	return &sdkmcp.CallToolResult{Content: []sdkmcp.Content{
+		&sdkmcp.ImageContent{Data: image, MIMEType: picture.ContentType},
+	}}, *picture, nil
+}
+
 func generateID() string {
 	return fmt.Sprintf("mcp-%d", time.Now().UnixNano())
 }

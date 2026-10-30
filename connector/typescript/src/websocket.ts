@@ -27,6 +27,7 @@ import {
   RequestTimeoutError,
 } from "./errors.js";
 import {
+  CameraPicture,
   ClipboardText,
   CommandPrefab,
   DiskMountsResponse,
@@ -43,6 +44,7 @@ import {
   AudioControl,
   BluetoothDeviceRequest,
   BluetoothPowerRequest,
+  CameraCaptureRequest,
   CameraControlRequest,
   ClipboardTextRequest,
   CommandIdRequest,
@@ -229,6 +231,13 @@ export interface Interface {
   readonly cameraControl: (
     control: CameraControlRequest,
   ) => Effect.Effect<void, WebSocketError>;
+  /**
+   * Takes a picture with a camera, when the cameras.capture setting is on.
+   * Linux only.
+   */
+  readonly cameraCapture: (
+    request: CameraCaptureRequest,
+  ) => Effect.Effect<CameraPicture, WebSocketError>;
   /** The text on the clipboard. */
   readonly getClipboard: Effect.Effect<ClipboardText, WebSocketError>;
   /** Puts text on the clipboard. Linux only. */
@@ -475,6 +484,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
   // The backend allows 30 seconds for a Bluetooth device to connect
   const bluetoothTimeout = Duration.max(requestTimeout, Duration.seconds(35));
+
+  // The backend allows 20 seconds for a camera to start and settle
+  const cameraCaptureTimeout = Duration.max(
+    requestTimeout,
+    Duration.seconds(25),
+  );
 
   const socket = yield* Socket.makeWebSocket(websocketUrl(options), {
     openTimeout: options.openTimeout ?? "10 seconds",
@@ -1092,6 +1107,19 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const cameraCapture = Effect.fn("SystemBridgeWebSocket.cameraCapture")(
+    function* (request: CameraCaptureRequest) {
+      return yield* call(
+        "CAMERA_CAPTURE",
+        "CAMERA_CAPTURED",
+        CameraCaptureRequest,
+        request,
+        CameraPicture,
+        cameraCaptureTimeout,
+      );
+    },
+  );
+
   const getClipboard = call(
     "CLIPBOARD_GET_TEXT",
     "CLIPBOARD_TEXT",
@@ -1577,6 +1605,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothForget,
     bluetoothSetPower,
     cameraControl,
+    cameraCapture,
     getClipboard,
     setClipboard,
     setPowerProfile,

@@ -11,6 +11,7 @@ const (
 	ResponseTypeBluetoothForgotten        ResponseType = "BLUETOOTH_FORGOTTEN"
 	ResponseTypeBluetoothPowerSet         ResponseType = "BLUETOOTH_POWER_SET"
 	ResponseTypeCameraControlled          ResponseType = "CAMERA_CONTROLLED"
+	ResponseTypeCameraCaptured            ResponseType = "CAMERA_CAPTURED"
 	ResponseTypeClipboardText             ResponseType = "CLIPBOARD_TEXT"
 	ResponseTypeClipboardTextSet          ResponseType = "CLIPBOARD_TEXT_SET"
 	ResponseTypeCommandAdded              ResponseType = "COMMAND_ADDED"
