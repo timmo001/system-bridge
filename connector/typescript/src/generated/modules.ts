@@ -284,6 +284,7 @@ export interface CameraControlOption extends Schema.Schema.Type<
 export const CameraControl = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
+  group: Schema.String,
   type: CameraControlType,
   value: Schema.Finite,
   minimum: Schema.Finite,

@@ -26,6 +26,7 @@ const (
 	ctrlTypeInteger     = 1
 	ctrlTypeBoolean     = 2
 	ctrlTypeMenu        = 3
+	ctrlTypeCtrlClass   = 6
 	ctrlTypeIntegerMenu = 9
 )
 

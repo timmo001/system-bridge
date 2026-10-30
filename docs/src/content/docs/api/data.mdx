@@ -131,6 +131,7 @@ Each control has:
 | --- | --- | --- |
 | `id` | string | The control's name as `v4l2-ctl` writes it, such as `brightness` or `focus_automatic_continuous`. |
 | `name` | string | The control's name, such as `Focus, Automatic Continuous`. |
+| `group` | string | The set the control is in, such as `User Controls` or `Camera Controls`, as `v4l2-ctl` lists them. |
 | `type` | string | `integer`, `boolean` or `menu`. |
 | `value` | number | The current value. A boolean is `0` or `1`, and a menu's is the `value` of one of its `options`. |
 | `minimum`, `maximum`, `step`, `default` | number | The range the value can take, and its default. |

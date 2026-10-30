@@ -9,6 +9,7 @@
         {
           "id": "brightness",
           "name": "Brightness",
+          "group": "User Controls",
           "type": "integer",
           "value": 50,
           "minimum": 0,
@@ -22,6 +23,7 @@
         {
           "id": "white_balance_automatic",
           "name": "White Balance, Automatic",
+          "group": "User Controls",
           "type": "boolean",
           "value": 1,
           "minimum": 0,
@@ -35,6 +37,7 @@
         {
           "id": "power_line_frequency",
           "name": "Power Line Frequency",
+          "group": "User Controls",
           "type": "menu",
           "value": 1,
           "minimum": 0,
@@ -52,6 +55,7 @@
         {
           "id": "focus_absolute",
           "name": "Focus, Absolute",
+          "group": "Camera Controls",
           "type": "integer",
           "value": 94,
           "minimum": 0,

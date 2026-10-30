@@ -6,6 +6,7 @@
         controls=list([
           CameraControl(
             default=50,
+            group='User Controls',
             id='brightness',
             inactive=False,
             maximum=100,
@@ -20,6 +21,7 @@
           ),
           CameraControl(
             default=3,
+            group='User Controls',
             id='power_line_frequency',
             inactive=False,
             maximum=2,
@@ -46,6 +48,7 @@
           ),
           CameraControl(
             default=50,
+            group='Camera Controls',
             id='focus_absolute',
             inactive=True,
             maximum=100,
@@ -60,6 +63,7 @@
           ),
           CameraControl(
             default=0,
+            group='Camera Controls',
             id='focus_automatic_continuous',
             inactive=False,
             maximum=1,

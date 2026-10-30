@@ -24,6 +24,7 @@ FIXTURE_CAMERAS = Cameras(
                     maximum=100,
                     step=1,
                     default=50,
+                    group="User Controls",
                 ),
                 CameraControl(
                     id="power_line_frequency",
@@ -34,6 +35,7 @@ FIXTURE_CAMERAS = Cameras(
                     maximum=2,
                     step=1,
                     default=3,
+                    group="User Controls",
                     options=[
                         CameraControlOption(value=0, name="Disabled"),
                         CameraControlOption(value=1, name="50 Hz"),
@@ -49,6 +51,7 @@ FIXTURE_CAMERAS = Cameras(
                     maximum=100,
                     step=1,
                     default=50,
+                    group="Camera Controls",
                     inactive=True,
                 ),
                 CameraControl(
@@ -60,6 +63,7 @@ FIXTURE_CAMERAS = Cameras(
                     maximum=1,
                     step=1,
                     default=0,
+                    group="Camera Controls",
                 ),
             ],
         )

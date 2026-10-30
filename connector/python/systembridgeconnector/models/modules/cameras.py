@@ -37,6 +37,7 @@ class CameraControl:
     maximum: int
     step: int
     default: int
+    group: str = ""
     options: list[CameraControlOption] = field(default_factory=list)
     inactive: bool = False
     read_only: bool = False

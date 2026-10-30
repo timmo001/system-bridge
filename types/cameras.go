@@ -20,6 +20,7 @@ type CameraControlOption struct {
 type CameraControl struct {
 	ID       string                `json:"id" mapstructure:"id"` // Such as brightness or focus_automatic_continuous
 	Name     string                `json:"name" mapstructure:"name"`
+	Group    string                `json:"group" mapstructure:"group"` // The set it's in, such as User Controls or Camera Controls
 	Type     CameraControlType     `json:"type" mapstructure:"type"`
 	Value    int64                 `json:"value" mapstructure:"value"`
 	Minimum  int64                 `json:"minimum" mapstructure:"minimum"`

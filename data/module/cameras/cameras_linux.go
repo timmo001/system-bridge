@@ -108,10 +108,12 @@ func readCamera(device string) (types.Camera, bool, error) {
 	return camera, true, nil
 }
 
-// readControls reads the integer, boolean and menu controls of a device.
-// Others, such as buttons, are left out.
+// readControls reads the integer, boolean and menu controls of a device, each
+// in the group of the class it comes after. Others, such as buttons, are left
+// out.
 func readControls(fd int) []types.CameraControl {
 	controls := []types.CameraControl{}
+	group := ""
 	for id := uint32(0); ; {
 		query, ok, err := nextCtrl(fd, id)
 		if err != nil {
@@ -123,6 +125,11 @@ func readControls(fd int) []types.CameraControl {
 		}
 		id = query.ID
 
+		// A class, such as User Controls, comes before its controls
+		if query.Type == ctrlTypeCtrlClass {
+			group = cString(query.Name[:])
+			continue
+		}
 		if query.Flags&(ctrlFlagDisabled|ctrlFlagWriteOnly) != 0 {
 			continue
 		}
@@ -147,6 +154,7 @@ func readControls(fd int) []types.CameraControl {
 		control := types.CameraControl{
 			ID:       controlID(name),
 			Name:     name,
+			Group:    group,
 			Type:     controlType,
 			Value:    int64(value),
 			Minimum:  int64(query.Minimum),
