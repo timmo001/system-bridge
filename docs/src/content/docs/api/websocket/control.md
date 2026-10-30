@@ -582,3 +582,26 @@ Control the system power state with one of the following events. Each takes empt
     "data": {}
 }
 ```
+
+### Power state changes
+
+Every connected client gets a `POWER_STATE_CHANGED` message with the `id` `system` just before the system sleeps or shuts down, and again when it wakes, whatever started it. `data.state` is one of:
+
+| State | When |
+| --- | --- |
+| `sleeping` | Before sleep or hibernate |
+| `shutting_down` | Before power off or restart. Linux only; elsewhere the connection just closes |
+| `resumed` | After waking |
+
+```json title="Response"
+{
+    "id": "system",
+    "type": "POWER_STATE_CHANGED",
+    "subtype": "NONE",
+    "data": {
+        "state": "sleeping"
+    }
+}
+```
+
+On waking, System Bridge also announces itself over mDNS again, so clients that discover it, such as Home Assistant, hear it's back.
