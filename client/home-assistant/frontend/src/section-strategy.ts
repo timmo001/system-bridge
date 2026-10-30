@@ -45,12 +45,13 @@ export const deviceError = (result: Extract<DeviceResult, { error: string }>) =>
 
 export const buildSection = (
   entities: SystemBridgeEntities,
-  { section, item }: SectionRef,
+  { section, item, link }: SectionRef,
   options: SectionOptions,
 ) =>
   SECTIONS[section]({
     entities,
     item,
+    link,
     hours: options.hours_to_show ?? DEFAULT_HOURS_TO_SHOW,
     percentage: percentageFeatures(
       options.tile_feature ?? DEFAULT_TILE_FEATURE,
@@ -89,7 +90,7 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
     return (
       buildSection(
         entities,
-        { section: config.section, item: config.item },
+        { section: config.section, item: config.item, link: config.link },
         config,
       ) ?? message("No System Bridge entities for this section.")
     );

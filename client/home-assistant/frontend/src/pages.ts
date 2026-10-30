@@ -4,6 +4,8 @@ import type { SectionName } from "./sections";
 export interface SectionRef {
   section: SectionName;
   item?: string;
+  /** The page the section's heading opens, when that page is in the dashboard. */
+  link?: string;
 }
 
 export interface Page {
@@ -37,13 +39,13 @@ export const PAGES: readonly Page[] = [
     icon: "mdi:view-dashboard-outline",
     diagnostics: true,
     sections: () => [
-      { section: "storage" },
-      { section: "audio" },
-      { section: "now-playing" },
-      { section: "overview-load" },
-      { section: "network" },
-      { section: "overview-power" },
-      { section: "overview-temperatures" },
+      { section: "storage", link: "disks" },
+      { section: "audio", link: "audio" },
+      { section: "now-playing", link: "media" },
+      { section: "overview-load", link: "cpu" },
+      { section: "network", link: "networks" },
+      { section: "overview-power", link: "system" },
+      { section: "overview-temperatures", link: "cpu" },
     ],
   },
   // Per-app volume is not for Core: apps come and go too often for entities
@@ -146,6 +148,10 @@ export const PAGES: readonly Page[] = [
     title: "System",
     icon: "mdi:information-outline",
     diagnostics: true,
-    sections: () => [{ section: "system" }, { section: "commands" }],
+    sections: () => [
+      { section: "system" },
+      { section: "power" },
+      { section: "commands" },
+    ],
   },
 ];

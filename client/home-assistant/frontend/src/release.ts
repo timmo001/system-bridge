@@ -65,6 +65,9 @@ export const RELEASE_GATES = new Map([
   ["audio_input_mute", "2026.12"],
   ["audio_input_volume", "2026.12"],
   ["audio_output", "2026.12"],
+  // Core #189544
+  ["keep_awake", "2026.12"],
+  ["power_profile", "2026.12"],
 ]);
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */

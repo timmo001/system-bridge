@@ -23,21 +23,29 @@ import {
   type ViewStrategyConfig,
 } from "./types";
 
-/** The page's sections that have entities, as section strategies. */
+/**
+ * The page's sections that have entities, as section strategies. Headings
+ * only link to `views`, the other views in the same dashboard.
+ */
 export const pageSections = (
   page: Page,
   entities: SystemBridgeEntities,
   options: SectionOptions,
+  views: ReadonlySet<string> = new Set(),
 ): LovelaceStrategySectionConfig[] =>
   page
     .sections(entities)
     .filter((ref) => buildSection(entities, ref, options) !== undefined)
-    .map((ref) => {
+    .map(({ link, ...ref }) => {
       const strategy: SectionStrategyConfig = {
         type: STRATEGY_TYPE,
         device_id: entities.device.id,
         ...ref,
       };
+
+      if (link !== undefined && views.has(link)) {
+        strategy.link = link;
+      }
 
       // Only options that were set, so the sections keep their defaults
       if (options.hours_to_show !== undefined) {
@@ -70,6 +78,7 @@ export const pageView = (
     show_icon_and_title?: boolean;
     show_top_links?: boolean;
   },
+  views?: ReadonlySet<string>,
 ): LovelaceViewConfig => ({
   type: "sections",
   title: page.title,
@@ -83,7 +92,7 @@ export const pageView = (
       : webClientBadge(entities, page.page, page.title)),
     ...(page.diagnostics ? diagnosticBadges(entities) : []),
   ],
-  sections: pageSections(page, entities, options),
+  sections: pageSections(page, entities, options, views),
 });
 
 @customElement("ll-strategy-view-system-bridge")

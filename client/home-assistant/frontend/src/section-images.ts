@@ -141,6 +141,12 @@ const DRAWINGS: Record<SectionName, string> = {
   commands: columns(3, (i) =>
     rect(10 + i * 26, 12, 22, 20, i === 0 ? 0.48 : 0.24, 4),
   ),
+  power:
+    outline(8, 10, 36, 24) +
+    rect(13, 26, 26, 4, 0.48, 2) +
+    outline(50, 10, 36, 24) +
+    rect(56, 18, 24, 8, 0.24, 4) +
+    dot(76, 22, 3, 0.48),
   system:
     `<circle cx="47" cy="22" r="13" stroke="currentColor" stroke-opacity="0.48" stroke-width="2"/>` +
     dot(47, 15.5, 2, 0.48) +

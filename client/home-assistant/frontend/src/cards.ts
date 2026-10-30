@@ -56,11 +56,20 @@ export const percentageFeatures = (
   }
 };
 
-export const heading = (text: string, icon?: string): HeadingCardConfig => {
+/** A heading, which opens the dashboard view at `link` when given. */
+export const heading = (
+  text: string,
+  icon?: string,
+  link?: string,
+): HeadingCardConfig => {
   const card: HeadingCardConfig = { type: "heading", heading: text };
 
   if (icon) {
     card.icon = icon;
+  }
+
+  if (link) {
+    card.tap_action = { action: "navigate", navigation_path: link };
   }
 
   return card;

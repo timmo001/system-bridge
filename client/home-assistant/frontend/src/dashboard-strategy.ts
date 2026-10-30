@@ -35,21 +35,26 @@ export class SystemBridgeDashboardStrategy extends ReactiveElement {
     const entities = await getSystemBridgeEntities(hass, result.device);
 
     // The chosen pages, in the chosen order; unknown paths are skipped
-    const pages = (config.pages ?? PAGES.map(({ page }) => page)).flatMap(
-      (path) => PAGES.filter(({ page }) => page === path),
-    );
+    const pages = (config.pages ?? PAGES.map(({ page }) => page))
+      .flatMap((path) => PAGES.filter(({ page }) => page === path))
+      .filter((page) => pageSections(page, entities, config).length > 0);
+
+    const views = new Set(pages.map(({ page }) => page));
 
     return {
-      views: pages
-        .filter((page) => pageSections(page, entities, config).length > 0)
-        .map((page) =>
-          pageView(page, entities, {
+      views: pages.map((page) =>
+        pageView(
+          page,
+          entities,
+          {
             ...config,
             show_icon_and_title:
               config.icon_and_title_pages?.includes(page.page) ?? true,
             show_top_links: config.top_links_pages?.includes(page.page) ?? true,
-          }),
+          },
+          views,
         ),
+      ),
     };
   }
 

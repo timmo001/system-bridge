@@ -20,6 +20,8 @@ export interface SectionContext {
   audioFeatures: AudioFeature[];
   /** Whether the audio input tile has its picker. */
   inputSource: boolean;
+  /** The dashboard view the section's heading opens. */
+  link: string | undefined;
 }
 
 type SectionBuilder = (
@@ -130,23 +132,23 @@ const itemTiles = (
   });
 
 export const SECTIONS = {
-  storage: ({ entities }) =>
+  storage: ({ entities, link }) =>
     grid([
-      heading("Storage", "mdi:harddisk"),
+      heading("Storage", "mdi:harddisk", link),
       ...fromItems(entities, "mount", "space_used").map((entity) =>
         tile(entity),
       ),
     ]),
 
-  audio: ({ entities, audioFeatures: audio }) =>
+  audio: ({ entities, audioFeatures: audio, link }) =>
     grid([
-      heading("Audio", "mdi:volume-high"),
+      heading("Audio", "mdi:volume-high", link),
       ...singles(entities, "audio").map((entity) => playerTile(entity, audio)),
     ]),
 
-  "now-playing": ({ entities, mediaFeatures: media }) =>
+  "now-playing": ({ entities, mediaFeatures: media, link }) =>
     grid([
-      heading("Now playing", "mdi:play-circle-outline"),
+      heading("Now playing", "mdi:play-circle-outline", link),
       ...singles(entities, "media").map((entity) => playerTile(entity, media)),
     ]),
 
@@ -177,26 +179,26 @@ export const SECTIONS = {
       ]),
     ]),
 
-  "overview-load": ({ entities, hours }) =>
+  "overview-load": ({ entities, hours, link }) =>
     grid([
-      heading("CPU and memory", "mdi:cpu-64-bit"),
+      heading("CPU and memory", "mdi:cpu-64-bit", link),
       graph(
         singles(entities, "processes_load", "memory_used_percentage"),
         hours,
       ),
     ]),
 
-  "overview-power": ({ entities, hours }) => {
+  "overview-power": ({ entities, hours, link }) => {
     const power = singles(entities, "power_usage", "cpu_power_package");
 
     return grid([
-      heading("Power", "mdi:flash"),
+      heading("Power", "mdi:flash", link),
       ...power.map((entity) => tile(entity)),
       graph(power, hours),
     ]);
   },
 
-  "overview-temperatures": ({ entities, hours }) => {
+  "overview-temperatures": ({ entities, hours, link }) => {
     // TODO(Core): add the sensors module's temperatures and fans once Core has
     // them (Core roadmap note, "Core features: sensors module")
     const temperatures = [
@@ -205,7 +207,7 @@ export const SECTIONS = {
     ];
 
     return grid([
-      heading("Temperatures", "mdi:thermometer"),
+      heading("Temperatures", "mdi:thermometer", link),
       ...temperatures.map((entity) => tile(entity)),
       graph(temperatures, hours),
     ]);
@@ -411,7 +413,7 @@ export const SECTIONS = {
     ]);
   },
 
-  network: ({ entities, hours }) => {
+  network: ({ entities, hours, link }) => {
     const rates = singles(
       entities,
       "network_download_rate",
@@ -419,7 +421,7 @@ export const SECTIONS = {
     );
 
     return grid([
-      heading("Network", "mdi:lan"),
+      heading("Network", "mdi:lan", link),
       ...rates.map((entity) => tile(entity)),
       graph(rates, hours),
     ]);
@@ -473,9 +475,19 @@ export const SECTIONS = {
       ).map((entity) => tile(entity)),
     ]),
 
-  // TODO(Core): add a "Power" section for the power profile select and keep
-  // awake switch (connector 5.20.0 follow-ups), and a "Health" section for
-  // failed units and pending packages with roadmap item 8
+  power: ({ entities }) =>
+    grid([
+      heading("Power", "mdi:lightning-bolt"),
+      ...singles(entities, "power_profile").map((entity) =>
+        tile(entity, [{ type: "select-options" }]),
+      ),
+      ...singles(entities, "keep_awake").map((entity) =>
+        tile(entity, [{ type: "toggle" }]),
+      ),
+    ]),
+
+  // TODO(Core): add a "Health" section for failed units and pending packages
+  // with roadmap item 8
   system: ({ entities }) =>
     grid([
       heading("Device", "mdi:information-outline"),

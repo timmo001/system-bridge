@@ -48,8 +48,9 @@ export interface TileFeatureConfig {
 }
 
 export interface ActionConfig {
-  action: "url" | "more-info";
+  action: "url" | "more-info" | "navigate";
   url_path?: string;
+  navigation_path?: string;
 }
 
 export interface HeadingCardConfig {
@@ -57,6 +58,7 @@ export interface HeadingCardConfig {
   heading: string;
   heading_style?: "title" | "subtitle";
   icon?: string;
+  tap_action?: ActionConfig;
 }
 
 export interface TileCardConfig {
@@ -196,6 +198,8 @@ export interface SectionStrategyConfig extends StrategyOptions {
   section: string;
   /** Which disk, mount, GPU, display or network interface, for per-item sections. */
   item?: string;
+  /** The dashboard view the heading opens, such as `disks`. */
+  link?: string;
 }
 
 declare global {
