@@ -336,6 +336,16 @@ system-bridge client history export --module cpu --module gpus --since 6h --form
 
 The CSV has a row per reading with the columns `time`, `metric`, `id`, `value` and `unit`. Times are in UTC, and `id` names the GPU, disk, sensor or fan for the readings that have one. The JSON is the history as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event returns it. The web client has the same export in the Export menu on the overview and on each module's page. It lists every module with history as a checkbox, ticked to start for the modules that page graphs: all of them on the overview, and the page's own module elsewhere, plus the CPU and GPUs on the System page, whose power graph shows theirs too. The TypeScript and Python connectors can write the same CSV.
 
+## Diagnostics
+
+To see how the running backend is doing, for a bug report:
+
+```bash
+system-bridge client diagnostics
+```
+
+It prints the [`GET_DIAGNOSTICS`](/api/websocket/data/#getting-diagnostics) reply as indented JSON: the version, platform, when the backend started, each data module's failures and last error, a summary of the settings and up to the last 20 warnings and errors. Your home directory shows as `~` and your user name as `<user>`, so it's safe to share.
+
 ## Backend
 
 To run the backend server, use:

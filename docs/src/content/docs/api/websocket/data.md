@@ -193,3 +193,79 @@ It responds with the `HISTORY` type. Each series is a list of readings, oldest f
 ```
 
 To save the history to a file, use [`system-bridge client history export`](/using/cli/#export-history) or the web client's Export menu, on the overview or a module's page. The TypeScript connector's `historyToCsv` and the Python connector's `MetricHistory.to_csv()` write the same CSV.
+
+## Getting diagnostics
+
+Send the `GET_DIAGNOSTICS` event, with no data, to see how the app is doing. It's meant for bug reports, so it holds no paths, names or command lines: settings are summarised as counts and switches, and errors have the home directory shown as `~` and the user name as `<user>`.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "GET_DIAGNOSTICS"
+}
+```
+
+It responds with the `DIAGNOSTICS` type:
+
+- `started_at` and every `last_error_at` and `time` are in Unix seconds.
+- `modules` lists each data module. `updated` is when it last succeeded, in RFC 3339, or `null` if it never has. `failures` counts the failed updates in a row and goes back to 0 on a success, while `last_error` stays until the next failure.
+- `settings` is `null` when the settings can't be read.
+- `recent_errors` holds up to the last 20 warnings and errors from the log, oldest first.
+
+```json title="Response"
+{
+    "id": "abc123",
+    "type": "DIAGNOSTICS",
+    "subtype": "NONE",
+    "data": {
+        "version": "5.24.0",
+        "platform": "linux",
+        "architecture": "amd64",
+        "started_at": 1761300000,
+        "log_level": "INFO",
+        "modules": [
+            {
+                "name": "cpu",
+                "has_data": true,
+                "updated": "2025-10-24T10:01:00Z",
+                "failures": 0,
+                "last_error": null,
+                "last_error_at": null
+            },
+            {
+                "name": "gpus",
+                "has_data": false,
+                "updated": null,
+                "failures": 3,
+                "last_error": "failed to get GPU info",
+                "last_error_at": 1761300060
+            }
+        ],
+        "settings": {
+            "autostart": false,
+            "system_tray": true,
+            "hotkeys": 0,
+            "commands": 2,
+            "media_directories": 1,
+            "allowed_secondary_mount_points": 0,
+            "cameras_capture": false,
+            "desktop_window_titles": false,
+            "desktop_hyprland_code": false
+        },
+        "recent_errors": [
+            {
+                "time": 1761300060,
+                "level": "WARN",
+                "message": "Task processing error for module",
+                "error": "failed to get GPU info",
+                "module": "gpus",
+                "event": null
+            }
+        ]
+    },
+    "message": "Got diagnostics"
+}
+```
+
+The [`system-bridge client diagnostics`](/using/cli/#diagnostics) command prints the same, and the connectors have it as `getDiagnostics` in TypeScript and `get_diagnostics()` in Python.
