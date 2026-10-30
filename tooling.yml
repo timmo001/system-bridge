@@ -21,7 +21,7 @@ tools:
     reviewed: 2026.10.4
     review: Bring the Python connector in line with Core's pyproject.toml at the new tag (requires-python, the aiohttp pin and the Ruff and pylint rules connector/python/pyproject.toml copies), and check homeassistant/components/system_bridge for calls into the connector that changed or that it no longer supports. Then check the TODO(Core) comments in client/home-assistant/frontend/src (pages.ts and sections.ts) against the entities the release adds. Uncomment a page or add to a section once its entities exist, and gate the new translation keys at this release in release.ts's RELEASE_GATES. Raise MINIMUM_RELEASE there when the dashboard starts to need a newer release. Also check registry.ts's ITEM_RULES against changed unique ID keys and translation keys in sensor.py, and its use of the config/entity_registry/list command.
   - repo: home-assistant/frontend
-    reviewed: "20261028.0"
+    reviewed: "20261028.1"
     prereleases: true
     review: Check the dashboard, view and section strategies in client/home-assistant/frontend against changes to the strategy API in src/panels/lovelace/strategies (get-strategy.ts and types.ts, registryDependencies, getConfigElement, getCreateSuggestions and window.customStrategies), the heading, tile, history-graph and entity badge config built in src/cards.ts and src/sections.ts, the tile features they use (bar-gauge, media-player-playback and media-player-volume-slider), and the ha-form selectors in src/editor.ts. Note new built-in strategies, such as the device section strategy, that could replace a generated section.
   - repo: omacom/omarchy
