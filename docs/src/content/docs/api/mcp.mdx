@@ -129,6 +129,14 @@ Turn Bluetooth on or off.
 
 - `powered` (required): `true` to turn it on, `false` to turn it off.
 
+### `system_bridge_camera_control`
+
+Set one of a webcam's controls, such as its brightness or zoom. See [camera control](/api/websocket/control/#camera-control). Linux only.
+
+- `id` (required): The camera's `id` from the `cameras` module.
+- `control` (required): The control's `id` from that camera's `controls`.
+- `value` (required): A whole number within the control's range. A boolean's is `0` or `1`, and a menu's is one of its options' `value`.
+
 ### `system_bridge_desktop_close_window`
 
 Ask a window to close, as its close button does. See [desktop control](/api/websocket/control/#desktop-control).

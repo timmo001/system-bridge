@@ -9,6 +9,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/data/module/bluetooth"
+	"github.com/timmo001/system-bridge/data/module/cameras"
 	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/data/module/processes"
 	"github.com/timmo001/system-bridge/event"
@@ -127,9 +128,10 @@ func decodeRequest[T any](eventType event.EventType, message event.Message, vali
 func requestError(message event.Message, err error) event.MessageResponse {
 	subtype := event.ResponseSubtypeNone
 	switch {
-	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed):
+	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, cameras.ErrUnsupported), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed):
 		subtype = event.ResponseSubtypeInvalidAction
-	case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue),
+	case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, cameras.ErrNotFound), errors.Is(err, cameras.ErrInvalidValue),
+		errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue),
 		errors.Is(err, processes.ErrNotFound), errors.Is(err, processes.ErrRefused):
 		subtype = event.ResponseSubtypeBadRequest
 	}

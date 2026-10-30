@@ -43,6 +43,7 @@ import {
   AudioControl,
   BluetoothDeviceRequest,
   BluetoothPowerRequest,
+  CameraControlRequest,
   ClipboardTextRequest,
   CommandIdRequest,
   CommandRequest,
@@ -223,6 +224,10 @@ export interface Interface {
   /** Turns the Bluetooth adapter on or off. Linux only. */
   readonly bluetoothSetPower: (
     power: BluetoothPowerRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Sets one of a camera's controls. Linux only. */
+  readonly cameraControl: (
+    control: CameraControlRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** The text on the clipboard. */
   readonly getClipboard: Effect.Effect<ClipboardText, WebSocketError>;
@@ -1075,6 +1080,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const cameraControl = Effect.fn("SystemBridgeWebSocket.cameraControl")(
+    function* (control: CameraControlRequest) {
+      yield* call(
+        "CAMERA_CONTROL",
+        "CAMERA_CONTROLLED",
+        CameraControlRequest,
+        control,
+        ignoreReply,
+      );
+    },
+  );
+
   const getClipboard = call(
     "CLIPBOARD_GET_TEXT",
     "CLIPBOARD_TEXT",
@@ -1559,6 +1576,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     bluetoothDisconnect,
     bluetoothForget,
     bluetoothSetPower,
+    cameraControl,
     getClipboard,
     setClipboard,
     setPowerProfile,

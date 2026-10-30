@@ -183,6 +183,16 @@ The [`displays`](/api/data/#displays) data reports each display's `brightness` a
 
 Not every monitor answers DDC/CI. Outside Hyprland, those report `null`, and controlling them returns an error. macOS isn't supported yet.
 
+## Cameras
+
+Set a webcam's controls, such as its brightness, zoom, pan or autofocus, from the API with [`CAMERA_CONTROL`](/api/websocket/control/#camera-control), the [MCP server](/api/mcp/)'s `system_bridge_camera_control` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client camera control usb-Insta360_Insta360_Link_2C-video-index0 zoom_absolute 200
+```
+
+The [`cameras`](/api/data/#cameras) data lists each camera's controls with their ranges and options. Controls can be set while another app is using the camera. Linux only, through V4L2.
+
 ## Processes
 
 End a process from the [`processes`](/api/data/#processes) data with [`PROCESS_KILL`](/api/websocket/control/#process-control), the [MCP server](/api/mcp/)'s `system_bridge_kill_process` tool, or the CLI:

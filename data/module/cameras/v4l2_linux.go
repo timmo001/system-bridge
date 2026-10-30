@@ -78,6 +78,7 @@ const (
 var (
 	vidiocQueryCap  = ioc(iocRead, 0, unsafe.Sizeof(v4l2Capability{}))
 	vidiocGCtrl     = ioc(iocReadWrite, 27, unsafe.Sizeof(v4l2Control{}))
+	vidiocSCtrl     = ioc(iocReadWrite, 28, unsafe.Sizeof(v4l2Control{}))
 	vidiocQueryCtrl = ioc(iocReadWrite, 36, unsafe.Sizeof(v4l2QueryCtrl{}))
 	vidiocQueryMenu = ioc(iocReadWrite, 37, unsafe.Sizeof(v4l2QueryMenu{}))
 )
@@ -133,6 +134,14 @@ func getCtrl(fd int, id uint32) (int32, error) {
 		return 0, fmt.Errorf("failed to read control %#x: %w", id, err)
 	}
 	return control.Value, nil
+}
+
+func setCtrl(fd int, id uint32, value int32) error {
+	control := v4l2Control{ID: id, Value: value}
+	if err := ioctl(fd, vidiocSCtrl, unsafe.Pointer(&control)); err != nil {
+		return fmt.Errorf("failed to set control %#x: %w", id, err)
+	}
+	return nil
 }
 
 // queryMenu returns a menu item, or false for an index the menu skips

@@ -271,6 +271,7 @@ func main() {
 						},
 					},
 					bluetoothCommand(),
+					cameraCommand(),
 					clipboardCommand(),
 					systemCommand(),
 					commandCommand(),

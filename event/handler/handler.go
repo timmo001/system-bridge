@@ -8,6 +8,7 @@ import (
 func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterAudioControlHandler(router, dataStore)
 	RegisterBluetoothHandlers(router, dataStore)
+	RegisterCameraHandlers(router, dataStore)
 	RegisterClipboardHandlers(router)
 	RegisterCommandAllowlistHandlers(router)
 	RegisterCommandExecuteHandler(router)

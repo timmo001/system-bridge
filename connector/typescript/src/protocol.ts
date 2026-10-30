@@ -13,6 +13,7 @@ export const EventType = Schema.Literals([
   "BLUETOOTH_DISCONNECT",
   "BLUETOOTH_FORGET",
   "BLUETOOTH_SET_POWER",
+  "CAMERA_CONTROL",
   "CLIPBOARD_GET_TEXT",
   "CLIPBOARD_SET_TEXT",
   "COMMAND_ADD",
@@ -89,6 +90,7 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_DISCONNECTED",
   "BLUETOOTH_FORGOTTEN",
   "BLUETOOTH_POWER_SET",
+  "CAMERA_CONTROLLED",
   "CLIPBOARD_TEXT",
   "CLIPBOARD_TEXT_SET",
   "COMMAND_ADDED",
@@ -526,6 +528,20 @@ export const BluetoothPowerRequest = Schema.Struct({ powered: Schema.Boolean });
 
 export interface BluetoothPowerRequest extends Schema.Schema.Type<
   typeof BluetoothPowerRequest
+> {}
+
+/** Sets one of a camera's controls, such as its brightness or zoom. */
+export const CameraControlRequest = Schema.Struct({
+  /** The camera's `id` from the cameras module. */
+  id: Schema.String,
+  /** The control's `id` on that camera. */
+  control: Schema.String,
+  /** A boolean's is 0 or 1, and a menu's is one of its options' `value`. */
+  value: Schema.Int,
+});
+
+export interface CameraControlRequest extends Schema.Schema.Type<
+  typeof CameraControlRequest
 > {}
 
 /** Names a window by its `id` from the desktop module. */

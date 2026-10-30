@@ -142,6 +142,29 @@ Forgetting a device unpairs it, so it has to be paired again before it can conne
 
 The response comes once the device has connected, which can take up to 30 seconds, and the bluetooth module updates straight after. An unknown address gets an `ERROR` with the subtype `BAD_REQUEST`, and something the platform can't do gets `INVALID_ACTION`.
 
+## Camera control
+
+Send the `CAMERA_CONTROL` event to set one of a webcam's controls, such as its brightness, zoom or autofocus. It works while another app is using the camera. Linux only.
+
+- `id` (required): The camera's `id` from the [`cameras`](/api/data/#cameras) data.
+- `control` (required): The control's `id` from that camera's `controls`.
+- `value` (required): A whole number within the control's `minimum` and `maximum`, in its `step`s. A boolean's is `0` or `1`, and a menu's is one of its `options`' `value`.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "CAMERA_CONTROL",
+    "data": {
+        "id": "usb-Insta360_Insta360_Link_2C-video-index0",
+        "control": "zoom_absolute",
+        "value": 200
+    }
+}
+```
+
+The response type is `CAMERA_CONTROLLED`, and the cameras module updates straight after. An unknown camera or control, a read-only control or a value it can't take gets an `ERROR` with the subtype `BAD_REQUEST`. A control another one sets automatically, such as focus while autofocus is on, can't be set until that one is turned off.
+
 ## System control
 
 Change system settings. Linux only.

@@ -15,3 +15,8 @@ func GetCamerasData(context.Context) (types.CamerasData, error) {
 
 // Watch does nothing on this platform, which reports no cameras yet
 func Watch(context.Context, func()) {}
+
+// SetControl isn't supported on this platform yet
+func SetControl(context.Context, string, string, int64) error {
+	return ErrUnsupported
+}

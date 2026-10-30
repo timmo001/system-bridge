@@ -63,6 +63,16 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"powered"}),
 	}, eventTool[bluetoothPowerInput](handlers, event.EventBluetoothSetPower))
 
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_camera_control",
+		Description: "Set one of a camera's controls, such as its brightness, zoom or autofocus. Get camera and control ids, ranges and menu options from the cameras module. Works while another app uses the camera. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"id":      map[string]any{"type": "string", "description": "Camera id from the cameras module"},
+			"control": map[string]any{"type": "string", "description": "Control id from the camera's controls"},
+			"value":   map[string]any{"type": "integer", "description": "Value within the control's range and step. A boolean's is 0 or 1, and a menu's is one of its options' value"},
+		}, []string{"id", "control", "value"}),
+	}, eventTool[cameraControlInput](handlers, event.EventCameraControl))
+
 	windowID := map[string]any{"type": "string", "description": "Window id from the desktop module's windows"}
 	boolean := func(description string) map[string]any {
 		return map[string]any{"type": "boolean", "description": description}

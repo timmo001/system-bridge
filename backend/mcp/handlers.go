@@ -39,6 +39,12 @@ type bluetoothPowerInput struct {
 	Powered bool `json:"powered"`
 }
 
+type cameraControlInput struct {
+	ID      string `json:"id"`
+	Control string `json:"control"`
+	Value   int64  `json:"value"`
+}
+
 type displayControlInput struct {
 	ID         string   `json:"id"`
 	Brightness *float64 `json:"brightness,omitempty"`
