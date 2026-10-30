@@ -12,7 +12,7 @@ import (
 )
 
 func getGPUs() ([]types.GPU, error) {
-	var gpuList []types.GPU
+	gpuList := make([]types.GPU, 0)
 
 	// Get GPU information using system_profiler
 	cmd := exec.Command("system_profiler", "SPDisplaysDataType", "-json")
