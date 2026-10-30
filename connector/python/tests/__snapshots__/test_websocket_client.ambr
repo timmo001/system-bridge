@@ -201,6 +201,54 @@
     ),
   )
 # ---
+# name: test_get_diagnostics
+  Diagnostics(
+    architecture='amd64',
+    log_level='WARN',
+    modules=list([
+      DiagnosticsModule(
+        failures=0,
+        has_data=True,
+        last_error=None,
+        last_error_at=None,
+        name='cpu',
+        updated='2023-11-14T22:13:20Z',
+      ),
+      DiagnosticsModule(
+        failures=3,
+        has_data=False,
+        last_error='failed to get GPU info',
+        last_error_at=1700000060,
+        name='gpus',
+        updated=None,
+      ),
+    ]),
+    platform='linux',
+    recent_errors=list([
+      DiagnosticsLogRecord(
+        error='failed to get GPU info',
+        event=None,
+        level='WARN',
+        message='Task processing error for module',
+        module='gpus',
+        time=1700000060,
+      ),
+    ]),
+    settings=DiagnosticsSettings(
+      allowed_secondary_mount_points=0,
+      autostart=False,
+      cameras_capture=False,
+      commands=2,
+      desktop_hyprland_code=False,
+      desktop_window_titles=False,
+      hotkeys=0,
+      media_directories=1,
+      system_tray=True,
+    ),
+    started_at=1700000000,
+    version='5.24.0',
+  )
+# ---
 # name: test_get_directories
   list([
     MediaDirectory(

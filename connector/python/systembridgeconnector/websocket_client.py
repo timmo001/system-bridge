@@ -53,6 +53,7 @@ from .models.desktop_control import (
     OmarchyMenuRequest,
     OmarchyPanelRequest,
 )
+from .models.diagnostics import Diagnostics
 from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
 from .models.display_control import DisplayControl
@@ -339,6 +340,25 @@ class WebSocketClient(Base):
         )
 
         return MetricHistory(**self._response_dict(response, "history"))
+
+    async def get_diagnostics(
+        self,
+        request_id: str | None = None,
+    ) -> Diagnostics:
+        """Get the app's diagnostics, curated so they're safe to share.
+
+        They include each module's failures, a settings summary and recent
+        warnings and errors.
+        """
+        self._logger.info("Getting diagnostics")
+        response = await self.send_message(
+            EventType.GET_DIAGNOSTICS,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.DIAGNOSTICS,
+        )
+        return Diagnostics(**self._response_dict(response, "diagnostics"))
 
     async def get_directory(
         self,

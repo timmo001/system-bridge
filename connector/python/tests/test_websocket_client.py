@@ -36,6 +36,12 @@ from systembridgeconnector.models.desktop_control import (
     OmarchyAction,
     OmarchyMenuRequest,
 )
+from systembridgeconnector.models.diagnostics import (
+    Diagnostics,
+    DiagnosticsLogRecord,
+    DiagnosticsModule,
+    DiagnosticsSettings,
+)
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.discord_setup import DiscordSetup
 from systembridgeconnector.models.display_control import DisplayControl
@@ -787,6 +793,22 @@ async def test_get_disk_mounts(
     assert isinstance(disk_mounts.primary[0].usage, DiskUsage)
     assert isinstance(disk_mounts.secondary.squashfs[0], DiskMountInfo)
     assert disk_mounts == snapshot
+
+
+@pytest.mark.asyncio
+async def test_get_diagnostics(
+    snapshot: SnapshotAssertion,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    diagnostics = await mock_websocket_client_listening.get_diagnostics(
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(diagnostics, Diagnostics)
+    assert isinstance(diagnostics.modules[0], DiagnosticsModule)
+    assert isinstance(diagnostics.settings, DiagnosticsSettings)
+    assert isinstance(diagnostics.recent_errors[0], DiagnosticsLogRecord)
+    assert diagnostics == snapshot
 
 
 @pytest.mark.asyncio

@@ -30,6 +30,7 @@ import {
   CameraPicture,
   ClipboardText,
   CommandPrefab,
+  Diagnostics,
   DiskMountsResponse,
   HyprlandCursorPosition,
   HyprlandEvent,
@@ -149,6 +150,11 @@ export interface Interface {
   readonly getHistory: (
     request?: HistoryRequest,
   ) => Effect.Effect<MetricHistory, WebSocketError>;
+  /**
+   * The app's diagnostics, curated so they're safe to share: each module's
+   * failures, a settings summary and recent warnings and errors.
+   */
+  readonly getDiagnostics: Effect.Effect<Diagnostics, WebSocketError>;
   readonly getDirectories: Effect.Effect<
     ReadonlyArray<MediaDirectory>,
     WebSocketError
@@ -870,6 +876,14 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const getDiagnostics = call(
+    "GET_DIAGNOSTICS",
+    "DIAGNOSTICS",
+    Empty,
+    {},
+    Diagnostics,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.getDiagnostics"));
+
   const getDirectories = call(
     "GET_DIRECTORIES",
     "DIRECTORIES",
@@ -1581,6 +1595,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     registerDataListener,
     unregisterDataListener,
     getHistory,
+    getDiagnostics,
     getDirectories,
     getDirectory,
     getFiles,

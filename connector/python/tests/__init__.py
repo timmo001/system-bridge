@@ -164,8 +164,63 @@ def camera_capture_response(request: Request) -> Response:
     )
 
 
+def diagnostics_response(request: Request) -> Response:
+    """Reply with diagnostics for one working and one failing module."""
+    return Response(
+        id=request.id,
+        type=EventType.DIAGNOSTICS,
+        data={
+            "version": "5.24.0",
+            "platform": "linux",
+            "architecture": "amd64",
+            "started_at": 1700000000,
+            "log_level": "WARN",
+            "modules": [
+                {
+                    "name": "cpu",
+                    "has_data": True,
+                    "updated": "2023-11-14T22:13:20Z",
+                    "failures": 0,
+                    "last_error": None,
+                    "last_error_at": None,
+                },
+                {
+                    "name": "gpus",
+                    "has_data": False,
+                    "updated": None,
+                    "failures": 3,
+                    "last_error": "failed to get GPU info",
+                    "last_error_at": 1700000060,
+                },
+            ],
+            "settings": {
+                "autostart": False,
+                "system_tray": True,
+                "hotkeys": 0,
+                "commands": 2,
+                "media_directories": 1,
+                "allowed_secondary_mount_points": 0,
+                "cameras_capture": False,
+                "desktop_window_titles": False,
+                "desktop_hyprland_code": False,
+            },
+            "recent_errors": [
+                {
+                    "time": 1700000060,
+                    "level": "WARN",
+                    "message": "Task processing error for module",
+                    "error": "failed to get GPU info",
+                    "module": "gpus",
+                    "event": None,
+                }
+            ],
+        },
+    )
+
+
 REQUEST_RESPONSES: Final[dict[EventType, Callable[[Request], Response]]] = {
     EventType.CAMERA_CAPTURE: camera_capture_response,
+    EventType.GET_DIAGNOSTICS: diagnostics_response,
     EventType.GET_DISCORD_SETUP: discord_setup_response,
     EventType.UPDATE_DISCORD_SETUP: discord_setup_response,
 }
