@@ -772,9 +772,26 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
       `,
     );
 
+    const format = camera.format;
+
+    const supported = camera.formats
+      .map(
+        (option) =>
+          `${option.name || option.format} up to ${option.width} × ${option.height}`,
+      )
+      .join(", ");
+
     return html`
       <sb-card heading=${camera.name} subheading=${camera.device}>
-        ${facts([["Driver", camera.driver]])}
+        ${facts([
+          ["Driver", camera.driver],
+          [
+            "Resolution",
+            format === null ? null : `${format.width} × ${format.height}`,
+          ],
+          ["Format", format === null ? null : format.name || format.format],
+          ["Supported formats", supported || null],
+        ])}
         <sb-camera-capture slot="footer" .camera=${camera}></sb-camera-capture>
       </sb-card>
       ${sets}
