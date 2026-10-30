@@ -42,7 +42,7 @@ export class SbRange extends LitElement {
     }
   `;
 
-  /** The value's unit, shown after it. */
+  /** The value's unit, shown after it, or nothing for a plain number. */
   @property() unit = "%";
 
   @state() private input: HTMLInputElement | null = null;
@@ -97,7 +97,11 @@ export class SbRange extends LitElement {
     const fraction = max > min ? (value - min) / (max - min) : 0;
 
     const text =
-      this.unit === "%" ? formatPercent(value) : `${value} ${this.unit}`;
+      this.unit === "%"
+        ? formatPercent(value)
+        : this.unit === ""
+          ? String(value)
+          : `${value} ${this.unit}`;
 
     // Follows the thumb's centre, which travels a thumb's width less than the track.
     const left = `calc(${fraction * 100}% + (0.5 - ${fraction}) * var(--sb-range-thumb))`;

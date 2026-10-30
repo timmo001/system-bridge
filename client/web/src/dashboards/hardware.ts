@@ -2,7 +2,6 @@ import { mdiBattery, mdiBatteryCharging, mdiFan, mdiPowerPlug } from "@mdi/js";
 import type {
   AudioDevice,
   BatteryState,
-  CameraControl,
   CPUTimes,
   Display,
   SensorsWindowsHardware,
@@ -745,20 +744,6 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
   `;
 };
 
-/** A control's value as it reads, such as a menu choice's name. */
-const cameraControlValue = (control: CameraControl) => {
-  const value =
-    control.type === "boolean"
-      ? yesNo(control.value !== 0)
-      : control.type === "menu"
-        ? (control.options.find((option) => option.value === control.value)
-            ?.name ?? formatNumber(control.value))
-        : formatNumber(control.value);
-
-  // Another control overrides it, such as focus while autofocus is on
-  return control.inactive ? `${value} (overridden)` : value;
-};
-
 export const camerasDashboard = ({ data }: DashboardContext) => {
   const cameras = data.cameras?.cameras;
 
@@ -769,12 +754,9 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
   const cards = cameras.map(
     (camera) => html`
       <sb-card class="half" heading=${camera.name} subheading=${camera.device}>
-        ${facts([
-          ["Driver", camera.driver],
-          ...camera.controls.map(
-            (control) => [control.name, cameraControlValue(control)] as const,
-          ),
-        ])}
+        ${facts([["Driver", camera.driver]])}
+        <sb-camera-controls .camera=${camera}></sb-camera-controls>
+        <sb-camera-capture slot="footer" .camera=${camera}></sb-camera-capture>
       </sb-card>
     `,
   );

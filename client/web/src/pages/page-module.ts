@@ -5,6 +5,8 @@ import { customElement, property } from "lit/decorators.js";
 
 import "~/components/sb-audio-device";
 import "~/components/sb-audio-main";
+import "~/components/sb-camera-capture";
+import "~/components/sb-camera-controls";
 import "~/components/sb-card";
 import "~/components/sb-data-table";
 import "~/components/sb-display-controls";
@@ -53,6 +55,7 @@ import "./page-discord";
 import "./page-media";
 import "./page-notifications";
 import "./page-open";
+import "./page-settings-cameras";
 import "./page-settings-commands";
 import "./page-settings-desktop";
 import "./page-settings-discord";
@@ -124,6 +127,13 @@ const sections: Partial<
       id="window-titles"
       class="wide"
     ></page-settings-desktop>`,
+  },
+  cameras: {
+    after: html`<page-settings-cameras
+      embedded
+      id="camera-capture"
+      class="wide"
+    ></page-settings-cameras>`,
   },
   disks: {
     after: html`<page-settings-disks

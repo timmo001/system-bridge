@@ -185,7 +185,7 @@ Not every monitor answers DDC/CI. Outside Hyprland, those report `null`, and con
 
 ## Cameras
 
-Set a webcam's controls, such as its brightness, zoom, pan or autofocus, from the API with [`CAMERA_CONTROL`](/api/websocket/control/#camera-control), the [MCP server](/api/mcp/)'s `system_bridge_camera_control` tool, or the CLI:
+Set a webcam's controls, such as its brightness, zoom, pan or autofocus, from the [web client](/using/web-client/)'s Cameras page, the API with [`CAMERA_CONTROL`](/api/websocket/control/#camera-control), the [MCP server](/api/mcp/)'s `system_bridge_camera_control` tool, or the CLI:
 
 ```bash title="Terminal"
 system-bridge client camera control usb-Insta360_Insta360_Link_2C-video-index0 zoom_absolute 200
@@ -193,7 +193,7 @@ system-bridge client camera control usb-Insta360_Insta360_Link_2C-video-index0 z
 
 The [`cameras`](/api/data/#cameras) data lists each camera's controls with their ranges and options. Controls can be set while another app is using the camera. Linux only, through V4L2.
 
-With the `cameras.capture` setting on, take a picture with [`CAMERA_CAPTURE`](/api/websocket/control/#camera-capture), the MCP server's `system_bridge_camera_capture` tool, or the CLI, which saves it as a JPEG, or writes it to the output with `-`:
+With the `cameras.capture` setting on, which is **Take pictures** on the web client's Cameras page, take a picture there, with [`CAMERA_CAPTURE`](/api/websocket/control/#camera-capture), the MCP server's `system_bridge_camera_capture` tool, or the CLI, which saves it as a JPEG, or writes it to the output with `-`:
 
 ```bash title="Terminal"
 system-bridge client camera capture usb-Insta360_Insta360_Link_2C-video-index0 picture.jpg

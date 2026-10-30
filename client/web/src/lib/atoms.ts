@@ -4,6 +4,7 @@ import {
   ModuleName,
   SystemBridgeWebSocket,
   type AudioControl,
+  type CameraControlRequest,
   type DataMissingError,
   type DesktopWindowStateRequest,
   type DiscordControl,
@@ -486,6 +487,24 @@ export const bluetoothAction = Atom.family((address: string) =>
             return bridge.bluetoothForget({ address });
         }
       }),
+    ),
+  ),
+);
+
+/** Sets one of a camera's controls, one atom per camera. */
+export const cameraControl = Atom.family((id: string) =>
+  Atom.fn((control: Omit<CameraControlRequest, "id">, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.cameraControl({ ...control, id })),
+    ),
+  ),
+);
+
+/** Takes a picture with a camera, one atom per camera, holding the last one. */
+export const cameraCapture = Atom.family((id: string) =>
+  Atom.fn((_: undefined, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.cameraCapture({ id })),
     ),
   ),
 );

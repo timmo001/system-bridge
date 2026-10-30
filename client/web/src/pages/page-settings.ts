@@ -6,6 +6,7 @@ import {
   mdiFolderMultipleOutline,
   mdiHarddisk,
   mdiHeadset,
+  mdiWebcam,
 } from "@mdi/js";
 import { LogLevel, type Settings } from "@timmo001/effect-system-bridge";
 import { Schema, Struct } from "effect";
@@ -202,6 +203,12 @@ export class PageSettings extends SbSettingsPage {
 
 /** Settings that live with their module's data now. */
 const elsewhere = [
+  {
+    label: "Cameras",
+    icon: mdiWebcam,
+    module: "cameras",
+    section: "camera-capture",
+  },
   {
     label: "Commands",
     icon: mdiConsoleLine,
