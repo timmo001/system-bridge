@@ -30,7 +30,7 @@ token: {token}
 </Tab>
 </Tabs>
 
-`{module}` is one of: `audio`, `battery`, `bluetooth`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
+`{module}` is one of: `audio`, `battery`, `bluetooth`, `cameras`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
 
 ## Response
 
@@ -108,6 +108,37 @@ Each device has:
 | `connected` | boolean | Whether the device is connected. |
 
 On Linux, the devices come from BlueZ. On Windows, only classic Bluetooth devices are listed, so Bluetooth LE devices such as some keyboards and mice are left out. On macOS the list is empty.
+
+### `cameras`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `cameras` | array | Video capture devices, such as webcams, sorted by name. |
+
+Each camera has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | The camera's `/dev/v4l/by-id` name, such as `usb-Insta360_Insta360_Link_2C-video-index0`, which stays the same when it's plugged in again. The device name, such as `video0`, when there's no such link. |
+| `name` | string | The name the driver gives the camera. |
+| `device` | string | The device node, such as `/dev/video0`. |
+| `driver` | string | The kernel driver, such as `uvcvideo`. `null` when it isn't reported. |
+| `controls` | array | The camera's settings, such as brightness, zoom and white balance. |
+
+Each control has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | The control's name as `v4l2-ctl` writes it, such as `brightness` or `focus_automatic_continuous`. |
+| `name` | string | The control's name, such as `Focus, Automatic Continuous`. |
+| `type` | string | `integer`, `boolean` or `menu`. |
+| `value` | number | The current value. A boolean is `0` or `1`, and a menu's is the `value` of one of its `options`. |
+| `minimum`, `maximum`, `step`, `default` | number | The range the value can take, and its default. |
+| `options` | array | A menu's choices, each with a `value` and `name`. Empty for other controls. |
+| `inactive` | boolean | Whether another control overrides it for now, such as focus while autofocus is on. |
+| `read_only` | boolean | Whether the control can only be read. |
+
+Metadata nodes are left out, so a webcam is listed once. The cameras are read without streaming from them, so they're still listed while an app is using them. On Windows and macOS the list is empty.
 
 ### `cpu`
 

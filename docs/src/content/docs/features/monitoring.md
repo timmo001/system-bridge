@@ -17,6 +17,7 @@ System Bridge reads your system's state into data modules and keeps them up to d
 | `sensors` | Temperatures and fan speeds. |
 | `battery` | Charge, whether it's charging, and time remaining. |
 | `bluetooth` | Paired Bluetooth devices and whether they're connected. |
+| `cameras` | Webcams and their settings, such as brightness, zoom and focus (Linux). |
 | `displays` | Resolution, position, refresh rate, brightness and power state of each display. |
 | `audio` | Output and input devices, their volume, whether they're muted and which are the defaults. |
 | `disks` | Partitions, used and free space, and read and write activity. |

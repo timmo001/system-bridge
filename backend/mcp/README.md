@@ -75,9 +75,9 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_get_clipboard` reads the clipboard's text through
   `prefab.GetClipboard`.
 - `system_bridge_get_data` returns the latest data for requested modules.
-  Supported modules are `audio`, `battery`, `bluetooth`, `cpu`, `desktop`,
-  `disks`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`,
-  `sensors`, and `system`.
+  Supported modules are `audio`, `battery`, `bluetooth`, `cameras`, `cpu`,
+  `desktop`, `disks`, `displays`, `gpus`, `media`, `memory`, `networks`,
+  `processes`, `sensors`, and `system`.
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
 - `system_bridge_hyprland_dispatch` runs a named Hyprland dispatcher, such as

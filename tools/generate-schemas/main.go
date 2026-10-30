@@ -62,6 +62,7 @@ var moduleDataTypes = map[string]string{
 	"audio":     "AudioData",
 	"battery":   "BatteryData",
 	"bluetooth": "BluetoothData",
+	"cameras":   "CamerasData",
 	"cpu":       "CPUData",
 	"desktop":   "DesktopData",
 	"disks":     "DisksData",

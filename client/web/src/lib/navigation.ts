@@ -18,6 +18,7 @@ import {
   mdiThermometer,
   mdiViewDashboardOutline,
   mdiVolumeHigh,
+  mdiWebcam,
 } from "@mdi/js";
 import { ModuleName } from "@timmo001/effect-system-bridge";
 import { Schema } from "effect";
@@ -45,6 +46,11 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
     label: "Bluetooth",
     description: "Paired devices and whether they're connected",
     icon: mdiBluetooth,
+  },
+  cameras: {
+    label: "Cameras",
+    description: "Webcams and their settings",
+    icon: mdiWebcam,
   },
   cpu: {
     label: "CPU",

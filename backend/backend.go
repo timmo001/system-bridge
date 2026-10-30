@@ -21,6 +21,7 @@ import (
 	"github.com/timmo001/system-bridge/data/module/audio"
 	"github.com/timmo001/system-bridge/data/module/battery"
 	"github.com/timmo001/system-bridge/data/module/bluetooth"
+	"github.com/timmo001/system-bridge/data/module/cameras"
 	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/data/module/displays"
 	"github.com/timmo001/system-bridge/data/module/media"
@@ -144,6 +145,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		types.ModuleAudio:     audio.Watch,
 		types.ModuleBattery:   battery.Watch,
 		types.ModuleBluetooth: bluetooth.Watch,
+		types.ModuleCameras:   cameras.Watch,
 		types.ModuleDesktop:   desktop.Watch,
 		types.ModuleDisplays:  displays.Watch,
 		types.ModuleMedia:     media.Watch,

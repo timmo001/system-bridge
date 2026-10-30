@@ -1,0 +1,68 @@
+{
+  "cameras": [
+    {
+      "id": "usb-Insta360_Insta360_Link_2C-video-index0",
+      "name": "Insta360 Link 2C: Insta360 Link",
+      "device": "/dev/video0",
+      "driver": "uvcvideo",
+      "controls": [
+        {
+          "id": "brightness",
+          "name": "Brightness",
+          "type": "integer",
+          "value": 50,
+          "minimum": 0,
+          "maximum": 100,
+          "step": 1,
+          "default": 50,
+          "options": [],
+          "inactive": false,
+          "read_only": false
+        },
+        {
+          "id": "white_balance_automatic",
+          "name": "White Balance, Automatic",
+          "type": "boolean",
+          "value": 1,
+          "minimum": 0,
+          "maximum": 1,
+          "step": 1,
+          "default": 1,
+          "options": [],
+          "inactive": false,
+          "read_only": false
+        },
+        {
+          "id": "power_line_frequency",
+          "name": "Power Line Frequency",
+          "type": "menu",
+          "value": 1,
+          "minimum": 0,
+          "maximum": 2,
+          "step": 1,
+          "default": 3,
+          "options": [
+            { "value": 0, "name": "Disabled" },
+            { "value": 1, "name": "50 Hz" },
+            { "value": 2, "name": "60 Hz" }
+          ],
+          "inactive": false,
+          "read_only": false
+        },
+        {
+          "id": "focus_absolute",
+          "name": "Focus, Absolute",
+          "type": "integer",
+          "value": 94,
+          "minimum": 0,
+          "maximum": 100,
+          "step": 1,
+          "default": 50,
+          "options": [],
+          "inactive": true,
+          "read_only": false
+        }
+      ]
+    }
+  ]
+}

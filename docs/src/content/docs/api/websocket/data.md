@@ -42,6 +42,7 @@ Most modules refresh once a minute. These also update as soon as something chang
 | `audio` | An output or input's volume, mute or default changes | Linux, Windows |
 | `battery` | The charger is plugged in or removed, or a battery's charge or state changes | Linux, Windows |
 | `bluetooth` | A device is paired, removed, connected, disconnected or renamed | Linux, Windows |
+| `cameras` | A camera is connected or removed | Linux |
 | `discord` | Anything changes in Discord | All |
 | `displays` | A display is connected or removed. On Linux, also when a built-in panel's brightness changes | Linux, Windows |
 | `media` | The track or playback state changes | Linux |

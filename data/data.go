@@ -47,6 +47,7 @@ func NewDataStore() (*DataStore, error) {
 		data_module.AudioModule{},
 		data_module.BatteryModule{},
 		data_module.BluetoothModule{},
+		data_module.CameraModule{},
 		data_module.CPUModule{},
 		data_module.DesktopModule{},
 		data_module.DiskModule{},

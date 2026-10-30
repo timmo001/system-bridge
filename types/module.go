@@ -9,6 +9,7 @@ const (
 	ModuleAudio     ModuleName = "audio"
 	ModuleBattery   ModuleName = "battery"
 	ModuleBluetooth ModuleName = "bluetooth"
+	ModuleCameras   ModuleName = "cameras"
 	ModuleCPU       ModuleName = "cpu"
 	ModuleDesktop   ModuleName = "desktop"
 	ModuleDisks     ModuleName = "disks"

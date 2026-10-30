@@ -95,6 +95,10 @@ const summary = (module: ModuleName, data: ModulesData): string => {
       return data.bluetooth
         ? `${data.bluetooth.devices.filter((device) => device.connected).length} connected`
         : "";
+    case "cameras":
+      return data.cameras
+        ? formatQuantity(data.cameras.cameras.length, "camera")
+        : "";
     case "audio": {
       const output = data.audio?.outputs.find((device) => device.default);
 

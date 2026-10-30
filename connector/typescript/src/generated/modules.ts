@@ -18,6 +18,14 @@ export const BatteryState = Schema.Literals([
 
 export type BatteryState = typeof BatteryState.Type;
 
+export const CameraControlType = Schema.Literals([
+  "integer",
+  "boolean",
+  "menu",
+]);
+
+export type CameraControlType = typeof CameraControlType.Type;
+
 export const DesktopCompositor = Schema.Literals([
   "hyprland",
   "wayland",
@@ -103,6 +111,7 @@ export const ModuleName = Schema.Literals([
   "audio",
   "battery",
   "bluetooth",
+  "cameras",
   "cpu",
   "desktop",
   "disks",
@@ -262,6 +271,49 @@ export const CPUData = Schema.Struct({
 });
 
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
+
+export const CameraControlOption = Schema.Struct({
+  value: Schema.Finite,
+  name: Schema.String,
+});
+
+export interface CameraControlOption extends Schema.Schema.Type<
+  typeof CameraControlOption
+> {}
+
+export const CameraControl = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  type: CameraControlType,
+  value: Schema.Finite,
+  minimum: Schema.Finite,
+  maximum: Schema.Finite,
+  step: Schema.Finite,
+  default: Schema.Finite,
+  options: Schema.Array(CameraControlOption),
+  inactive: Schema.Boolean,
+  read_only: Schema.Boolean,
+});
+
+export interface CameraControl extends Schema.Schema.Type<
+  typeof CameraControl
+> {}
+
+export const Camera = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  device: Schema.String,
+  driver: Schema.NullOr(Schema.String),
+  controls: Schema.Array(CameraControl),
+});
+
+export interface Camera extends Schema.Schema.Type<typeof Camera> {}
+
+export const CamerasData = Schema.Struct({
+  cameras: Schema.Array(Camera),
+});
+
+export interface CamerasData extends Schema.Schema.Type<typeof CamerasData> {}
 
 export const ClipboardText = Schema.Struct({
   text: Schema.String,
@@ -1383,6 +1435,7 @@ export interface ModuleData {
   readonly audio: AudioData;
   readonly battery: BatteryData;
   readonly bluetooth: BluetoothData;
+  readonly cameras: CamerasData;
   readonly cpu: CPUData;
   readonly desktop: DesktopData;
   readonly discord: DiscordData;
@@ -1405,6 +1458,7 @@ export const ModuleDataSchemas: ModuleDataSchemas = {
   audio: AudioData,
   battery: BatteryData,
   bluetooth: BluetoothData,
+  cameras: CamerasData,
   cpu: CPUData,
   desktop: DesktopData,
   discord: DiscordData,
@@ -1423,6 +1477,7 @@ export const ModulesData = Schema.Struct({
   audio: Schema.optionalKey(AudioData),
   battery: Schema.optionalKey(BatteryData),
   bluetooth: Schema.optionalKey(BluetoothData),
+  cameras: Schema.optionalKey(CamerasData),
   cpu: Schema.optionalKey(CPUData),
   desktop: Schema.optionalKey(DesktopData),
   discord: Schema.optionalKey(DiscordData),
@@ -1443,6 +1498,7 @@ export const ModuleDataUpdate = Schema.Union([
   Schema.Struct({ module: Schema.Literal("audio"), data: AudioData }),
   Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),
   Schema.Struct({ module: Schema.Literal("bluetooth"), data: BluetoothData }),
+  Schema.Struct({ module: Schema.Literal("cameras"), data: CamerasData }),
   Schema.Struct({ module: Schema.Literal("cpu"), data: CPUData }),
   Schema.Struct({ module: Schema.Literal("desktop"), data: DesktopData }),
   Schema.Struct({ module: Schema.Literal("discord"), data: DiscordData }),

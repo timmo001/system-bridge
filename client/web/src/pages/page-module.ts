@@ -18,6 +18,7 @@ import { AtomController } from "~/controllers/atom-controller";
 import {
   audioDashboard,
   batteryDashboard,
+  camerasDashboard,
   cpuDashboard,
   displaysDashboard,
   gpusDashboard,
@@ -65,6 +66,7 @@ const dashboards: Readonly<
   audio: audioDashboard,
   battery: batteryDashboard,
   bluetooth: bluetoothDashboard,
+  cameras: camerasDashboard,
   cpu: cpuDashboard,
   desktop: desktopDashboard,
   discord: discordDashboard,

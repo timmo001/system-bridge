@@ -223,6 +223,7 @@ type getDataOutput struct {
 	Audio     *types.AudioData     `json:"audio,omitempty"`
 	Battery   *types.BatteryData   `json:"battery,omitempty"`
 	Bluetooth *types.BluetoothData `json:"bluetooth,omitempty"`
+	Cameras   *types.CamerasData   `json:"cameras,omitempty"`
 	CPU       *types.CPUData       `json:"cpu,omitempty"`
 	Desktop   *types.DesktopData   `json:"desktop,omitempty"`
 	Disks     *types.DisksData     `json:"disks,omitempty"`
@@ -382,6 +383,8 @@ func setModuleData(output *getDataOutput, name types.ModuleName, data any) error
 		output.Battery, err = moduleData[types.BatteryData](data)
 	case types.ModuleBluetooth:
 		output.Bluetooth, err = moduleData[types.BluetoothData](data)
+	case types.ModuleCameras:
+		output.Cameras, err = moduleData[types.CamerasData](data)
 	case types.ModuleCPU:
 		output.CPU, err = moduleData[types.CPUData](data)
 	case types.ModuleDesktop:

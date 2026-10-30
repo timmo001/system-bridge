@@ -4,6 +4,7 @@ import { ModuleDataSchemas, ModuleName } from "../src/index.js";
 import audio from "./fixtures/audio.json" with { type: "json" };
 import battery from "./fixtures/battery.json" with { type: "json" };
 import bluetooth from "./fixtures/bluetooth.json" with { type: "json" };
+import cameras from "./fixtures/cameras.json" with { type: "json" };
 import cpu from "./fixtures/cpu.json" with { type: "json" };
 import desktop from "./fixtures/desktop.json" with { type: "json" };
 import discord from "./fixtures/discord.json" with { type: "json" };
@@ -21,6 +22,7 @@ const fixtures = {
   audio,
   battery,
   bluetooth,
+  cameras,
   cpu,
   desktop,
   discord,
