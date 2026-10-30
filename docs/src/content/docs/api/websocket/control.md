@@ -605,3 +605,5 @@ Every connected client gets a `POWER_STATE_CHANGED` message with the `id` `syste
 ```
 
 On waking, System Bridge also announces itself over mDNS again, so clients that discover it, such as Home Assistant, hear it's back.
+
+The TypeScript connector has them as the `powerStateChanges` stream, and the Python connector passes them to `listen()`'s `power_state_callback`.
