@@ -2,6 +2,9 @@
 # name: test_settings
   Settings(
     autostart=False,
+    cameras=SettingsCameras(
+      capture=False,
+    ),
     commands=SettingsCommands(
       allowlist=list([
       ]),
@@ -72,6 +75,9 @@
 # name: test_settings_with_commands
   Settings(
     autostart=False,
+    cameras=SettingsCameras(
+      capture=False,
+    ),
     commands=SettingsCommands(
       allowlist=list([
         SettingsCommandDefinition(

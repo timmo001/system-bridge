@@ -11,6 +11,7 @@ modules = [
     Module.AUDIO,
     Module.BATTERY,
     Module.BLUETOOTH,
+    Module.CAMERAS,
     Module.CPU,
     Module.DESKTOP,
     Module.DISCORD,
@@ -51,6 +52,7 @@ def test_modules_data():
     assert modules_data.audio is None
     assert modules_data.battery is None
     assert modules_data.bluetooth is None
+    assert modules_data.cameras is None
     assert modules_data.cpu is None
     assert modules_data.desktop is None
     assert modules_data.discord is None

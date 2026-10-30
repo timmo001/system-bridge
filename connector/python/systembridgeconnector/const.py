@@ -10,6 +10,7 @@ from .models.modules import Module, ModulesData
 from .models.modules.audio import Audio
 from .models.modules.battery import Battery
 from .models.modules.bluetooth import Bluetooth
+from .models.modules.cameras import Cameras
 from .models.modules.cpu import CPU
 from .models.modules.desktop import Desktop
 from .models.modules.discord import Discord
@@ -89,6 +90,10 @@ class EventType(StrEnum):
     BLUETOOTH_FORGOTTEN = "BLUETOOTH_FORGOTTEN"
     BLUETOOTH_POWER_SET = "BLUETOOTH_POWER_SET"
     BLUETOOTH_SET_POWER = "BLUETOOTH_SET_POWER"
+    CAMERA_CAPTURE = "CAMERA_CAPTURE"
+    CAMERA_CAPTURED = "CAMERA_CAPTURED"
+    CAMERA_CONTROL = "CAMERA_CONTROL"
+    CAMERA_CONTROLLED = "CAMERA_CONTROLLED"
     CLIPBOARD_GET_TEXT = "CLIPBOARD_GET_TEXT"
     CLIPBOARD_SET_TEXT = "CLIPBOARD_SET_TEXT"
     CLIPBOARD_TEXT = "CLIPBOARD_TEXT"
@@ -259,6 +264,7 @@ class Model(StrEnum):
     AUDIO = Module.AUDIO
     BATTERY = Module.BATTERY
     BLUETOOTH = Module.BLUETOOTH
+    CAMERAS = Module.CAMERAS
     CPU = Module.CPU
     DATA = "data"
     DESKTOP = Module.DESKTOP
@@ -289,6 +295,7 @@ MODEL_MAP = {
     Model.AUDIO: Audio,
     Model.BATTERY: Battery,
     Model.BLUETOOTH: Bluetooth,
+    Model.CAMERAS: Cameras,
     Model.CPU: CPU,
     Model.DATA: ModulesData,
     Model.DESKTOP: Desktop,

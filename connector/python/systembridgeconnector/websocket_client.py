@@ -21,6 +21,11 @@ from .exceptions import (
 )
 from .models.audio_control import AudioControl
 from .models.bluetooth_control import BluetoothDeviceRequest, BluetoothPowerRequest
+from .models.camera_control import (
+    CameraCaptureRequest,
+    CameraControlRequest,
+    CameraPicture,
+)
 from .models.clipboard import ClipboardText, ClipboardTextRequest
 from .models.command_execute import ExecuteRequest
 from .models.command_prefab import CommandPrefab
@@ -81,6 +86,9 @@ from .models.system_control import KeepAwakeRequest, PowerProfileRequest
 
 # The backend allows 30 seconds for a Bluetooth device to connect
 BLUETOOTH_TIMEOUT = 35.0
+
+# The backend allows 20 seconds for a camera to start and settle
+CAMERA_CAPTURE_TIMEOUT = 25.0
 
 
 class WebSocketClient(Base):
@@ -706,6 +714,38 @@ class WebSocketClient(Base):
             request_id,
             BLUETOOTH_TIMEOUT,
         )
+
+    async def camera_control(
+        self,
+        model: CameraControlRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Set one of a camera's controls, such as its brightness or zoom. Linux only."""
+        return await self._action(
+            EventType.CAMERA_CONTROL,
+            EventType.CAMERA_CONTROLLED,
+            model,
+            request_id,
+        )
+
+    async def camera_capture(
+        self,
+        model: CameraCaptureRequest,
+        request_id: str | None = None,
+    ) -> CameraPicture:
+        """Take a picture with a camera, as a base64 JPEG.
+
+        Needs the cameras.capture setting on. Linux only.
+        """
+        response = await self.send_message(
+            EventType.CAMERA_CAPTURE,
+            request_id,
+            asdict(model),
+            wait_for_response=True,
+            response_type=EventType.CAMERA_CAPTURED,
+            timeout=CAMERA_CAPTURE_TIMEOUT,
+        )
+        return CameraPicture(**self._response_dict(response, "camera picture"))
 
     async def desktop_close_window(
         self,

@@ -106,6 +106,16 @@ class SettingsCommands:
 
 
 @dataclass
+class SettingsCameras:
+    """Settings Cameras.
+
+    Taking pictures is off by default, as a camera can see the room it's in.
+    """
+
+    capture: bool = False
+
+
+@dataclass
 class SettingsDesktop:
     """Settings Desktop.
 
@@ -133,6 +143,7 @@ class Settings:
     systemTray: bool = field(default=True)  # noqa: N815
     hotkeys: list[SettingHotkey] = field(default_factory=list)
     logLevel: str = field(default="WARN")  # noqa: N815
+    cameras: SettingsCameras = field(default_factory=SettingsCameras)
     commands: SettingsCommands = field(default_factory=SettingsCommands)
     desktop: SettingsDesktop = field(default_factory=SettingsDesktop)
     disks: SettingsDisks = field(default_factory=SettingsDisks)
@@ -144,6 +155,9 @@ class Settings:
             SettingHotkey(**cast(dict, h)) if isinstance(h, dict) else h
             for h in self.hotkeys or []
         ]
+
+        if isinstance(self.cameras, dict):
+            self.cameras = SettingsCameras(**self.cameras)
 
         if isinstance(self.commands, dict):
             self.commands = SettingsCommands(

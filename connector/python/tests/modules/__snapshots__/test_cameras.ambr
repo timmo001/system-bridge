@@ -1,0 +1,83 @@
+# serializer version: 1
+# name: test_cameras
+  Cameras(
+    cameras=list([
+      Camera(
+        controls=list([
+          CameraControl(
+            default=50,
+            id='brightness',
+            inactive=False,
+            maximum=100,
+            minimum=0,
+            name='Brightness',
+            options=list([
+            ]),
+            read_only=False,
+            step=1,
+            type='integer',
+            value=50,
+          ),
+          CameraControl(
+            default=3,
+            id='power_line_frequency',
+            inactive=False,
+            maximum=2,
+            minimum=0,
+            name='Power Line Frequency',
+            options=list([
+              CameraControlOption(
+                name='Disabled',
+                value=0,
+              ),
+              CameraControlOption(
+                name='50 Hz',
+                value=1,
+              ),
+              CameraControlOption(
+                name='60 Hz',
+                value=2,
+              ),
+            ]),
+            read_only=False,
+            step=1,
+            type='menu',
+            value=1,
+          ),
+          CameraControl(
+            default=50,
+            id='focus_absolute',
+            inactive=True,
+            maximum=100,
+            minimum=0,
+            name='Focus, Absolute',
+            options=list([
+            ]),
+            read_only=False,
+            step=1,
+            type='integer',
+            value=94,
+          ),
+          CameraControl(
+            default=0,
+            id='focus_automatic_continuous',
+            inactive=False,
+            maximum=1,
+            minimum=0,
+            name='Focus, Automatic Continuous',
+            options=list([
+            ]),
+            read_only=False,
+            step=1,
+            type='boolean',
+            value=1,
+          ),
+        ]),
+        device='/dev/video0',
+        driver='uvcvideo',
+        id='usb-Insta360_Insta360_Link_2C-video-index0',
+        name='Insta360 Link 2C: Insta360 Link',
+      ),
+    ]),
+  )
+# ---

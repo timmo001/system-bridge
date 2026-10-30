@@ -6,6 +6,7 @@ from systembridgeconnector.models.settings import (
     SettingDirectory,
     SettingHotkey,
     Settings,
+    SettingsCameras,
     SettingsCommandDefinition,
     SettingsCommands,
     SettingsDesktop,
@@ -27,6 +28,7 @@ def test_settings_from_backend():
         systemTray=False,
         hotkeys=[{"name": "Lock", "key": "ctrl+l"}],
         logLevel="DEBUG",
+        cameras={"capture": True},
         commands={
             "allowlist": [
                 {
@@ -44,6 +46,7 @@ def test_settings_from_backend():
     )
     assert settings.systemTray is False
     assert settings.hotkeys == [SettingHotkey(name="Lock", key="ctrl+l")]
+    assert settings.cameras == SettingsCameras(capture=True)
     assert isinstance(settings.commands.allowlist[0], SettingsCommandDefinition)
     assert settings.desktop == SettingsDesktop(windowTitles=True)
     assert settings.disks == SettingsDisks(

@@ -21,6 +21,11 @@ from systembridgeconnector.exceptions import (
 )
 from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
+from systembridgeconnector.models.camera_control import (
+    CameraCaptureRequest,
+    CameraControlRequest,
+    CameraPicture,
+)
 from systembridgeconnector.models.clipboard import ClipboardTextRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_prefab import CommandPrefab
@@ -591,6 +596,44 @@ async def test_bluetooth_set_power(
     assert response.type == EventType.BLUETOOTH_POWER_SET
     # Turning it off is sent, not left out as unset
     assert response.data == {"powered": False}
+
+
+@pytest.mark.asyncio
+async def test_camera_control(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.camera_control(
+        CameraControlRequest(
+            id="usb-Insta360_Insta360_Link_2C-video-index0",
+            control="focus_automatic_continuous",
+            value=0,
+        ),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.CAMERA_CONTROLLED
+    # A value of 0 is sent, not left out as unset
+    assert response.data == {
+        "id": "usb-Insta360_Insta360_Link_2C-video-index0",
+        "control": "focus_automatic_continuous",
+        "value": 0,
+    }
+
+
+@pytest.mark.asyncio
+async def test_camera_capture(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    picture = await mock_websocket_client_listening.camera_capture(
+        CameraCaptureRequest(id="usb-Insta360_Insta360_Link_2C-video-index0"),
+        request_id=REQUEST_ID,
+    )
+    assert picture == CameraPicture(
+        id="usb-Insta360_Insta360_Link_2C-video-index0",
+        content_type="image/jpeg",
+        image="/9j/4AAQSkZJRgABAQ==",
+    )
 
 
 @pytest.mark.asyncio

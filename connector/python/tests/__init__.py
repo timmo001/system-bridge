@@ -14,6 +14,7 @@ from systembridgeconnector.models.fixtures.media_files import FIXTURE_MEDIA_FILE
 from systembridgeconnector.models.fixtures.modules.audio import FIXTURE_AUDIO
 from systembridgeconnector.models.fixtures.modules.battery import FIXTURE_BATTERY
 from systembridgeconnector.models.fixtures.modules.bluetooth import FIXTURE_BLUETOOTH
+from systembridgeconnector.models.fixtures.modules.cameras import FIXTURE_CAMERAS
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
 from systembridgeconnector.models.fixtures.modules.desktop import FIXTURE_DESKTOP
 from systembridgeconnector.models.fixtures.modules.discord import FIXTURE_DISCORD
@@ -43,6 +44,7 @@ MODULES_DATA = ModulesData(
     audio=FIXTURE_AUDIO,
     battery=FIXTURE_BATTERY,
     bluetooth=FIXTURE_BLUETOOTH,
+    cameras=FIXTURE_CAMERAS,
     cpu=FIXTURE_CPU,
     desktop=FIXTURE_DESKTOP,
     discord=FIXTURE_DISCORD,
@@ -148,9 +150,31 @@ def discord_setup_response(request: Request) -> Response:
     )
 
 
+def camera_capture_response(request: Request) -> Response:
+    """Reply to a camera capture with a picture."""
+    return Response(
+        id=request.id,
+        type=EventType.CAMERA_CAPTURED,
+        data={
+            "id": request.data["id"],
+            "content_type": "image/jpeg",
+            "image": "/9j/4AAQSkZJRgABAQ==",
+        },
+        message="Picture taken",
+    )
+
+
+REQUEST_RESPONSES: Final[dict[EventType, Callable[[Request], Response]]] = {
+    EventType.CAMERA_CAPTURE: camera_capture_response,
+    EventType.GET_DISCORD_SETUP: discord_setup_response,
+    EventType.UPDATE_DISCORD_SETUP: discord_setup_response,
+}
+
+
 CONTROL_RESPONSES = {
     EventType.AUDIO_CONTROL: EventType.AUDIO_CONTROLLED,
     EventType.BLUETOOTH_SET_POWER: EventType.BLUETOOTH_POWER_SET,
+    EventType.CAMERA_CONTROL: EventType.CAMERA_CONTROLLED,
     EventType.CLIPBOARD_SET_TEXT: EventType.CLIPBOARD_TEXT_SET,
     EventType.DESKTOP_SET_WINDOW_STATE: EventType.DESKTOP_WINDOW_STATE_SET,
     EventType.DISCORD_CONTROL: EventType.DISCORD_CONTROLLED,
@@ -173,6 +197,7 @@ SETTINGS_DATA: Final[dict[str, Any]] = {
     "systemTray": True,
     "hotkeys": [],
     "logLevel": "WARN",
+    "cameras": {"capture": False},
     "desktop": {"windowTitles": False},
     "disks": {"allowedSecondaryMountPoints": []},
     "media": {"directories": []},
@@ -414,8 +439,8 @@ async def process_request(request: Request) -> Response:
             type=CONTROL_RESPONSES[request.event],
             data=request.data,
         )
-    if request.event in (EventType.GET_DISCORD_SETUP, EventType.UPDATE_DISCORD_SETUP):
-        return discord_setup_response(request)
+    if request.event in REQUEST_RESPONSES:
+        return REQUEST_RESPONSES[request.event](request)
     if request.event == EventType.NOTIFICATION:
         return Response(
             id=request.id,
