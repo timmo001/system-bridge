@@ -5,6 +5,7 @@ import {
   SystemBridgeWebSocket,
   type AudioControl,
   type CameraControlRequest,
+  type CameraSize,
   type DataMissingError,
   type DesktopWindowStateRequest,
   type DiscordControl,
@@ -501,13 +502,28 @@ export const cameraControl = Atom.family((_key: string) =>
   ),
 );
 
-/** Takes a picture with a camera, one atom per camera, holding the last one. */
+/** The size each camera takes pictures at, null for its current size. */
+export const cameraCaptureSize = Atom.family((_id: string) =>
+  Atom.make<CameraSize | null>(null),
+);
+
+/** Takes a picture with a camera at its chosen size, one atom per camera,
+ * holding the last one. */
 export const cameraCapture = Atom.family((id: string) =>
-  Atom.fn((_: undefined, get) =>
-    fnSocket(get).pipe(
-      Effect.flatMap((bridge) => bridge.cameraCapture({ id })),
-    ),
-  ),
+  Atom.fn((_: undefined, get) => {
+    // Read without depending on it, so choosing a size doesn't take a picture
+    const size = get.registry.get(cameraCaptureSize(id));
+
+    return fnSocket(get).pipe(
+      Effect.flatMap((bridge) =>
+        bridge.cameraCapture(
+          size === null
+            ? { id }
+            : { id, width: size.width, height: size.height },
+        ),
+      ),
+    );
+  }),
 );
 
 /** Switches the power profile, to one of the system data's `power_profiles`. */

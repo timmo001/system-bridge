@@ -1,19 +1,27 @@
 import { mdiCamera, mdiDownload } from "@mdi/js";
-import type { Camera } from "@timmo001/effect-system-bridge";
+import type { Camera, CameraSize } from "@timmo001/effect-system-bridge";
 import { Option } from "effect";
 import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import "./sb-action-button";
+import "./sb-select";
 import { icon, shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
-import { cameraCapture, settings } from "~/lib/atoms";
+import {
+  cameraCapture,
+  cameraCaptureSize,
+  registry,
+  settings,
+} from "~/lib/atoms";
 import { href } from "~/lib/router";
 
+const sizeLabel = (size: CameraSize) => `${size.width} × ${size.height}`;
+
 /**
- * Takes a picture with a camera and shows it, when the setting allows it.
- * Points to the setting otherwise.
+ * Takes a picture with a camera, at its current size or one of its others,
+ * and shows it, when the setting allows it. Points to the setting otherwise.
  */
 @customElement("sb-camera-capture")
 export class SbCameraCapture extends LitElement {
@@ -24,6 +32,10 @@ export class SbCameraCapture extends LitElement {
         display: flex;
         flex-direction: column;
         gap: var(--sb-space-3);
+      }
+
+      sb-select {
+        --sb-select-width: 14rem;
       }
 
       img {
@@ -43,6 +55,41 @@ export class SbCameraCapture extends LitElement {
   );
 
   readonly #settings = new AtomController(this, () => settings);
+
+  readonly #size = new AtomController(this, () =>
+    cameraCaptureSize(this.camera?.id ?? ""),
+  );
+
+  #onSize = (event: CustomEvent<{ readonly value: string }>) => {
+    const camera = this.camera;
+
+    if (!camera) return;
+
+    registry.set(
+      cameraCaptureSize(camera.id),
+      camera.sizes.find((size) => sizeLabel(size) === event.detail.value) ??
+        null,
+    );
+  };
+
+  #renderSize(camera: Camera) {
+    if (camera.sizes.length === 0) return nothing;
+
+    const options = camera.sizes.map((size) => ({
+      value: sizeLabel(size),
+      label: sizeLabel(size),
+    }));
+
+    // Until one is chosen, pictures are taken at the current size
+    const size = this.#size.value ?? camera.format;
+
+    return html`<sb-select
+      label="Picture size"
+      .options=${options}
+      .value=${size === null ? "" : sizeLabel(size)}
+      @value-changed=${this.#onSize}
+    ></sb-select>`;
+  }
 
   override render() {
     const camera = this.camera;
@@ -76,6 +123,7 @@ export class SbCameraCapture extends LitElement {
 
     return html`
       <div class="row wrap">
+        ${this.#renderSize(camera)}
         <sb-action-button
           label="Take picture"
           .icon=${mdiCamera}
