@@ -28,6 +28,7 @@ const (
 	EventExitApplication           EventType = "EXIT_APPLICATION"
 	EventGetCommandPrefabs         EventType = "GET_COMMAND_PREFABS"
 	EventGetData                   EventType = "GET_DATA"
+	EventGetDiagnostics            EventType = "GET_DIAGNOSTICS"
 	EventGetDirectories            EventType = "GET_DIRECTORIES"
 	EventGetDirectory              EventType = "GET_DIRECTORY"
 	EventGetDiscordSetup           EventType = "GET_DISCORD_SETUP"

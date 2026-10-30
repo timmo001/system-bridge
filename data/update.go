@@ -132,6 +132,7 @@ func (tp *UpdateTaskProcessor) worker() {
 			if err != nil {
 				moduleName := string(task.Name())
 				slog.Warn("Task processing error for module", "module", moduleName, "error", err)
+				tp.DataStore.RecordModuleFailure(task.Name(), err)
 				continue
 			}
 

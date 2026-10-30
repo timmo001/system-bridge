@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -451,6 +452,45 @@ func TestDataStore_TriggerModuleUpdate(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "module name cannot be empty")
 	})
+}
+
+func TestDataStore_ModuleDiagnostics(t *testing.T) {
+	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", t.TempDir())
+
+	ds := &DataStore{registry: make(map[types.ModuleName]types.Module)}
+	ds.Register(mockUpdater{name: "b-failing", err: errors.New("no devices")})
+	ds.Register(mockUpdater{name: "a-working", data: "data"})
+
+	require.Error(t, ds.TriggerModuleUpdate("b-failing"))
+	ds.RecordModuleFailure("b-failing", errors.New("still no devices"))
+	require.NoError(t, ds.TriggerModuleUpdate("a-working"))
+
+	modules := ds.ModuleDiagnostics()
+	require.Len(t, modules, 2)
+
+	working := modules[0]
+	assert.Equal(t, types.ModuleName("a-working"), working.Name)
+	assert.True(t, working.HasData)
+	assert.NotNil(t, working.Updated)
+	assert.Zero(t, working.Failures)
+	assert.Nil(t, working.LastError)
+
+	failing := modules[1]
+	assert.Equal(t, types.ModuleName("b-failing"), failing.Name)
+	assert.False(t, failing.HasData)
+	assert.Nil(t, failing.Updated)
+	assert.Equal(t, 2, failing.Failures)
+	require.NotNil(t, failing.LastError)
+	assert.Equal(t, "still no devices", *failing.LastError)
+	assert.NotNil(t, failing.LastErrorAt)
+
+	// A success resets the count but keeps the last error
+	require.NoError(t, ds.SetModuleData("b-failing", "recovered"))
+	failing = ds.ModuleDiagnostics()[1]
+	assert.True(t, failing.HasData)
+	assert.Zero(t, failing.Failures)
+	require.NotNil(t, failing.LastError)
+	assert.Equal(t, "still no devices", *failing.LastError)
 }
 
 func TestDataStore_SaveModuleDataSkipsUnchangedData(t *testing.T) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"embed"
 	"encoding/json"
@@ -273,6 +274,22 @@ func main() {
 					bluetoothCommand(),
 					cameraCommand(),
 					clipboardCommand(),
+					{
+						Name:  "diagnostics",
+						Usage: "Print the backend's diagnostics: module failures, a settings summary and recent errors, safe to share in a bug report",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							raw, err := client.Request(cmdCtx, event.EventGetDiagnostics, map[string]any{})
+							if err != nil {
+								return err
+							}
+							var pretty bytes.Buffer
+							if err := json.Indent(&pretty, raw, "", "  "); err != nil {
+								return fmt.Errorf("decode the diagnostics: %w", err)
+							}
+							_, err = fmt.Fprintln(cmd.Root().Writer, pretty.String())
+							return err
+						},
+					},
 					systemCommand(),
 					commandCommand(),
 					{

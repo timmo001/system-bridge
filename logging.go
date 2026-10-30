@@ -111,7 +111,7 @@ func setupLogging() {
 	if includeTerminal && terminalHandler != nil {
 		handlers = append(handlers, terminalHandler)
 	}
-	handlers = append(handlers, fileHandler)
+	handlers = append(handlers, fileHandler, logging.Recent)
 
 	logger := slog.New(&multiHandler{handlers: handlers})
 	slog.SetDefault(logger)

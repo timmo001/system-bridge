@@ -8,6 +8,8 @@ import (
 	"hash/fnv"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,6 +29,14 @@ type DataStore struct {
 	saved map[types.ModuleName]uint64
 	// history keeps the recent readings of the graphed metrics
 	history *History
+	// status keeps each module's failed updates, for diagnostics
+	status map[types.ModuleName]moduleStatus
+}
+
+type moduleStatus struct {
+	failures    int
+	lastError   string
+	lastErrorAt time.Time
 }
 
 // lazyModules register when they first receive data instead of at startup.
@@ -171,6 +181,7 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	}
 
 	d.registry[name] = module
+	d.recordSuccess(name)
 
 	return nil
 }
@@ -347,6 +358,7 @@ func (d *DataStore) TriggerModuleUpdate(name types.ModuleName) error {
 	ctx := context.Background()
 	data, err := module.Updater.Update(ctx)
 	if err != nil {
+		d.recordFailure(name, err)
 		return fmt.Errorf("failed to update module %s: %w", name, err)
 	}
 
@@ -378,6 +390,63 @@ func (d *DataStore) TriggerModuleUpdate(name types.ModuleName) error {
 	}
 
 	d.registry[name] = module
+	d.recordSuccess(name)
 
 	return nil
+}
+
+// RecordModuleFailure notes a module's failed update, for diagnostics
+func (d *DataStore) RecordModuleFailure(name types.ModuleName, err error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.recordFailure(name, err)
+}
+
+// recordFailure needs the lock held
+func (d *DataStore) recordFailure(name types.ModuleName, err error) {
+	if d.status == nil {
+		d.status = make(map[types.ModuleName]moduleStatus)
+	}
+	status := d.status[name]
+	status.failures++
+	status.lastError = utils.MaskUserPaths(err.Error())
+	status.lastErrorAt = time.Now()
+	d.status[name] = status
+}
+
+// recordSuccess needs the lock held. It keeps the last error, which still
+// explains an earlier gap in the data.
+func (d *DataStore) recordSuccess(name types.ModuleName) {
+	if status, ok := d.status[name]; ok && status.failures > 0 {
+		status.failures = 0
+		d.status[name] = status
+	}
+}
+
+// ModuleDiagnostics reports how each registered module's updates are going,
+// sorted by name
+func (d *DataStore) ModuleDiagnostics() []types.DiagnosticsModule {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	modules := make([]types.DiagnosticsModule, 0, len(d.registry))
+	for name, module := range d.registry {
+		diagnostics := types.DiagnosticsModule{Name: name, HasData: module.Data != nil}
+		if module.Updated != "" {
+			updated := module.Updated
+			diagnostics.Updated = &updated
+		}
+		if status, ok := d.status[name]; ok {
+			diagnostics.Failures = status.failures
+			lastError := status.lastError
+			lastErrorAt := status.lastErrorAt.Unix()
+			diagnostics.LastError = &lastError
+			diagnostics.LastErrorAt = &lastErrorAt
+		}
+		modules = append(modules, diagnostics)
+	}
+	slices.SortFunc(modules, func(a, b types.DiagnosticsModule) int {
+		return strings.Compare(string(a.Name), string(b.Name))
+	})
+	return modules
 }

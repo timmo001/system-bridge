@@ -673,6 +673,61 @@ export const DeviceInfo = Schema.Struct({
 
 export interface DeviceInfo extends Schema.Schema.Type<typeof DeviceInfo> {}
 
+export const DiagnosticsModule = Schema.Struct({
+  name: ModuleName,
+  has_data: Schema.Boolean,
+  updated: Schema.NullOr(Schema.String),
+  failures: Schema.Finite,
+  last_error: Schema.NullOr(Schema.String),
+  last_error_at: Schema.NullOr(Schema.Finite),
+});
+
+export interface DiagnosticsModule extends Schema.Schema.Type<
+  typeof DiagnosticsModule
+> {}
+
+export const DiagnosticsSettings = Schema.Struct({
+  autostart: Schema.Boolean,
+  system_tray: Schema.Boolean,
+  hotkeys: Schema.Finite,
+  commands: Schema.Finite,
+  media_directories: Schema.Finite,
+  allowed_secondary_mount_points: Schema.Finite,
+  cameras_capture: Schema.Boolean,
+  desktop_window_titles: Schema.Boolean,
+  desktop_hyprland_code: Schema.Boolean,
+});
+
+export interface DiagnosticsSettings extends Schema.Schema.Type<
+  typeof DiagnosticsSettings
+> {}
+
+export const DiagnosticsLogRecord = Schema.Struct({
+  time: Schema.Finite,
+  level: Schema.String,
+  message: Schema.String,
+  error: Schema.NullOr(Schema.String),
+  module: Schema.NullOr(Schema.String),
+  event: Schema.NullOr(Schema.String),
+});
+
+export interface DiagnosticsLogRecord extends Schema.Schema.Type<
+  typeof DiagnosticsLogRecord
+> {}
+
+export const Diagnostics = Schema.Struct({
+  version: Schema.String,
+  platform: Schema.String,
+  architecture: Schema.String,
+  started_at: Schema.Finite,
+  log_level: Schema.String,
+  modules: Schema.Array(DiagnosticsModule),
+  settings: Schema.NullOr(DiagnosticsSettings),
+  recent_errors: Schema.Array(DiagnosticsLogRecord),
+});
+
+export interface Diagnostics extends Schema.Schema.Type<typeof Diagnostics> {}
+
 export const DiscordDevice = Schema.Struct({
   id: Schema.String,
   name: Schema.String,

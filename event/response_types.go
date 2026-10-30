@@ -29,6 +29,7 @@ const (
 	ResponseTypeDesktopWindowFocused      ResponseType = "DESKTOP_WINDOW_FOCUSED"
 	ResponseTypeDesktopWindowStateSet     ResponseType = "DESKTOP_WINDOW_STATE_SET"
 	ResponseTypeDesktopWorkspaceFocused   ResponseType = "DESKTOP_WORKSPACE_FOCUSED"
+	ResponseTypeDiagnostics               ResponseType = "DIAGNOSTICS"
 	ResponseTypeDirectories               ResponseType = "DIRECTORIES"
 	ResponseTypeDirectory                 ResponseType = "DIRECTORY"
 	ResponseTypeDirectoryValidated        ResponseType = "DIRECTORY_VALIDATED"
