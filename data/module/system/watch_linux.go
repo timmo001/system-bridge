@@ -24,10 +24,11 @@ const watchRetry = time.Minute
 
 // Watch calls changed whenever the session is locked or unlocked, the user
 // goes away or comes back, the power profile changes, keeping awake runs
-// out, or a systemd unit fails or recovers, until ctx is
-// done. Lock and idle hints come from logind, input from the Wayland
-// compositor where it supports ext-idle-notify, and unit states from the
-// system and user systemd managers.
+// out, a systemd unit fails or recovers, or an app starts or stops using a
+// camera, until ctx is done. Lock and idle hints come from logind, input
+// from the Wayland compositor where it supports ext-idle-notify, unit
+// states from the system and user systemd managers, and camera use from
+// inotify on the video devices.
 func Watch(ctx context.Context, changed func()) {
 	trigger, stop := watch.Debounce(watchDebounce, changed)
 	defer stop()
@@ -48,6 +49,11 @@ func Watch(ctx context.Context, changed func()) {
 	wg.Go(func() {
 		watch.Retry(ctx, watchRetry, "power profiles", func(ctx context.Context) error {
 			return followPowerProfiles(ctx, trigger)
+		})
+	})
+	wg.Go(func() {
+		watch.Retry(ctx, watchRetry, "cameras", func(ctx context.Context) error {
+			return followCameras(ctx, trigger)
 		})
 	})
 	watch.Retry(ctx, watchRetry, "logind", func(ctx context.Context) error {
