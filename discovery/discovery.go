@@ -118,6 +118,15 @@ func (dm *DiscoveryManager) DiscoverServices() ([]ServiceInfo, error) {
 	return services, nil
 }
 
+// Announce announces the services again, such as after waking
+func (dm *DiscoveryManager) Announce() {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+	if dm.running && dm.mdnsDisc != nil {
+		dm.mdnsDisc.Announce()
+	}
+}
+
 // GetMDNSDiscovery returns the mDNS discovery instance
 func (dm *DiscoveryManager) GetMDNSDiscovery() *MDNSDiscovery {
 	dm.mu.RLock()

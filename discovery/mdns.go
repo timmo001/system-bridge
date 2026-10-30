@@ -6,11 +6,18 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/mdns"
+	"github.com/miekg/dns"
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/timmo001/system-bridge/utils"
+	"golang.org/x/net/ipv4"
 )
+
+// mdnsGroup is where mDNS messages go over IPv4
+var mdnsGroup = &net.UDPAddr{IP: net.IPv4(224, 0, 0, 251), Port: 5353}
 
 // MDNSDiscovery represents an mDNS-based service discovery mechanism
 type MDNSDiscovery struct {
@@ -90,7 +97,73 @@ func (m *MDNSDiscovery) Start() error {
 		"port", service.Port,
 		"hostname", service.HostName)
 
+	go m.announce()
+
 	return nil
+}
+
+// announceWaits are the gaps before each announcement, doubling as RFC 6762
+// section 8.3 allows, so a network that takes a while to come back after
+// waking still gets one
+var announceWaits = []time.Duration{time.Second, 2 * time.Second, 4 * time.Second, 8 * time.Second, 16 * time.Second}
+
+// announce sends the service's records unasked, at startup and after waking,
+// as RFC 6762 section 8.3 asks. Browsers stop asking once a record expires, so
+// without this they never hear the host is back after a long sleep.
+func (m *MDNSDiscovery) announce() {
+	name := fmt.Sprintf("%s.%s.", strings.Trim(m.service.Service, "."), strings.Trim(m.service.Domain, "."))
+	msg := dns.Msg{
+		MsgHdr:   dns.MsgHdr{Response: true, Authoritative: true},
+		Compress: true,
+		Answer:   m.service.Records(dns.Question{Name: name, Qtype: dns.TypePTR, Qclass: dns.ClassINET}),
+	}
+	packet, err := msg.Pack()
+	if err != nil {
+		slog.Debug("Failed to build the mDNS announcement", "error", err)
+		return
+	}
+
+	for _, wait := range announceWaits {
+		select {
+		case <-m.stopChan:
+			return
+		case <-time.After(wait):
+		}
+		if err := sendAnnouncement(packet); err != nil {
+			slog.Debug("Failed to announce over mDNS", "error", err)
+		}
+	}
+}
+
+// sendAnnouncement opens a socket for each announcement, as the network can
+// still be down for a few seconds after waking and joining the group fails
+// until it's back
+func sendAnnouncement(packet []byte) error {
+	// The server keeps its sockets to itself, so open another the same way.
+	// It shares port 5353 with it and any other responder, and responses
+	// from any other port are ignored.
+	conn, err := net.ListenMulticastUDP("udp4", nil, mdnsGroup)
+	if err != nil {
+		return fmt.Errorf("failed to open a socket: %w", err)
+	}
+	defer func() { _ = conn.Close() }()
+	// Go turns loopback off, but a Home Assistant on this same host needs to
+	// hear it too
+	if err := ipv4.NewPacketConn(conn).SetMulticastLoopback(true); err != nil {
+		slog.Debug("Failed to turn on mDNS loopback", "error", err)
+	}
+	if _, err := conn.WriteToUDP(packet, mdnsGroup); err != nil {
+		return fmt.Errorf("failed to send: %w", err)
+	}
+	return nil
+}
+
+// Announce announces the service again, such as after waking
+func (m *MDNSDiscovery) Announce() {
+	if m.server == nil {
+		return
+	}
+	go m.announce()
 }
 
 // Stop stops the mDNS service discovery
