@@ -77,6 +77,7 @@ const (
 	ResponseTypePowerRestarting           ResponseType = "POWER_RESTARTING"
 	ResponseTypePowerShuttingdown         ResponseType = "POWER_SHUTTINGDOWN"
 	ResponseTypePowerSleeping             ResponseType = "POWER_SLEEPING"
+	ResponseTypePowerStateChanged         ResponseType = "POWER_STATE_CHANGED"
 	ResponseTypeProcessKilled             ResponseType = "PROCESS_KILLED"
 	ResponseTypeSettingsChanged           ResponseType = "SETTINGS_CHANGED"
 	ResponseTypeSettingsResult            ResponseType = "SETTINGS_RESULT"

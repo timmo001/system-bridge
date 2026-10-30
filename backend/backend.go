@@ -36,6 +36,7 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
+	"github.com/timmo001/system-bridge/utils/handlers/power"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -138,6 +139,21 @@ func (b *Backend) Run(ctx context.Context) error {
 		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
 	})
 	defer notification.OnEvent(nil)
+
+	// Clients hear before the host sleeps or shuts down, so they can mark it
+	// unavailable at once, and again when it wakes
+	go power.WatchSleep(ctx, func(state types.PowerState) {
+		slog.Info("Power state changed", "state", state)
+		b.wsServer.BroadcastMessage(event.MessageResponse{
+			ID:      "system",
+			Type:    event.ResponseTypePowerStateChanged,
+			Subtype: event.ResponseSubtypeNone,
+			Data:    types.PowerStateEvent{State: state},
+		})
+		if state == types.PowerStateResumed {
+			b.discoveryManager.Announce()
+		}
+	})
 
 	// These modules follow changes on the system, so they update as soon as
 	// one happens rather than on their next refresh

@@ -132,6 +132,14 @@ export const OmarchyAction = Schema.Literals(["close", "open", "toggle"]);
 
 export type OmarchyAction = typeof OmarchyAction.Type;
 
+export const PowerState = Schema.Literals([
+  "sleeping",
+  "shutting_down",
+  "resumed",
+]);
+
+export type PowerState = typeof PowerState.Type;
+
 export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
@@ -1290,6 +1298,14 @@ export const NetworksData = Schema.Struct({
 });
 
 export interface NetworksData extends Schema.Schema.Type<typeof NetworksData> {}
+
+export const PowerStateEvent = Schema.Struct({
+  state: PowerState,
+});
+
+export interface PowerStateEvent extends Schema.Schema.Type<
+  typeof PowerStateEvent
+> {}
 
 export const Process = Schema.Struct({
   id: Schema.Finite,
