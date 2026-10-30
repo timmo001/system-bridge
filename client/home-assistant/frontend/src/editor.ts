@@ -8,6 +8,7 @@ import {
   resolveDevice,
   type SystemBridgeEntities,
 } from "./registry";
+import { isAtLeast, PAGE_RELEASES, SECTION_RELEASES } from "./release";
 import { isSectionName, type SectionName } from "./sections";
 import { sectionImage } from "./section-images";
 import {
@@ -113,35 +114,70 @@ const DEFAULTS = {
 
 const ALL_PAGES = PAGES.map(({ page }) => page);
 
-const pagesSelector = (reorder: boolean) => ({
+/** Whether Home Assistant has the entities a page or section needs. */
+const isReleased = (version: string | undefined, release: string | undefined) =>
+  release === undefined ||
+  (version !== undefined && isAtLeast(version, release));
+
+/** Pages hidden from the editor until Home Assistant has their entities. */
+const hiddenPages = (version: string | undefined) =>
+  new Set(
+    ALL_PAGES.filter((page) => !isReleased(version, PAGE_RELEASES.get(page))),
+  );
+
+/**
+ * A page list from the editor, with the hidden pages put back where they were,
+ * so they show once Home Assistant has their entities.
+ */
+const withHiddenPages = (
+  list: readonly string[],
+  previous: readonly string[],
+  hidden: ReadonlySet<string>,
+) => {
+  const result = list.filter((page) => !hidden.has(page));
+  let anchor: string | undefined;
+
+  for (const page of previous) {
+    if (hidden.has(page)) {
+      result.splice(
+        anchor === undefined ? 0 : result.indexOf(anchor) + 1,
+        0,
+        page,
+      );
+    }
+
+    if (result.includes(page)) {
+      anchor = page;
+    }
+  }
+
+  return result;
+};
+
+const pagesSelector = (reorder: boolean, pages: readonly string[]) => ({
   select: {
     multiple: true,
     reorder,
     mode: "dropdown",
-    options: PAGES.map(({ page, title }) => ({ value: page, label: title })),
+    options: PAGES.filter(({ page }) => pages.includes(page)).map(
+      ({ page, title }) => ({ value: page, label: title }),
+    ),
   },
 });
 
-const PAGES_SCHEMA = [
+const pagesSchema = (pages: readonly string[]) => [
   {
     name: "pages_options",
     type: "expandable",
     flatten: true,
     expanded: true,
     schema: [
-      { name: "pages", selector: pagesSelector(true) },
-      { name: "icon_and_title_pages", selector: pagesSelector(false) },
-      { name: "top_links_pages", selector: pagesSelector(false) },
+      { name: "pages", selector: pagesSelector(true, pages) },
+      { name: "icon_and_title_pages", selector: pagesSelector(false, pages) },
+      { name: "top_links_pages", selector: pagesSelector(false, pages) },
     ],
   },
 ];
-
-/** Defaults of the page lists, which are every page, and left out of the saved config. */
-const PAGES_DEFAULTS = {
-  pages: ALL_PAGES,
-  icon_and_title_pages: ALL_PAGES,
-  top_links_pages: ALL_PAGES,
-};
 
 const SECTION_ACRONYMS = new Map([
   ["cpu", "CPU"],
@@ -297,8 +333,21 @@ const mediaOptions = (config: StrategyConfig): readonly MediaOption[] => {
   return MEDIA_OPTIONS;
 };
 
-const mediaSchema = (config: StrategyConfig) => {
-  const available = mediaOptions(config);
+/** Whether a section with the option is in Home Assistant's release. */
+const isMediaOptionReleased = (
+  option: MediaOption,
+  version: string | undefined,
+) =>
+  [...SECTION_MEDIA_OPTIONS].some(
+    ([section, options]) =>
+      options.includes(option) &&
+      isReleased(version, SECTION_RELEASES.get(section)),
+  );
+
+const mediaSchema = (config: StrategyConfig, version: string | undefined) => {
+  const available = mediaOptions(config).filter((option) =>
+    isMediaOptionReleased(option, version),
+  );
 
   return MEDIA_GROUPS.flatMap(({ name, options }) => {
     const shown = options.filter((option) => available.includes(option));
@@ -339,6 +388,7 @@ const sameList = (a: readonly string[], b: readonly string[]) =>
 const generalSchema = (
   config: StrategyConfig,
   itemOptions: readonly SelectOption[],
+  version: string | undefined,
 ) => [
   {
     name: "device_id",
@@ -352,7 +402,12 @@ const generalSchema = (
           selector: {
             select: {
               mode: "dropdown",
-              options: PAGES.map(({ page, title }) => ({
+              // The saved page stays, so the dropdown still shows it
+              options: PAGES.filter(
+                ({ page }) =>
+                  page === config.page ||
+                  isReleased(version, PAGE_RELEASES.get(page)),
+              ).map(({ page, title }) => ({
                 value: page,
                 label: title,
               })),
@@ -387,7 +442,9 @@ const generalSchema = (
               sort: true,
               options: Object.entries(SECTION_DESCRIPTIONS).flatMap(
                 ([value, description]) =>
-                  isSectionName(value)
+                  isSectionName(value) &&
+                  (value === config.section ||
+                    isReleased(version, SECTION_RELEASES.get(value)))
                     ? [
                         {
                           value,
@@ -459,7 +516,7 @@ const generalSchema = (
         },
       ]
     : []),
-  ...mediaSchema(config),
+  ...mediaSchema(config, version),
 ];
 
 const isDashboardConfig = (
@@ -542,12 +599,23 @@ export class SystemBridgeStrategyEditor extends LitElement {
     }
 
     const config = this._config;
+    const version = this.hass?.config.version;
+    const hidden = hiddenPages(version);
+
+    const shown = (list: readonly string[]) =>
+      list.filter((page) => !hidden.has(page));
 
     const pages = isDashboardConfig(config)
       ? html`<ha-form
           .hass=${this.hass}
-          .data=${{ ...PAGES_DEFAULTS, ...config }}
-          .schema=${PAGES_SCHEMA}
+          .data=${{
+            pages: shown(config.pages ?? ALL_PAGES),
+            icon_and_title_pages: shown(
+              config.icon_and_title_pages ?? ALL_PAGES,
+            ),
+            top_links_pages: shown(config.top_links_pages ?? ALL_PAGES),
+          }}
+          .schema=${pagesSchema(shown(ALL_PAGES))}
           .computeLabel=${this._computeLabel}
           .computeHelper=${this._computeHelper}
           @value-changed=${this._generalChanged}
@@ -558,7 +626,7 @@ export class SystemBridgeStrategyEditor extends LitElement {
       <ha-form
         .hass=${this.hass}
         .data=${{ ...DEFAULTS, ...config }}
-        .schema=${generalSchema(config, this._itemOptions(config))}
+        .schema=${generalSchema(config, this._itemOptions(config), version)}
         .computeLabel=${this._computeLabel}
         .computeHelper=${this._computeHelper}
         @value-changed=${this._generalChanged}
@@ -618,6 +686,29 @@ export class SystemBridgeStrategyEditor extends LitElement {
     }
 
     if (isDashboardConfig(config)) {
+      // Hidden pages keep where they were, as the editor can't change them
+      const previous = isDashboardConfig(this._config)
+        ? this._config
+        : undefined;
+
+      const hidden = hiddenPages(this.hass?.config.version);
+
+      for (const key of [
+        "pages",
+        "icon_and_title_pages",
+        "top_links_pages",
+      ] as const) {
+        const list = config[key];
+
+        if (list) {
+          config[key] = withHiddenPages(
+            list,
+            previous?.[key] ?? ALL_PAGES,
+            hidden,
+          );
+        }
+      }
+
       // Only the page lists that differ from every page, in order, are saved
       if (config.pages && sameList(config.pages, ALL_PAGES)) {
         delete config.pages;

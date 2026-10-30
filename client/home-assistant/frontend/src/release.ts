@@ -85,3 +85,78 @@ const yearMonth = (version: string) => {
  */
 export const isAtLeast = (version: string, release: string) =>
   yearMonth(version) >= yearMonth(release);
+
+/**
+ * The earliest of some releases, since a section or page shows once any of
+ * its entities do. Nothing when one of them is in every supported release.
+ */
+const earliest = (releases: readonly (string | undefined)[]) =>
+  releases.reduce<string | undefined>(
+    (first, release) =>
+      first === undefined || release === undefined
+        ? undefined
+        : yearMonth(release) < yearMonth(first)
+          ? release
+          : first,
+    releases[0],
+  );
+
+const gatedSection = (section: string, ...keys: string[]) =>
+  [section, earliest(keys.map((key) => RELEASE_GATES.get(key)))] as const;
+
+/**
+ * Sections whose entities are all in RELEASE_GATES, by the keys they show,
+ * with the release that adds them. The editors hide them before then, as
+ * they'd be empty.
+ */
+export const SECTION_RELEASES = new Map([
+  gatedSection("audio", "audio"),
+  gatedSection("audio-outputs", "audio", "audio_output"),
+  gatedSection(
+    "audio-inputs",
+    "audio_input",
+    "audio_input_mute",
+    "audio_input_volume",
+  ),
+  gatedSection("device-batteries", "battery_info", "battery_info_state"),
+  gatedSection(
+    "disk-activity",
+    "disk_read_rate",
+    "disk_write_rate",
+    "disk_device_read_rate",
+    "disk_device_write_rate",
+  ),
+  gatedSection("network", "network_download_rate", "network_upload_rate"),
+  gatedSection(
+    "interface",
+    "network_interface_download_rate",
+    "network_interface_upload_rate",
+    "network_interface_ssid",
+    "network_interface_signal_strength",
+    "network_interface_link_rate",
+  ),
+  gatedSection("desktop", "locked", "idle_time"),
+  gatedSection(
+    "commands",
+    "power_lock",
+    "power_logout",
+    "power_sleep",
+    "power_hibernate",
+    "power_restart",
+    "power_shutdown",
+  ),
+  gatedSection("power", "power_profile", "keep_awake"),
+]);
+
+const gatedPage = (page: string, ...sections: string[]) =>
+  [
+    page,
+    earliest(sections.map((section) => SECTION_RELEASES.get(section))),
+  ] as const;
+
+/** Pages whose sections are all in SECTION_RELEASES, with the release that adds them. */
+export const PAGE_RELEASES = new Map([
+  gatedPage("audio", "audio-outputs", "audio-inputs"),
+  gatedPage("desktop", "desktop"),
+  gatedPage("networks", "network", "interface"),
+]);

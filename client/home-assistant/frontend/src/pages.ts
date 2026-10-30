@@ -30,7 +30,8 @@ const each = (
  * The web client's pages, Overview first and then in its navigation order.
  * Pages for modules Core has no entities for yet are commented out below,
  * ready to come back as Core adds them. Gate each new entity in release.ts's
- * RELEASE_GATES at the Core release that ships it.
+ * RELEASE_GATES at the Core release that ships it, and the section or page in
+ * SECTION_RELEASES or PAGE_RELEASES when all of its entities are gated.
  */
 export const PAGES: readonly Page[] = [
   {
