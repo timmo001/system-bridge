@@ -17,9 +17,15 @@ class CameraControlRequest:
 
 @dataclass(slots=True)
 class CameraCaptureRequest:
-    """Takes a picture with a camera, by its id from the cameras module."""
+    """Takes a picture with a camera, by its id from the cameras module.
+
+    With a width and height, one of the camera's sizes, it's taken at that
+    size. Without, it's taken at the camera's current size.
+    """
 
     id: str
+    width: int | None = None
+    height: int | None = None
 
 
 @dataclass(slots=True)

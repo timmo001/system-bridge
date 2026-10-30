@@ -170,6 +170,7 @@ The response type is `CAMERA_CONTROLLED`, and the cameras module updates straigh
 Send the `CAMERA_CAPTURE` event to take a picture with a webcam. Linux only, and needs ffmpeg.
 
 - `id` (required): The camera's `id` from the [`cameras`](/api/data/#cameras) data.
+- `width` and `height` (optional): One of the camera's `sizes` to take it at. Without them, it's taken at the camera's current size. While another app is streaming from the camera through PipeWire, it's taken at that app's size whatever these are.
 
 ```json title="Request"
 {
@@ -177,7 +178,9 @@ Send the `CAMERA_CAPTURE` event to take a picture with a webcam. Linux only, and
     "token": "abc123",
     "event": "CAMERA_CAPTURE",
     "data": {
-        "id": "usb-Insta360_Insta360_Link_2C-video-index0"
+        "id": "usb-Insta360_Insta360_Link_2C-video-index0",
+        "width": 1920,
+        "height": 1080
     }
 }
 ```

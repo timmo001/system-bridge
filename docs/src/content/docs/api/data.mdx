@@ -125,6 +125,7 @@ Each camera has:
 | `driver` | string | The kernel driver, such as `uvcvideo`. `null` when it isn't reported. |
 | `format` | object | The format and size it captures in now, such as `MJPG` at 1280 by 720. `null` when it can't be read. |
 | `formats` | array | Each format it supports, at its largest size. |
+| `sizes` | array | Each size it captures at in any format, as `width` and `height`, largest first. Pictures can be taken at any of them. |
 | `controls` | array | The camera's settings, such as brightness, zoom and white balance. |
 
 Each format has:

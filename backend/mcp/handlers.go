@@ -47,7 +47,9 @@ type cameraControlInput struct {
 }
 
 type cameraCaptureInput struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Width  *int64 `json:"width,omitempty"`
+	Height *int64 `json:"height,omitempty"`
 }
 
 type displayControlInput struct {
@@ -520,10 +522,17 @@ func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRe
 // can see it, and as structured content, for clients such as code mode that
 // save it
 func (h toolHandlers) handleCameraCapture(_ context.Context, _ *sdkmcp.CallToolRequest, input cameraCaptureInput) (*sdkmcp.CallToolResult, types.CameraPicture, error) {
+	data := map[string]interface{}{"id": input.ID}
+	if input.Width != nil {
+		data["width"] = *input.Width
+	}
+	if input.Height != nil {
+		data["height"] = *input.Height
+	}
 	response := h.eventRouter.HandleMessage("mcp", event.Message{
 		ID:    generateID(),
 		Event: event.EventCameraCapture,
-		Data:  map[string]interface{}{"id": input.ID},
+		Data:  data,
 	})
 	if response.Type == event.ResponseTypeError {
 		return nil, types.CameraPicture{}, fmt.Errorf("%s", response.Message)

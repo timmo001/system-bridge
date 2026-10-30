@@ -96,13 +96,14 @@ func readCamera(device string) (types.Camera, bool, error) {
 		return types.Camera{}, false, nil
 	}
 
-	formats := readFormats(fd)
+	formats, sizes := readFormats(fd)
 	camera := types.Camera{
 		ID:       filepath.Base(device),
 		Name:     cString(capability.Card[:]),
 		Device:   device,
 		Format:   currentFormat(fd, formats),
 		Formats:  formats,
+		Sizes:    sizes,
 		Controls: readControls(fd),
 	}
 	if driver := cString(capability.Driver[:]); driver != "" {
@@ -112,9 +113,11 @@ func readCamera(device string) (types.Camera, bool, error) {
 }
 
 // readFormats lists the pixel formats a device captures in, each at its
-// largest frame size
-func readFormats(fd int) []types.CameraFormat {
+// largest frame size, and every frame size across them, largest first. A
+// format with a range of sizes adds only its largest.
+func readFormats(fd int) ([]types.CameraFormat, []types.CameraSize) {
 	formats := []types.CameraFormat{}
+	sizes := []types.CameraSize{}
 	for index := uint32(0); ; index++ {
 		desc, ok := enumFmt(fd, index)
 		if !ok {
@@ -137,13 +140,19 @@ func readFormats(fd int) []types.CameraFormat {
 			if int64(width)*int64(height) > format.Width*format.Height {
 				format.Width, format.Height = int64(width), int64(height)
 			}
+			if frame := (types.CameraSize{Width: int64(width), Height: int64(height)}); !slices.Contains(sizes, frame) {
+				sizes = append(sizes, frame)
+			}
 			if size.Type != frmSizeTypeDiscrete {
 				break
 			}
 		}
 		formats = append(formats, format)
 	}
-	return formats
+	slices.SortFunc(sizes, func(a, b types.CameraSize) int {
+		return cmp.Or(cmp.Compare(b.Width*b.Height, a.Width*a.Height), cmp.Compare(b.Width, a.Width))
+	})
+	return formats, sizes
 }
 
 // currentFormat reads the format and size a device captures in, named from

@@ -22,7 +22,7 @@ func SetControl(context.Context, string, string, int64) error {
 }
 
 // Capture isn't supported on this platform yet
-func Capture(context.Context, string) ([]byte, error) {
+func Capture(context.Context, string, *types.CameraSize) ([]byte, error) {
 	if !captureEnabled() {
 		return nil, ErrNotAllowed
 	}

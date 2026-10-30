@@ -27,7 +27,9 @@ type CameraControlRequestData struct {
 }
 
 type CameraCaptureRequestData struct {
-	ID string `json:"id" mapstructure:"id"`
+	ID     string `json:"id" mapstructure:"id"`
+	Width  *int64 `json:"width" mapstructure:"width"` // With height, one of the camera's sizes. Without, its current size
+	Height *int64 `json:"height" mapstructure:"height"`
 }
 
 func RegisterCameraHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
@@ -44,10 +46,20 @@ func RegisterCameraHandlers(router *event.MessageRouter, dataStore *data.DataSto
 
 	registerQuery(router, cameraCaptureTimeout, event.EventCameraCapture, event.ResponseTypeCameraCaptured, "Picture taken",
 		func(request CameraCaptureRequestData) string {
+			if (request.Width == nil) != (request.Height == nil) {
+				return "Provide both a width and a height, or neither"
+			}
+			if request.Width != nil && (*request.Width <= 0 || *request.Height <= 0) {
+				return "The width and height must be above 0"
+			}
 			return required(request.ID, "No camera id provided")
 		},
 		func(ctx context.Context, request CameraCaptureRequestData) (*types.CameraPicture, error) {
-			image, err := cameras.Capture(ctx, request.ID)
+			var size *types.CameraSize
+			if request.Width != nil {
+				size = &types.CameraSize{Width: *request.Width, Height: *request.Height}
+			}
+			image, err := cameras.Capture(ctx, request.ID, size)
 			// Starting and stopping a camera changes what's using it, so
 			// refresh both whether or not the picture was taken
 			if dataStore != nil {

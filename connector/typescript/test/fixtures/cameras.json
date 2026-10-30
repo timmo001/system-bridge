@@ -20,6 +20,11 @@
         },
         { "format": "H264", "name": "H.264", "width": 3840, "height": 2160 }
       ],
+      "sizes": [
+        { "width": 3840, "height": 2160 },
+        { "width": 1920, "height": 1080 },
+        { "width": 1280, "height": 720 }
+      ],
       "controls": [
         {
           "id": "brightness",

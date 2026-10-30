@@ -40,6 +40,12 @@ type CameraFormat struct {
 	Height int64  `json:"height" mapstructure:"height"`
 }
 
+// CameraSize is a frame size a camera captures at
+type CameraSize struct {
+	Width  int64 `json:"width" mapstructure:"width"`
+	Height int64 `json:"height" mapstructure:"height"`
+}
+
 // Camera is a video capture device, such as a webcam
 type Camera struct {
 	ID       string          `json:"id" mapstructure:"id"` // Stays the same across reconnects where the system allows
@@ -48,6 +54,7 @@ type Camera struct {
 	Driver   *string         `json:"driver" mapstructure:"driver"`
 	Format   *CameraFormat   `json:"format" mapstructure:"format"`   // What it captures in now, null when it can't be read
 	Formats  []CameraFormat  `json:"formats" mapstructure:"formats"` // Each format it supports, at its largest size
+	Sizes    []CameraSize    `json:"sizes" mapstructure:"sizes"`     // Each size it captures at in any format, largest first, which pictures can be taken at
 	Controls []CameraControl `json:"controls" mapstructure:"controls"`
 }
 

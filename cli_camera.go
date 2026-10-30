@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/event"
@@ -23,13 +24,24 @@ func cameraCommand() *cli.Command {
 				Name:      "capture",
 				Usage:     "Take a picture with a camera and save it as a JPEG, or write it to the output with -",
 				ArgsUsage: "<camera id> <file>",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "size", Usage: "One of the camera's sizes, such as 1920x1080, instead of its current size"},
+				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					if cmd.Args().Len() != 2 {
 						return fmt.Errorf("give a camera id and a file to save the picture to")
 					}
-					reply, err := client.RequestWithin(cmdCtx, client.SlowSendTimeout, event.EventCameraCapture, map[string]any{
-						"id": cmd.Args().Get(0),
-					})
+					request := map[string]any{"id": cmd.Args().Get(0)}
+					if size := cmd.String("size"); size != "" {
+						width, height, ok := strings.Cut(size, "x")
+						w, wErr := strconv.ParseInt(width, 10, 64)
+						h, hErr := strconv.ParseInt(height, 10, 64)
+						if !ok || wErr != nil || hErr != nil {
+							return fmt.Errorf("give the size as a width and height, such as 1920x1080")
+						}
+						request["width"], request["height"] = w, h
+					}
+					reply, err := client.RequestWithin(cmdCtx, client.SlowSendTimeout, event.EventCameraCapture, request)
 					if err != nil {
 						return err
 					}

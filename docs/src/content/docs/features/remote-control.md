@@ -199,6 +199,8 @@ With the `cameras.capture` setting on, which is **Take pictures** on the web cli
 system-bridge client camera capture usb-Insta360_Insta360_Link_2C-video-index0 picture.jpg
 ```
 
+Pictures are taken at the camera's current size, or at one of its other [`sizes`](/api/data/#cameras), such as with `--size 1920x1080` in the CLI. A camera another app is streaming from through PipeWire is always pictured at that app's size.
+
 Pictures need ffmpeg, and GStreamer's PipeWire plugin to share a camera another app is using through PipeWire.
 
 ## Processes

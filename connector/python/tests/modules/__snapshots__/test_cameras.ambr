@@ -101,6 +101,20 @@
         ]),
         id='usb-Insta360_Insta360_Link_2C-video-index0',
         name='Insta360 Link 2C: Insta360 Link',
+        sizes=list([
+          CameraSize(
+            height=2160,
+            width=3840,
+          ),
+          CameraSize(
+            height=1080,
+            width=1920,
+          ),
+          CameraSize(
+            height=720,
+            width=1280,
+          ),
+        ]),
       ),
     ]),
   )

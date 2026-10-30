@@ -556,8 +556,16 @@ export interface CameraControlRequest extends Schema.Schema.Type<
   typeof CameraControlRequest
 > {}
 
-/** Takes a picture with a camera, by its `id` from the cameras module. */
-export const CameraCaptureRequest = Schema.Struct({ id: Schema.String });
+/**
+ * Takes a picture with a camera, by its `id` from the cameras module. With a
+ * `width` and `height`, one of the camera's `sizes`, it's taken at that size;
+ * without, at the camera's current size.
+ */
+export const CameraCaptureRequest = Schema.Struct({
+  id: Schema.String,
+  width: Schema.optionalKey(Schema.Int),
+  height: Schema.optionalKey(Schema.Int),
+});
 
 export interface CameraCaptureRequest extends Schema.Schema.Type<
   typeof CameraCaptureRequest

@@ -281,6 +281,13 @@ export const CameraFormat = Schema.Struct({
 
 export interface CameraFormat extends Schema.Schema.Type<typeof CameraFormat> {}
 
+export const CameraSize = Schema.Struct({
+  width: Schema.Finite,
+  height: Schema.Finite,
+});
+
+export interface CameraSize extends Schema.Schema.Type<typeof CameraSize> {}
+
 export const CameraControlOption = Schema.Struct({
   value: Schema.Finite,
   name: Schema.String,
@@ -316,6 +323,7 @@ export const Camera = Schema.Struct({
   driver: Schema.NullOr(Schema.String),
   format: Schema.NullOr(CameraFormat),
   formats: Schema.Array(CameraFormat),
+  sizes: Schema.Array(CameraSize),
   controls: Schema.Array(CameraControl),
 });
 

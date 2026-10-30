@@ -6,6 +6,7 @@ from systembridgeconnector.models.modules.cameras import (
     CameraControlOption,
     CameraFormat,
     Cameras,
+    CameraSize,
 )
 
 FIXTURE_CAMERAS = Cameras(
@@ -23,6 +24,11 @@ FIXTURE_CAMERAS = Cameras(
                     format="MJPG", name="Motion-JPEG", width=3840, height=2160
                 ),
                 CameraFormat(format="H264", name="H.264", width=3840, height=2160),
+            ],
+            sizes=[
+                CameraSize(width=3840, height=2160),
+                CameraSize(width=1920, height=1080),
+                CameraSize(width=1280, height=720),
             ],
             controls=[
                 CameraControl(

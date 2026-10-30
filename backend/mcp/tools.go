@@ -75,9 +75,11 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_camera_capture",
-		Description: "Take a picture with a camera and return it as a JPEG. Get camera ids from the cameras module. Only works when the cameras.capture setting is on, and not while another app has the camera to itself. Only use this when the user asks to see through the camera. Linux only.",
+		Description: "Take a picture with a camera and return it as a JPEG. Get camera ids and the sizes each can take pictures at from the cameras module. Only works when the cameras.capture setting is on, and not while another app has the camera to itself. Only use this when the user asks to see through the camera. Linux only.",
 		InputSchema: objectSchema(map[string]any{
-			"id": map[string]any{"type": "string", "description": "Camera id from the cameras module"},
+			"id":     map[string]any{"type": "string", "description": "Camera id from the cameras module"},
+			"width":  map[string]any{"type": "integer", "description": "With height, one of the camera's sizes. Leave both out for its current size"},
+			"height": map[string]any{"type": "integer", "description": "With width, one of the camera's sizes"},
 		}, []string{"id"}),
 	}, handlers.handleCameraCapture)
 

@@ -14,6 +14,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"golang.org/x/sys/unix"
+
+	"github.com/timmo001/system-bridge/types"
 )
 
 // captureSkipFrames lets a camera that's only just started settle its
@@ -25,10 +29,12 @@ const captureSkipFrames = 5
 var errDeviceBusy = errors.New("device busy")
 
 // Capture takes a JPEG picture with a camera, by its id from the cameras
-// module. A camera nothing is using is opened over V4L2 with ffmpeg. One
+// module, at size, one of the camera's sizes, or at its current size when
+// size is nil. A camera nothing is using is opened over V4L2 with ffmpeg. One
 // PipeWire is streaming to other apps is shared through PipeWire with
-// GStreamer. One another app has open directly can't be used until it's done.
-func Capture(ctx context.Context, camera string) ([]byte, error) {
+// GStreamer, at the size that app chose. One another app has open directly
+// can't be used until it's done.
+func Capture(ctx context.Context, camera string, size *types.CameraSize) ([]byte, error) {
 	if !captureEnabled() {
 		return nil, ErrNotAllowed
 	}
@@ -36,8 +42,13 @@ func Capture(ctx context.Context, camera string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if size != nil {
+		if err := checkSize(device, *size); err != nil {
+			return nil, err
+		}
+	}
 
-	image, err := captureV4L2(ctx, device)
+	image, err := captureV4L2(ctx, device, size)
 	if !errors.Is(err, errDeviceBusy) {
 		return image, err
 	}
@@ -47,15 +58,34 @@ func Capture(ctx context.Context, camera string) ([]byte, error) {
 	return capturePipeWire(ctx, device)
 }
 
-func captureV4L2(ctx context.Context, device string) ([]byte, error) {
+// checkSize returns an error unless size is one of the device's sizes
+func checkSize(device string, size types.CameraSize) error {
+	fd, err := unix.Open(device, unix.O_RDWR|unix.O_NONBLOCK|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return fmt.Errorf("failed to open %s: %w", device, err)
+	}
+	defer func() { _ = unix.Close(fd) }()
+
+	if _, sizes := readFormats(fd); !slices.Contains(sizes, size) {
+		return fmt.Errorf("%w: the camera can't take pictures at %d × %d", ErrInvalidValue, size.Width, size.Height)
+	}
+	return nil
+}
+
+func captureV4L2(ctx context.Context, device string, size *types.CameraSize) ([]byte, error) {
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		return nil, fmt.Errorf("%w: install ffmpeg to take pictures", ErrUnsupported)
+	}
+	var videoSize []string
+	if size != nil {
+		videoSize = []string{"-video_size", fmt.Sprintf("%dx%d", size.Width, size.Height)}
 	}
 	args := func(inputFormat ...string) []string {
 		return slices.Concat(
 			[]string{"-hide_banner", "-loglevel", "error", "-f", "v4l2"},
 			inputFormat,
+			videoSize,
 			[]string{
 				"-i", device,
 				"-vf", fmt.Sprintf("select=gte(n\\,%d)", captureSkipFrames),
@@ -66,8 +96,8 @@ func captureV4L2(ctx context.Context, device string) ([]byte, error) {
 		)
 	}
 
-	// MJPEG starts fastest at full size, but not every camera has it, so
-	// those use whatever format they're set to
+	// MJPEG starts fastest at full size, but not every camera has it, or has
+	// it at every size, so those use whatever format they're set to
 	image, err := runCapture(ctx, ffmpeg, args("-input_format", "mjpeg")...)
 	if err != nil && !errors.Is(err, errDeviceBusy) && ctx.Err() == nil {
 		image, err = runCapture(ctx, ffmpeg, args()...)
