@@ -79,6 +79,8 @@ from systembridgeconnector.models.settings import (
 from systembridgeconnector.models.system_control import (
     KeepAwakeRequest,
     PowerProfileRequest,
+    PowerState,
+    PowerStateEvent,
 )
 from systembridgeconnector.websocket_client import WebSocketClient
 
@@ -469,6 +471,43 @@ async def test_listen_hyprland_event(
         )
 
     assert received == [HyprlandEvent(data="dock")]
+
+
+@pytest.mark.asyncio
+async def test_listen_power_state(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a listener gets power state changes, skipping unknown states."""
+    received: list[PowerStateEvent] = []
+
+    async def power_state_callback(event: PowerStateEvent) -> None:
+        received.append(event)
+
+    with (
+        patch.object(
+            mock_websocket_client_connected,
+            "receive_message",
+            side_effect=[
+                {
+                    "id": "system",
+                    "type": EventType.POWER_STATE_CHANGED,
+                    "subtype": EventSubType.NONE,
+                    "data": {"state": state},
+                }
+                for state in ("sleeping", "unknown", "resumed")
+            ]
+            + [ConnectionClosedException("Connection closed to server")],
+        ),
+        pytest.raises(ConnectionClosedException),
+    ):
+        await mock_websocket_client_connected.listen(
+            power_state_callback=power_state_callback
+        )
+
+    assert received == [
+        PowerStateEvent(state=PowerState.SLEEPING),
+        PowerStateEvent(state=PowerState.RESUMED),
+    ]
 
 
 @pytest.mark.asyncio

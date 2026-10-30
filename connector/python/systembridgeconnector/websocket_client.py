@@ -83,7 +83,12 @@ from .models.process_control import ProcessKillRequest
 from .models.request import Request
 from .models.response import Response
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
-from .models.system_control import KeepAwakeRequest, PowerProfileRequest
+from .models.system_control import (
+    KeepAwakeRequest,
+    PowerProfileRequest,
+    PowerState,
+    PowerStateEvent,
+)
 
 # The backend allows 30 seconds for a Bluetooth device to connect
 BLUETOOTH_TIMEOUT = 35.0
@@ -1490,6 +1495,8 @@ class WebSocketClient(Base):
         | None = None,
         notification_event_callback: Callable[[NotificationEvent], Awaitable[None]]
         | None = None,
+        power_state_callback: Callable[[PowerStateEvent], Awaitable[None]]
+        | None = None,
     ) -> None:
         """Listen for messages and map to modules.
 
@@ -1499,6 +1506,8 @@ class WebSocketClient(Base):
         Hyprland, once listening for the desktop module.
         notification_event_callback gets each click on, or close of, a
         notification System Bridge sent, from any client. Linux only.
+        power_state_callback gets each change just before the host sleeps or
+        shuts down, and again when it wakes.
         """
 
         async def _callback_message(message: dict) -> None:
@@ -1644,6 +1653,17 @@ class WebSocketClient(Base):
                         reason=data.get("reason"),
                     )
                 )
+            elif (
+                message[EventKey.TYPE] == EventType.POWER_STATE_CHANGED
+                and power_state_callback is not None
+                and isinstance(message.get(EventKey.DATA), dict)
+            ):
+                state = message[EventKey.DATA].get("state")
+                if state in PowerState:
+                    self._logger.debug("[%s] Power state changed: %s", name, state)
+                    await power_state_callback(PowerStateEvent(state=PowerState(state)))
+                else:
+                    self._logger.warning("[%s] Unknown power state: %s", name, state)
             else:
                 self._logger.debug(
                     "[%s] Other message: %s",

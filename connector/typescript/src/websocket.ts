@@ -40,6 +40,7 @@ import {
   ModuleDataUpdate,
   type ModuleName,
   ModulesData,
+  PowerStateEvent,
 } from "./generated/modules.js";
 import {
   AudioControl,
@@ -187,6 +188,8 @@ export interface Interface {
    * desktop module.
    */
   readonly hyprlandEvents: Stream.Stream<HyprlandEvent>;
+  /** Each change just before the host sleeps or shuts down, and again when it wakes. */
+  readonly powerStateChanges: Stream.Stream<PowerStateEvent>;
   /** Adds one command to the allowlist, leaving the others as they are. */
   readonly addCommand: (
     command: SettingsCommandDefinition,
@@ -530,6 +533,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     PubSub.shutdown,
   );
 
+  const powerStateResponses = yield* Effect.acquireRelease(
+    PubSub.unbounded<WebSocketResponse>(),
+    PubSub.shutdown,
+  );
+
   const closed = yield* Deferred.make<never, ConnectionError>();
 
   const prefix = (yield* Random.nextInt).toString(36);
@@ -583,6 +591,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
       response.type === "NOTIFICATION_CLOSED"
     ) {
       yield* PubSub.publish(notificationEventResponses, response);
+
+      return;
+    }
+
+    if (response.type === "POWER_STATE_CHANGED") {
+      yield* PubSub.publish(powerStateResponses, response);
 
       return;
     }
@@ -761,6 +775,22 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         ),
       ),
     );
+
+  const powerStateChanges: Stream.Stream<PowerStateEvent> = Stream.fromPubSub(
+    powerStateResponses,
+  ).pipe(
+    Stream.filterMapEffect((response) =>
+      Schema.decodeUnknownEffect(PowerStateEvent)(response.data).pipe(
+        Effect.map(Result.succeed),
+        Effect.catch((error) =>
+          Effect.logWarning(
+            "Skipping an unreadable power state change",
+            error.message,
+          ).pipe(Effect.as(Result.fail(response))),
+        ),
+      ),
+    ),
+  );
 
   const collectModules = Effect.fnUntraced(function* (
     subscription: PubSub.Subscription<WebSocketResponse>,
@@ -1606,6 +1636,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     validateDirectory,
     settingsChanges,
     hyprlandEvents,
+    powerStateChanges,
     notificationEvents,
     addCommand,
     updateCommand,
