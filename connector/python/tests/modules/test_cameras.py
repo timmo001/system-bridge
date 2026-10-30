@@ -9,6 +9,7 @@ from systembridgeconnector.models.modules.cameras import (
     Camera,
     CameraControl,
     CameraControlOption,
+    CameraFormat,
     Cameras,
 )
 
@@ -27,4 +28,6 @@ def test_cameras_dict():
     assert isinstance(camera, Camera)
     assert isinstance(camera.controls[1], CameraControl)
     assert isinstance(camera.controls[1].options[0], CameraControlOption)
+    assert isinstance(camera.format, CameraFormat)
+    assert isinstance(camera.formats[0], CameraFormat)
     assert cameras == FIXTURE_CAMERAS

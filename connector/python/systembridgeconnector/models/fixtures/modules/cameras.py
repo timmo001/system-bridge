@@ -4,6 +4,7 @@ from systembridgeconnector.models.modules.cameras import (
     Camera,
     CameraControl,
     CameraControlOption,
+    CameraFormat,
     Cameras,
 )
 
@@ -14,6 +15,15 @@ FIXTURE_CAMERAS = Cameras(
             name="Insta360 Link 2C: Insta360 Link",
             device="/dev/video0",
             driver="uvcvideo",
+            format=CameraFormat(
+                format="MJPG", name="Motion-JPEG", width=1280, height=720
+            ),
+            formats=[
+                CameraFormat(
+                    format="MJPG", name="Motion-JPEG", width=3840, height=2160
+                ),
+                CameraFormat(format="H264", name="H.264", width=3840, height=2160),
+            ],
             controls=[
                 CameraControl(
                     id="brightness",

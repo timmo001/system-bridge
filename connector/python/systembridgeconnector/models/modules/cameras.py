@@ -52,6 +52,17 @@ class CameraControl:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class CameraFormat:
+    """A pixel format a camera captures in, with a size."""
+
+    format: str
+    name: str
+    width: int
+    height: int
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class Camera:
     """A video capture device, such as a webcam."""
 
@@ -59,10 +70,18 @@ class Camera:
     name: str
     device: str
     driver: str | None = None
+    format: CameraFormat | None = None
+    formats: list[CameraFormat] = field(default_factory=list)
     controls: list[CameraControl] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Post Init."""
+        if isinstance(self.format, dict):
+            self.format = CameraFormat(**cast(dict, self.format))
+        self.formats = [
+            CameraFormat(**cast(dict, f)) if isinstance(f, dict) else f
+            for f in self.formats or []
+        ]
         self.controls = [
             CameraControl(**cast(dict, c)) if isinstance(c, dict) else c
             for c in self.controls or []

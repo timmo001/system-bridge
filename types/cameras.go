@@ -32,12 +32,22 @@ type CameraControl struct {
 	ReadOnly bool                  `json:"read_only" mapstructure:"read_only"`
 }
 
+// CameraFormat is a pixel format a camera captures in, with a size
+type CameraFormat struct {
+	Format string `json:"format" mapstructure:"format"` // The four character code, such as MJPG or YUYV
+	Name   string `json:"name" mapstructure:"name"`     // Such as Motion-JPEG
+	Width  int64  `json:"width" mapstructure:"width"`
+	Height int64  `json:"height" mapstructure:"height"`
+}
+
 // Camera is a video capture device, such as a webcam
 type Camera struct {
 	ID       string          `json:"id" mapstructure:"id"` // Stays the same across reconnects where the system allows
 	Name     string          `json:"name" mapstructure:"name"`
 	Device   string          `json:"device" mapstructure:"device"` // Such as /dev/video0
 	Driver   *string         `json:"driver" mapstructure:"driver"`
+	Format   *CameraFormat   `json:"format" mapstructure:"format"`   // What it captures in now, null when it can't be read
+	Formats  []CameraFormat  `json:"formats" mapstructure:"formats"` // Each format it supports, at its largest size
 	Controls []CameraControl `json:"controls" mapstructure:"controls"`
 }
 

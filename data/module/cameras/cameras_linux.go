@@ -96,16 +96,76 @@ func readCamera(device string) (types.Camera, bool, error) {
 		return types.Camera{}, false, nil
 	}
 
+	formats := readFormats(fd)
 	camera := types.Camera{
 		ID:       filepath.Base(device),
 		Name:     cString(capability.Card[:]),
 		Device:   device,
+		Format:   currentFormat(fd, formats),
+		Formats:  formats,
 		Controls: readControls(fd),
 	}
 	if driver := cString(capability.Driver[:]); driver != "" {
 		camera.Driver = &driver
 	}
 	return camera, true, nil
+}
+
+// readFormats lists the pixel formats a device captures in, each at its
+// largest frame size
+func readFormats(fd int) []types.CameraFormat {
+	formats := []types.CameraFormat{}
+	for index := uint32(0); ; index++ {
+		desc, ok := enumFmt(fd, index)
+		if !ok {
+			break
+		}
+		format := types.CameraFormat{
+			Format: fourCC(desc.PixelFormat),
+			Name:   cString(desc.Description[:]),
+		}
+		for sizeIndex := uint32(0); ; sizeIndex++ {
+			size, ok := enumFrameSize(fd, desc.PixelFormat, sizeIndex)
+			if !ok {
+				break
+			}
+			width, height := size.Size[0], size.Size[1]
+			if size.Type != frmSizeTypeDiscrete {
+				// A range's maximum width and height
+				width, height = size.Size[1], size.Size[4]
+			}
+			if int64(width)*int64(height) > format.Width*format.Height {
+				format.Width, format.Height = int64(width), int64(height)
+			}
+			if size.Type != frmSizeTypeDiscrete {
+				break
+			}
+		}
+		formats = append(formats, format)
+	}
+	return formats
+}
+
+// currentFormat reads the format and size a device captures in, named from
+// its supported formats
+func currentFormat(fd int, formats []types.CameraFormat) *types.CameraFormat {
+	width, height, pixelFormat, err := getFmt(fd)
+	if err != nil {
+		slog.Debug("Failed to read camera format", "error", err)
+		return nil
+	}
+	format := types.CameraFormat{
+		Format: fourCC(pixelFormat),
+		Width:  int64(width),
+		Height: int64(height),
+	}
+	for _, supported := range formats {
+		if supported.Format == format.Format {
+			format.Name = supported.Name
+			break
+		}
+	}
+	return &format
 }
 
 // readControls reads the integer, boolean and menu controls of a device, each

@@ -5,6 +5,21 @@
       "name": "Insta360 Link 2C: Insta360 Link",
       "device": "/dev/video0",
       "driver": "uvcvideo",
+      "format": {
+        "format": "MJPG",
+        "name": "Motion-JPEG",
+        "width": 1280,
+        "height": 720
+      },
+      "formats": [
+        {
+          "format": "MJPG",
+          "name": "Motion-JPEG",
+          "width": 3840,
+          "height": 2160
+        },
+        { "format": "H264", "name": "H.264", "width": 3840, "height": 2160 }
+      ],
       "controls": [
         {
           "id": "brightness",

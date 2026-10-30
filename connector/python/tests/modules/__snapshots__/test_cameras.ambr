@@ -79,6 +79,26 @@
         ]),
         device='/dev/video0',
         driver='uvcvideo',
+        format=CameraFormat(
+          format='MJPG',
+          height=720,
+          name='Motion-JPEG',
+          width=1280,
+        ),
+        formats=list([
+          CameraFormat(
+            format='MJPG',
+            height=2160,
+            name='Motion-JPEG',
+            width=3840,
+          ),
+          CameraFormat(
+            format='H264',
+            height=2160,
+            name='H.264',
+            width=3840,
+          ),
+        ]),
         id='usb-Insta360_Insta360_Link_2C-video-index0',
         name='Insta360 Link 2C: Insta360 Link',
       ),

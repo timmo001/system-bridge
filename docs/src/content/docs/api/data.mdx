@@ -123,7 +123,17 @@ Each camera has:
 | `name` | string | The name the driver gives the camera. |
 | `device` | string | The device node, such as `/dev/video0`. |
 | `driver` | string | The kernel driver, such as `uvcvideo`. `null` when it isn't reported. |
+| `format` | object | The format and size it captures in now, such as `MJPG` at 1280 by 720. `null` when it can't be read. |
+| `formats` | array | Each format it supports, at its largest size. |
 | `controls` | array | The camera's settings, such as brightness, zoom and white balance. |
+
+Each format has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `format` | string | The format's four character code, such as `MJPG` or `YUYV`. |
+| `name` | string | The format's name, such as `Motion-JPEG`. Empty in `format` when the camera doesn't list it. |
+| `width`, `height` | number | The size in pixels. |
 
 Each control has:
 

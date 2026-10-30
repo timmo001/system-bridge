@@ -272,6 +272,15 @@ export const CPUData = Schema.Struct({
 
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
 
+export const CameraFormat = Schema.Struct({
+  format: Schema.String,
+  name: Schema.String,
+  width: Schema.Finite,
+  height: Schema.Finite,
+});
+
+export interface CameraFormat extends Schema.Schema.Type<typeof CameraFormat> {}
+
 export const CameraControlOption = Schema.Struct({
   value: Schema.Finite,
   name: Schema.String,
@@ -305,6 +314,8 @@ export const Camera = Schema.Struct({
   name: Schema.String,
   device: Schema.String,
   driver: Schema.NullOr(Schema.String),
+  format: Schema.NullOr(CameraFormat),
+  formats: Schema.Array(CameraFormat),
   controls: Schema.Array(CameraControl),
 });
 
