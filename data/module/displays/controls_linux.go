@@ -39,7 +39,8 @@ func isInternal(connector string) bool {
 
 // addControls reads the brightness and power state of each display: from the
 // backlight for a built-in panel, and over DDC/CI for an external monitor.
-func addControls(ctx context.Context, displays []types.Display) {
+// monitors is Hyprland's view of the displays, nil without Hyprland.
+func addControls(ctx context.Context, displays []types.Display, monitors map[string]desktop.HyprlandMonitor) {
 	var buses map[string]string
 	for i := range displays {
 		display := &displays[i]
@@ -59,18 +60,16 @@ func addControls(ctx context.Context, displays []types.Display) {
 	}
 
 	// Hyprland knows whether each display is on, for those DDC/CI can't read
-	if states, err := desktop.HyprlandDPMS(ctx); err == nil {
-		for i := range displays {
-			on, ok := states[displays[i].ID]
-			if !ok || displays[i].PowerState != nil {
-				continue
-			}
-			state := types.DisplayPowerStateOff
-			if on {
-				state = types.DisplayPowerStateOn
-			}
-			displays[i].PowerState = &state
+	for i := range displays {
+		monitor, ok := monitors[displays[i].ID]
+		if !ok || displays[i].PowerState != nil {
+			continue
 		}
+		state := types.DisplayPowerStateOff
+		if monitor.On {
+			state = types.DisplayPowerStateOn
+		}
+		displays[i].PowerState = &state
 	}
 }
 

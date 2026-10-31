@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -70,6 +71,31 @@ func TestDRMDisplays(t *testing.T) {
 	require.NotNil(t, displays[1].Width)
 	assert.Equal(t, 700, *displays[1].Width)
 	assert.Nil(t, displays[1].X)
+	assert.Nil(t, displays[1].RefreshRate)
+}
+
+func TestApplyHyprlandModes(t *testing.T) {
+	displays := []types.Display{
+		{ID: "DP-1", ResolutionHorizontal: 3840, ResolutionVertical: 2160},
+		{ID: "HDMI-A-2", ResolutionHorizontal: 3840, ResolutionVertical: 2160},
+	}
+	applyHyprlandModes(displays, map[string]desktop.HyprlandMonitor{
+		"DP-1": {On: true, Width: 2560, Height: 1440, X: -1350, Y: 0, RefreshRate: 143.857},
+	})
+
+	assert.Equal(t, 2560, displays[0].ResolutionHorizontal)
+	assert.Equal(t, 1440, displays[0].ResolutionVertical)
+	require.NotNil(t, displays[0].RefreshRate)
+	assert.Equal(t, 143.857, *displays[0].RefreshRate)
+	require.NotNil(t, displays[0].X)
+	assert.Equal(t, -1350, *displays[0].X)
+
+	assert.Equal(t, 3840, displays[1].ResolutionHorizontal)
+	assert.Nil(t, displays[1].RefreshRate)
+	assert.Nil(t, displays[1].X)
+
+	// Without Hyprland the DRM values stay as they are
+	applyHyprlandModes(displays[1:], nil)
 	assert.Nil(t, displays[1].RefreshRate)
 }
 

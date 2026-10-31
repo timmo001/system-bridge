@@ -12,6 +12,7 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/randr"
 	"github.com/jezek/xgb/xproto"
+	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -20,6 +21,7 @@ import (
 // one's brightness and power state.
 func GetDisplays(ctx context.Context) ([]types.Display, error) {
 	displays, err := x11Displays()
+	fromDRM := err != nil
 	if err != nil {
 		slog.Debug("X11 displays unavailable, reading DRM connectors", "error", err)
 		displays, err = drmDisplays(drmPath)
@@ -28,8 +30,33 @@ func GetDisplays(ctx context.Context) ([]types.Display, error) {
 		}
 	}
 
-	addControls(ctx, displays)
+	monitors, err := desktop.HyprlandMonitors(ctx)
+	if err != nil {
+		slog.Debug("Hyprland monitors unavailable", "error", err)
+	}
+	if fromDRM {
+		applyHyprlandModes(displays, monitors)
+	}
+	addControls(ctx, displays, monitors)
 	return displays, nil
+}
+
+// applyHyprlandModes sets the resolution, refresh rate and position Hyprland
+// chose for each display, matched by connector name, in place of the DRM
+// connector's preferred mode
+func applyHyprlandModes(displays []types.Display, monitors map[string]desktop.HyprlandMonitor) {
+	for i := range displays {
+		monitor, ok := monitors[displays[i].ID]
+		if !ok {
+			continue
+		}
+		x, y, refreshRate := monitor.X, monitor.Y, monitor.RefreshRate
+		displays[i].ResolutionHorizontal = monitor.Width
+		displays[i].ResolutionVertical = monitor.Height
+		displays[i].X = &x
+		displays[i].Y = &y
+		displays[i].RefreshRate = &refreshRate
+	}
 }
 
 func x11Displays() ([]types.Display, error) {

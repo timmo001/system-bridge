@@ -886,9 +886,17 @@ func HyprlandReloadConfig(ctx context.Context) error {
 	return hyprlandSend(ctx, "reload")
 }
 
-// HyprlandDPMS is whether each enabled display is on, by name. It asks
-// Hyprland each time, as turning a display off sends no event.
-func HyprlandDPMS(ctx context.Context) (map[string]bool, error) {
+// HyprlandMonitor is an enabled display's state in Hyprland: whether it's on,
+// and its current mode and position
+type HyprlandMonitor struct {
+	On                  bool
+	Width, Height, X, Y int
+	RefreshRate         float64
+}
+
+// HyprlandMonitors is each enabled display's state, by name. It asks Hyprland
+// each time, as turning a display off sends no event.
+func HyprlandMonitors(ctx context.Context) (map[string]HyprlandMonitor, error) {
 	dir, err := hyprlandDir()
 	if err != nil {
 		return nil, err
@@ -901,10 +909,17 @@ func HyprlandDPMS(ctx context.Context) (map[string]bool, error) {
 	if err := decodeReplies(replies, []any{&monitors}, 0); err != nil {
 		return nil, err
 	}
-	states := make(map[string]bool, len(monitors))
+	states := make(map[string]HyprlandMonitor, len(monitors))
 	for _, monitor := range monitors {
 		if !monitor.Disabled {
-			states[monitor.Name] = monitor.DPMSStatus
+			states[monitor.Name] = HyprlandMonitor{
+				On:          monitor.DPMSStatus,
+				Width:       monitor.Width,
+				Height:      monitor.Height,
+				X:           monitor.X,
+				Y:           monitor.Y,
+				RefreshRate: monitor.RefreshRate,
+			}
 		}
 	}
 	return states, nil

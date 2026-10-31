@@ -81,6 +81,11 @@ type hyprlandWorkspace struct {
 type hyprlandMonitor struct {
 	ID                    int                  `json:"id"`
 	Name                  string               `json:"name"`
+	Width                 int                  `json:"width"`
+	Height                int                  `json:"height"`
+	RefreshRate           float64              `json:"refreshRate"`
+	X                     int                  `json:"x"`
+	Y                     int                  `json:"y"`
 	Focused               bool                 `json:"focused"`
 	ActiveWorkspace       hyprlandWorkspaceRef `json:"activeWorkspace"`
 	SpecialWorkspace      hyprlandWorkspaceRef `json:"specialWorkspace"`
