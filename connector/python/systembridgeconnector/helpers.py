@@ -4,6 +4,9 @@ from collections.abc import Callable
 import datetime as dt
 from datetime import UTC, datetime, timedelta
 from functools import partial
+import hashlib
+import hmac
+from urllib.parse import urlencode
 
 from .models.modules import ModulesData
 from .models.modules.cpu import PerCPU
@@ -158,6 +161,26 @@ def gpu_temperature(gpu: GPU) -> float | None:
 def gpu_usage_percentage(gpu: GPU) -> float | None:
     """Return the GPU usage percentage."""
     return gpu.core_load
+
+
+def media_file_url(
+    host: str,
+    port: int,
+    token: str,
+    base: str,
+    path: str,
+    expires_in: timedelta = timedelta(hours=24),
+) -> str:
+    """Return a signed URL for a media file, valid for expires_in.
+
+    The signature only covers this base and path, so the URL can be sent to
+    other devices without sharing the API token.
+    """
+    expires = int((utcnow() + expires_in).timestamp())
+    message = f"{base}\n{path}\n{expires}".encode()
+    sig = hmac.new(token.encode(), message, hashlib.sha256).hexdigest()
+    query = urlencode({"base": base, "path": path, "expires": expires, "sig": sig})
+    return f"http://{host}:{port}/api/media/file/data?{query}"
 
 
 def memory_free(data: ModulesData) -> float | None:

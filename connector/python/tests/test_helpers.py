@@ -24,6 +24,7 @@ from systembridgeconnector.helpers import (
     gpu_power_usage,
     gpu_temperature,
     gpu_usage_percentage,
+    media_file_url,
     memory_free,
     memory_used,
     partition_usage,
@@ -45,6 +46,22 @@ async def test_battery_time_remaining(
     ):
         assert battery_time_remaining(mock_modules_data) == snapshot
         assert battery_time_remaining(EMPTY_MODULES_DATA) is None
+
+
+def test_media_file_url() -> None:
+    """Test the media file URL is signed the same way as the backend.
+
+    The signature matches TestMediaFileSignature in backend/http/media_test.go.
+    """
+    with patch(
+        "systembridgeconnector.helpers.utcnow",
+        return_value=datetime(2023, 11, 13, 22, 13, 20, tzinfo=UTC),
+    ):
+        assert media_file_url("192.0.2.1", 9170, "abc123", "music", "song.mp3") == (
+            "http://192.0.2.1:9170/api/media/file/data?base=music&path=song.mp3"
+            "&expires=1700000000"
+            "&sig=71497c7265cabb467f6c272122b70929f6d9467f626b22169c2d946d48969eb2"
+        )
 
 
 @pytest.mark.asyncio
