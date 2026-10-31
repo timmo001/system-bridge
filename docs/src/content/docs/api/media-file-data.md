@@ -7,19 +7,32 @@ Download a media file from the machine running System Bridge. The file is return
 
 ## Authentication
 
-This endpoint requires your API token, passed as the `token` query parameter. A missing or invalid token returns `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+Requests are signed with your API token, so the URL can be handed to another device, such as a cast speaker, without sharing the token. A signed URL only reads the one file it was made for, until it expires. A missing, invalid or expired signature returns `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+
+To sign a request, take the HMAC-SHA256 of `base`, `path` and `expires` joined by newlines, keyed with your API token, and hex-encode it:
+
+```text
+sig = hex(HMAC-SHA256(key = token, message = base + "\n" + path + "\n" + expires))
+```
+
+Sign `base` and `path` as they are, before URL encoding. The Python connector's `media_file_url()` helper builds a signed URL for you.
 
 ## Request
 
 ```http
-GET /api/media/file/data?base={base}&path={path}&token={token}
+GET /api/media/file/data?base={base}&path={path}&expires={expires}&sig={sig}
 ```
 
 - `base`: the base directory to serve from (see below).
 - `path`: the path to the file, relative to `base`.
-- `token`: your API token.
+- `expires`: when the URL stops working, in Unix seconds.
+- `sig`: the signature described above.
 
-All three parameters are required.
+All four parameters are required.
+
+### Deprecated: token parameter
+
+Passing your API token as `token` in place of `expires` and `sig` still works, but it puts the token in the URL, which can end up on other devices and in their logs. System Bridge logs a warning the first time it's used, and support will be removed in a later release.
 
 ### Base directories
 
@@ -52,8 +65,8 @@ Errors return a JSON body of the form `{ "error": "..." }` with one of these sta
 
 | Status | Meaning |
 | --- | --- |
-| `400 Bad Request` | Missing `base`, `path`, or `token`, an invalid base directory, or the path is not a regular file. |
-| `401 Unauthorized` | The token is missing or incorrect. |
+| `400 Bad Request` | Missing `base` or `path`, an invalid base directory, or the path is not a regular file. |
+| `401 Unauthorized` | The signature is missing, invalid or expired, or the deprecated token is incorrect. |
 | `403 Forbidden` | The path escapes the base directory, or the file type is not allowed. |
 | `404 Not Found` | The file does not exist. |
 | `413 Payload Too Large` | The file is larger than 100 MB. |

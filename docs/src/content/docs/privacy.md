@@ -42,7 +42,7 @@ Everything else needs the token:
 | Endpoint | How the token is sent |
 | --- | --- |
 | `/api/data/{module}` | `X-API-Token` or `token` header |
-| `/api/media/file/data` | `token` query parameter |
+| `/api/media/file/data` | A URL signed with the token (`expires` and `sig`), or the deprecated `token` query parameter. A signed URL only reads one file, until it expires. |
 | `/api/websocket` | `token` field in every message. The connection closes if no valid message arrives within 10 seconds. |
 | `/api/mcp` | `token` query parameter or `Authorization: Bearer` header |
 | `/api/quit` | `X-API-Token` header |
