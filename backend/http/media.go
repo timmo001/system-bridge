@@ -1,14 +1,22 @@
 package http
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
@@ -27,15 +35,15 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get query parameters
-	base := r.URL.Query().Get("base")
-	path := r.URL.Query().Get("path")
-	token := r.URL.Query().Get("token")
+	query := r.URL.Query()
+	base := query.Get("base")
+	path := query.Get("path")
 
 	// Validate required parameters
-	if base == "" || path == "" || token == "" {
+	if base == "" || path == "" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Missing required parameters: base, path, token"}); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Missing required parameters: base, path"}); err != nil {
 			slog.Error("Failed to encode response", "error", err)
 		}
 		return
@@ -53,10 +61,10 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if token != expectedToken {
+	if !mediaRequestAuthorised(query, base, path, expectedToken, time.Now()) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"}); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid or expired signature"}); err != nil {
 			slog.Error("Failed to encode response", "error", err)
 		}
 		return
@@ -162,6 +170,40 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 	// Serve the file
 	slog.Info("Serving media file", "path", cleanPath, "size", fileInfo.Size())
 	http.ServeFile(w, r, cleanPath)
+}
+
+// legacyTokenWarning logs the deprecated token query parameter once per run,
+// since cast devices make many range requests for one file.
+var legacyTokenWarning sync.Once
+
+// MediaFileSignature returns the hex HMAC-SHA256 of base, path and expires,
+// keyed with the API token. base never contains a newline and expires comes
+// last, so the message can't be ambiguous.
+func MediaFileSignature(token, base, path string, expires int64) string {
+	mac := hmac.New(sha256.New, []byte(token))
+	mac.Write([]byte(base + "\n" + path + "\n" + strconv.FormatInt(expires, 10)))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+// mediaRequestAuthorised accepts an unexpired signature for this base and
+// path, or the deprecated token query parameter.
+func mediaRequestAuthorised(query url.Values, base, path, token string, now time.Time) bool {
+	if sig := query.Get("sig"); sig != "" {
+		expires, err := strconv.ParseInt(query.Get("expires"), 10, 64)
+		if err != nil || now.Unix() > expires {
+			return false
+		}
+		return hmac.Equal([]byte(sig), []byte(MediaFileSignature(token, base, path, expires)))
+	}
+
+	legacy := query.Get("token")
+	if legacy == "" || subtle.ConstantTimeCompare([]byte(legacy), []byte(token)) != 1 {
+		return false
+	}
+	legacyTokenWarning.Do(func() {
+		slog.Warn("Media file request used the token query parameter, which is deprecated; use a signed URL")
+	})
+	return true
 }
 
 // getBaseDirectoryPath returns the absolute path for a base directory key
