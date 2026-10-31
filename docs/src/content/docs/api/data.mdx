@@ -89,7 +89,9 @@ On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or 
 
 The top-level battery fields are for the first system battery, and are `null` when there isn't one. `ac_connected` is `null` when the system doesn't report a power supply, as on most desktops, and on macOS.
 
-Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `state`, `percentage`, `time_remaining`, `power`, and `voltage`. On Windows and macOS, batteries are named `BAT0`, `BAT1` and so on, and connected devices usually aren't listed.
+Each item in `batteries` has `name`, `model`, `serial`, `scope` (`system` or `device`), `state`, `percentage`, `time_remaining`, `power`, and `voltage`. On Windows and macOS, batteries are named `BAT0`, `BAT1` and so on, and connected devices usually aren't listed.
+
+On Linux, a connected device's `name` can change when it reconnects, such as `hidpp_battery_1` becoming `hidpp_battery_2`. Its `serial` stays the same, so use it to tell device batteries apart. `serial` is `null` when the driver doesn't report one, and always on Windows and macOS.
 
 ### `bluetooth`
 
@@ -277,7 +279,7 @@ Each workspace has `id`, `name`, `display`, `windows` (how many), and whether it
 
 Returns an array of objects, one per display.
 
-On Linux without an X server, such as under Wayland, the displays come from the kernel's DRM connectors instead. Then `name` is the monitor's model from its EDID, the resolution is its preferred one, and the position, `is_primary`, `pixel_clock` and `refresh_rate` are `null`.
+On Linux without an X server, such as under Wayland, the displays come from the kernel's DRM connectors instead. Then `name` is the monitor's model from its EDID, and `is_primary` and `pixel_clock` are `null`. Under Hyprland, the resolution, `refresh_rate` and position are the mode Hyprland set. On other Wayland compositors, the resolution is the monitor's preferred one, and the position and `refresh_rate` are `null`.
 
 | Field | Type | Description |
 | --- | --- | --- |
