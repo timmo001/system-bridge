@@ -177,6 +177,7 @@ export interface AudioData extends Schema.Schema.Type<typeof AudioData> {}
 export const BatteryInfo = Schema.Struct({
   name: Schema.String,
   model: Schema.NullOr(Schema.String),
+  serial: Schema.NullOr(Schema.String),
   scope: BatteryScope,
   state: BatteryState,
   percentage: Schema.NullOr(Schema.Finite),

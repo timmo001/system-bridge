@@ -54,6 +54,9 @@ func readBattery(dir, name string) types.BatteryInfo {
 	if model := readString(dir, "model_name"); model != "" {
 		info.Model = &model
 	}
+	if serial := readString(dir, "serial_number"); serial != "" {
+		info.Serial = &serial
+	}
 
 	voltage, hasVoltage := readMicro(dir, "voltage_now")
 	if hasVoltage && voltage > 0 {

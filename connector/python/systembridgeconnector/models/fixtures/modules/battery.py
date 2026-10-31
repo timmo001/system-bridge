@@ -29,6 +29,7 @@ FIXTURE_BATTERY = Battery(
         BatteryInfo(
             name="hidpp_battery_1",
             model="mouse",
+            serial="9b-9a-d4-1b",
             scope=BatteryScope.DEVICE,
             state=BatteryState.DISCHARGING,
             percentage=96,

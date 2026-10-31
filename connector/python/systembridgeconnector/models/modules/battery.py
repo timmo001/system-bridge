@@ -34,6 +34,7 @@ class BatteryInfo:
     scope: BatteryScope
     state: BatteryState
     model: str | None = None
+    serial: str | None = None
     percentage: float | None = None
     time_remaining: float | None = None
     power: float | None = None

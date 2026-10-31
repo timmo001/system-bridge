@@ -25,6 +25,7 @@ const (
 type BatteryInfo struct {
 	Name          string       `json:"name"`
 	Model         *string      `json:"model"`
+	Serial        *string      `json:"serial"` // The device's serial, which stays the same when it reconnects
 	Scope         BatteryScope `json:"scope"`
 	State         BatteryState `json:"state"`
 	Percentage    *float64     `json:"percentage"`

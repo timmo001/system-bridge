@@ -44,10 +44,11 @@ func TestReadBatteriesFrom(t *testing.T) {
 		"voltage_now": "8000000",
 	})
 	writeSupply(t, root, "hidpp_battery_1", map[string]string{
-		"type":     "Battery",
-		"scope":    "Device",
-		"status":   "Not charging",
-		"capacity": "96",
+		"type":          "Battery",
+		"scope":         "Device",
+		"status":        "Not charging",
+		"capacity":      "96",
+		"serial_number": "9b-9a-d4-1b",
 	})
 
 	batteries := readBatteriesFrom(root)
@@ -68,12 +69,18 @@ func TestReadBatteriesFrom(t *testing.T) {
 	assertFloat(t, "BAT1 percentage", bat1.Percentage, 25)
 	assertFloat(t, "BAT1 power", bat1.Power, 12)
 	assertFloat(t, "BAT1 time remaining", bat1.TimeRemaining, 7200)
+	if bat1.Serial != nil {
+		t.Errorf("BAT1 serial = %q, want nil", *bat1.Serial)
+	}
 
 	mouse := batteries[2]
 	if mouse.Scope != types.BatteryScopeDevice || mouse.State != types.BatteryStateNotCharging {
 		t.Errorf("mouse state %q scope %q", mouse.State, mouse.Scope)
 	}
 	assertFloat(t, "mouse percentage", mouse.Percentage, 96)
+	if mouse.Serial == nil || *mouse.Serial != "9b-9a-d4-1b" {
+		t.Errorf("mouse serial = %v, want 9b-9a-d4-1b", mouse.Serial)
+	}
 	if mouse.Power != nil || mouse.TimeRemaining != nil {
 		t.Errorf("mouse power %v time remaining %v, want nil", mouse.Power, mouse.TimeRemaining)
 	}
