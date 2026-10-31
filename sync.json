@@ -1,0 +1,8 @@
+{
+  "items": {
+    "filterable-panel": "omarchy-plugin",
+    "panel-flickable": "omarchy-plugin",
+    "panel-header": "omarchy-plugin",
+    "section-heading": "omarchy-plugin"
+  }
+}
