@@ -21,6 +21,8 @@ import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
 import "@timmo001/groundwork-ui/gw-card.ts";
+import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
 import { icon, pageStyles, shared, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -36,6 +38,7 @@ import {
   registry,
 } from "~/lib/atoms";
 import { generateUUID } from "~/lib/utils";
+import { selectValue } from "~/lib/select";
 
 import { SbSettingsPage } from "./sb-settings-page";
 
@@ -271,7 +274,7 @@ export class PageSettingsCommands extends SbSettingsPage {
 
   @query("#edit-popover") private editPopover!: HTMLElement | null;
 
-  @query("#edit-value") private editInput!: HTMLInputElement | null;
+  @query("#edit-field input") private editInput!: HTMLInputElement | null;
 
   /** The edit button the popover opened from. */
   #editAnchor: HTMLButtonElement | null = null;
@@ -474,14 +477,13 @@ export class PageSettingsCommands extends SbSettingsPage {
 
   /** Picking a target starts its function afresh. */
   #onIpcChange = (event: Event) => {
-    const target = event.target;
-
-    if (!(target instanceof HTMLSelectElement)) return;
+    const value = selectValue(event);
 
     this.form =
-      target.name === "target"
-        ? { ...this.form, target: target.value, function: "" }
-        : { ...this.form, function: target.value };
+      event.currentTarget instanceof GwSelect &&
+      event.currentTarget.name === "target"
+        ? { ...this.form, target: value, function: "" }
+        : { ...this.form, function: value };
   };
 
   /** Fields are named after their key in the form. */
@@ -495,17 +497,16 @@ export class PageSettingsCommands extends SbSettingsPage {
 
   /** Picking a prefab names the command after it, unless it has a name of its own. */
   #onPrefabChange = (event: Event) => {
-    if (!(event.target instanceof HTMLSelectElement)) return;
-
+    const value = selectValue(event);
     const previous = this.#prefab(this.form.prefab);
-    const next = this.#prefab(event.target.value);
+    const next = this.#prefab(value);
 
     const named =
       this.form.name.trim() !== "" && this.form.name !== previous?.name;
 
     this.form = {
       ...this.form,
-      prefab: event.target.value,
+      prefab: value,
       name: named ? this.form.name : (next?.name ?? ""),
     };
   };
@@ -568,27 +569,22 @@ export class PageSettingsCommands extends SbSettingsPage {
     hint?: string,
   ) {
     return html`
-      <div class="field">
-        <label for=${key}>${label}</label>
-        <input
-          class="input ${key === "command" ? "mono" : ""}"
-          id=${key}
-          name=${key}
-          placeholder=${placeholder}
-          aria-describedby=${hint === undefined ? nothing : `${key}-hint`}
-          ?required=${
-            key === "name" || (key === "command" && this.form.prefab === "")
-          }
-          ?disabled=${this.isSaving}
-          .value=${this.form[key]}
-          @input=${this.#onInput}
-        />
-        ${
-          hint === undefined
-            ? nothing
-            : html`<span class="hint" id="${key}-hint">${hint}</span>`
+      <gw-input
+        label=${label}
+        name=${key}
+        placeholder=${placeholder}
+        hint=${hint ?? ""}
+        ?monospace=${key === "command"}
+        ?optional=${
+          key === "workingDir" || (key === "command" && this.form.prefab !== "")
         }
-      </div>
+        ?required=${
+          key === "name" || (key === "command" && this.form.prefab === "")
+        }
+        ?disabled=${this.isSaving}
+        .value=${this.form[key]}
+        @input=${this.#onInput}
+      ></gw-input>
     `;
   }
 
@@ -818,45 +814,45 @@ ${result.stderr}</pre>`
       hint = "Where the program runs. Leave it empty for none.";
     }
 
+    const heading = `Edit the ${editFields[field]}${
+      command === undefined ? "" : ` of ${command.name}`
+    }`;
+
     return html`
       <div
         id="edit-popover"
         class="edit-popover"
         popover
         role="dialog"
-        aria-labelledby="edit-heading"
+        aria-label=${heading}
         @toggle=${this.#onEditToggle}
       >
         <form class="stack" @submit=${this.#onEditSubmit}>
-          <label id="edit-heading" for="edit-value"
-            >Edit the
-            ${editFields[field]}${
-              command === undefined ? "" : ` of ${command.name}`
-            }</label
-          >
-          <input
-            id="edit-value"
-            class="input ${field === "name" ? "" : "mono"}"
-            aria-describedby="edit-hint"
+          <gw-input
+            id="edit-field"
+            label=${heading}
+            hint=${hint}
+            ?monospace=${field !== "name"}
             .value=${editing?.value ?? ""}
             @input=${this.#onEditInput}
-          />
-          <span class="hint" id="edit-hint">${hint}</span>
+          ></gw-input>
           <div class="row" style="justify-content: flex-end">
-            <button
-              class="button plain small"
-              type="button"
+            <gw-button
+              variant="neutral"
+              appearance="plain"
+              size="small"
+              icon=${mdiClose}
               @click=${this.#onEditCancel}
+              >Cancel</gw-button
             >
-              ${icon(mdiClose)} Cancel
-            </button>
-            <button
-              class="button filled small"
+            <gw-button
               type="submit"
-              ?disabled=${this.isSaving || !this.#canSaveEdit()}
+              size="small"
+              icon=${mdiCheck}
+              ?loading=${this.isSaving}
+              ?disabled=${!this.#canSaveEdit()}
+              >Save</gw-button
             >
-              ${icon(mdiCheck)} Save
-            </button>
           </div>
         </form>
       </div>
@@ -864,63 +860,49 @@ ${result.stderr}</pre>`
   }
 
   #renderPrefabSelect() {
-    const options = this.#prefabList.map(
-      (prefab) =>
-        html`<option
-          value=${prefab.id}
-          ?disabled=${!prefab.available}
-          ?selected=${prefab.id === this.form.prefab}
-        >
-          ${prefab.available ? prefab.name : `${prefab.name}: ${prefab.reason}`}
-        </option>`,
-    );
+    const options: OptionItem[] = [
+      { value: "", label: "Custom", description: "Your own program" },
+      ...this.#prefabList.map((prefab): OptionItem =>
+        prefab.available
+          ? { value: prefab.id, label: prefab.name }
+          : {
+              value: prefab.id,
+              label: prefab.name,
+              description: prefab.reason,
+              disabled: true,
+            },
+      ),
+    ];
 
     return html`
-      <div class="field">
-        <label for="prefab">Type</label>
-        <select
-          class="input"
-          id="prefab"
-          name="prefab"
-          aria-describedby="prefab-hint"
-          ?disabled=${this.isSaving}
-          .value=${this.form.prefab}
-          @change=${this.#onPrefabChange}
-        >
-          <option value="">Custom</option>
-          ${options}
-        </select>
-        <span class="hint" id="prefab-hint"
-          >A ready-made command, or your own program.</span
-        >
-      </div>
+      <gw-select
+        label="Type"
+        name="prefab"
+        hint="A ready-made command, or your own program."
+        ?disabled=${this.isSaving}
+        .options=${options}
+        .value=${this.form.prefab}
+        @change=${this.#onPrefabChange}
+      ></gw-select>
     `;
   }
 
   #ipcSelect(
     key: "target" | "function",
     label: string,
-    options: readonly TemplateResult[],
+    options: OptionItem[],
     hint: string,
   ) {
     return html`
-      <div class="field">
-        <label for="ipc-${key}">${label}</label>
-        <select
-          class="input mono"
-          id="ipc-${key}"
-          name=${key}
-          aria-describedby="ipc-${key}-hint"
-          required
-          ?disabled=${this.isSaving}
-          .value=${this.form[key]}
-          @change=${this.#onIpcChange}
-        >
-          <option value="">Choose…</option>
-          ${options}
-        </select>
-        <span class="hint" id="ipc-${key}-hint">${hint}</span>
-      </div>
+      <gw-select
+        label=${label}
+        name=${key}
+        hint=${hint}
+        ?disabled=${this.isSaving}
+        .options=${options}
+        .value=${this.form[key]}
+        @change=${this.#onIpcChange}
+      ></gw-select>
     `;
   }
 
@@ -935,18 +917,17 @@ ${result.stderr}</pre>`
       argumentsList: OmarchyTarget["functions"][number]["arguments"],
     ) => argumentsList.map(({ name, type }) => `${name}: ${type}`).join(", ");
 
-    const targetOptions = targets.map(
-      ({ name }) =>
-        html`<option value=${name} ?selected=${name === this.form.target}>
-          ${name}
-        </option>`,
-    );
+    const targetOptions: OptionItem[] = targets.map(({ name }) => ({
+      value: name,
+      label: name,
+    }));
 
-    const functionOptions = functions.map(
-      ({ name, arguments: argumentsList }) =>
-        html`<option value=${name} ?selected=${name === this.form.function}>
-          ${name}(${signature(argumentsList)})
-        </option>`,
+    const functionOptions: OptionItem[] = functions.map(
+      ({ name, arguments: argumentsList }) => ({
+        value: name,
+        label: name,
+        description: `(${signature(argumentsList)})`,
+      }),
     );
 
     let argumentsHint = "Pick a function to see what it takes.";
@@ -984,7 +965,7 @@ ${result.stderr}</pre>`
         prefab === undefined ? "/usr/bin/systemctl" : prefab.command || builtIn,
         prefab === undefined
           ? "The program's full path."
-          : "Optional. Leave empty to use the program shown, or give your own program's full path.",
+          : "Leave empty to use the program shown, or give your own program's full path.",
       )}
       ${this.#input(
         "arguments",
@@ -996,7 +977,7 @@ ${result.stderr}</pre>`
           ? "Separated by commas."
           : "Separated by commas. Only used with your own program.",
       )}
-      ${this.#input("workingDir", "Working directory", "/home/me", "Optional.")}
+      ${this.#input("workingDir", "Working directory", "/home/me")}
     `;
   }
 
@@ -1017,13 +998,13 @@ ${result.stderr}</pre>`
             }
           </div>
           <div class="row" style="justify-content: flex-end">
-            <button
-              class="button filled"
+            <gw-button
               type="submit"
-              ?disabled=${saving || !this.#canAdd()}
+              icon=${mdiPlus}
+              ?loading=${saving}
+              ?disabled=${!this.#canAdd()}
+              >Add</gw-button
             >
-              ${saving ? spinner() : icon(mdiPlus)} Add
-            </button>
           </div>
         </form>
       </gw-card>

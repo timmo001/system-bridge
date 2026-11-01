@@ -4,6 +4,7 @@ import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-checkbox.ts";
 import "@timmo001/groundwork-ui/gw-empty-state.ts";
+import "@timmo001/groundwork-ui/gw-input.ts";
 import "@timmo001/groundwork-ui/gw-setting-row.ts";
 import "@timmo001/groundwork-ui/gw-skeleton.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";

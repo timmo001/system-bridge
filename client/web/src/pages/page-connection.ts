@@ -1,8 +1,7 @@
-import { mdiEye, mdiEyeOff, mdiLanConnect } from "@mdi/js";
-import { html, nothing } from "lit";
+import { mdiLanConnect } from "@mdi/js";
+import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
@@ -47,8 +46,6 @@ export class PageConnection extends SbPage {
   };
 
   @state() private errors: FormErrors = {};
-
-  @state() private showToken = false;
 
   protected readonly pageTitle = "Connection";
 
@@ -100,51 +97,29 @@ export class PageConnection extends SbPage {
     }
   };
 
-  #toggleToken = () => {
-    this.showToken = !this.showToken;
-  };
-
   #field(
     key: "host" | "port",
     label: string,
     hint: string,
-    attributes: { readonly type: string; readonly placeholder: string },
+    placeholder: string,
   ) {
-    const error = this.errors[key];
-
     return html`
-      <div class="field">
-        <label for=${key}>${label}</label>
-        <input
-          class="input"
-          id=${key}
-          name=${key}
-          type=${attributes.type}
-          inputmode=${key === "port" ? "numeric" : nothing}
-          placeholder=${attributes.placeholder}
-          autocomplete="off"
-          aria-invalid=${error === undefined ? "false" : "true"}
-          aria-describedby=${
-            error === undefined ? `${key}-hint` : `${key}-hint ${key}-error`
-          }
-          .value=${this.form[key]}
-          @input=${this.#onTextInput}
-        />
-        <span class="hint" id="${key}-hint">${hint}</span>
-        ${
-          error === undefined
-            ? nothing
-            : html`<span class="error-text" id="${key}-error" role="alert"
-                >${error}</span
-              >`
-        }
-      </div>
+      <gw-input
+        label=${label}
+        name=${key}
+        inputmode=${key === "port" ? "numeric" : ""}
+        placeholder=${placeholder}
+        autocomplete="off"
+        hint=${hint}
+        error=${this.errors[key] ?? ""}
+        .value=${this.form[key]}
+        @input=${this.#onTextInput}
+      ></gw-input>
     `;
   }
 
   override render() {
     const testing = this.#test.value.waiting;
-    const tokenError = this.errors.token;
 
     return html`
       <div class="page narrow">
@@ -157,78 +132,51 @@ export class PageConnection extends SbPage {
         ${this.renderResult(
           actionResult(this.#test.value, "Connected to System Bridge."),
         )}
-        <form class="card" @submit=${this.#onSubmit} novalidate>
-          <div class="grid" style="--sb-grid-min: 14rem">
-            ${this.#field(
-              "host",
-              "Host",
-              "The host name or IP address of the computer running System Bridge.",
-              { type: "text", placeholder: "localhost" },
-            )}
-            ${this.#field(
-              "port",
-              "Port",
-              "System Bridge listens on 9170 unless you've changed it.",
-              { type: "text", placeholder: "9170" },
-            )}
-          </div>
-          <gw-setting-row
-            heading="Use a secure connection"
-            description="Turn on when System Bridge is behind HTTPS."
-          >
-            <gw-switch
-              label="Use a secure connection"
-              label-hidden
-              .checked=${this.form.ssl}
-              @change=${this.#onSslChange}
-            ></gw-switch>
-          </gw-setting-row>
-          <div class="field">
-            <label for="token">API token</label>
-            <div class="row">
-              <input
-                class="input mono"
-                id="token"
+        <form @submit=${this.#onSubmit} novalidate>
+          <gw-card>
+            <div class="stack">
+              <div class="grid" style="--sb-grid-min: 14rem">
+                ${this.#field(
+                  "host",
+                  "Host",
+                  "The host name or IP address of the computer running System Bridge.",
+                  "localhost",
+                )}
+                ${this.#field(
+                  "port",
+                  "Port",
+                  "System Bridge listens on 9170 unless you've changed it.",
+                  "9170",
+                )}
+              </div>
+              <gw-setting-row
+                heading="Use a secure connection"
+                description="Turn on when System Bridge is behind HTTPS."
+              >
+                <gw-switch
+                  label="Use a secure connection"
+                  label-hidden
+                  .checked=${this.form.ssl}
+                  @change=${this.#onSslChange}
+                ></gw-switch>
+              </gw-setting-row>
+              <gw-input
+                label="API token"
                 name="token"
-                type=${this.showToken ? "text" : "password"}
+                type="password"
                 autocomplete="off"
-                aria-invalid=${tokenError === undefined ? "false" : "true"}
-                aria-describedby=${
-                  tokenError === undefined
-                    ? "token-hint"
-                    : "token-hint token-error"
-                }
+                monospace
+                reveal
+                hint="Find it in System Bridge's settings, or run system-bridge client token."
+                error=${this.errors.token ?? ""}
                 .value=${this.form.token}
                 @input=${this.#onTextInput}
-              />
-              <button
-                class="button icon-only"
-                type="button"
-                aria-label=${this.showToken ? "Hide token" : "Show token"}
-                aria-pressed=${this.showToken ? "true" : "false"}
-                @click=${this.#toggleToken}
-              >
-                ${icon(this.showToken ? mdiEyeOff : mdiEye)}
-              </button>
+              ></gw-input>
             </div>
-            <span class="hint" id="token-hint"
-              >Find it in System Bridge's settings, or with
-              <code>system-bridge client token</code>.</span
-            >
-            ${
-              tokenError === undefined
-                ? nothing
-                : html`<span class="error-text" id="token-error" role="alert"
-                    >${tokenError}</span
-                  >`
-            }
-          </div>
-          <div class="row" style="justify-content: flex-end">
-            <button class="button filled" type="submit" ?disabled=${testing}>
-              ${testing ? spinner() : nothing}
-              ${testing ? "Connecting…" : "Connect"}
-            </button>
-          </div>
+            <div slot="footer" class="row" style="justify-content: flex-end">
+              <gw-button type="submit" ?loading=${testing}>Connect</gw-button>
+            </div>
+          </gw-card>
         </form>
       </div>
     `;

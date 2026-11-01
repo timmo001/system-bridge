@@ -1,13 +1,12 @@
 import { mdiBellOutline, mdiSend } from "@mdi/js";
 import { Notification } from "@timmo001/effect-system-bridge";
 import { Option, Schema } from "effect";
-import { html, nothing } from "lit";
+import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
-import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, registry, sendNotification } from "~/lib/atoms";
 
@@ -142,46 +141,20 @@ export class PageNotifications extends SbPage {
   };
 
   #renderField(field: Field, sending: boolean) {
-    const control = field.multiline
-      ? html`<textarea
-          class="input"
-          id=${field.key}
-          name=${field.key}
-          rows="3"
-          style="padding-block: var(--gw-space-2); resize: vertical"
-          placeholder=${field.placeholder}
-          ?required=${field.required === true}
-          ?disabled=${sending}
-          .value=${this.form[field.key]}
-          @input=${this.#onInput}
-        ></textarea>`
-      : html`<input
-          class="input"
-          id=${field.key}
-          name=${field.key}
-          placeholder=${field.placeholder}
-          ?required=${field.required === true}
-          ?disabled=${sending}
-          .value=${this.form[field.key]}
-          @input=${this.#onInput}
-        />`;
-
     return html`
-      <div class="field">
-        <label for=${field.key}
-          >${field.label}${
-            field.required
-              ? nothing
-              : html` <span class="muted">(optional)</span>`
-          }</label
-        >
-        ${control}
-        ${
-          field.hint === undefined
-            ? nothing
-            : html`<span class="hint">${field.hint}</span>`
-        }
-      </div>
+      <gw-input
+        label=${field.label}
+        name=${field.key}
+        placeholder=${field.placeholder}
+        hint=${field.hint ?? ""}
+        ?required=${field.required === true}
+        ?optional=${field.required !== true}
+        ?multiline=${field.multiline === true}
+        ?monospace=${field.key === "icon" || field.key === "sound"}
+        ?disabled=${sending}
+        .value=${this.form[field.key]}
+        @input=${this.#onInput}
+      ></gw-input>
     `;
   }
 
@@ -194,39 +167,40 @@ export class PageNotifications extends SbPage {
     const inputs = fields.map((field) => this.#renderField(field, sending));
 
     return html`
-      <form class="card" @submit=${this.#onSubmit}>
-        ${inputs}
-        <div class="field">
-          <span>Urgency</span>
-          <gw-segmented
-            label="Urgency"
-            size="small"
-            .options=${urgencyOptions}
-            .value=${this.urgency}
-            @change=${this.#onUrgency}
-          ></gw-segmented>
-          <span class="hint"
-            >Critical notifications stay until they're dismissed. Linux
-            only.</span
-          >
-        </div>
-        <div class="row" style="justify-content: flex-end">
-          <button
-            class="button plain"
-            type="button"
-            ?disabled=${sending}
-            @click=${this.#clear}
-          >
-            Clear
-          </button>
-          <button
-            class="button filled"
-            type="submit"
-            ?disabled=${sending || !ready}
-          >
-            ${sending ? spinner() : icon(mdiSend)} Send
-          </button>
-        </div>
+      <form @submit=${this.#onSubmit}>
+        <gw-card>
+          <div class="stack">
+            ${inputs}
+            <gw-setting-row
+              heading="Urgency"
+              description="Critical notifications stay until they're dismissed. Linux only."
+            >
+              <gw-segmented
+                label="Urgency"
+                size="small"
+                .options=${urgencyOptions}
+                .value=${this.urgency}
+                @change=${this.#onUrgency}
+              ></gw-segmented>
+            </gw-setting-row>
+          </div>
+          <div slot="footer" class="row" style="justify-content: flex-end">
+            <gw-button
+              variant="neutral"
+              appearance="plain"
+              ?disabled=${sending}
+              @click=${this.#clear}
+              >Clear</gw-button
+            >
+            <gw-button
+              type="submit"
+              icon=${mdiSend}
+              ?loading=${sending}
+              ?disabled=${!ready}
+              >Send</gw-button
+            >
+          </div>
+        </gw-card>
       </form>
     `;
   }

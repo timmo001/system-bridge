@@ -3,9 +3,7 @@ import {
   mdiCheckCircle,
   mdiCircleOutline,
   mdiContentCopy,
-  mdiEye,
   mdiCogOutline,
-  mdiEyeOff,
   mdiOpenInNew,
   mdiProgressClock,
 } from "@mdi/js";
@@ -16,7 +14,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/gw-card.ts";
-import { icon, spinner } from "~/components/shared-styles";
+import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
@@ -169,8 +167,6 @@ export class PageSettingsDiscord extends SbPage {
 
   @state() private clientSecret = "";
 
-  @state() private showSecret = false;
-
   @state() private copied = false;
 
   protected readonly pageTitle = "Discord setup";
@@ -185,10 +181,6 @@ export class PageSettingsDiscord extends SbPage {
     if (event.target instanceof HTMLInputElement) {
       this.clientSecret = event.target.value;
     }
-  };
-
-  #toggleSecret = () => {
-    this.showSecret = !this.showSecret;
   };
 
   #copyRedirect = async (event: MouseEvent) => {
@@ -314,78 +306,49 @@ export class PageSettingsDiscord extends SbPage {
         </ol>
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 14rem">
-            <div class="field">
-              <label for="client-id">Client ID</label>
-              <input
-                class="input mono"
-                id="client-id"
-                name="clientId"
-                inputmode="numeric"
-                autocomplete="off"
-                placeholder="A long number"
-                required
-                aria-invalid=${invalid ? "true" : nothing}
-                aria-describedby=${invalid ? "setup-error" : nothing}
-                ?disabled=${saving}
-                .value=${clientId}
-                @input=${this.#onClientIdInput}
-              />
-            </div>
-            <div class="field">
-              <label for="client-secret">Client secret</label>
-              <div class="row">
-                <input
-                  class="input mono"
-                  id="client-secret"
-                  type=${this.showSecret ? "text" : "password"}
-                  autocomplete="off"
-                  required
-                  aria-describedby="secret-hint${invalid ? " setup-error" : ""}"
-                  aria-invalid=${invalid ? "true" : nothing}
-                  ?disabled=${saving}
-                  .value=${this.clientSecret}
-                  @input=${this.#onSecretInput}
-                />
-                <button
-                  class="button icon-only"
-                  type="button"
-                  aria-label=${this.showSecret ? "Hide secret" : "Show secret"}
-                  aria-pressed=${this.showSecret ? "true" : "false"}
-                  @click=${this.#toggleSecret}
-                >
-                  ${icon(this.showSecret ? mdiEyeOff : mdiEye)}
-                </button>
-              </div>
-              <span class="hint" id="secret-hint">
-                ${
-                  setup.configured
-                    ? "Saved. Enter it again only to change the application."
-                    : "Stored only on this system, and never shown again."
-                }
-              </span>
-            </div>
+            <gw-input
+              label="Client ID"
+              name="clientId"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="A long number"
+              required
+              monospace
+              ?disabled=${saving}
+              .value=${clientId}
+              @input=${this.#onClientIdInput}
+            ></gw-input>
+            <gw-input
+              label="Client secret"
+              name="clientSecret"
+              type="password"
+              autocomplete="off"
+              required
+              monospace
+              reveal
+              hint=${
+                setup.configured
+                  ? "Saved. Enter it again only to change the application."
+                  : "Stored only on this system, and never shown again."
+              }
+              error=${invalid ? result.message : ""}
+              ?disabled=${saving}
+              .value=${this.clientSecret}
+              @input=${this.#onSecretInput}
+            ></gw-input>
           </div>
-          ${
-            invalid
-              ? html`<span class="error-text" id="setup-error" role="alert"
-                  >${result.message}</span
-                >`
-              : nothing
-          }
           ${
             result?.success === true
               ? html`<span class="hint" role="status">${result.message}</span>`
               : nothing
           }
           <div class="row" style="justify-content: flex-end">
-            <button
-              class="button filled"
+            <gw-button
               type="submit"
-              ?disabled=${saving || clientId.trim() === "" || this.clientSecret.trim() === ""}
+              ?loading=${saving}
+              ?disabled=${clientId.trim() === "" || this.clientSecret.trim() === ""}
+              >${setup.configured ? "Save and reconnect" : "Save and connect"}</gw-button
             >
-              ${saving ? spinner() : nothing}
-              ${setup.configured ? "Save and reconnect" : "Save and connect"}
-            </button>
           </div>
         </form>
       </gw-card>

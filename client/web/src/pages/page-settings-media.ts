@@ -9,11 +9,11 @@ import type {
   SettingsMediaDirectory,
 } from "@timmo001/effect-system-bridge";
 import { Struct } from "effect";
-import { html, nothing } from "lit";
+import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/gw-card.ts";
-import { icon, spinner } from "~/components/shared-styles";
+import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, addMediaDirectory, registry } from "~/lib/atoms";
 
@@ -122,50 +122,35 @@ export class PageSettingsMedia extends SbSettingsPage {
       >
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 14rem">
-            <div class="field">
-              <label for="name">Name</label>
-              <input
-                class="input"
-                id="name"
-                placeholder="Music"
-                required
-                ?disabled=${busy}
-                .value=${this.name}
-                @input=${this.#onNameInput}
-              />
-            </div>
-            <div class="field">
-              <label for="path">Path</label>
-              <input
-                class="input mono"
-                id="path"
-                placeholder="/home/me/Music"
-                required
-                aria-invalid=${addResult?.success === false ? "true" : nothing}
-                aria-describedby=${
-                  addResult?.success === false ? "add-error" : nothing
-                }
-                ?disabled=${busy}
-                .value=${this.path}
-                @input=${this.#onPathInput}
-              />
-            </div>
+            <gw-input
+              label="Name"
+              name="name"
+              placeholder="Music"
+              required
+              ?disabled=${busy}
+              .value=${this.name}
+              @input=${this.#onNameInput}
+            ></gw-input>
+            <gw-input
+              label="Path"
+              name="path"
+              placeholder="/home/me/Music"
+              required
+              monospace
+              error=${addResult?.success === false ? addResult.message : ""}
+              ?disabled=${busy}
+              .value=${this.path}
+              @input=${this.#onPathInput}
+            ></gw-input>
           </div>
-          ${
-            addResult?.success === false
-              ? html`<span class="error-text" id="add-error" role="alert"
-                  >${addResult.message}</span
-                >`
-              : nothing
-          }
           <div class="row" style="justify-content: flex-end">
-            <button
-              class="button filled"
+            <gw-button
               type="submit"
-              ?disabled=${busy || this.name.trim() === "" || this.path.trim() === ""}
+              icon=${mdiPlus}
+              ?loading=${busy}
+              ?disabled=${this.name.trim() === "" || this.path.trim() === ""}
+              >Add</gw-button
             >
-              ${busy ? spinner() : icon(mdiPlus)} Add
-            </button>
           </div>
         </form>
       </gw-card>

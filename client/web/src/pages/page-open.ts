@@ -5,7 +5,6 @@ import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
-import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, open, registry } from "~/lib/atoms";
 
@@ -93,36 +92,36 @@ export class PageOpen extends SbPage {
     const info = kinds[kind];
 
     return html`
-      <form class="card" @submit=${this.#onSubmit}>
-        <gw-segmented
-          label="What to open"
-          size="small"
-          .options=${kindOptions}
-          .value=${kind}
-          @change=${this.#onKindChange}
-        ></gw-segmented>
-        <div class="field">
-          <label for="target">${info.label}</label>
-          <input
-            class="input"
-            id="target"
-            placeholder=${info.placeholder}
-            required
-            ?disabled=${sending}
-            .value=${this.values[kind]}
-            @input=${this.#onInput}
-          />
-          <span class="hint">${info.hint}</span>
-        </div>
-        <div class="row" style="justify-content: flex-end">
-          <button
-            class="button filled"
-            type="submit"
-            ?disabled=${sending || this.values[kind].trim() === ""}
-          >
-            ${sending ? spinner() : icon(mdiOpenInNew)} Open
-          </button>
-        </div>
+      <form @submit=${this.#onSubmit}>
+        <gw-card>
+          <div class="stack">
+            <gw-segmented
+              label="What to open"
+              size="small"
+              .options=${kindOptions}
+              .value=${kind}
+              @change=${this.#onKindChange}
+            ></gw-segmented>
+            <gw-input
+              label=${info.label}
+              placeholder=${info.placeholder}
+              hint=${info.hint}
+              required
+              ?disabled=${sending}
+              .value=${this.values[kind]}
+              @input=${this.#onInput}
+            ></gw-input>
+          </div>
+          <div slot="footer" class="row" style="justify-content: flex-end">
+            <gw-button
+              type="submit"
+              icon=${mdiOpenInNew}
+              ?loading=${sending}
+              ?disabled=${this.values[kind].trim() === ""}
+              >Open</gw-button
+            >
+          </div>
+        </gw-card>
       </form>
     `;
   }
