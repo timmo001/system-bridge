@@ -38,7 +38,6 @@ import {
   latestModuleData,
   registry,
 } from "~/lib/atoms";
-import { formatPercent } from "~/lib/format";
 
 import { SbPage } from "./sb-page";
 
@@ -90,18 +89,6 @@ export class PageDiscord extends SbPage {
 
       gw-range {
         flex: 1;
-      }
-
-      .level {
-        display: flex;
-        align-items: center;
-        gap: var(--gw-space-3);
-      }
-
-      .level output {
-        min-width: 5ch;
-        white-space: nowrap;
-        text-align: end;
       }
 
       .members {
@@ -287,36 +274,25 @@ export class PageDiscord extends SbPage {
     readonly min?: number;
     readonly max: number;
     readonly step?: number;
-    readonly unit?: string;
     readonly user?: string;
   }) {
-    const unit = options.unit ?? "%";
-
-    const text =
-      options.value === null
-        ? "-"
-        : unit === "%"
-          ? formatPercent(options.value)
-          : `${Math.round(options.value)} ${unit}`;
-
-    return html`<div class="level">
-      <gw-range
-        id=${options.id}
-        label=${options.label}
-        label-hidden
-        unit=${unit}
-        .min=${options.min ?? 0}
-        .max=${options.max}
-        .step=${options.step ?? 1}
-        .value=${live(options.value ?? 0)}
-        ?disabled=${options.value === null}
-        data-action=${options.action}
-        data-label=${options.label}
-        data-user=${options.user ?? nothing}
-        @change=${this.#onRange}
-      ></gw-range>
-      <output class="muted small tabular" for=${options.id}>${text}</output>
-    </div>`;
+    return html`<gw-range
+      id=${options.id}
+      class="level"
+      label=${options.label}
+      label-hidden
+      unit="%"
+      readout
+      .min=${options.min ?? 0}
+      .max=${options.max}
+      .step=${options.step ?? 1}
+      .value=${live(options.value ?? 0)}
+      ?disabled=${options.value === null}
+      data-action=${options.action}
+      data-label=${options.label}
+      data-user=${options.user ?? nothing}
+      @change=${this.#onRange}
+    ></gw-range>`;
   }
 
   #renderVoice(discord: DiscordData) {
@@ -441,38 +417,35 @@ export class PageDiscord extends SbPage {
         ></gw-segmented>
         ${
           pushToTalk
-            ? html`<div class="field">
-                <label for="ptt-delay">Release delay</label>
-                ${this.#level({
-                  id: "ptt-delay",
-                  label: "Push to talk release delay",
-                  action: "SET_PUSH_TO_TALK_DELAY",
-                  value: mode.delay,
-                  max: limits.delay,
-                  step: 20,
-                  unit: "ms",
-                })}
-              </div>`
-            : html`<div class="field">
-                <label for="threshold">Sensitivity</label>
-                ${this.#level({
-                  id: "threshold",
-                  label: "Voice activity sensitivity",
-                  action: "SET_VOICE_THRESHOLD",
-                  value: mode?.threshold ?? null,
-                  min: limits.thresholdMin,
-                  max: 0,
-                  unit: "dB",
-                })}
-                ${
+            ? html`<gw-range
+                label="Release delay"
+                unit="ms"
+                readout
+                .min=${0}
+                .max=${limits.delay}
+                .step=${20}
+                .value=${live(mode.delay)}
+                data-action="SET_PUSH_TO_TALK_DELAY"
+                data-label="Push to talk release delay"
+                @change=${this.#onRange}
+              ></gw-range>`
+            : html`<gw-range
+                label="Sensitivity"
+                unit="dB"
+                readout
+                hint=${
                   mode?.auto_threshold === true
-                    ? html`<span class="hint"
-                        >Discord sets this itself while automatic sensitivity is
-                        on in its settings.</span
-                      >`
-                    : nothing
+                    ? "Discord sets this itself while automatic sensitivity is on in its settings."
+                    : ""
                 }
-              </div>`
+                .min=${limits.thresholdMin}
+                .max=${0}
+                .value=${live(mode?.threshold ?? 0)}
+                ?disabled=${mode?.threshold === undefined}
+                data-action="SET_VOICE_THRESHOLD"
+                data-label="Voice activity sensitivity"
+                @change=${this.#onRange}
+              ></gw-range>`
         }
         <div>
           ${this.#switch(

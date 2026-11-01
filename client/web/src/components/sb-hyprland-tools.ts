@@ -2,6 +2,9 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import "@timmo001/groundwork-ui/gw-alert.ts";
+import "@timmo001/groundwork-ui/gw-button.ts";
+import "@timmo001/groundwork-ui/gw-input.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
@@ -20,6 +23,7 @@ interface ToolField {
   readonly label: string;
   readonly placeholder: string;
   readonly number?: boolean;
+  readonly code?: boolean;
 }
 
 interface ToolDefinition {
@@ -58,7 +62,9 @@ const tools: Readonly<Record<ToolTag, ToolDefinition>> = {
   },
   exec: {
     label: "Run a command",
-    fields: [{ name: "command", label: "Command", placeholder: "kitty" }],
+    fields: [
+      { name: "command", label: "Command", placeholder: "kitty", code: true },
+    ],
     hint: codeHint,
   },
   raw: {
@@ -68,6 +74,7 @@ const tools: Readonly<Record<ToolTag, ToolDefinition>> = {
         name: "dispatch",
         label: "Dispatch",
         placeholder: 'hl.dsp.focus({ workspace = "1" })',
+        code: true,
       },
     ],
     hint: `Written in the config's language. ${codeHint}`,
@@ -79,6 +86,7 @@ const tools: Readonly<Record<ToolTag, ToolDefinition>> = {
         name: "code",
         label: "Lua",
         placeholder: 'hl.notification.create({ text = "Hi" })',
+        code: true,
       },
     ],
     hint: `Needs a Lua config. ${codeHint}`,
@@ -133,15 +141,18 @@ const toolRequest = (
 };
 
 const fieldInput = (field: ToolField) =>
-  html`<input
-    class="input ${field.number ? "number" : ""}"
+  html`<gw-input
+    class=${field.number ? "number" : "text"}
+    size="small"
+    label=${field.label}
+    hide-label
     name=${field.name}
     type=${field.number ? "number" : "text"}
     step=${field.number ? "1" : nothing}
+    ?monospace=${field.code === true}
     required
-    aria-label=${field.label}
     placeholder=${field.placeholder}
-  />`;
+  ></gw-input>`;
 
 /** Reads options, the cursor and the log, and runs actions, on Hyprland. */
 @customElement("sb-hyprland-tools")
@@ -162,12 +173,12 @@ export class SbHyprlandTools extends LitElement {
         gap: var(--gw-space-2);
       }
 
-      .input {
+      .text {
         flex: 1 1 10rem;
         min-width: 0;
       }
 
-      .input.number {
+      .number {
         flex: 0 1 6rem;
       }
 
@@ -223,20 +234,19 @@ export class SbHyprlandTools extends LitElement {
           @change=${this.#onTool}
         ></gw-select>
         ${fields}
-        <button
-          class="button tonal small"
+        <gw-button
           type="submit"
-          ?disabled=${result.waiting}
+          size="small"
+          appearance="filled"
+          ?loading=${result.waiting}
         >
           Run
-        </button>
+        </gw-button>
       </form>
       ${tool.hint ? html`<p class="muted small">${tool.hint}</p>` : nothing}
       ${
         failure?.success === false
-          ? html`<span class="error-text" role="alert"
-              >${failure.message}</span
-            >`
+          ? html`<gw-alert tone="danger">${failure.message}</gw-alert>`
           : nothing
       }
       ${output === null ? nothing : html`<pre>${output}</pre>`}

@@ -6,6 +6,8 @@ import type {
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
+import "@timmo001/groundwork-ui/gw-input.ts";
 import "@timmo001/groundwork-ui/gw-menu-button.ts";
 import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
@@ -40,7 +42,7 @@ export class SbWorkspaceActions extends LitElement {
         gap: var(--gw-space-1);
       }
 
-      .input {
+      .name {
         width: 12rem;
       }
     `,
@@ -148,21 +150,26 @@ export class SbWorkspaceActions extends LitElement {
 
     if (this.renaming) {
       return html`<form @submit=${this.#onRename}>
-        <input
-          class="input"
+        <gw-input
+          class="name"
+          size="small"
           name="name"
-          aria-label="New name for ${name}"
+          label="New name for ${name}"
+          hide-label
           placeholder=${workspace.id}
           .value=${name}
-        />
-        <button class="button tonal small" type="submit">Rename</button>
-        <button
-          class="button plain small"
-          type="button"
+        ></gw-input>
+        <gw-button type="submit" size="small" appearance="filled"
+          >Rename</gw-button
+        >
+        <gw-button
+          size="small"
+          variant="neutral"
+          appearance="plain"
           @click=${this.#onCancel}
         >
           Cancel
-        </button>
+        </gw-button>
       </form>`;
     }
 

@@ -30,6 +30,11 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
+import "@timmo001/groundwork-ui/gw-input.ts";
+import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
+
 import { icon, shared } from "./shared-styles";
 
 export const dataTableFeatures = tableFeatures({
@@ -123,23 +128,9 @@ export class SbDataTable<T extends RowData> extends LitElement {
       }
 
       .search {
-        position: relative;
         flex: 1;
         min-width: min(100%, 14rem);
         max-width: 24rem;
-      }
-
-      .search .icon {
-        position: absolute;
-        top: 50%;
-        left: var(--gw-space-3);
-        translate: 0 -50%;
-        color: var(--gw-color-text-secondary);
-        pointer-events: none;
-      }
-
-      .search .input {
-        padding-left: 2.5rem;
       }
 
       .scroller {
@@ -342,9 +333,9 @@ export class SbDataTable<T extends RowData> extends LitElement {
   };
 
   #onPageSizeChange = (event: Event) => {
-    if (event.target instanceof HTMLSelectElement) {
-      const pageSize = Number(event.target.value);
+    const pageSize = Number(selectValue(event));
 
+    if (pageSize > 0) {
       if (this.label !== "") saveRows(this.label, pageSize);
       this.#change({ pageSize, page: 1 });
     }
@@ -427,12 +418,10 @@ export class SbDataTable<T extends RowData> extends LitElement {
     const first = total === 0 ? 0 : (page - 1) * pageSize + 1;
     const last = Math.min(total, page * pageSize);
 
-    const sizeOptions = pageSizes.map(
-      (size) =>
-        html`<option value=${size} ?selected=${size === pageSize}>
-          ${size}
-        </option>`,
-    );
+    const sizeOptions: OptionItem[] = pageSizes.map((size) => ({
+      value: String(size),
+      label: String(size),
+    }));
 
     const pageButton = (target: number, label: string, path: string) =>
       html`<button
@@ -448,17 +437,17 @@ export class SbDataTable<T extends RowData> extends LitElement {
 
     return html`
       <div class="toolbar">
-        <label class="search">
-          ${icon(mdiMagnify)}
-          <input
-            class="input"
-            type="search"
-            aria-label=${this.searchPlaceholder}
-            placeholder=${this.searchPlaceholder}
-            .value=${filter}
-            @input=${this.#onFilterInput}
-          />
-        </label>
+        <gw-input
+          class="search"
+          type="search"
+          size="small"
+          hide-label
+          label=${this.searchPlaceholder}
+          placeholder=${this.searchPlaceholder}
+          icon=${mdiMagnify}
+          .value=${filter}
+          @input=${this.#onFilterInput}
+        ></gw-input>
         <span class="spacer"></span>
         <slot name="toolbar"></slot>
       </div>
@@ -509,16 +498,15 @@ export class SbDataTable<T extends RowData> extends LitElement {
       <div class="pager">
         <span class="tabular">${first}-${last} of ${total}</span>
         <span class="spacer"></span>
-        <label class="row">
-          Rows
-          <select
-            class="input"
-            .value=${String(pageSize)}
-            @change=${this.#onPageSizeChange}
-          >
-            ${sizeOptions}
-          </select>
-        </label>
+        <gw-select
+          label="Rows"
+          inline-label
+          size="small"
+          search="never"
+          .options=${sizeOptions}
+          .value=${String(pageSize)}
+          @change=${this.#onPageSizeChange}
+        ></gw-select>
         <span class="pages">
           ${pageButton(1, "First page", mdiPageFirst)}
           ${pageButton(page - 1, "Previous page", mdiChevronLeft)}

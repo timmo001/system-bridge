@@ -3,6 +3,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "@timmo001/groundwork-ui/gw-input.ts";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
@@ -27,7 +28,7 @@ export class SbHyprlandOption extends LitElement {
         gap: var(--gw-space-1);
       }
 
-      .input {
+      .number {
         width: 7rem;
       }
     `,
@@ -50,11 +51,11 @@ export class SbHyprlandOption extends LitElement {
 
   /** Sends once the field is left or Enter is pressed, not on every key. */
   #onNumber = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLInputElement) || !this.option) {
+    if (!(event.target instanceof HTMLInputElement) || !this.option) {
       return;
     }
 
-    const value = event.currentTarget.valueAsNumber;
+    const value = event.target.valueAsNumber;
 
     if (Number.isInteger(value) && value >= 0) {
       registry.set(setHyprlandOption(this.option.name), value);
@@ -78,16 +79,18 @@ export class SbHyprlandOption extends LitElement {
               .value=${option.bool ? "on" : "off"}
               @change=${this.#onToggle}
             ></gw-segmented>`
-          : html`<input
-              class="input"
+          : html`<gw-input
+              class="number"
+              size="small"
               type="number"
               min="0"
               step="1"
-              aria-label=${option.name}
+              label=${option.name}
+              hide-label
               .value=${live(String(option.int ?? ""))}
               ?disabled=${this.#set.value.waiting}
               @change=${this.#onNumber}
-            />`
+            ></gw-input>`
       }
       ${
         result?.success === false
