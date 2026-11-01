@@ -235,6 +235,7 @@ export class PageOverview extends SbPage {
 
     return html`
       <gw-card
+        title-link
         description=${
           data.system
             ? `${data.system.platform} ${data.system.platform_version} · up ${formatUptime(data.system.uptime)}`
@@ -327,7 +328,7 @@ export class PageOverview extends SbPage {
     );
 
     return html`
-      <gw-card class="half">
+      <gw-card class="half" title-link>
         <a
           slot="heading"
           href=${href("module", { params: { module: "disks" } })}
@@ -366,7 +367,7 @@ export class PageOverview extends SbPage {
     );
 
     return html`
-      <gw-card class="half" description="By CPU">
+      <gw-card class="half" title-link description="By CPU">
         <a
           slot="heading"
           href=${href("module", { params: { module: "processes" } })}
@@ -434,7 +435,7 @@ export class PageOverview extends SbPage {
     const nothingPlaying = !media?.title;
 
     return html`
-      <gw-card>
+      <gw-card title-link>
         <a
           slot="heading"
           href=${href("module", { params: { module: "media" } })}
@@ -532,6 +533,7 @@ export class PageOverview extends SbPage {
     const shortcuts = moduleOrder.map(
       (module) =>
         html`<gw-card
+          title-link
           href=${href("module", { params: { module } })}
           icon=${moduleInfo[module].icon}
           heading=${moduleInfo[module].label}
@@ -552,7 +554,7 @@ export class PageOverview extends SbPage {
             : nothing
         }
         ${this.#renderGauges(data)}
-        <gw-card class="half">
+        <gw-card class="half" title-link>
           <a
             slot="heading"
             href=${href("module", { params: { module: "cpu" } })}
@@ -570,6 +572,7 @@ export class PageOverview extends SbPage {
         </gw-card>
         <gw-card
           class="half"
+          title-link
           description=${
             history.networkReceive.length === 0
               ? ""
@@ -593,7 +596,7 @@ export class PageOverview extends SbPage {
         ${
           temperatures.length === 0
             ? nothing
-            : html`<gw-card class="half">
+            : html`<gw-card class="half" title-link>
                 <a
                   slot="heading"
                   href=${href("module", { params: { module: "sensors" } })}
@@ -609,7 +612,7 @@ export class PageOverview extends SbPage {
         ${
           power.length === 0
             ? nothing
-            : html`<gw-card class="half">
+            : html`<gw-card class="half" title-link>
                 <a
                   slot="heading"
                   href=${href("module", { params: { module: "system" } })}

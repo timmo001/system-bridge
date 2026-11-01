@@ -216,7 +216,10 @@ export class SbAudioMain extends LitElement {
     const waiting = this.#control.value.waiting;
     const result = actionResult(this.#control.value, "");
 
-    return html`<gw-card heading=${this.href === "" ? this.heading : ""}>
+    return html`<gw-card
+      title-link
+      heading=${this.href === "" ? this.heading : ""}
+    >
       ${
         this.href === ""
           ? nothing

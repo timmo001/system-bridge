@@ -236,6 +236,7 @@ export class SbApp extends LitElement {
           label="Go to page"
           placeholder="Search pages"
           .options=${jumpOptions}
+          value=${active?.href ?? ""}
           @pick=${this.#onJump}
         ></gw-command-menu>
         <span slot="actions">${this.#renderStatus()}</span>
