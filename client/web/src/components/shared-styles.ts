@@ -511,48 +511,6 @@ export const shared = css`
     border-radius: 50%;
   }
 
-  /* Alerts */
-  .alert {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sb-space-3);
-    padding: var(--sb-space-3) var(--sb-space-4);
-    font-size: var(--sb-font-size-s);
-    background: color-mix(
-      in oklab,
-      var(--sb-alert-color, var(--sb-color-info)) 12%,
-      var(--sb-color-surface)
-    );
-    border: 1px solid
-      color-mix(
-        in oklab,
-        var(--sb-alert-color, var(--sb-color-info)) 40%,
-        transparent
-      );
-    border-radius: var(--sb-radius-m);
-  }
-
-  .alert > .icon {
-    color: var(--sb-alert-color, var(--sb-color-info));
-  }
-
-  .alert.success {
-    --sb-alert-color: var(--sb-color-success);
-  }
-
-  .alert.warning {
-    --sb-alert-color: var(--sb-color-warning);
-  }
-
-  .alert.danger {
-    --sb-alert-color: var(--sb-color-danger);
-  }
-
-  .alert strong {
-    display: block;
-    font-weight: var(--sb-font-weight-semibold);
-  }
-
   /* Placeholders while data loads, sized like what they stand in for */
   .skeleton {
     display: block;

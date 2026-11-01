@@ -1,9 +1,9 @@
-import { mdiAlertCircleOutline } from "@mdi/js";
+import "@timmo001/groundwork-ui/gw-alert.ts";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { Atom } from "effect/reactivity";
 
-import { icon, shared } from "./shared-styles";
+import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 
 /** Read until the alert has failures to watch. */
@@ -20,7 +20,7 @@ export class SbActionAlert extends LitElement {
         display: contents;
       }
 
-      .alert {
+      gw-alert {
         grid-column: 1 / -1;
       }
     `,
@@ -41,13 +41,9 @@ export class SbActionAlert extends LitElement {
     const messages = failures.map((message) => html`<div>${message}</div>`);
 
     return html`
-      <div class="alert danger" role="alert">
-        ${icon(mdiAlertCircleOutline)}
-        <div>
-          <strong>That didn't work</strong>
-          ${messages}
-        </div>
-      </div>
+      <gw-alert tone="danger" urgent heading="That didn't work">
+        ${messages}
+      </gw-alert>
     `;
   }
 }

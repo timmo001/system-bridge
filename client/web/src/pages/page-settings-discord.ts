@@ -247,13 +247,13 @@ export class PageSettingsDiscord extends SbPage {
         ${
           setup.error === ""
             ? nothing
-            : html`<div class="alert danger" role="alert">
-                ${icon(mdiAlertCircleOutline)}
-                <div>
-                  <strong>Discord reported a problem</strong>
-                  ${sentence(setup.error)}
-                </div>
-              </div>`
+            : html`<gw-alert
+                tone="danger"
+                urgent
+                heading="Discord reported a problem"
+              >
+                ${sentence(setup.error)}
+              </gw-alert>`
         }
       </gw-card>
     `;
@@ -398,13 +398,13 @@ export class PageSettingsDiscord extends SbPage {
 
     if (setup === undefined) {
       return AsyncResult.isFailure(this.#setup.value)
-        ? html`<div class="alert danger" role="alert">
-            ${icon(mdiAlertCircleOutline)}
-            <div>
-              <strong>Couldn't read the Discord setup</strong>
-              This System Bridge may be too old for setting up Discord here.
-            </div>
-          </div>`
+        ? html`<gw-alert
+            tone="danger"
+            urgent
+            heading="Couldn't read the Discord setup"
+          >
+            This System Bridge may be too old for setting up Discord here.
+          </gw-alert>`
         : placeholder;
     }
 

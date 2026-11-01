@@ -1,9 +1,5 @@
-import {
-  mdiAlertCircleOutline,
-  mdiCheckCircleOutline,
-  mdiLanDisconnect,
-  mdiRefresh,
-} from "@mdi/js";
+import { mdiLanDisconnect, mdiRefresh } from "@mdi/js";
+import "@timmo001/groundwork-ui/gw-alert.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
@@ -93,16 +89,13 @@ export abstract class SbPage extends LitElement {
     if (result === null) return nothing;
 
     return html`
-      <div
-        class="alert ${result.success ? "success" : "danger"}"
-        role=${result.success ? "status" : "alert"}
+      <gw-alert
+        tone=${result.success ? "success" : "danger"}
+        ?urgent=${!result.success}
+        heading=${result.success ? "Done" : "That didn't work"}
       >
-        ${icon(result.success ? mdiCheckCircleOutline : mdiAlertCircleOutline)}
-        <div>
-          <strong>${result.success ? "Done" : "That didn't work"}</strong>
-          ${result.message} ${extra ?? nothing}
-        </div>
-      </div>
+        ${result.message} ${extra ?? nothing}
+      </gw-alert>
     `;
   }
 

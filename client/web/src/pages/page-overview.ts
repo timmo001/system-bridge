@@ -1,5 +1,4 @@
 import {
-  mdiAlertCircleOutline,
   mdiMusicNote,
   mdiPause,
   mdiPlay,
@@ -569,16 +568,12 @@ export class PageOverview extends SbPage {
       <div class="dashboard">
         ${
           data.system?.version_newer_available
-            ? html`<div class="alert warning">
-                ${icon(mdiAlertCircleOutline)}
-                <div>
-                  <strong
-                    >System Bridge ${data.system.version_latest} is
-                    available</strong
-                  >
-                  This system has ${data.system.version}.
-                </div>
-              </div>`
+            ? html`<gw-alert
+                tone="warning"
+                heading="System Bridge ${data.system.version_latest} is available"
+              >
+                This system has ${data.system.version}.
+              </gw-alert>`
             : nothing
         }
         ${this.#renderGauges(data)}

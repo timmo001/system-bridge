@@ -1,5 +1,4 @@
 import {
-  mdiAlertCircleOutline,
   mdiArrowDown,
   mdiArrowLeft,
   mdiArrowLeftBoldBoxOutline,
@@ -136,52 +135,41 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
     <div class="dashboard">
       ${
         system.version_newer_available
-          ? html`<div class="alert warning">
-              ${icon(mdiAlertCircleOutline)}
-              <div>
-                <strong>An update is available</strong>
-                Version ${system.version_latest} is out; this is
-                ${system.version}.
-                ${
-                  system.version_latest_url === null
-                    ? nothing
-                    : html`<a
-                        href=${system.version_latest_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        >See what's new</a
-                      >`
-                }
-              </div>
-            </div>`
+          ? html`<gw-alert tone="warning" heading="An update is available">
+              Version ${system.version_latest} is out; this is
+              ${system.version}.
+              ${
+                system.version_latest_url === null
+                  ? nothing
+                  : html`<a
+                      href=${system.version_latest_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >See what's new</a
+                    >`
+              }
+            </gw-alert>`
           : nothing
       }
       ${
         system.pending_reboot
-          ? html`<div class="alert">
-              ${icon(mdiAlertCircleOutline)}
-              <div>
-                <strong>Restart needed</strong>Updates are waiting for a
-                restart.
-              </div>
-            </div>`
+          ? html`<gw-alert heading="Restart needed">
+              Updates are waiting for a restart.
+            </gw-alert>`
           : nothing
       }
       ${
         failedUnits.length > 0
-          ? html`<div class="alert warning">
-              ${icon(mdiAlertCircleOutline)}
-              <div>
-                <strong
-                  >${
-                    failedUnits.length === 1
-                      ? "A systemd unit failed"
-                      : `${failedUnits.length} systemd units failed`
-                  }</strong
-                >
-                ${failedUnits.map((unit) => unit.name).join(", ")}
-              </div>
-            </div>`
+          ? html`<gw-alert
+              tone="warning"
+              heading=${
+                failedUnits.length === 1
+                  ? "A systemd unit failed"
+                  : `${failedUnits.length} systemd units failed`
+              }
+            >
+              ${failedUnits.map((unit) => unit.name).join(", ")}
+            </gw-alert>`
           : nothing
       }
       <gw-card
@@ -1550,39 +1538,31 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
       ${
         configErrors.length === 0
           ? nothing
-          : html`<div class="alert warning">
-              ${icon(mdiAlertCircleOutline)}
-              <div>
-                <strong>Hyprland's config has errors</strong>
-                <ul>
-                  ${configErrors}
-                </ul>
-              </div>
-            </div>`
+          : html`<gw-alert
+              tone="warning"
+              heading="Hyprland's config has errors"
+            >
+              <ul>
+                ${configErrors}
+              </ul>
+            </gw-alert>`
       }
       ${
         configNotices.length === 0
           ? nothing
-          : html`<div class="alert">
-              ${icon(mdiAlertCircleOutline)}
-              <div>
-                <strong>Hyprland's config uses deprecated settings</strong>
-                <ul>
-                  ${configNotices}
-                </ul>
-              </div>
-            </div>`
+          : html`<gw-alert heading="Hyprland's config uses deprecated settings">
+              <ul>
+                ${configNotices}
+              </ul>
+            </gw-alert>`
       }
       ${
         screencasts === ""
           ? nothing
-          : html`<div class="alert">
-              ${icon(mdiMonitorShare)}
-              <div>
-                <strong>Your screen is being shared</strong>
-                ${screencasts}
-              </div>
-            </div>`
+          : html`<gw-alert heading="Your screen is being shared">
+              <span slot="icon" class="row">${icon(mdiMonitorShare)}</span>
+              ${screencasts}
+            </gw-alert>`
       }
       <gw-card
         heading=${compositorName[desktop.compositor]}
@@ -1731,20 +1711,20 @@ export const discordDashboard = ({ data }: DashboardContext) => {
         </div>
         ${
           discord.error
-            ? html`<div class="alert danger" role="alert">
-                ${icon(mdiAlertCircleOutline)}
-                <div>
-                  <strong>Couldn't connect to Discord</strong>
-                  ${discord.error}
-                  <a
-                    href=${href("module", {
-                      params: { module: "discord" },
-                      hash: "discord-setup",
-                    })}
-                    >Check the setup</a
-                  >
-                </div>
-              </div>`
+            ? html`<gw-alert
+                tone="danger"
+                urgent
+                heading="Couldn't connect to Discord"
+              >
+                ${discord.error}
+                <a
+                  href=${href("module", {
+                    params: { module: "discord" },
+                    hash: "discord-setup",
+                  })}
+                  >Check the setup</a
+                >
+              </gw-alert>`
             : nothing
         }
         ${facts([
