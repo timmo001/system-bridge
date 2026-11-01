@@ -9,8 +9,9 @@ import type { SystemData } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-segmented";
-import type { SegmentOption } from "./sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -22,14 +23,14 @@ import {
 import { formatDateTime } from "~/lib/format";
 
 /** Names and icons for power-profiles-daemon's usual profiles. */
-const knownProfiles = new Map<string, Pick<SegmentOption, "label" | "icon">>([
+const knownProfiles = new Map<string, Pick<Segment, "label" | "icon">>([
   ["power-saver", { label: "Power saver", icon: mdiLeaf }],
   ["balanced", { label: "Balanced", icon: mdiScaleBalance }],
   ["performance", { label: "Performance", icon: mdiSpeedometer }],
 ]);
 
 /** Keeping awake, by how long. Values are seconds, or on and off. */
-const keepAwakeOptions: readonly SegmentOption[] = [
+const keepAwakeOptions: readonly Segment[] = [
   { value: "off", label: "Off", icon: mdiSleep },
   { value: "on", label: "On", icon: mdiCoffeeOutline },
   { value: "1800", label: "30 min" },
@@ -57,7 +58,7 @@ export class SbSystemPower extends LitElement {
         text-align: start;
       }
 
-      sb-segmented {
+      gw-segmented {
         max-width: 100%;
         overflow-x: auto;
       }
@@ -70,12 +71,12 @@ export class SbSystemPower extends LitElement {
 
   readonly #keepAwake = new AtomController(this, () => setKeepAwake);
 
-  #onProfile = (event: CustomEvent<{ readonly value: string }>) => {
-    registry.set(setPowerProfile, event.detail.value);
+  #onProfile = (event: Event) => {
+    registry.set(setPowerProfile, selectValue(event));
   };
 
-  #onKeepAwake = (event: CustomEvent<{ readonly value: string }>) => {
-    const { value } = event.detail;
+  #onKeepAwake = (event: Event) => {
+    const value = selectValue(event);
 
     if (value === "off" || value === "on") {
       registry.set(setKeepAwake, { enabled: value === "on" });
@@ -97,7 +98,7 @@ export class SbSystemPower extends LitElement {
 
     if (!system) return nothing;
 
-    const profiles: readonly SegmentOption[] = system.power_profiles.map(
+    const profiles: readonly Segment[] = system.power_profiles.map(
       (profile) => ({
         value: profile,
         label: knownProfiles.get(profile)?.label ?? profile,
@@ -118,13 +119,14 @@ export class SbSystemPower extends LitElement {
           ? nothing
           : html`<div class="row">
               <span class="small">Power profile</span>
-              <sb-segmented
+              <gw-segmented
                 label="Power profile"
-                narrow-icons
+                labels="auto"
+                size="small"
                 .options=${profiles}
                 .value=${system.power_profile}
-                @value-changed=${this.#onProfile}
-              ></sb-segmented>
+                @change=${this.#onProfile}
+              ></gw-segmented>
               ${this.#error(actionResult(this.#profile.value, ""))}
             </div>`
       }
@@ -142,12 +144,13 @@ export class SbSystemPower extends LitElement {
                       >`
                 }</span
               >
-              <sb-segmented
+              <gw-segmented
                 label="Keep awake"
+                size="small"
                 .options=${keepAwakeOptions}
                 .value=${keepAwake}
-                @value-changed=${this.#onKeepAwake}
-              ></sb-segmented>
+                @change=${this.#onKeepAwake}
+              ></gw-segmented>
               ${this.#error(actionResult(this.#keepAwake.value, ""))}
             </div>`
       }

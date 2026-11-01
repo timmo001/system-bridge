@@ -12,8 +12,9 @@ import { registry } from "~/lib/atoms";
 import type { Series } from "~/lib/history";
 import { HistoryRange, historyRange } from "~/lib/preferences";
 
-import "./sb-segmented";
-import type { SegmentOption } from "./sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 
 defineChartElement();
@@ -50,9 +51,10 @@ const ranges: Record<HistoryRange, { seconds: number; text: string }> = {
   "24h": { seconds: 24 * 60 * 60, text: "last 24 hours" },
 };
 
-const rangeOptions: readonly SegmentOption[] = HistoryRange.literals.map(
-  (range) => ({ value: range, label: range }),
-);
+const rangeOptions: readonly Segment[] = HistoryRange.literals.map((range) => ({
+  value: range,
+  label: range,
+}));
 
 const isHistoryRange = Schema.is(HistoryRange);
 
@@ -110,7 +112,7 @@ export class SbTimeseries extends LitElement {
         gap: var(--sb-space-1) var(--sb-space-4);
       }
 
-      .toolbar sb-segmented {
+      .toolbar gw-segmented {
         margin-inline-start: auto;
       }
 
@@ -197,8 +199,8 @@ export class SbTimeseries extends LitElement {
     }
   }
 
-  #onRangeChanged = (event: CustomEvent<{ value: string }>) => {
-    const range = event.detail.value;
+  #onRangeChanged = (event: Event) => {
+    const range = selectValue(event);
 
     if (isHistoryRange(range)) registry.set(historyRange, range);
   };
@@ -371,12 +373,13 @@ export class SbTimeseries extends LitElement {
                   ? html`<div class="legend" aria-hidden="true">${legend}</div>`
                   : nothing
               }
-              <sb-segmented
+              <gw-segmented
                 label=${`Time range for ${this.label || "the graph"}`}
+                size="small"
                 .options=${rangeOptions}
                 .value=${range}
-                @value-changed=${this.#onRangeChanged}
-              ></sb-segmented>
+                @change=${this.#onRangeChanged}
+              ></gw-segmented>
             </div>`
           : nothing
       }

@@ -2,7 +2,8 @@ import { mdiBluetooth, mdiBluetoothOff } from "@mdi/js";
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { registry, setBluetoothPower } from "~/lib/atoms";
@@ -22,18 +23,19 @@ export class SbBluetoothPower extends LitElement {
   // Keeps the action alive while it runs
   readonly _control = new AtomController(this, () => setBluetoothPower);
 
-  #onPower = (event: CustomEvent<{ readonly value: string }>) => {
-    registry.set(setBluetoothPower, event.detail.value === "on");
+  #onPower = (event: Event) => {
+    registry.set(setBluetoothPower, selectValue(event) === "on");
   };
 
   override render() {
     return html`
-      <sb-segmented
+      <gw-segmented
         label="Bluetooth"
+        size="small"
         .options=${powerOptions}
         .value=${this.powered ? "on" : "off"}
-        @value-changed=${this.#onPower}
-      ></sb-segmented>
+        @change=${this.#onPower}
+      ></gw-segmented>
     `;
   }
 }

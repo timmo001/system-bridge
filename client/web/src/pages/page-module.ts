@@ -13,7 +13,8 @@ import "~/components/sb-display-controls";
 import "~/components/sb-gauge";
 import "~/components/sb-history-export";
 import "~/components/sb-meter";
-import "~/components/sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import "~/components/sb-timeseries";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -48,8 +49,15 @@ import {
   type DataView,
   href,
   type LocationOf,
+  navigate,
   scrollToSection,
 } from "~/lib/router";
+import { selectValue } from "~/lib/select";
+
+const viewOptions: readonly Segment[] = [
+  { value: "dashboard", label: "Dashboard", icon: mdiViewDashboardOutline },
+  { value: "json", label: "JSON", icon: mdiCodeJson },
+];
 
 import "./page-discord";
 import "./page-media";
@@ -237,6 +245,14 @@ export class PageModule extends SbPage {
     });
   }
 
+  #onViewChange = (event: Event) => {
+    const view = selectValue(event);
+
+    if (view === "dashboard" || view === "json") {
+      navigate(this.#viewHref(view));
+    }
+  };
+
   #renderContent(module: ModuleName, view: DataView) {
     const { data, settled } = this.#modules.value;
 
@@ -311,25 +327,14 @@ export class PageModule extends SbPage {
                     .modules=${shownHistory.get(module)}
                   ></sb-history-export>`
                 : nothing
-            }<sb-segmented
-              narrow-icons
+            }<gw-segmented
+              labels="auto"
+              size="small"
               label="View"
-              .options=${[
-                {
-                  value: "dashboard",
-                  label: "Dashboard",
-                  icon: mdiViewDashboardOutline,
-                  href: this.#viewHref("dashboard"),
-                },
-                {
-                  value: "json",
-                  label: "JSON",
-                  icon: mdiCodeJson,
-                  href: this.#viewHref("json"),
-                },
-              ]}
+              .options=${viewOptions}
               .value=${view}
-            ></sb-segmented>`,
+              @change=${this.#onViewChange}
+            ></gw-segmented>`,
         })}
         ${
           // Only a failed export needs a message; the download is the success

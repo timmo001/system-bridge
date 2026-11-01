@@ -27,7 +27,7 @@ import { live } from "lit/directives/live.js";
 
 import "~/components/sb-card";
 import "~/components/sb-range";
-import "~/components/sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import { icon } from "~/components/shared-styles";
@@ -239,8 +239,8 @@ export class PageDiscord extends SbPage {
     );
   };
 
-  #onVoiceMode = (event: CustomEvent<{ readonly value: string }>) => {
-    const mode = event.detail.value;
+  #onVoiceMode = (event: Event) => {
+    const mode = selectValue(event);
 
     if (isVoiceMode(mode)) {
       this.#send({ action: "SET_VOICE_MODE", mode }, "Voice mode");
@@ -424,12 +424,13 @@ export class PageDiscord extends SbPage {
 
     return html`
       <sb-card heading="Voice settings">
-        <sb-segmented
+        <gw-segmented
           label="Input mode"
+          size="small"
           .options=${voiceModes}
           .value=${mode?.type ?? ""}
-          @value-changed=${this.#onVoiceMode}
-        ></sb-segmented>
+          @change=${this.#onVoiceMode}
+        ></gw-segmented>
         ${
           pushToTalk
             ? html`<div class="field">

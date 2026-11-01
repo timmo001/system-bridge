@@ -3,7 +3,8 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "./sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, registry, setHyprlandOption } from "~/lib/atoms";
@@ -38,11 +39,11 @@ export class SbHyprlandOption extends LitElement {
     setHyprlandOption(this.option?.name ?? ""),
   );
 
-  #onToggle = (event: CustomEvent<{ readonly value: string }>) => {
+  #onToggle = (event: Event) => {
     if (this.option) {
       registry.set(
         setHyprlandOption(this.option.name),
-        event.detail.value === "on",
+        selectValue(event) === "on",
       );
     }
   };
@@ -70,12 +71,13 @@ export class SbHyprlandOption extends LitElement {
     return html`
       ${
         option.type === "bool"
-          ? html`<sb-segmented
+          ? html`<gw-segmented
               label=${option.name}
+              size="small"
               .options=${toggleOptions}
               .value=${option.bool ? "on" : "off"}
-              @value-changed=${this.#onToggle}
-            ></sb-segmented>`
+              @change=${this.#onToggle}
+            ></gw-segmented>`
           : html`<input
               class="input"
               type="number"

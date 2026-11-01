@@ -5,7 +5,8 @@ import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "./sb-range";
-import "./sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, displayControl, registry } from "~/lib/atoms";
@@ -65,10 +66,10 @@ export class SbDisplayControls extends LitElement {
     });
   };
 
-  #onPower = (event: CustomEvent<{ readonly value: string }>) => {
+  #onPower = (event: Event) => {
     if (!this.display) return;
 
-    const power_state = event.detail.value;
+    const power_state = selectValue(event);
 
     if (power_state !== "on" && power_state !== "off") return;
 
@@ -111,12 +112,13 @@ export class SbDisplayControls extends LitElement {
       ${
         display.power_state === null
           ? nothing
-          : html`<sb-segmented
+          : html`<gw-segmented
               label="Power"
+              size="small"
               .options=${powerOptions}
               .value=${display.power_state === "on" ? "on" : "off"}
-              @value-changed=${this.#onPower}
-            ></sb-segmented>`
+              @change=${this.#onPower}
+            ></gw-segmented>`
       }
       ${
         result?.success === false

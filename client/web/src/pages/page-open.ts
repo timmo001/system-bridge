@@ -3,7 +3,8 @@ import { Schema } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, open, registry } from "~/lib/atoms";
@@ -63,8 +64,10 @@ export class PageOpen extends SbPage {
 
   protected readonly pageTitle = "Open";
 
-  #onKindChange = (event: CustomEvent<{ readonly value: string }>) => {
-    if (isOpenTargetType(event.detail.value)) this.kind = event.detail.value;
+  #onKindChange = (event: Event) => {
+    const value = selectValue(event);
+
+    if (isOpenTargetType(value)) this.kind = value;
   };
 
   #onSubmit = (event: SubmitEvent) => {
@@ -91,12 +94,13 @@ export class PageOpen extends SbPage {
 
     return html`
       <form class="card" @submit=${this.#onSubmit}>
-        <sb-segmented
+        <gw-segmented
           label="What to open"
+          size="small"
           .options=${kindOptions}
           .value=${kind}
-          @value-changed=${this.#onKindChange}
-        ></sb-segmented>
+          @change=${this.#onKindChange}
+        ></gw-segmented>
         <div class="field">
           <label for="target">${info.label}</label>
           <input

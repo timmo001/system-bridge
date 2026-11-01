@@ -4,8 +4,9 @@ import { Option, Schema } from "effect";
 import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-segmented";
-import type { SegmentOption } from "~/components/sb-segmented";
+import "@timmo001/groundwork-ui/gw-segmented.ts";
+import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
+import { selectValue } from "~/lib/select";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, registry, sendNotification } from "~/lib/atoms";
@@ -73,7 +74,7 @@ const fields: readonly Field[] = [
   },
 ];
 
-const urgencyOptions: readonly SegmentOption[] = [
+const urgencyOptions: readonly Segment[] = [
   { value: "low", label: "Low" },
   { value: "normal", label: "Normal" },
   { value: "critical", label: "Critical" },
@@ -114,8 +115,8 @@ export class PageNotifications extends SbPage {
     this.urgency = "normal";
   };
 
-  #onUrgency = (event: CustomEvent<{ readonly value: string }>) => {
-    this.urgency = event.detail.value;
+  #onUrgency = (event: Event) => {
+    this.urgency = selectValue(event);
   };
 
   #onSubmit = (event: SubmitEvent) => {
@@ -197,12 +198,13 @@ export class PageNotifications extends SbPage {
         ${inputs}
         <div class="field">
           <span>Urgency</span>
-          <sb-segmented
+          <gw-segmented
             label="Urgency"
+            size="small"
             .options=${urgencyOptions}
             .value=${this.urgency}
-            @value-changed=${this.#onUrgency}
-          ></sb-segmented>
+            @change=${this.#onUrgency}
+          ></gw-segmented>
           <span class="hint"
             >Critical notifications stay until they're dismissed. Linux
             only.</span
