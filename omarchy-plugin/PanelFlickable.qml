@@ -1,5 +1,6 @@
 import QtQuick
 
+// A panel's scrolling body, smooth on the wheel and touchpad.
 Flickable {
   id: root
 

@@ -2,13 +2,13 @@
   "copies": {
     "omarchy-plugin/FilterablePanel.qml": {
       "item": "filterable-panel",
-      "sha": "27599413a0cbda0676bb86c793adf965288c3ff7",
-      "hash": "a241bf696530a1d175fc0eb0d84972a4d88c317156b024e08d43129b4e6114d0"
+      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
+      "hash": "ea6fba85969975aad30a13049c3430e65a772a2aba17c2e391f8e66f9d5474c2"
     },
     "omarchy-plugin/PanelFlickable.qml": {
       "item": "panel-flickable",
-      "sha": "27599413a0cbda0676bb86c793adf965288c3ff7",
-      "hash": "d72e22efd34a83b78b316def462786f405b4f278c16a67e708ce23e81b95a844"
+      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
+      "hash": "3aeaf51bf09b1d671fbd6ad6c122f5561d27ff62dd9219015c4c7ba053b13065"
     },
     "omarchy-plugin/PanelHeader.qml": {
       "item": "panel-header",
@@ -17,8 +17,8 @@
     },
     "omarchy-plugin/SectionHeading.qml": {
       "item": "section-heading",
-      "sha": "27599413a0cbda0676bb86c793adf965288c3ff7",
-      "hash": "3d14a814a42f0d464f62bc3f248f4662b21de7f2b7d99c64faeee313e5ad6e44"
+      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
+      "hash": "fa6fb931c984103787a31f4ba18b69d354dd54500f8eaa2c96b8480846cf4b7a"
     }
   }
 }

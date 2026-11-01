@@ -1,6 +1,8 @@
 import QtQuick
 import qs.Commons
 
+// A filtered list with a keyboard cursor over its rows. Panels hand it a
+// model and react to its signals; it owns filtering and cursor movement.
 Item {
   id: root
 

@@ -3,6 +3,8 @@ import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
 
+// A heading between groups in a panel, with an optional icon, refresh button
+// and collapse toggle.
 Rectangle {
   id: root
 
