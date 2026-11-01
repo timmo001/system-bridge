@@ -5,9 +5,36 @@ import {
   type ThemeChoice,
   type ThemeMode,
 } from "@timmo001/groundwork-tokens/page";
-import { Result } from "effect";
+import type { ThemeStore } from "@timmo001/groundwork-tokens/runtime";
+import { Effect, Result } from "effect";
+import { AtomRegistry } from "effect/reactivity";
 
+import { registry, saveTheme, settings } from "./atoms";
 import { themeOptions } from "./theme-options";
+
+/**
+ * Keeps an imported theme on the host, so every client of it gets the same
+ * one. Loading waits for the first settings from the backend.
+ */
+const hostStore: ThemeStore = {
+  load: () =>
+    Effect.runPromise(AtomRegistry.getResult(registry, settings)).then(
+      (current) =>
+        current.theme === undefined || current.theme === ""
+          ? null
+          : current.theme,
+    ),
+  save: (text) => {
+    registry.set(saveTheme, text);
+
+    return Promise.resolve();
+  },
+  clear: () => {
+    registry.set(saveTheme, "");
+
+    return Promise.resolve();
+  },
+};
 
 /**
  * The theme families offered, Bridge first, each theme by id, name and the
@@ -44,6 +71,7 @@ const themeChoices: readonly (ThemeChoice & {
 const page = pageTheme({
   ...themeOptions,
   themes: themeChoices,
+  store: hostStore,
   // For the WebMCP theme tools, so an agent can pick any offered theme
   documents: async () => {
     const { parseTheme } = await import("@timmo001/groundwork-tokens/runtime");

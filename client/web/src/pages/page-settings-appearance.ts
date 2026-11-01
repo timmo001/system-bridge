@@ -35,7 +35,7 @@ export class PageSettingsAppearance extends SbPage {
         ${this.renderHeader({
           heading: "Appearance",
           description:
-            "Colours for this browser. Pick a mode and a theme, or import your own: a Groundwork theme or an Omarchy colors.toml.",
+            "Pick a mode and a theme for this browser, or import your own: a Groundwork theme or an Omarchy colors.toml. An imported theme is kept on this host, so every browser connected to it gets it.",
           icon: mdiPaletteOutline,
         })}
         <gw-theme-picker layout="inline" gallery></gw-theme-picker>

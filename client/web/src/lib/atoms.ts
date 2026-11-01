@@ -421,6 +421,21 @@ export const addMediaDirectory = Atom.fn(
 );
 
 /**
+ * Keeps the web client's own theme document on the host, or drops it with
+ * an empty string, leaving the other settings as they are.
+ */
+export const saveTheme = Atom.fn((theme: string, get) =>
+  Effect.gen(function* () {
+    const bridge = yield* fnSocket(get);
+    const current = yield* get.result(settings);
+
+    yield* bridge.updateSettings(Struct.assign(current, { theme }));
+
+    get.refresh(settings);
+  }),
+);
+
+/**
  * Where the Discord connection is up to. Changes only when it connects,
  * disconnects, signs in or fails, so the setup below re-reads at those
  * moments.
