@@ -223,4 +223,8 @@ declare global {
   interface HTMLElementTagNameMap {
     "sb-segmented": SbSegmented;
   }
+
+  interface HTMLElementEventMap {
+    "value-changed": CustomEvent<{ readonly value: string }>;
+  }
 }

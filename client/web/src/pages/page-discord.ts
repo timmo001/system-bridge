@@ -28,7 +28,8 @@ import { live } from "lit/directives/live.js";
 import "~/components/sb-card";
 import "~/components/sb-range";
 import "~/components/sb-segmented";
-import "~/components/sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -224,16 +225,16 @@ export class PageDiscord extends SbPage {
     if (isDiscordAction(action)) this.#send({ action }, label ?? action);
   };
 
-  #onInputDevice = (event: CustomEvent<{ readonly value: string }>) => {
+  #onInputDevice = (event: Event) => {
     this.#send(
-      { action: "SET_INPUT_DEVICE", device_id: event.detail.value },
+      { action: "SET_INPUT_DEVICE", device_id: selectValue(event) },
       "Input device",
     );
   };
 
-  #onOutputDevice = (event: CustomEvent<{ readonly value: string }>) => {
+  #onOutputDevice = (event: Event) => {
     this.#send(
-      { action: "SET_OUTPUT_DEVICE", device_id: event.detail.value },
+      { action: "SET_OUTPUT_DEVICE", device_id: selectValue(event) },
       "Output device",
     );
   };
@@ -377,15 +378,15 @@ export class PageDiscord extends SbPage {
       <sb-card heading="Audio">
         <div class="setting">
           <span class="label" id="input-label">Input</span>
-          <sb-select
+          <gw-select
             style="width: 16rem"
             label="Input device"
-            search-placeholder="Search devices"
+            label-hidden
             .options=${deviceOptions(discord.input)}
             .value=${discord.input?.device_id ?? ""}
             ?disabled=${(discord.input?.devices.length ?? 0) === 0}
-            @value-changed=${this.#onInputDevice}
-          ></sb-select>
+            @change=${this.#onInputDevice}
+          ></gw-select>
           ${this.#level({
             id: "input-volume",
             label: "Input volume",
@@ -396,15 +397,15 @@ export class PageDiscord extends SbPage {
         </div>
         <div class="setting">
           <span class="label" id="output-label">Output</span>
-          <sb-select
+          <gw-select
             style="width: 16rem"
             label="Output device"
-            search-placeholder="Search devices"
+            label-hidden
             .options=${deviceOptions(discord.output)}
             .value=${discord.output?.device_id ?? ""}
             ?disabled=${(discord.output?.devices.length ?? 0) === 0}
-            @value-changed=${this.#onOutputDevice}
-          ></sb-select>
+            @change=${this.#onOutputDevice}
+          ></gw-select>
           ${this.#level({
             id: "output-volume",
             label: "Output volume",

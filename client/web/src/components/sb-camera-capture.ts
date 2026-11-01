@@ -6,7 +6,8 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import "./sb-action-button";
-import "./sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import { icon, shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -34,8 +35,8 @@ export class SbCameraCapture extends LitElement {
         gap: var(--sb-space-3);
       }
 
-      sb-select {
-        --sb-select-width: 14rem;
+      gw-select {
+        width: 14rem;
       }
 
       img {
@@ -60,15 +61,15 @@ export class SbCameraCapture extends LitElement {
     cameraCaptureSize(this.camera?.id ?? ""),
   );
 
-  #onSize = (event: CustomEvent<{ readonly value: string }>) => {
+  #onSize = (event: Event) => {
     const camera = this.camera;
+    const value = selectValue(event);
 
     if (!camera) return;
 
     registry.set(
       cameraCaptureSize(camera.id),
-      camera.sizes.find((size) => sizeLabel(size) === event.detail.value) ??
-        null,
+      camera.sizes.find((size) => sizeLabel(size) === value) ?? null,
     );
   };
 
@@ -83,12 +84,13 @@ export class SbCameraCapture extends LitElement {
     // Until one is chosen, pictures are taken at the current size
     const size = this.#size.value ?? camera.format;
 
-    return html`<sb-select
+    return html`<gw-select
       label="Picture size"
+      label-hidden
       .options=${options}
       .value=${size === null ? "" : sizeLabel(size)}
-      @value-changed=${this.#onSize}
-    ></sb-select>`;
+      @change=${this.#onSize}
+    ></gw-select>`;
   }
 
   override render() {

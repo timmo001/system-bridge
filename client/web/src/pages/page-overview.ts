@@ -20,7 +20,8 @@ import "~/components/sb-card";
 import "~/components/sb-gauge";
 import "~/components/sb-history-export";
 import "~/components/sb-meter";
-import "~/components/sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import "~/components/sb-timeseries";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -431,10 +432,10 @@ export class PageOverview extends SbPage {
     const picker =
       players.length === 0
         ? nothing
-        : html`<sb-select
+        : html`<gw-select
             class="player-picker"
             label="Player"
-            search-placeholder="Search players"
+            label-hidden
             .options=${[
               { value: "", label: "Automatic" },
               ...players.map((player) => ({
@@ -444,8 +445,8 @@ export class PageOverview extends SbPage {
               })),
             ]}
             .value=${this.#chosenPlayer(data)?.id ?? ""}
-            @value-changed=${this.#onPlayerChange}
-          ></sb-select>`;
+            @change=${this.#onPlayerChange}
+          ></gw-select>`;
 
     const nothingPlaying = !media?.title;
 
@@ -514,8 +515,8 @@ export class PageOverview extends SbPage {
     );
   }
 
-  #onPlayerChange = (event: CustomEvent<{ readonly value: string }>) => {
-    registry.set(mediaPlayer, event.detail.value || null);
+  #onPlayerChange = (event: Event) => {
+    registry.set(mediaPlayer, selectValue(event) || null);
   };
 
   /** Sends to the player the card shows, or the backend's pick without one. */

@@ -27,8 +27,9 @@ import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "~/components/sb-card";
-import "~/components/sb-select";
-import type { SelectOption } from "~/components/sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import { selectValue } from "~/lib/select";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -490,8 +491,8 @@ export class PageMedia extends SbPage {
     registry.set(mediaControl, control);
   }
 
-  #onPlayerChange = (event: CustomEvent<{ readonly value: string }>) => {
-    this.#choose(event.detail.value || null);
+  #onPlayerChange = (event: Event) => {
+    this.#choose(selectValue(event) || null);
   };
 
   #onShowClick = (event: MouseEvent) => {
@@ -617,7 +618,7 @@ export class PageMedia extends SbPage {
 
     if (players.length < 2) return nothing;
 
-    const options: readonly SelectOption[] = [
+    const options: readonly OptionItem[] = [
       { value: "", label: "Automatic" },
       ...players.map((player) => ({
         value: player.id,
@@ -626,14 +627,14 @@ export class PageMedia extends SbPage {
       })),
     ];
 
-    return html`<sb-select
+    return html`<gw-select
       class="picker"
       label="Player"
-      search-placeholder="Search players"
+      label-hidden
       .options=${options}
       .value=${this.#chosenPlayer?.id ?? ""}
-      @value-changed=${this.#onPlayerChange}
-    ></sb-select>`;
+      @change=${this.#onPlayerChange}
+    ></gw-select>`;
   }
 
   #renderPlayer() {

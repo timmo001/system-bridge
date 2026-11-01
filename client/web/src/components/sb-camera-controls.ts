@@ -4,7 +4,8 @@ import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "./sb-range";
-import "./sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, cameraControl, registry } from "~/lib/atoms";
@@ -45,8 +46,8 @@ export class SbCameraControls extends LitElement {
         text-align: end;
       }
 
-      sb-select {
-        --sb-select-width: 14rem;
+      gw-select {
+        width: 14rem;
         min-width: 10rem;
       }
     `,
@@ -90,11 +91,11 @@ export class SbCameraControls extends LitElement {
     }
   };
 
-  #onMenu = (event: CustomEvent<{ readonly value: string }>) => {
+  #onMenu = (event: Event) => {
     if (event.currentTarget instanceof HTMLElement) {
       this.#set(
         event.currentTarget.dataset.control ?? "",
-        Number(event.detail.value),
+        Number(selectValue(event)),
       );
     }
   };
@@ -118,14 +119,15 @@ export class SbCameraControls extends LitElement {
           label: option.name,
         }));
 
-        return html`<sb-select
+        return html`<gw-select
           label=${control.name}
+          label-hidden
           data-control=${control.id}
           .options=${options}
           .value=${String(control.value)}
           ?disabled=${disabled}
-          @value-changed=${this.#onMenu}
-        ></sb-select>`;
+          @change=${this.#onMenu}
+        ></gw-select>`;
       }
 
       case "integer":

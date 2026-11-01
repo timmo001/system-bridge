@@ -2,7 +2,8 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "./sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -189,8 +190,10 @@ export class SbHyprlandTools extends LitElement {
 
   readonly #run = new AtomController(this, () => hyprlandTool);
 
-  #onTool = (event: CustomEvent<{ readonly value: string }>) => {
-    if (isToolTag(event.detail.value)) this.tool = event.detail.value;
+  #onTool = (event: Event) => {
+    const value = selectValue(event);
+
+    if (isToolTag(value)) this.tool = value;
   };
 
   #onSubmit = (event: SubmitEvent) => {
@@ -212,12 +215,13 @@ export class SbHyprlandTools extends LitElement {
 
     return html`
       <form @submit=${this.#onSubmit}>
-        <sb-select
+        <gw-select
           label="Tool"
+          label-hidden
           .options=${toolOptions}
           .value=${this.tool}
-          @value-changed=${this.#onTool}
-        ></sb-select>
+          @change=${this.#onTool}
+        ></gw-select>
         ${fields}
         <button
           class="button tonal small"

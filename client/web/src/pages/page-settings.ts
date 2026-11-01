@@ -14,7 +14,8 @@ import { css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "~/components/sb-card";
-import "~/components/sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import { icon, spinner } from "~/components/shared-styles";
 import { moduleInfo } from "~/lib/navigation";
 import { href } from "~/lib/router";
@@ -86,8 +87,8 @@ export class PageSettings extends SbSettingsPage {
     }
   };
 
-  #onLogLevelChange = (event: CustomEvent<{ readonly value: string }>) => {
-    const level = event.detail.value;
+  #onLogLevelChange = (event: Event) => {
+    const level = selectValue(event);
 
     if (this.form !== undefined && isLogLevel(level)) {
       this.form = Struct.assign(this.form, { logLevel: level });
@@ -158,15 +159,15 @@ export class PageSettings extends SbSettingsPage {
                 >How much System Bridge writes to its log.</span
               >
             </span>
-            <sb-select
-              style="width: 13rem"
+            <gw-select
+              style="width: 18rem"
               label="Log level"
-              search-placeholder="Search levels"
+              label-hidden
               .options=${logLevels}
               .value=${form.logLevel}
               ?disabled=${saving}
-              @value-changed=${this.#onLogLevelChange}
-            ></sb-select>
+              @change=${this.#onLogLevelChange}
+            ></gw-select>
           </div>
         </div>
         <div class="row" style="justify-content: flex-end">

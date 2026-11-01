@@ -53,7 +53,8 @@ import "~/components/sb-action-button";
 import "~/components/sb-hyprland-events";
 import "~/components/sb-hyprland-tools";
 import "~/components/sb-hyprland-option";
-import "~/components/sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import { selectValue } from "~/lib/select";
 import "~/components/sb-system-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-omarchy-actions";
@@ -1309,8 +1310,8 @@ const omarchyCards = (omarchy: OmarchyData) => html`
   </sb-card>
 `;
 
-const onSubmap = (event: CustomEvent<{ readonly value: string }>) => {
-  registry.set(setHyprlandSubmap, event.detail.value);
+const onSubmap = (event: Event) => {
+  registry.set(setHyprlandSubmap, selectValue(event));
 };
 
 const hyprlandCards = (hyprland: HyprlandData) => {
@@ -1352,12 +1353,14 @@ const hyprlandCards = (hyprland: HyprlandData) => {
           "Submap",
           submaps.length === 0
             ? (hyprland.submap ?? "Default")
-            : html`<sb-select
+            : html`<gw-select
                 label="Submap"
+                label-hidden
+                size="small"
                 .options=${[{ value: "", label: "Default" }, ...submaps]}
                 .value=${hyprland.submap ?? ""}
-                @value-changed=${onSubmap}
-              ></sb-select>`,
+                @change=${onSubmap}
+              ></gw-select>`,
         ],
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}

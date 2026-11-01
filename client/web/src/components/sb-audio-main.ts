@@ -12,8 +12,9 @@ import { live } from "lit/directives/live.js";
 
 import "./sb-card";
 import "./sb-range";
-import "./sb-select";
-import type { SelectOption } from "./sb-select";
+import "@timmo001/groundwork-ui/gw-select.ts";
+import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import { selectValue } from "~/lib/select";
 import { icon, shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, audioControl, registry } from "~/lib/atoms";
@@ -165,8 +166,8 @@ export class SbAudioMain extends LitElement {
     audioControl(this.#device?.id ?? ""),
   );
 
-  #onDefault = (event: CustomEvent<{ readonly value: string }>) => {
-    registry.set(audioControl(event.detail.value), { default: true });
+  #onDefault = (event: Event) => {
+    registry.set(audioControl(selectValue(event)), { default: true });
   };
 
   /** Sends once let go, not on every step. */
@@ -193,19 +194,19 @@ export class SbAudioMain extends LitElement {
     const others = this.devices.length > 1;
 
     // With nothing else to pick, it says so rather than offering one choice
-    const options: readonly SelectOption[] = others
+    const options: readonly OptionItem[] = others
       ? this.devices.map((option) => ({ value: option.id, label: option.name }))
       : [{ value: device.id, label: `No other ${kind}s` }];
 
-    return html`<sb-select
+    return html`<gw-select
       class="picker"
       label="Default ${kind}"
-      search-placeholder="Search devices"
+      label-hidden
       .options=${options}
       .value=${device.id}
       ?disabled=${!others}
-      @value-changed=${this.#onDefault}
-    ></sb-select>`;
+      @change=${this.#onDefault}
+    ></gw-select>`;
   }
 
   override render() {
