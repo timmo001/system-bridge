@@ -457,14 +457,12 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
 
     const meters = busiest.map(
       (process) =>
-        html`<sb-meter
+        html`<gw-meter
           label="${process.name ?? "Unknown"} (${process.id})"
           .value=${usage(process, key)}
           .max=${max}
           display=${formatPercent(usage(process, key), 1)}
-          .warning=${Number.POSITIVE_INFINITY}
-          .danger=${Number.POSITIVE_INFINITY}
-        ></sb-meter>`,
+        ></gw-meter>`,
     );
 
     return meters.length === 0

@@ -59,7 +59,7 @@ export const dashboardStyles = css`
 
   .meters.compact {
     --sb-meters-min: 7.5rem;
-    --sb-meter-height: 0.375rem;
+    --gw-meter-height: 0.375rem;
     column-gap: var(--sb-space-4);
   }
 

@@ -78,6 +78,12 @@ export const formatFrequency = (mhz: number | null | undefined): string => {
     : `${whole.format(mhz)} MHz`;
 };
 
+/**
+ * A formatted reading for a caption, empty when it isn't known, so the
+ * caption is left out rather than shown as a dash.
+ */
+export const caption = (text: string) => (text === "-" ? "" : text);
+
 export const formatTemperature = (celsius: number | null | undefined) =>
   celsius === null || celsius === undefined
     ? "-"

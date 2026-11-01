@@ -142,18 +142,18 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
   const cards = disks.devices.map((disk) => {
     const partitions = disk.partitions.map(
       (partition) =>
-        html`<sb-meter
+        html`<gw-meter
           label=${partition.mount_point}
-          .value=${partition.usage?.percent ?? null}
+          .value=${partition.usage?.percent ?? undefined}
           display=${
             partition.usage === null
               ? "-"
               : `${formatBytes(partition.usage.used)} of ${formatBytes(partition.usage.total)}`
           }
           caption="${partition.device} · ${partition.filesystem_type}"
-          .warning=${80}
-          .danger=${92}
-        ></sb-meter>`,
+          .high=${80}
+          .critical=${92}
+        ></gw-meter>`,
     );
 
     const count = formatQuantity(disk.partitions.length, "partition");

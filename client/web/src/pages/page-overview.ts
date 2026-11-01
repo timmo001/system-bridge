@@ -17,9 +17,9 @@ import { customElement } from "lit/decorators.js";
 
 import "~/components/sb-audio-main";
 import "~/components/sb-card";
-import "~/components/sb-gauge";
 import "~/components/sb-history-export";
-import "~/components/sb-meter";
+import "@timmo001/groundwork-ui/gw-gauge.ts";
+import "@timmo001/groundwork-ui/gw-meter.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import "~/components/sb-timeseries";
@@ -33,6 +33,7 @@ import {
 import { top, usage } from "~/dashboards/system";
 import { actionResult, mediaControl, moduleState, registry } from "~/lib/atoms";
 import {
+  caption,
   formatBytes,
   formatFrequency,
   formatPercent,
@@ -170,8 +171,8 @@ export class PageOverview extends SbPage {
         min-width: 0;
       }
 
-      .gauges sb-gauge {
-        --sb-gauge-size: 8rem;
+      .gauges gw-gauge {
+        --gw-gauge-size: 8rem;
       }
 
       /* Audio and Now playing side by side, the same height */
@@ -262,45 +263,45 @@ export class PageOverview extends SbPage {
         href=${href("module", { params: { module: "system" } })}
       >
         <div class="gauges">
-          <sb-gauge
+          <gw-gauge
             label="CPU"
-            .value=${cpu?.usage ?? null}
-            caption=${cpu ? formatFrequency(cpu.frequency?.current) : ""}
-          ></sb-gauge>
-          <sb-gauge
+            .value=${cpu?.usage ?? undefined}
+            caption=${cpu ? caption(formatFrequency(cpu.frequency?.current)) : ""}
+          ></gw-gauge>
+          <gw-gauge
             label="Memory"
-            .value=${memory?.virtual?.percent ?? null}
+            .value=${memory?.virtual?.percent ?? undefined}
             caption=${
               memory?.virtual
                 ? `${formatBytes(memory.virtual.used)} of ${formatBytes(memory.virtual.total)}`
                 : ""
             }
-          ></sb-gauge>
+          ></gw-gauge>
           ${
             gpu === undefined
               ? nothing
-              : html`<sb-gauge
+              : html`<gw-gauge
                   label="GPU"
-                  .value=${gpu.core_load}
+                  .value=${gpu.core_load ?? undefined}
                   caption=${gpu.name}
-                ></sb-gauge>`
+                ></gw-gauge>`
           }
           ${
             cpu?.temperature === null || cpu?.temperature === undefined
               ? nothing
-              : html`<sb-gauge
+              : html`<gw-gauge
                   label="CPU temperature"
                   .value=${cpu.temperature}
                   display=${Math.round(cpu.temperature)}
                   unit="°C"
                   .warning=${80}
                   .danger=${90}
-                ></sb-gauge>`
+                ></gw-gauge>`
           }
           ${
             battery?.percentage === null || battery === undefined
               ? nothing
-              : html`<sb-gauge
+              : html`<gw-gauge
                   label="Battery"
                   .value=${battery.percentage}
                   .warning=${20}
@@ -313,7 +314,7 @@ export class PageOverview extends SbPage {
                         ? "Plugged in"
                         : ""
                   }
-                ></sb-gauge>`
+                ></gw-gauge>`
           }
         </div>
       </sb-card>
@@ -325,17 +326,17 @@ export class PageOverview extends SbPage {
       disk.partitions.flatMap((partition) =>
         partition.category === "primary"
           ? [
-              html`<sb-meter
+              html`<gw-meter
                 label=${partition.mount_point}
-                .value=${partition.usage?.percent ?? null}
+                .value=${partition.usage?.percent ?? undefined}
                 display=${
                   partition.usage === null
                     ? "-"
                     : `${formatBytes(partition.usage.free)} free`
                 }
-                .warning=${80}
-                .danger=${92}
-              ></sb-meter>`,
+                .high=${80}
+                .critical=${92}
+              ></gw-meter>`,
             ]
           : [],
       ),
@@ -371,14 +372,12 @@ export class PageOverview extends SbPage {
 
     const meters = busiest.map(
       (process) =>
-        html`<sb-meter
+        html`<gw-meter
           label=${process.name ?? "Unknown"}
           .value=${process.cpu_usage ?? 0}
           .max=${max}
           display="${formatPercent(process.cpu_usage ?? 0, 1)} CPU · ${formatPercent(usage(process, "memory_usage"), 1)} memory"
-          .warning=${Number.POSITIVE_INFINITY}
-          .danger=${Number.POSITIVE_INFINITY}
-        ></sb-meter>`,
+        ></gw-meter>`,
     );
 
     return html`

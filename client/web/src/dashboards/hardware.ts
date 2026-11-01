@@ -12,6 +12,7 @@ import { html, nothing, svg, type TemplateResult } from "lit";
 
 import { icon } from "~/components/shared-styles";
 import {
+  caption,
   formatBytes,
   formatCount,
   formatFrequency,
@@ -52,9 +53,6 @@ const timeKeys: readonly (keyof CPUTimes)[] = [
   "dpc",
 ];
 
-/** Readings that never count as a problem, such as time spent idle. */
-const neutral = Number.POSITIVE_INFINITY;
-
 export const cpuDashboard = ({ data, history }: DashboardContext) => {
   const cpu = data.cpu;
 
@@ -65,11 +63,13 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
 
   const cores = cpu.per_cpu.map(
     (core) =>
-      html`<sb-meter
+      html`<gw-meter
         label="Core ${core.id}"
         .value=${core.usage}
-        caption=${formatFrequency(core.frequency?.current)}
-      ></sb-meter>`,
+        .high=${75}
+        .critical=${90}
+        caption=${caption(formatFrequency(core.frequency?.current))}
+      ></gw-meter>`,
   );
 
   const timeMeters =
@@ -79,12 +79,10 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
           times[key] === null
             ? []
             : [
-                html`<sb-meter
+                html`<gw-meter
                   label=${timeLabels[key]}
                   .value=${times[key]}
-                  .warning=${neutral}
-                  .danger=${neutral}
-                ></sb-meter>`,
+                ></gw-meter>`,
               ],
         );
 
@@ -92,11 +90,11 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
     <div class="dashboard">
       <sb-card class="third" heading="Usage" subheading=${cpu.name ?? ""}>
         <div class="gauges">
-          <sb-gauge
+          <gw-gauge
             label="CPU"
             .value=${cpu.usage}
-            caption=${formatFrequency(frequency?.current)}
-          ></sb-gauge>
+            caption=${caption(formatFrequency(frequency?.current))}
+          ></gw-gauge>
         </div>
         <div class="stats">
           ${stat("Cores", String(cpu.count ?? cpu.per_cpu.length))}
@@ -219,14 +217,12 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
     value === null || value === undefined || total === null
       ? []
       : [
-          html`<sb-meter
+          html`<gw-meter
             label=${label}
             .value=${value}
             .max=${total}
             display=${formatBytes(value)}
-            .warning=${neutral}
-            .danger=${neutral}
-          ></sb-meter>`,
+          ></gw-meter>`,
         ],
   );
 
@@ -234,18 +230,18 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
     <div class="dashboard">
       <sb-card class="third" heading="In use">
         <div class="gauges">
-          <sb-gauge
+          <gw-gauge
             label="Memory"
-            .value=${virtual?.percent ?? null}
-            caption="${formatBytes(virtual?.used)} of ${formatBytes(total)}"
-          ></sb-gauge>
+            .value=${virtual?.percent ?? undefined}
+            caption=${caption(`${formatBytes(virtual?.used)} of ${formatBytes(total)}`)}
+          ></gw-gauge>
           ${
             hasSwap
-              ? html`<sb-gauge
+              ? html`<gw-gauge
                   label="Swap"
-                  .value=${swap?.percent ?? null}
+                  .value=${swap?.percent ?? undefined}
                   caption="${formatBytes(swap?.used)} of ${formatBytes(swap?.total)}"
-                ></sb-gauge>`
+                ></gw-gauge>`
               : nothing
           }
         </div>
@@ -299,16 +295,16 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
     return html`
       <sb-card class="half" heading=${gpu.name} subheading="GPU ${gpu.id}">
         <div class="gauges">
-          <sb-gauge
+          <gw-gauge
             label="Core"
             .value=${gpu.core_load}
-            caption=${formatFrequency(gpu.core_clock)}
-          ></sb-gauge>
-          <sb-gauge
+            caption=${caption(formatFrequency(gpu.core_clock))}
+          ></gw-gauge>
+          <gw-gauge
             label="Memory"
             .value=${memoryPercent}
             caption="${mebibytes(gpu.memory_used)} of ${mebibytes(gpu.memory_total)}"
-          ></sb-gauge>
+          ></gw-gauge>
         </div>
         <sb-timeseries
           label="${gpu.name} core and memory load over time"
@@ -460,15 +456,15 @@ export const sensorsDashboard = ({ data, history }: DashboardContext) => {
   const temperatures = sensors.temperatures.map((sensor) => {
     const limit = sensor.critical > 0 ? sensor.critical : 100;
 
-    return html`<sb-meter
+    return html`<gw-meter
       label=${sensor.key}
       .value=${sensor.temperature}
       .max=${limit}
       display=${formatTemperature(sensor.temperature)}
       caption=${sensor.high > 0 ? `High ${formatTemperature(sensor.high)}` : ""}
-      .warning=${sensor.high > 0 ? (sensor.high / limit) * 100 : 80}
-      .danger=${95}
-    ></sb-meter>`;
+      .high=${sensor.high > 0 ? sensor.high : limit * 0.8}
+      .critical=${limit * 0.95}
+    ></gw-meter>`;
   });
 
   const fans = sensors.fans.map(
@@ -535,15 +531,15 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
 
   const otherMeters = others.map(
     (item) =>
-      html`<sb-meter
+      html`<gw-meter
         label=${item.model ?? item.name}
         .value=${item.percentage}
         display=${formatPercent(item.percentage)}
         caption=${batteryStateLabels[item.state]}
-        .warning=${20}
-        .danger=${10}
+        .high=${20}
+        .critical=${10}
         inverted
-      ></sb-meter>`,
+      ></gw-meter>`,
   );
 
   const otherCard = html`<sb-card
@@ -560,14 +556,14 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
     <div class="dashboard">
       <sb-card class="third" heading="Charge">
         <div class="gauges">
-          <sb-gauge
+          <gw-gauge
             label="Battery"
             .value=${battery.percentage}
             .warning=${20}
             .danger=${10}
             inverted
             caption=${batteryStateLabels[state]}
-          ></sb-gauge>
+          ></gw-gauge>
         </div>
         <div class="row" style="justify-content: center">
           <span class="chip ${charging ? "success" : ""}">

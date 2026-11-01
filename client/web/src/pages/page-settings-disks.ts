@@ -10,7 +10,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "~/components/sb-card";
-import "~/components/sb-meter";
+import "@timmo001/groundwork-ui/gw-meter.ts";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { diskMounts } from "~/lib/atoms";
@@ -47,7 +47,7 @@ export class PageSettingsDisks extends SbSettingsPage {
         cursor: default;
       }
 
-      .mount sb-meter {
+      .mount gw-meter {
         flex: 1;
         min-width: 0;
       }
@@ -100,18 +100,18 @@ export class PageSettingsDisks extends SbSettingsPage {
           ?disabled=${locked || this.isSaving}
           @change=${this.#onChange}
         />
-        <sb-meter
+        <gw-meter
           label=${mount.mount_point}
-          .value=${mount.usage?.percent ?? null}
+          .value=${mount.usage?.percent ?? undefined}
           display=${
             mount.usage === null
               ? "-"
               : `${formatBytes(mount.usage.used)} of ${formatBytes(mount.usage.total)}`
           }
           caption="${mount.device} · ${mount.filesystem_type}"
-          .warning=${80}
-          .danger=${92}
-        ></sb-meter>
+          .high=${80}
+          .critical=${92}
+        ></gw-meter>
       </label>
     `;
   }
