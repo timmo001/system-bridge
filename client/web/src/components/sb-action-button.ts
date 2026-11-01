@@ -2,7 +2,8 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { AsyncResult, Atom } from "effect/reactivity";
 
-import { icon, shared, spinner } from "./shared-styles";
+import "@timmo001/groundwork-ui/gw-button.ts";
+import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, type BridgeError, registry } from "~/lib/atoms";
 
@@ -54,24 +55,18 @@ export class SbActionButton extends LitElement {
 
     const result = actionResult(value, "");
 
-    const leading = value.waiting
-      ? spinner()
-      : this.icon === undefined
-        ? nothing
-        : icon(this.icon);
-
     return html`
-      <button
-        class="button plain small ${this.iconOnly ? "icon-only" : ""}"
-        type="button"
-        aria-label=${this.iconOnly ? this.label : nothing}
-        title=${this.iconOnly ? this.label : nothing}
-        aria-busy=${value.waiting ? "true" : "false"}
-        ?disabled=${value.waiting || this.atom === null}
+      <gw-button
+        variant="neutral"
+        appearance="plain"
+        size="small"
+        labels=${this.iconOnly ? "hide" : "show"}
+        icon=${this.icon ?? ""}
+        ?loading=${value.waiting}
+        ?disabled=${this.atom === null}
         @click=${this.#onClick}
+        >${this.label}</gw-button
       >
-        ${leading} ${this.iconOnly ? nothing : this.label}
-      </button>
       ${
         result?.success === false && !this.quiet
           ? html`<span class="error-text" role="alert">${result.message}</span>`

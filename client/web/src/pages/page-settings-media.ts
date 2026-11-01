@@ -12,6 +12,7 @@ import { Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -54,18 +55,16 @@ export class PageSettingsMedia extends SbSettingsPage {
     }
   };
 
-  /** Each remove button's value is its directory's path. */
+  /** Each remove button's `data-path` is its directory's path. */
   #onRemove = (event: MouseEvent) => {
     const current = this.settings;
 
-    if (
-      current === undefined ||
-      !(event.currentTarget instanceof HTMLButtonElement)
-    ) {
-      return;
-    }
+    const path =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget.dataset.path
+        : undefined;
 
-    const path = event.currentTarget.value;
+    if (current === undefined || path === undefined) return;
 
     this.saveSettings(
       Struct.assign(current, {
@@ -100,17 +99,17 @@ export class PageSettingsMedia extends SbSettingsPage {
             <strong class="small">${directory.name}</strong>
             <span class="muted xsmall mono break">${directory.path}</span>
           </span>
-          <button
-            class="button danger small icon-only"
-            type="button"
-            aria-label="Remove ${directory.name}"
-            title="Remove"
-            value=${directory.path}
+          <gw-button
+            variant="danger"
+            appearance="plain"
+            size="small"
+            labels="hide"
+            icon=${mdiTrashCanOutline}
+            data-path=${directory.path}
             ?disabled=${busy}
             @click=${this.#onRemove}
+            >Remove ${directory.name}</gw-button
           >
-            ${icon(mdiTrashCanOutline)}
-          </button>
         </li>`,
     );
 

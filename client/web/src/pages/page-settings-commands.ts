@@ -20,10 +20,11 @@ import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
-import { icon, pageStyles, shared, spinner } from "~/components/shared-styles";
+import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
@@ -313,7 +314,7 @@ export class PageSettingsCommands extends SbSettingsPage {
 
   /** The command an action button is for, from its `data-id`. */
   #commandId(event: MouseEvent): string | undefined {
-    return event.currentTarget instanceof HTMLButtonElement
+    return event.currentTarget instanceof HTMLElement
       ? event.currentTarget.dataset.id
       : undefined;
   }
@@ -662,48 +663,49 @@ ${result.stderr}</pre>`
             }
           </div>
           <div class="row actions">
-            <button
-              class="button tonal small"
-              type="button"
-              aria-label="Run ${command.name}"
+            <gw-button
+              appearance="filled"
+              size="small"
+              icon=${mdiPlay}
+              label="Run ${command.name}"
               aria-describedby=${
                 unavailable === undefined
                   ? nothing
                   : `unavailable-${command.id}`
               }
-              ?disabled=${running || this.isSaving || unavailable !== undefined}
+              ?loading=${running}
+              ?disabled=${this.isSaving || unavailable !== undefined}
               data-id=${command.id}
               @click=${this.#onRun}
+              >Run</gw-button
             >
-              ${running ? spinner() : icon(mdiPlay)} Run
-            </button>
-            <button
-              class="button danger small icon-only"
-              type="button"
-              aria-label="Remove ${command.name}"
-              title="Remove"
+            <gw-button
+              variant="danger"
+              appearance="plain"
+              size="small"
+              labels="hide"
+              icon=${mdiTrashCanOutline}
               ?disabled=${this.isSaving}
               data-id=${command.id}
               @click=${this.#onRemove}
+              >Remove ${command.name}</gw-button
             >
-              ${icon(mdiTrashCanOutline)}
-            </button>
           </div>
         </div>
         <div class="details">
           ${this.#renderRuns(command, prefab, usesPrefab)}
           <span class="id">
             <span class="mono">${command.id}</span>
-            <button
-              class="button plain icon-only small"
-              type="button"
-              aria-label="Copy the ID of ${command.name}"
-              title="Copy ID"
+            <gw-button
+              variant="neutral"
+              appearance="plain"
+              size="small"
+              labels="hide"
+              icon=${mdiContentCopy}
               data-id=${command.id}
               @click=${this.#onCopyId}
+              >Copy the ID of ${command.name}</gw-button
             >
-              ${icon(mdiContentCopy)}
-            </button>
           </span>
         </div>
         ${this.#renderOutcome(

@@ -6,9 +6,10 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import "./sb-action-button";
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
-import { icon, shared } from "./shared-styles";
+import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   cameraCapture,
@@ -134,11 +135,14 @@ export class SbCameraCapture extends LitElement {
         ${
           source === null
             ? nothing
-            : html`<a
-                class="button plain small"
-                href=${source}
-                download="${camera.id}.jpg"
-                >${icon(mdiDownload)} Download</a
+            : html`<gw-button
+                variant="neutral"
+                appearance="plain"
+                size="small"
+                icon=${mdiDownload}
+                ><a href=${source} download="${camera.id}.jpg"
+                  >Download</a
+                ></gw-button
               >`
         }
       </div>

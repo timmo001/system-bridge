@@ -1,3 +1,4 @@
+import "@timmo001/groundwork-ui/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/gw-command-menu.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
@@ -246,24 +247,23 @@ export class SbApp extends LitElement {
         ></gw-command-menu>
         <span class="spacer"></span>
         ${this.#renderStatus()}
-        <a
-          class="button plain icon-only"
+        <gw-button
+          variant="neutral"
+          appearance="plain"
+          labels="hide"
+          icon=${mdiPaletteOutline}
           href=${href("settingsAppearance")}
-          aria-label="Appearance"
-          title="Appearance"
+          >Appearance</gw-button
         >
-          ${icon(mdiPaletteOutline)}
-        </a>
-        <a
-          class="button plain icon-only"
-          href=${DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Documentation"
-          title="Documentation"
+        <gw-button
+          variant="neutral"
+          appearance="plain"
+          labels="hide"
+          icon=${mdiBookOpenVariant}
+          ><a href=${DOCS_URL} target="_blank" rel="noopener noreferrer"
+            >Documentation</a
+          ></gw-button
         >
-          ${icon(mdiBookOpenVariant)}
-        </a>
       </header>
       <main>${renderPage(location)}</main>
     `;

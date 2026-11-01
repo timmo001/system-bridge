@@ -4,6 +4,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-range.ts";
 import { rangeTarget } from "~/lib/select";
 import { icon, shared } from "./shared-styles";
@@ -115,14 +116,15 @@ export class SbAudioDevice extends LitElement {
       return html`<gw-chip size="small" tone="accent">Default</gw-chip>`;
     }
 
-    return html`<button
-      class="button plain small"
-      type="button"
-      ?disabled=${this.#control.value.waiting}
+    return html`<gw-button
+      variant="neutral"
+      appearance="plain"
+      size="small"
+      icon=${mdiCheckCircleOutline}
+      ?loading=${this.#control.value.waiting}
       @click=${this.#onDefault}
-    >
-      ${icon(mdiCheckCircleOutline)} Make default
-    </button>`;
+      >Make default</gw-button
+    >`;
   }
 
   override render() {

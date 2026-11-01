@@ -30,6 +30,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-input.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
@@ -342,7 +343,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
   };
 
   #onPageClick = (event: MouseEvent) => {
-    if (event.currentTarget instanceof HTMLButtonElement) {
+    if (event.currentTarget instanceof HTMLElement) {
       this.#change({ page: Number(event.currentTarget.dataset.page) });
     }
   };
@@ -424,16 +425,17 @@ export class SbDataTable<T extends RowData> extends LitElement {
     }));
 
     const pageButton = (target: number, label: string, path: string) =>
-      html`<button
-        class="button plain icon-only small"
-        type="button"
-        aria-label=${label}
+      html`<gw-button
+        variant="neutral"
+        appearance="plain"
+        size="small"
+        labels="hide"
+        icon=${path}
         data-page=${target}
         ?disabled=${target < 1 || target > pages || target === page}
         @click=${this.#onPageClick}
-      >
-        ${icon(path)}
-      </button>`;
+        >${label}</gw-button
+      >`;
 
     return html`
       <div class="toolbar">

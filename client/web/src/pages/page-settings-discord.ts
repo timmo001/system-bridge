@@ -13,6 +13,7 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -184,9 +185,14 @@ export class PageSettingsDiscord extends SbPage {
   };
 
   #copyRedirect = async (event: MouseEvent) => {
-    if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+    const value =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget.dataset.value
+        : undefined;
 
-    await navigator.clipboard.writeText(event.currentTarget.value);
+    if (value === undefined) return;
+
+    await navigator.clipboard.writeText(value);
     this.copied = true;
   };
 
@@ -271,12 +277,14 @@ export class PageSettingsDiscord extends SbPage {
         <ol class="guide small">
           <li>
             Open the Discord Developer Portal and create an application.
-            <a
-              class="button small"
-              href=${PORTAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              >${icon(mdiOpenInNew)} Developer Portal</a
+            <gw-button
+              variant="neutral"
+              appearance="outlined"
+              size="small"
+              icon=${mdiOpenInNew}
+              ><a href=${PORTAL_URL} target="_blank" rel="noopener noreferrer"
+                >Developer Portal</a
+              ></gw-button
             >
           </li>
           <li>
@@ -287,16 +295,16 @@ export class PageSettingsDiscord extends SbPage {
             On the same page, add this redirect and save:
             <span class="copy">
               <code>${setup.redirectUri}</code>
-              <button
-                class="button plain icon-only small"
-                type="button"
-                value=${setup.redirectUri}
-                aria-label=${this.copied ? "Redirect copied" : "Copy the redirect"}
-                title=${this.copied ? "Copied" : "Copy"}
+              <gw-button
+                variant="neutral"
+                appearance="plain"
+                size="small"
+                labels="hide"
+                icon=${this.copied ? mdiCheckCircle : mdiContentCopy}
+                data-value=${setup.redirectUri}
                 @click=${this.#copyRedirect}
+                >${this.copied ? "Redirect copied" : "Copy the redirect"}</gw-button
               >
-                ${icon(this.copied ? mdiCheckCircle : mdiContentCopy)}
-              </button>
             </span>
           </li>
           <li>

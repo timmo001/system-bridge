@@ -8,6 +8,7 @@ import type { BluetoothDevice } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-menu-button.ts";
 import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
@@ -64,7 +65,7 @@ export class SbBluetoothActions extends LitElement {
 
   @query("[popover]") private confirm?: HTMLElement;
 
-  @query(".cancel") private cancel?: HTMLButtonElement;
+  @query(".cancel") private cancel?: HTMLElement;
 
   readonly #action = new AtomController(this, () =>
     bluetoothAction(this.device?.address ?? ""),
@@ -193,20 +194,21 @@ export class SbBluetoothActions extends LitElement {
           connect.
         </p>
         <div class="buttons">
-          <button
-            class="button plain small cancel"
-            type="button"
+          <gw-button
+            class="cancel"
+            variant="neutral"
+            appearance="plain"
+            size="small"
             @click=${this.#onCancelForget}
+            >Cancel</gw-button
           >
-            Cancel
-          </button>
-          <button
-            class="button danger small"
-            type="button"
+          <gw-button
+            variant="danger"
+            appearance="filled"
+            size="small"
             @click=${this.#onForget}
+            >Forget</gw-button
           >
-            Forget
-          </button>
         </div>
       </div>
     `;
