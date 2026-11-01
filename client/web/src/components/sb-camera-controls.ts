@@ -3,8 +3,10 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "@timmo001/groundwork-ui/gw-checkbox.ts";
 import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
+import "@timmo001/groundwork-ui/gw-setting-row.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -23,15 +25,15 @@ export class SbCameraControls extends LitElement {
         flex-direction: column;
       }
 
-      .setting {
-        padding: var(--gw-space-2) 0;
+      gw-setting-row {
+        --gw-row-padding: var(--gw-space-2);
       }
 
       .level {
         display: flex;
         align-items: center;
         gap: var(--gw-space-3);
-        flex: 1 1 14rem;
+        width: min(18rem, 100%);
       }
 
       gw-range {
@@ -80,10 +82,11 @@ export class SbCameraControls extends LitElement {
   };
 
   #onSwitch = (event: Event) => {
-    if (event.currentTarget instanceof HTMLInputElement) {
-      const input = event.currentTarget;
+    const host = event.currentTarget;
+    const input = event.target;
 
-      this.#set(input.name, input.checked ? 1 : 0);
+    if (host instanceof HTMLElement && input instanceof HTMLInputElement) {
+      this.#set(host.dataset.control ?? "", input.checked ? 1 : 0);
     }
   };
 
@@ -99,16 +102,14 @@ export class SbCameraControls extends LitElement {
   #renderInput(control: CameraControl, labelId: string, disabled: boolean) {
     switch (control.type) {
       case "boolean":
-        return html`<input
-          class="switch"
-          type="checkbox"
-          role="switch"
-          name=${control.id}
-          aria-labelledby=${labelId}
+        return html`<gw-switch
+          label=${control.name}
+          label-hidden
+          data-control=${control.id}
           .checked=${live(control.value !== 0)}
           ?disabled=${disabled}
           @change=${this.#onSwitch}
-        />`;
+        ></gw-switch>`;
       case "menu": {
         const options = control.options.map((option) => ({
           value: String(option.value),
@@ -157,17 +158,16 @@ export class SbCameraControls extends LitElement {
         ? "Set automatically"
         : null;
 
-    return html`<div class="setting">
-      <span class="stack" style="--sb-stack-gap: 0">
-        <span class="label" id=${labelId}>${control.name}</span>
-        ${hint === null ? nothing : html`<span class="hint">${hint}</span>`}
-      </span>
+    return html`<gw-setting-row
+      heading=${control.name}
+      description=${hint ?? ""}
+    >
       ${this.#renderInput(
         control,
         labelId,
         waiting || control.read_only || control.inactive,
       )}
-    </div>`;
+    </gw-setting-row>`;
   }
 
   override render() {

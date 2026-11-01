@@ -39,25 +39,18 @@ export class PageSettingsCameras extends SbSettingsPage {
   #renderContent() {
     return html`
       <gw-card level=${this.cardLevel}>
-        <label class="setting">
-          <span class="stack" style="--sb-stack-gap: 0">
-            <span class="label" id="camera-capture-label">Take pictures</span>
-            <span class="hint" id="camera-capture-hint"
-              >Lets clients take pictures with your cameras. A camera can see
-              the room it's in, so it's off unless you turn it on.</span
-            >
-          </span>
-          <input
-            class="switch"
-            type="checkbox"
-            role="switch"
-            aria-labelledby="camera-capture-label"
-            aria-describedby="camera-capture-hint"
+        <gw-setting-row
+          heading="Take pictures"
+          description="Lets clients take pictures with your cameras. A camera can see the room it's in, so it's off unless you turn it on."
+        >
+          <gw-switch
+            label="Take pictures"
+            label-hidden
             .checked=${this.capture}
             ?disabled=${this.isSaving}
             @change=${this.#onCaptureChange}
-          />
-        </label>
+          ></gw-switch>
+        </gw-setting-row>
       </gw-card>
     `;
   }

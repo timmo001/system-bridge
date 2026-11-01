@@ -16,7 +16,7 @@ import { customElement, state } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
-import { icon, spinner } from "~/components/shared-styles";
+import { icon } from "~/components/shared-styles";
 import { moduleInfo } from "~/lib/navigation";
 import { href } from "~/lib/router";
 
@@ -108,57 +108,38 @@ export class PageSettings extends SbSettingsPage {
     if (form === undefined) return placeholder;
 
     return html`
-      <form class="card" @submit=${this.#onSubmit}>
-        <div>
-          <label class="setting">
-            <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label" id="autostart-label"
-                >Start automatically</span
-              >
-              <span class="hint" id="autostart-hint"
-                >Start System Bridge when you sign in.</span
-              >
-            </span>
-            <input
-              class="switch"
-              type="checkbox"
-              role="switch"
-              aria-labelledby="autostart-label"
-              aria-describedby="autostart-hint"
+      <form @submit=${this.#onSubmit}>
+        <gw-card>
+          <gw-setting-row
+            heading="Start automatically"
+            description="Start System Bridge when you sign in."
+          >
+            <gw-switch
+              label="Start automatically"
+              label-hidden
               name="autostart"
               .checked=${form.autostart}
               ?disabled=${saving}
               @change=${this.#onToggle}
-            />
-          </label>
-          <label class="setting">
-            <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label" id="tray-label">Show in the system tray</span>
-              <span class="hint" id="tray-hint"
-                >Hiding takes effect when you save. To show it again, save and
-                restart System Bridge. On macOS, hiding also needs a
-                restart.</span
-              >
-            </span>
-            <input
-              class="switch"
-              type="checkbox"
-              role="switch"
-              aria-labelledby="tray-label"
-              aria-describedby="tray-hint"
+            ></gw-switch>
+          </gw-setting-row>
+          <gw-setting-row
+            heading="Show in the system tray"
+            description="Hiding takes effect when you save. To show it again, save and restart System Bridge. On macOS, hiding also needs a restart."
+          >
+            <gw-switch
+              label="Show in the system tray"
+              label-hidden
               name="systemTray"
               .checked=${form.systemTray}
               ?disabled=${saving}
               @change=${this.#onToggle}
-            />
-          </label>
-          <div class="setting">
-            <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label" id="log-level">Log level</span>
-              <span class="hint"
-                >How much System Bridge writes to its log.</span
-              >
-            </span>
+            ></gw-switch>
+          </gw-setting-row>
+          <gw-setting-row
+            heading="Log level"
+            description="How much System Bridge writes to its log."
+          >
             <gw-select
               style="width: 18rem"
               label="Log level"
@@ -168,13 +149,13 @@ export class PageSettings extends SbSettingsPage {
               ?disabled=${saving}
               @change=${this.#onLogLevelChange}
             ></gw-select>
+          </gw-setting-row>
+          <div slot="footer" class="row" style="justify-content: flex-end">
+            <gw-button type="submit" icon=${mdiContentSave} ?loading=${saving}
+              >Save</gw-button
+            >
           </div>
-        </div>
-        <div class="row" style="justify-content: flex-end">
-          <button class="button filled" type="submit" ?disabled=${saving}>
-            ${saving ? spinner() : icon(mdiContentSave)} Save
-          </button>
-        </div>
+        </gw-card>
       </form>
     `;
   }

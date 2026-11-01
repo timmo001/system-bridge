@@ -172,23 +172,17 @@ export class PageConnection extends SbPage {
               { type: "text", placeholder: "9170" },
             )}
           </div>
-          <label class="setting">
-            <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label" id="ssl-label">Use a secure connection</span>
-              <span class="hint" id="ssl-hint"
-                >Turn on when System Bridge is behind HTTPS.</span
-              >
-            </span>
-            <input
-              class="switch"
-              type="checkbox"
-              role="switch"
-              aria-labelledby="ssl-label"
-              aria-describedby="ssl-hint"
+          <gw-setting-row
+            heading="Use a secure connection"
+            description="Turn on when System Bridge is behind HTTPS."
+          >
+            <gw-switch
+              label="Use a secure connection"
+              label-hidden
               .checked=${this.form.ssl}
               @change=${this.#onSslChange}
-            />
-          </label>
+            ></gw-switch>
+          </gw-setting-row>
           <div class="field">
             <label for="token">API token</label>
             <div class="row">

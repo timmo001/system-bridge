@@ -64,48 +64,30 @@ export class PageSettingsDesktop extends SbSettingsPage {
   #renderContent() {
     return html`
       <gw-card level=${this.cardLevel}>
-        <label class="setting">
-          <span class="stack" style="--sb-stack-gap: 0">
-            <span class="label" id="window-titles-label"
-              >Report window titles</span
-            >
-            <span class="hint" id="window-titles-hint"
-              >Titles can show private things, such as the page or document you
-              have open, so they're off unless you turn them on.</span
-            >
-          </span>
-          <input
-            class="switch"
-            type="checkbox"
-            role="switch"
-            aria-labelledby="window-titles-label"
-            aria-describedby="window-titles-hint"
+        <gw-setting-row
+          heading="Report window titles"
+          description="Titles can show private things, such as the page or document you have open, so they're off unless you turn them on."
+        >
+          <gw-switch
+            label="Report window titles"
+            label-hidden
             .checked=${this.titles}
             ?disabled=${this.isSaving}
             @change=${this.#onTitlesChange}
-          />
-        </label>
-        <label class="setting">
-          <span class="stack" style="--sb-stack-gap: 0">
-            <span class="label" id="hyprland-code-label"
-              >Run commands, dispatches and Lua through Hyprland</span
-            >
-            <span class="hint" id="hyprland-code-hint"
-              >Lets clients run any command, dispatch or line of Lua in
-              Hyprland, so it's off unless you turn it on.</span
-            >
-          </span>
-          <input
-            class="switch"
-            type="checkbox"
-            role="switch"
-            aria-labelledby="hyprland-code-label"
-            aria-describedby="hyprland-code-hint"
+          ></gw-switch>
+        </gw-setting-row>
+        <gw-setting-row
+          heading="Run commands, dispatches and Lua through Hyprland"
+          description="Lets clients run any command, dispatch or line of Lua in Hyprland, so it's off unless you turn it on."
+        >
+          <gw-switch
+            label="Run commands, dispatches and Lua through Hyprland"
+            label-hidden
             .checked=${this.hyprlandCode}
             ?disabled=${this.isSaving}
             @change=${this.#onHyprlandCodeChange}
-          />
-        </label>
+          ></gw-switch>
+        </gw-setting-row>
       </gw-card>
     `;
   }

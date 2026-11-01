@@ -217,10 +217,18 @@ export class PageDiscord extends SbPage {
   };
 
   #onSwitch = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLInputElement)) return;
+    const host = event.currentTarget;
+    const input = event.target;
 
-    const { on, off, label } = event.currentTarget.dataset;
-    const action = event.currentTarget.checked ? on : off;
+    if (
+      !(host instanceof HTMLElement) ||
+      !(input instanceof HTMLInputElement)
+    ) {
+      return;
+    }
+
+    const { on, off, label } = host.dataset;
+    const action = input.checked ? on : off;
 
     if (isDiscordAction(action)) this.#send({ action }, label ?? action);
   };
@@ -374,44 +382,46 @@ export class PageDiscord extends SbPage {
   #renderAudio(discord: DiscordData) {
     return html`
       <gw-card level=${this.cardLevel} heading="Audio">
-        <div class="setting">
-          <span class="label" id="input-label">Input</span>
-          <gw-select
-            style="width: 16rem"
-            label="Input device"
-            label-hidden
-            .options=${deviceOptions(discord.input)}
-            .value=${discord.input?.device_id ?? ""}
-            ?disabled=${(discord.input?.devices.length ?? 0) === 0}
-            @change=${this.#onInputDevice}
-          ></gw-select>
-          ${this.#level({
-            id: "input-volume",
-            label: "Input volume",
-            action: "SET_INPUT_VOLUME",
-            value: discord.input?.volume ?? null,
-            max: limits.input,
-          })}
-        </div>
-        <div class="setting">
-          <span class="label" id="output-label">Output</span>
-          <gw-select
-            style="width: 16rem"
-            label="Output device"
-            label-hidden
-            .options=${deviceOptions(discord.output)}
-            .value=${discord.output?.device_id ?? ""}
-            ?disabled=${(discord.output?.devices.length ?? 0) === 0}
-            @change=${this.#onOutputDevice}
-          ></gw-select>
-          ${this.#level({
-            id: "output-volume",
-            label: "Output volume",
-            action: "SET_OUTPUT_VOLUME",
-            value: discord.output?.volume ?? null,
-            max: limits.output,
-          })}
-        </div>
+        <gw-setting-row heading="Input">
+          <div class="row wrap">
+            <gw-select
+              style="width: 16rem"
+              label="Input device"
+              label-hidden
+              .options=${deviceOptions(discord.input)}
+              .value=${discord.input?.device_id ?? ""}
+              ?disabled=${(discord.input?.devices.length ?? 0) === 0}
+              @change=${this.#onInputDevice}
+            ></gw-select>
+            ${this.#level({
+              id: "input-volume",
+              label: "Input volume",
+              action: "SET_INPUT_VOLUME",
+              value: discord.input?.volume ?? null,
+              max: limits.input,
+            })}
+          </div>
+        </gw-setting-row>
+        <gw-setting-row heading="Output">
+          <div class="row wrap">
+            <gw-select
+              style="width: 16rem"
+              label="Output device"
+              label-hidden
+              .options=${deviceOptions(discord.output)}
+              .value=${discord.output?.device_id ?? ""}
+              ?disabled=${(discord.output?.devices.length ?? 0) === 0}
+              @change=${this.#onOutputDevice}
+            ></gw-select>
+            ${this.#level({
+              id: "output-volume",
+              label: "Output volume",
+              action: "SET_OUTPUT_VOLUME",
+              value: discord.output?.volume ?? null,
+              max: limits.output,
+            })}
+          </div>
+        </gw-setting-row>
       </gw-card>
     `;
   }
@@ -466,14 +476,12 @@ export class PageDiscord extends SbPage {
         }
         <div>
           ${this.#switch(
-            "qos",
             "Quality of service",
             "Ask the network to prioritise voice.",
             discord.qos,
             ["ENABLE_QOS", "DISABLE_QOS"],
           )}
           ${this.#switch(
-            "silence",
             "Silence warning",
             "Warn when Discord hears nothing from your microphone.",
             discord.silence_warning,
@@ -489,31 +497,23 @@ export class PageDiscord extends SbPage {
    * change that fails springs back.
    */
   #switch(
-    id: string,
     label: string,
     hint: string,
     checked: boolean | null,
     [on, off]: readonly [DiscordAction, DiscordAction],
   ) {
-    return html`<label class="setting">
-      <span class="stack" style="--sb-stack-gap: 0">
-        <span class="label" id="${id}-label">${label}</span>
-        <span class="hint" id="${id}-hint">${hint}</span>
-      </span>
-      <input
-        class="switch"
-        type="checkbox"
-        role="switch"
-        aria-labelledby="${id}-label"
-        aria-describedby="${id}-hint"
+    return html`<gw-setting-row heading=${label} description=${hint}>
+      <gw-switch
+        label=${label}
+        label-hidden
         .checked=${live(checked === true)}
         ?disabled=${checked === null || this.#busy(on) || this.#busy(off)}
         data-on=${on}
         data-off=${off}
         data-label=${label}
         @change=${this.#onSwitch}
-      />
-    </label>`;
+      ></gw-switch>
+    </gw-setting-row>`;
   }
 
   #renderCall(discord: DiscordData) {

@@ -361,79 +361,11 @@ export const shared = css`
     opacity: 0.6;
   }
 
-  /* A checkbox drawn as a switch */
-  .switch {
-    appearance: none;
-    position: relative;
-    flex: none;
-    width: 2.5rem;
-    height: 1.5rem;
-    margin: 0;
-    cursor: pointer;
-    background: var(--gw-color-surface-lower);
-    border: 1px solid var(--gw-color-border-normal);
-    border-radius: var(--gw-radius-pill);
-    transition: background var(--gw-motion-fast) var(--gw-motion-easing);
-  }
-
-  .switch::after {
-    content: "";
-    position: absolute;
-    top: 0.1875rem;
-    left: 0.1875rem;
-    width: 1rem;
-    height: 1rem;
-    background: var(--gw-color-text-secondary);
-    border-radius: 50%;
-    transition:
-      translate var(--gw-motion-fast) var(--gw-motion-easing),
-      background var(--gw-motion-fast) var(--gw-motion-easing);
-  }
-
-  .switch:checked {
-    background: var(--gw-color-accent);
-    border-color: transparent;
-  }
-
-  .switch:checked::after {
-    translate: 1rem 0;
-    background: var(--gw-color-on-accent);
-  }
-
-  .switch:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
   .checkbox {
     width: 1.125rem;
     height: 1.125rem;
     margin: 0;
     accent-color: var(--gw-color-accent);
-  }
-
-  /* A row with a label on one side and a control on the other. A wide
-     control drops under its label when there isn't room for both */
-  .setting {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--gw-space-2) var(--gw-space-4);
-    padding: var(--gw-space-3) 0;
-  }
-
-  .setting > :first-child {
-    flex: 1 1 12rem;
-    min-width: 0;
-  }
-
-  .setting > :last-child:not(:first-child) {
-    max-width: 100%;
-  }
-
-  .setting + .setting {
-    border-top: 1px solid var(--gw-color-border-normal);
   }
 
   /* Cards */
