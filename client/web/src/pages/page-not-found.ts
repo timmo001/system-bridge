@@ -2,7 +2,6 @@ import { mdiMapMarkerQuestionOutline } from "@mdi/js";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { icon } from "~/components/shared-styles";
 import { href } from "~/lib/router";
 
 import { SbPage } from "./sb-page";
@@ -17,16 +16,17 @@ export class PageNotFound extends SbPage {
   override render() {
     return html`
       <div class="page narrow">
-        <div class="card empty">
-          ${icon(mdiMapMarkerQuestionOutline)}
-          <h1>There's no page here</h1>
-          <p class="muted">
-            <code>${this.path}</code> isn't part of System Bridge.
-          </p>
-          <a class="button filled" href=${href("overview")}
-            >Go to the overview</a
+        <gw-card>
+          <gw-empty-state
+            icon=${mdiMapMarkerQuestionOutline}
+            heading="There's no page here"
           >
-        </div>
+            <p><code>${this.path}</code> isn't part of System Bridge.</p>
+            <gw-button slot="actions" href=${href("overview")}
+              >Go to the overview</gw-button
+            >
+          </gw-empty-state>
+        </gw-card>
       </div>
     `;
   }

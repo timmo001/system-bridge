@@ -1,5 +1,8 @@
 import { mdiLanDisconnect, mdiRefresh } from "@mdi/js";
 import "@timmo001/groundwork-ui/gw-alert.ts";
+import "@timmo001/groundwork-ui/gw-button.ts";
+import "@timmo001/groundwork-ui/gw-card.ts";
+import "@timmo001/groundwork-ui/gw-empty-state.ts";
 import "@timmo001/groundwork-ui/gw-skeleton.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
@@ -117,19 +120,25 @@ export abstract class SbPage extends LitElement {
     if (error === null) return placeholder;
 
     return html`
-      <div class="card connection-required" role="alert">
-        <span class="tile">${icon(mdiLanDisconnect)}</span>
-        <h2>Not connected to System Bridge</h2>
-        <p class="muted small">${error}</p>
-        <div class="row wrap" style="justify-content: center">
-          <a class="button filled" href=${href("connection")}
-            >Connection settings</a
-          >
-          <button class="button" type="button" @click=${retryConnection}>
-            ${icon(mdiRefresh)} Retry
-          </button>
-        </div>
-      </div>
+      <gw-card role="alert">
+        <gw-empty-state
+          icon=${mdiLanDisconnect}
+          heading="Not connected to System Bridge"
+        >
+          <p>${error}</p>
+          <div slot="actions" class="row wrap" style="justify-content: center">
+            <gw-button href=${href("connection")}
+              >Connection settings</gw-button
+            >
+            <gw-button
+              appearance="filled"
+              icon=${mdiRefresh}
+              @click=${retryConnection}
+              >Retry</gw-button
+            >
+          </div>
+        </gw-empty-state>
+      </gw-card>
     `;
   }
 }

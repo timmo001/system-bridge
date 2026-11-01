@@ -1676,22 +1676,20 @@ export const discordDashboard = ({ data }: DashboardContext) => {
   // The module only exists once Discord is set up
   if (discord === undefined) {
     return html`<gw-card>
-      <div class="empty">
-        ${icon(mdiHeadset)}
-        <p>Discord isn't set up yet.</p>
-        <p class="muted small">
+      <gw-empty-state icon=${mdiHeadset} heading="Discord isn't set up yet">
+        <p>
           Connect System Bridge to the Discord desktop app to see your voice
           settings and calls here.
         </p>
-        <a
-          class="button filled"
+        <gw-button
+          slot="actions"
           href=${href("module", {
             params: { module: "discord" },
             hash: "discord-setup",
           })}
-          >Set up Discord</a
+          >Set up Discord</gw-button
         >
-      </div>
+      </gw-empty-state>
     </gw-card>`;
   }
 
@@ -1763,7 +1761,7 @@ export const discordDashboard = ({ data }: DashboardContext) => {
       >
         ${
           discord.call === null
-            ? html`<div class="empty"><p>Not in a voice call.</p></div>`
+            ? html`<gw-empty-state><p>Not in a voice call.</p></gw-empty-state>`
             : html`<ul class="list">
                   ${members}
                 </ul>

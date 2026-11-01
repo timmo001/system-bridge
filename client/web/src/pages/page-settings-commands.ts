@@ -1037,10 +1037,9 @@ ${result.stderr}</pre>`
       >
         ${
           this.commands.length === 0
-            ? html`<div class="empty">
-                ${icon(mdiConsoleLine)}
+            ? html`<gw-empty-state icon=${mdiConsoleLine}>
                 <p>No commands yet. Add one above.</p>
-              </div>`
+              </gw-empty-state>`
             : html`<div class="stack" style="--sb-stack-gap: var(--gw-space-3)">
                 ${repeat(
                   this.commands,

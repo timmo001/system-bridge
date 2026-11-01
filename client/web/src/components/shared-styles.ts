@@ -510,18 +510,6 @@ export const shared = css`
     border-radius: 50%;
   }
 
-  .empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--gw-space-2);
-    padding: var(--gw-space-8) var(--gw-space-4);
-    color: var(--gw-color-text-secondary);
-    text-align: center;
-    --sb-icon-size: 2.5rem;
-  }
-
   /* Label and value pairs */
   dl.facts {
     display: grid;
@@ -642,26 +630,5 @@ export const pageStyles = css`
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--gw-color-text-secondary);
-  }
-
-  .connection-required {
-    align-items: center;
-    padding: var(--gw-space-10) var(--gw-space-6);
-    text-align: center;
-  }
-
-  .connection-required .tile {
-    display: grid;
-    place-items: center;
-    width: 3.5rem;
-    height: 3.5rem;
-    color: var(--gw-color-danger);
-    background: var(--gw-color-fill-danger-quiet);
-    border-radius: 50%;
-    --sb-icon-size: 1.75rem;
-  }
-
-  .connection-required p {
-    max-width: 32rem;
   }
 `;

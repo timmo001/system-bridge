@@ -176,10 +176,9 @@ export class PageSettingsMedia extends SbSettingsPage {
       >
         ${
           this.directories.length === 0
-            ? html`<div class="empty">
-                ${icon(mdiFolderMultipleOutline)}
+            ? html`<gw-empty-state icon=${mdiFolderMultipleOutline}>
                 <p>No directories yet. Add one above.</p>
-              </div>`
+              </gw-empty-state>`
             : html`<ul
                 class="stack"
                 style="margin: 0; padding: 0; list-style: none; --sb-stack-gap: var(--gw-space-2)"

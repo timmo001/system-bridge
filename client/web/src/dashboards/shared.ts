@@ -326,9 +326,9 @@ export const yesNo = (value: boolean | null | undefined) =>
 /** Shown when a module has no data on this system. */
 export const noData = (what: string) =>
   html`<gw-card>
-    <div class="empty">
+    <gw-empty-state>
       <p>No ${what} reported on this system.</p>
-    </div>
+    </gw-empty-state>
   </gw-card>`;
 
 /** A table's state from the page's URL, with defaults for what's missing. */
