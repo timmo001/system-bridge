@@ -12,11 +12,12 @@ import {
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { omarchyMenu, omarchyPanel, registry } from "~/lib/atoms";
+import { menuValue } from "~/lib/select";
 
 /**
  * A menu to open, close or toggle an Omarchy shell panel, or the Omarchy menu
@@ -47,10 +48,10 @@ export class SbOmarchyActions extends LitElement {
     return this.kind === "menu" ? omarchyMenu(id) : omarchyPanel(id);
   }
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    const action = OmarchyAction.literals.find(
-      (literal) => literal === event.detail.value,
-    );
+  #onSelect = (event: Event) => {
+    const value = menuValue(event);
+
+    const action = OmarchyAction.literals.find((literal) => literal === value);
 
     if (action) registry.set(this.#atom(), action);
   };
@@ -72,14 +73,16 @@ export class SbOmarchyActions extends LitElement {
     if (!item) return nothing;
 
     return html`
-      <sb-menu-button
-        icon-only
+      <gw-menu-button
+        labels="hide"
+        appearance="plain"
+        size="small"
         label="Actions for ${item.name}"
         .icon=${mdiDotsHorizontal}
-        .busy=${this.#action.value.waiting}
+        ?loading=${this.#action.value.waiting}
         .items=${this.#items()}
-        @menu-select=${this.#onSelect}
-      ></sb-menu-button>
+        @select=${this.#onSelect}
+      ></gw-menu-button>
     `;
   }
 }

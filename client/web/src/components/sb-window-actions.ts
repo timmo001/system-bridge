@@ -13,8 +13,8 @@ import type {
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -23,6 +23,7 @@ import {
   type WindowAction,
   windowAction,
 } from "~/lib/atoms";
+import { menuCheck, menuValue } from "~/lib/select";
 
 /** The window states each desktop can set. */
 const settableStates = new Map<DesktopCompositor, readonly string[]>([
@@ -73,10 +74,8 @@ export class SbWindowActions extends LitElement {
     if (this.window) registry.set(windowAction(this.window.id), action);
   }
 
-  #onToggle = (
-    event: CustomEvent<{ readonly value: string; readonly checked: boolean }>,
-  ) => {
-    const { value, checked } = event.detail;
+  #onToggle = (event: Event) => {
+    const { value, checked } = menuCheck(event);
 
     switch (value) {
       case "floating":
@@ -91,8 +90,8 @@ export class SbWindowActions extends LitElement {
     }
   };
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    const value = event.detail.value;
+  #onSelect = (event: Event) => {
+    const value = menuValue(event);
 
     switch (value) {
       case "close":
@@ -127,7 +126,7 @@ export class SbWindowActions extends LitElement {
       (state): MenuItem => ({
         value: state,
         label: stateLabels.get(state) ?? state,
-        kind: "checkbox",
+        checkbox: true,
         checked:
           state === "fullscreen"
             ? window.fullscreen === true
@@ -151,14 +150,14 @@ export class SbWindowActions extends LitElement {
       {
         value: "floating",
         label: "Floating",
-        kind: "checkbox",
+        checkbox: true,
         checked: window.floating === true,
       },
       {
         value: "pinned",
         label: "Pinned",
         description: "Shown on every workspace",
-        kind: "checkbox",
+        checkbox: true,
         checked: this.extra?.pinned === true,
         disabled: window.floating !== true,
       },
@@ -191,15 +190,17 @@ export class SbWindowActions extends LitElement {
     const name = window.app ?? window.title ?? "window";
 
     return html`
-      <sb-menu-button
-        icon-only
+      <gw-menu-button
+        labels="hide"
+        appearance="plain"
+        size="small"
         label="Actions for ${name}"
         .icon=${mdiDotsHorizontal}
-        .busy=${value.waiting}
+        ?loading=${value.waiting}
         .items=${this.#items(window)}
-        @menu-toggle=${this.#onToggle}
-        @menu-select=${this.#onSelect}
-      ></sb-menu-button>
+        @check=${this.#onToggle}
+        @select=${this.#onSelect}
+      ></gw-menu-button>
       ${
         result?.success === false
           ? html`<span class="error-text" role="alert">${result.message}</span>`

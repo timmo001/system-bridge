@@ -8,11 +8,12 @@ import type { BluetoothDevice } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { type BluetoothAction, bluetoothAction, registry } from "~/lib/atoms";
+import { menuValue } from "~/lib/select";
 
 /**
  * A menu of a paired device's actions: connect, disconnect or forget it.
@@ -59,7 +60,7 @@ export class SbBluetoothActions extends LitElement {
   /** Whether the adapter is on, so the device can connect. */
   @property({ type: Boolean }) powered = true;
 
-  @query("sb-menu-button") private menuButton?: HTMLElement;
+  @query("gw-menu-button") private menuButton?: HTMLElement;
 
   @query("[popover]") private confirm?: HTMLElement;
 
@@ -120,8 +121,8 @@ export class SbBluetoothActions extends LitElement {
     super.disconnectedCallback();
   }
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    switch (event.detail.value) {
+  #onSelect = (event: Event) => {
+    switch (menuValue(event)) {
       case "connect":
         this.#run("connect");
         break;
@@ -170,14 +171,16 @@ export class SbBluetoothActions extends LitElement {
     const value = this.#action.value;
 
     return html`
-      <sb-menu-button
-        icon-only
+      <gw-menu-button
+        labels="hide"
+        appearance="plain"
+        size="small"
         label="Actions for ${device.name}"
         .icon=${mdiDotsHorizontal}
-        .busy=${value.waiting}
+        ?loading=${value.waiting}
         .items=${this.#items(device)}
-        @menu-select=${this.#onSelect}
-      ></sb-menu-button>
+        @select=${this.#onSelect}
+      ></gw-menu-button>
       <div
         id="${this.#id}-confirm"
         popover

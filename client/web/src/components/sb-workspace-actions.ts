@@ -6,8 +6,8 @@ import type {
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -16,6 +16,7 @@ import {
   registry,
   workspaceAction,
 } from "~/lib/atoms";
+import { menuValue } from "~/lib/select";
 
 /**
  * A menu of a workspace's actions: show it and, on Hyprland, rename it or move
@@ -64,10 +65,10 @@ export class SbWorkspaceActions extends LitElement {
     focusWorkspace(this.workspace?.id ?? ""),
   );
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
+  #onSelect = (event: Event) => {
     if (!this.workspace) return;
 
-    const value = event.detail.value;
+    const value = menuValue(event);
 
     if (value === "show") {
       registry.set(focusWorkspace(this.workspace.id), undefined);
@@ -177,14 +178,16 @@ export class SbWorkspaceActions extends LitElement {
     )[0];
 
     return html`
-      <sb-menu-button
-        icon-only
+      <gw-menu-button
+        labels="hide"
+        appearance="plain"
+        size="small"
         label="Actions for ${name}"
         .icon=${mdiDotsHorizontal}
-        .busy=${this.#action.value.waiting || this.#focus.value.waiting}
+        ?loading=${this.#action.value.waiting || this.#focus.value.waiting}
         .items=${items}
-        @menu-select=${this.#onSelect}
-      ></sb-menu-button>
+        @select=${this.#onSelect}
+      ></gw-menu-button>
       ${
         failure === undefined
           ? nothing

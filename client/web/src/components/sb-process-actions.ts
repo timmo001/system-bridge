@@ -3,11 +3,12 @@ import type { Process } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, killProcess, registry } from "~/lib/atoms";
+import { menuValue } from "~/lib/select";
 
 const items: readonly MenuItem[] = [
   {
@@ -45,12 +46,9 @@ export class SbProcessActions extends LitElement {
     killProcess(this.process?.id ?? 0),
   );
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
+  #onSelect = (event: Event) => {
     if (this.process) {
-      registry.set(
-        killProcess(this.process.id),
-        event.detail.value === "force",
-      );
+      registry.set(killProcess(this.process.id), menuValue(event) === "force");
     }
   };
 
@@ -62,14 +60,16 @@ export class SbProcessActions extends LitElement {
     const result = actionResult(this.#kill.value, "");
 
     return html`
-      <sb-menu-button
-        icon-only
+      <gw-menu-button
+        labels="hide"
+        appearance="plain"
+        size="small"
         label="Actions for ${process.name ?? process.id}"
         .icon=${mdiDotsHorizontal}
-        .busy=${this.#kill.value.waiting}
+        ?loading=${this.#kill.value.waiting}
         .items=${items}
-        @menu-select=${this.#onSelect}
-      ></sb-menu-button>
+        @select=${this.#onSelect}
+      ></gw-menu-button>
       ${
         result?.success === false
           ? html`<span class="error-text" role="alert">${result.message}</span>`

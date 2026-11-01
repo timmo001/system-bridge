@@ -8,8 +8,9 @@ import { registry } from "~/lib/atoms";
 import { exportHistory, historyModules } from "~/lib/history";
 import { moduleInfo } from "~/lib/navigation";
 
-import "./sb-menu-button";
-import type { MenuItem } from "./sb-menu-button";
+import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
+import { menuCheck, menuValue } from "~/lib/select";
 
 const formats: readonly MenuItem[] = [
   {
@@ -52,8 +53,8 @@ export class SbHistoryExport extends LitElement {
     }
   }
 
-  #onToggle = (event: CustomEvent<{ value: string; checked: boolean }>) => {
-    const { value, checked } = event.detail;
+  #onToggle = (event: Event) => {
+    const { value, checked } = menuCheck(event);
 
     if (!isHistoryModule(value)) return;
 
@@ -65,8 +66,8 @@ export class SbHistoryExport extends LitElement {
     this.chosen = chosen;
   };
 
-  #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    const format = event.detail.value;
+  #onSelect = (event: Event) => {
+    const format = menuValue(event);
 
     if (format !== "csv" && format !== "json") return;
 
@@ -83,7 +84,7 @@ export class SbHistoryExport extends LitElement {
       ...[...historyModules].map((module): MenuItem => ({
         value: module,
         label: moduleInfo[module].label,
-        kind: "checkbox",
+        checkbox: true,
         checked: this.chosen.has(module),
         group: "Modules",
       })),
@@ -97,16 +98,16 @@ export class SbHistoryExport extends LitElement {
   }
 
   override render() {
-    return html`<sb-menu-button
-      narrow-icon
+    return html`<gw-menu-button
+      labels="auto"
+      size="small"
       label="Export"
-      menu-label="Export history"
       .icon=${mdiDownload}
       .items=${this.#items()}
-      ?busy=${this.#export.value.waiting}
-      @menu-toggle=${this.#onToggle}
-      @menu-select=${this.#onSelect}
-    ></sb-menu-button>`;
+      ?loading=${this.#export.value.waiting}
+      @check=${this.#onToggle}
+      @select=${this.#onSelect}
+    ></gw-menu-button>`;
   }
 }
 
