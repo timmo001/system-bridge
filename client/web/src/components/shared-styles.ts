@@ -455,12 +455,4 @@ export const pageStyles = css`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  .section-title {
-    font-size: var(--gw-font-size-xs);
-    font-weight: var(--gw-font-weight-strong);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--gw-color-text-secondary);
-  }
 `;
