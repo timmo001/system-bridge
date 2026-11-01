@@ -1,26 +1,19 @@
-import {
-  mdiBookOpenVariant,
-  mdiThemeLightDark,
-  mdiWeatherNight,
-  mdiWeatherSunny,
-} from "@mdi/js";
-import { HotkeyController } from "@tanstack/lit-hotkeys";
-import { Schema } from "effect";
+import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
+import "@timmo001/groundwork-ui/gw-command-menu.ts";
+import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import { mdiBookOpenVariant, mdiMagnify, mdiPaletteOutline } from "@mdi/js";
 import { css, html, LitElement } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
 import "./styles/tokens.css";
-import "./components/sb-segmented";
-import "./components/sb-select";
-import type { SbSelect, SelectOption } from "./components/sb-select";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
-import { connectionSettings, connectionStatus, registry } from "./lib/atoms";
+import { connectionSettings, connectionStatus } from "./lib/atoms";
 import { DOCS_URL } from "./lib/links";
 import { type NavItem, navigation } from "./lib/navigation";
-import { appearance, appliedTheme } from "./lib/preferences";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
-import { ThemeMode } from "./lib/themes";
+// Applies the stored theme and registers its WebMCP tools on every page
+import "./lib/theme";
 import "./pages/page-connection";
 import "./pages/page-module";
 import "./pages/page-not-found";
@@ -28,24 +21,16 @@ import "./pages/page-overview";
 import "./pages/page-settings";
 import "./pages/page-settings-appearance";
 
-const isThemeMode = Schema.is(ThemeMode);
-
-const modeOptions = [
-  { value: "system", label: "System", icon: mdiThemeLightDark },
-  { value: "dark", label: "Dark", icon: mdiWeatherNight },
-  { value: "light", label: "Light", icon: mdiWeatherSunny },
-] as const;
-
 /**
- * Every page, for the select in the header, which is the app's navigation,
- * grouped by area.
+ * Every page, for the command menu in the header, which is the app's
+ * navigation, grouped by area.
  */
 const jumpItems: readonly (NavItem & { readonly group: string })[] =
   navigation.flatMap((section) =>
     section.items.map((item) => ({ ...item, group: section.label || "Pages" })),
   );
 
-const jumpOptions: readonly SelectOption[] = jumpItems.map((item) => ({
+const jumpOptions: readonly OptionItem[] = jumpItems.map((item) => ({
   value: item.href,
   label: item.label,
   icon: item.icon,
@@ -117,12 +102,42 @@ export class SbApp extends LitElement {
       }
 
       .jump {
+        display: flex;
         flex: 1 1 24rem;
+        gap: var(--sb-space-2);
+        align-items: center;
         min-width: 0;
         max-width: 26rem;
+        height: 2.25rem;
         margin-inline-start: var(--sb-space-4);
-        --sb-select-width: 26rem;
-        --sb-select-max-height: min(36rem, 70dvh);
+        padding: 0 var(--sb-space-2) 0 var(--sb-space-3);
+        font: inherit;
+        color: var(--sb-color-text);
+        text-align: start;
+        cursor: pointer;
+        background: var(--sb-color-sunken);
+        border: 1px solid var(--sb-color-border);
+        border-radius: var(--sb-radius-m);
+        transition: border-color var(--sb-duration-fast) var(--sb-easing);
+      }
+
+      .jump:hover {
+        border-color: var(--gw-color-border-loud);
+      }
+
+      .jump .current {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Phones rarely have a keyboard, and the page name needs the room */
+      @media (width < 40rem) {
+        .jump kbd {
+          display: none;
+        }
       }
 
       .status {
@@ -142,7 +157,6 @@ export class SbApp extends LitElement {
 
       @media (max-width: 40rem) {
         .brand span,
-        .mode,
         .status .label {
           display: none;
         }
@@ -156,37 +170,14 @@ export class SbApp extends LitElement {
 
   readonly #settings = new AtomController(this, () => connectionSettings);
 
-  readonly #appearance = new AtomController(this, () => appearance);
+  @query(".commands") private commands?: GwCommandMenu;
 
-  // Read so the theme is applied, and follows changes
-  readonly #theme = new AtomController(this, () => appliedTheme);
-
-  @query(".jump") private jump?: SbSelect;
-
-  constructor() {
-    super();
-    this.addController(
-      new HotkeyController(this, "Mod+K", () => this.jump?.show(), {
-        preventDefault: true,
-      }),
-    );
-  }
-
-  override willUpdate(): void {
-    // Reading it keeps the theme atom mounted
-    void this.#theme.value;
-  }
+  #openCommands = () => {
+    this.commands?.show();
+  };
 
   #onJump = (event: CustomEvent<{ readonly value: string }>) => {
     navigate(event.detail.value);
-  };
-
-  #onModeChange = (event: CustomEvent<{ readonly value: string }>) => {
-    const mode = event.detail.value;
-
-    if (isThemeMode(mode)) {
-      registry.set(appearance, { ...this.#appearance.value, mode });
-    }
   };
 
   #renderStatus() {
@@ -212,7 +203,6 @@ export class SbApp extends LitElement {
 
   override render() {
     const location = this.#location.value;
-    const current = this.#appearance.value;
 
     const active = jumpItems.find((item) => item.matches(location));
 
@@ -228,26 +218,33 @@ export class SbApp extends LitElement {
           />
           <span>System Bridge</span>
         </a>
-        <sb-select
+        <button
           class="jump"
+          type="button"
+          aria-haspopup="dialog"
+          @click=${this.#openCommands}
+        >
+          ${icon(active?.icon ?? mdiMagnify)}
+          <span class="current">${active?.label ?? "Go to…"}</span>
+          <kbd>${navigator.userAgent.includes("Mac") ? "⌘ K" : "Ctrl K"}</kbd>
+        </button>
+        <gw-command-menu
+          class="commands"
           label="Go to page"
-          placeholder="Go to…"
-          search-placeholder="Search pages"
-          shortcut=${navigator.userAgent.includes("Mac") ? "⌘ K" : "Ctrl K"}
+          placeholder="Search pages"
           .options=${jumpOptions}
-          .value=${active?.href ?? ""}
-          @value-changed=${this.#onJump}
-        ></sb-select>
+          @pick=${this.#onJump}
+        ></gw-command-menu>
         <span class="spacer"></span>
         ${this.#renderStatus()}
-        <sb-segmented
-          class="mode"
-          icons-only
-          label="Colour scheme"
-          .options=${modeOptions}
-          .value=${current.mode}
-          @value-changed=${this.#onModeChange}
-        ></sb-segmented>
+        <a
+          class="button plain icon-only"
+          href=${href("settingsAppearance")}
+          aria-label="Appearance"
+          title="Appearance"
+        >
+          ${icon(mdiPaletteOutline)}
+        </a>
         <a
           class="button plain icon-only"
           href=${DOCS_URL}

@@ -76,9 +76,11 @@ export const shared = css`
   kbd {
     display: inline-flex;
     align-items: center;
-    padding: 0 var(--sb-space-1);
+    padding: var(--sb-space-0-5) var(--sb-space-1-5);
     font-size: var(--sb-font-size-2xs);
+    line-height: 1;
     color: var(--sb-color-muted);
+    background: var(--sb-color-surface);
     border: 1px solid var(--sb-color-border);
     border-bottom-width: 2px;
     border-radius: var(--sb-radius-s);

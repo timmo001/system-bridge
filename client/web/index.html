@@ -9,27 +9,10 @@
     <title>System Bridge</title>
     <style>
       html {
-        background: var(--sb-color-bg, Canvas);
-        color: var(--sb-color-text, CanvasText);
+        background: var(--gw-color-surface-default, Canvas);
+        color: var(--gw-color-text-primary, CanvasText);
       }
     </style>
-    <script>
-      // Apply the last theme before the first paint, so a reload never
-      // flashes the wrong colours. The app keeps this up to date.
-      try {
-        const css = localStorage.getItem("system-bridge-theme-css");
-
-        if (css) {
-          const style = document.createElement("style");
-
-          style.id = "sb-theme";
-          style.textContent = css;
-          document.head.append(style);
-        }
-      } catch {
-        // Storage can be unavailable, such as in a private window
-      }
-    </script>
     <script type="module" src="/src/app.ts"></script>
   </head>
   <body>
