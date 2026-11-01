@@ -2,7 +2,6 @@ import { css, html, svg } from "lit";
 
 import "@timmo001/groundwork-ui/gw-chip.ts";
 import "@timmo001/groundwork-ui/gw-dot.ts";
-import "@timmo001/groundwork-ui/gw-spinner.ts";
 
 /** A Material Design icon, from one of `@mdi/js`'s paths. */
 export const icon = (path: string, label?: string) =>
@@ -17,15 +16,8 @@ export const icon = (path: string, label?: string) =>
   </svg>`;
 
 /**
- * A spinner in place of a button's icon while its action runs. It waits
- * before fading in, so a quick action never flashes it.
- */
-export const spinner = () => html`<gw-spinner label="Working"></gw-spinner>`;
-
-/**
- * Styles every component shares: type, icons, buttons, fields, chips and
- * facts. Buttons and fields are native elements with classes,
- * so forms, focus and keyboard behaviour work as the browser intends.
+ * Styles every component shares: type, icons, layout helpers and the few
+ * field hints the Groundwork components don't cover.
  */
 export const shared = css`
   :host {
@@ -162,143 +154,6 @@ export const shared = css`
     outline-offset: 2px;
   }
 
-  /* Buttons, on <button> or <a> */
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--gw-space-2);
-    min-height: 2.25rem;
-    padding: 0 var(--gw-space-4);
-    font: inherit;
-    font-size: var(--gw-font-size-s);
-    font-weight: var(--gw-font-weight-strong);
-    line-height: 1;
-    color: var(--gw-color-text-primary);
-    text-decoration: none;
-    white-space: nowrap;
-    cursor: pointer;
-    background: var(--gw-color-surface-overlay);
-    border: 1px solid var(--gw-color-border-normal);
-    border-radius: var(--gw-radius-m);
-    transition:
-      background var(--gw-motion-fast) var(--gw-motion-easing),
-      border-color var(--gw-motion-fast) var(--gw-motion-easing),
-      color var(--gw-motion-fast) var(--gw-motion-easing);
-    --sb-icon-size: 1.125rem;
-  }
-
-  .button:hover {
-    background: color-mix(
-      in oklab,
-      var(--gw-color-surface-overlay),
-      var(--gw-color-text-primary) 6%
-    );
-  }
-
-  .button:active {
-    background: color-mix(
-      in oklab,
-      var(--gw-color-surface-overlay),
-      var(--gw-color-text-primary) 10%
-    );
-  }
-
-  .button.filled {
-    color: var(--gw-color-on-accent);
-    background: var(--gw-color-accent);
-    border-color: transparent;
-  }
-
-  .button.filled:hover {
-    background: color-mix(
-      in oklab,
-      var(--gw-color-accent),
-      var(--gw-color-text-primary) 12%
-    );
-  }
-
-  .button.tonal {
-    color: var(--gw-color-accent);
-    background: var(--gw-color-fill-accent-quiet);
-    border-color: transparent;
-  }
-
-  .button.tonal:hover {
-    background: color-mix(in oklab, var(--gw-color-accent) 24%, transparent);
-  }
-
-  .button.plain {
-    background: transparent;
-    border-color: transparent;
-  }
-
-  .button.plain:hover {
-    background: var(--gw-color-fill-neutral-hovered);
-  }
-
-  .button.danger {
-    color: var(--gw-color-danger);
-    background: var(--gw-color-fill-danger-quiet);
-    border-color: transparent;
-  }
-
-  .button.danger:hover {
-    background: color-mix(in oklab, var(--gw-color-danger) 26%, transparent);
-  }
-
-  .button.small {
-    min-height: 1.875rem;
-    padding: 0 var(--gw-space-3);
-    font-size: var(--gw-font-size-xs);
-    --sb-icon-size: 1rem;
-  }
-
-  .button.large {
-    min-height: 3rem;
-    padding: 0 var(--gw-space-6);
-    font-size: var(--gw-font-size-m);
-    --sb-icon-size: 1.5rem;
-  }
-
-  /* Always square, so a round one is a circle */
-  .button.icon-only {
-    width: 2.25rem;
-    min-height: 0;
-    aspect-ratio: 1;
-    padding: 0;
-  }
-
-  .button.icon-only.small {
-    width: 1.875rem;
-  }
-
-  .button.icon-only.large {
-    width: 3rem;
-  }
-
-  .button.round {
-    border-radius: var(--gw-radius-pill);
-  }
-
-  .button:disabled,
-  .button[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .button.plain:disabled,
-  .button.plain[aria-disabled="true"] {
-    color: var(--gw-color-text-secondary);
-  }
-
-  /* Matches the icon it stands in for */
-  gw-spinner {
-    --gw-spinner-size: var(--sb-icon-size, 1.25rem);
-    color: currentColor;
-  }
-
   /* Fields */
   .hint {
     font-size: var(--gw-font-size-xs);
@@ -315,50 +170,6 @@ export const shared = css`
     height: 1.125rem;
     margin: 0;
     accent-color: var(--gw-color-accent);
-  }
-
-  /* Cards */
-  .card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gw-space-4);
-    padding: var(--gw-space-5);
-    background: var(--gw-color-surface-raised);
-    border: 1px solid var(--gw-color-border-normal);
-    border-radius: var(--gw-radius-l);
-  }
-
-  a.card {
-    color: inherit;
-    text-decoration: none;
-    transition: border-color var(--gw-motion-fast) var(--gw-motion-easing);
-  }
-
-  a.card:hover {
-    border-color: color-mix(
-      in oklab,
-      var(--gw-color-accent) 50%,
-      var(--gw-color-border-normal)
-    );
-  }
-
-  /* Label and value pairs */
-  dl.facts {
-    display: grid;
-    grid-template-columns: minmax(7rem, max-content) 1fr;
-    gap: var(--gw-space-2) var(--gw-space-4);
-    margin: 0;
-    font-size: var(--gw-font-size-s);
-  }
-
-  dl.facts dt {
-    color: var(--gw-color-text-secondary);
-  }
-
-  dl.facts dd {
-    margin: 0;
-    min-width: 0;
-    overflow-wrap: anywhere;
   }
 `;
 
@@ -389,70 +200,10 @@ export const pageStyles = css`
     margin: 0;
   }
 
-  :host([embedded]) .page-header .tile {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--gw-radius-m);
-    --sb-icon-size: 1.375rem;
-  }
-
-  :host([embedded]) .page-header h2 {
-    font-size: var(--gw-font-size-l);
-  }
-
-  .page-header {
+  /* The controls a page header holds */
+  gw-page-header > .actions {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: var(--gw-space-4);
-  }
-
-  .page-header .tile {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    color: var(--gw-color-accent);
-    background: var(--gw-color-fill-accent-quiet);
-    border-radius: var(--gw-radius-l);
-    --sb-icon-size: 1.625rem;
-  }
-
-  .page-header .titles {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--gw-space-1);
-    min-width: min(100%, 14rem);
-  }
-
-  .page-header .description {
-    font-size: var(--gw-font-size-s);
-    color: var(--gw-color-text-secondary);
-  }
-
-  /* Controls sit at the top right, beside the title, at every width */
-  .page-header:has(.actions) {
-    flex-wrap: nowrap;
-    align-items: flex-start;
-  }
-
-  .page-header .actions {
-    display: flex;
-    flex: none;
-    align-items: center;
-    justify-content: flex-end;
     gap: var(--gw-space-2);
-    margin-inline-start: auto;
-  }
-
-  .page-header:has(.actions) .titles {
-    min-width: 0;
-  }
-
-  .page-header:has(.actions) h1 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 `;

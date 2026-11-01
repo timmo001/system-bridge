@@ -192,17 +192,6 @@ export const dashboardStyles = css`
     gap: var(--gw-space-4);
     scroll-margin-top: calc(var(--sb-header-height) + var(--gw-space-4));
   }
-
-  .dashboard-section .page-header .tile {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--gw-radius-m);
-    --sb-icon-size: 1.375rem;
-  }
-
-  .dashboard-section .page-header h2 {
-    font-size: var(--gw-font-size-l);
-  }
 `;
 
 export interface GraphCard {
@@ -317,7 +306,7 @@ export const facts = (
         ],
   );
 
-  return shown.length === 0 ? nothing : html`<dl class="facts">${shown}</dl>`;
+  return shown.length === 0 ? nothing : html`<gw-facts>${shown}</gw-facts>`;
 };
 
 export const yesNo = (value: boolean | null | undefined) =>

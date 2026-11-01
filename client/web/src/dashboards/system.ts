@@ -1239,18 +1239,18 @@ const dashboardSection = (section: {
   readonly cards: TemplateResult;
 }) => html`
   <section class="dashboard-section" id=${section.id}>
-    <header class="page-header">
-      <span class="tile">${icon(section.icon)}</span>
-      <div class="titles">
-        <h2>${section.heading}</h2>
-        <p class="description">${section.description}</p>
-      </div>
+    <gw-page-header
+      level="2"
+      heading=${section.heading}
+      description=${section.description}
+      icon=${section.icon}
+    >
       ${
         section.actions === undefined
           ? nothing
-          : html`<div class="actions">${section.actions}</div>`
+          : html`<div slot="actions" class="actions">${section.actions}</div>`
       }
-    </header>
+    </gw-page-header>
     <div class="dashboard">${section.cards}</div>
   </section>
 `;

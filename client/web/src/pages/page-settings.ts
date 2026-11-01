@@ -16,7 +16,6 @@ import { customElement, state } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
-import { icon } from "~/components/shared-styles";
 import { moduleInfo } from "~/lib/navigation";
 import { href } from "~/lib/router";
 
@@ -52,14 +51,6 @@ export class PageSettings extends SbSettingsPage {
         margin: 0;
         padding: 0;
         list-style: none;
-      }
-
-      .links .button {
-        justify-content: flex-start;
-        width: 100%;
-        height: auto;
-        padding-block: var(--gw-space-2);
-        text-align: start;
       }
     `,
   ];
@@ -226,19 +217,16 @@ const elsewhere = [
 const elsewhereLinks = elsewhere.map(
   (item) =>
     html`<li>
-      <a
-        class="button plain"
+      <gw-card
+        level="3"
         href=${href("module", {
           params: { module: item.module },
           hash: item.section,
         })}
-      >
-        ${icon(item.icon)}
-        <span class="stack" style="--sb-stack-gap: 0">
-          <span>${item.label}</span>
-          <span class="hint">On the ${moduleInfo[item.module].label} page</span>
-        </span>
-      </a>
+        icon=${item.icon}
+        heading=${item.label}
+        description="On the ${moduleInfo[item.module].label} page"
+      ></gw-card>
     </li>`,
 );
 

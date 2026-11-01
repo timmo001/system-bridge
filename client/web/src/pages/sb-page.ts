@@ -4,13 +4,15 @@ import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-checkbox.ts";
 import "@timmo001/groundwork-ui/gw-empty-state.ts";
+import "@timmo001/groundwork-ui/gw-facts.ts";
 import "@timmo001/groundwork-ui/gw-input.ts";
+import "@timmo001/groundwork-ui/gw-page-header.ts";
 import "@timmo001/groundwork-ui/gw-setting-row.ts";
 import "@timmo001/groundwork-ui/gw-skeleton.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
-import { pageStyles, icon, shared } from "~/components/shared-styles";
+import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   type ConnectionStatus,
@@ -61,30 +63,18 @@ export abstract class SbPage extends LitElement {
 
   protected renderHeader(header: PageHeader): TemplateResult {
     return html`
-      <header class="page-header">
-        ${
-          header.icon === undefined
-            ? nothing
-            : html`<span class="tile">${icon(header.icon)}</span>`
-        }
-        <div class="titles">
-          ${
-            this.embedded
-              ? html`<h2>${header.heading}</h2>`
-              : html`<h1>${header.heading}</h1>`
-          }
-          ${
-            header.description === undefined
-              ? nothing
-              : html`<p class="description">${header.description}</p>`
-          }
-        </div>
+      <gw-page-header
+        level=${this.embedded ? 2 : 1}
+        heading=${header.heading}
+        description=${header.description ?? ""}
+        icon=${header.icon ?? ""}
+      >
         ${
           header.actions === undefined
             ? nothing
-            : html`<div class="actions">${header.actions}</div>`
+            : html`<div slot="actions" class="actions">${header.actions}</div>`
         }
-      </header>
+      </gw-page-header>
     `;
   }
 
