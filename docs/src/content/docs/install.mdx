@@ -1,6 +1,6 @@
 ---
 title: Download and install
-description: Install System Bridge on Linux or Windows from the AUR, a package, the installer, mise or an archive.
+description: Install System Bridge on Linux or Windows from the AUR, a package, the installer, mise, aqua or an archive.
 ---
 
 Download the package for your platform from the [releases page](https://github.com/timmo001/system-bridge/releases).
@@ -130,13 +130,13 @@ If you run System Bridge from `systemd.user.services` in your configuration, Nix
 </Tab>
 <Tab title="mise">
 
-[mise](https://mise.jdx.dev) installs the Linux archive from the latest release:
+[mise](https://mise.jdx.dev) installs the Linux archive from the latest release, through the [aqua registry](https://github.com/aquaproj/aqua-registry):
 
 ```bash
-mise use -g github:timmo001/system-bridge
+mise use -g aqua:timmo001/system-bridge
 ```
 
-Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+Pin a version with `aqua:timmo001/system-bridge@<version>`; the archives start at 5.20.0. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations). [aqua](https://aquaproj.github.io) itself works too, with `aqua g -i timmo001/system-bridge` and then `aqua i`.
 
 The executable needs `libx11`, `libxtst`, `libxkbcommon` and `libxkbcommon-x11` (`libx11-6`, `libxtst6`, `libxkbcommon0` and `libxkbcommon-x11-0` on Debian / Ubuntu), even without a desktop. Nothing starts it for you: run `system-bridge backend`, or add your own service or autostart entry. See [Running](/running).
 
@@ -168,13 +168,13 @@ Run the `system-bridge-<version>-setup.exe` installer to install the application
 </Tab>
 <Tab title="mise">
 
-[mise](https://mise.jdx.dev) installs the Windows archive from the latest release:
+[mise](https://mise.jdx.dev) installs the Windows archive from the latest release, through the [aqua registry](https://github.com/aquaproj/aqua-registry):
 
 ```powershell
-mise use -g github:timmo001/system-bridge
+mise use -g aqua:timmo001/system-bridge
 ```
 
-Pin a version with `github:timmo001/system-bridge@<version>`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations). Nothing starts it for you: run `system-bridge backend`. See [Running](/running).
+Pin a version with `aqua:timmo001/system-bridge@<version>`; the archives start at 5.20.0. aqua itself works too, with `aqua g -i timmo001/system-bridge` and then `aqua i`. mise checks the download against the release's [GitHub attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations). Nothing starts it for you: run `system-bridge backend`. See [Running](/running).
 
 </Tab>
 <Tab title="Archive">
