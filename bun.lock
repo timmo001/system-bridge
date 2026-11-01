@@ -87,7 +87,7 @@
         "@astrojs/cloudflare": "14.4.3",
         "@fontsource-variable/inter": "5.3.0",
         "@fontsource-variable/jetbrains-mono": "5.3.0",
-        "@timmo001/docs-kit": "0.4.1",
+        "@timmo001/docs-kit": "0.5.0",
         "blume": "2.2.6",
         "sharp": "0.35.5",
       },
@@ -738,13 +738,13 @@
 
     "@tanstack/table-core": ["@tanstack/table-core@9.3.1", "", { "dependencies": { "@tanstack/store": "^0.11.2" } }, "sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ=="],
 
-    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.4.1", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.4.1", "@timmo001/groundwork-ui": "0.4.1", "sharp": "0.35.5" }, "peerDependencies": { "blume": "2.2.6" } }, "sha512-hNTOmD9IgpkAOETUQbuhTcrWq6ky6rF4U++xS3hlUOU1SULFElxiy4I9pnlNfJQ0cpaxBW62Af4Npy//xPZjfA=="],
+    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.5.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.5.0", "@timmo001/groundwork-ui": "0.5.0", "sharp": "0.35.5" }, "peerDependencies": { "blume": "2.2.6" } }, "sha512-mOnpLRv6dzgSrco6BpNjsX4aj1fHkFC9h+rjzv89lX2X9RTNoVQJbMWPS9IcbwmMFP98coovrI3eOQMaqQVEaQ=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.4.1", "", { "dependencies": { "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-WYMUNNZtTfg824br+sfMq5L5XpxtnNzU85r2rQvyXyHRfxvTFn+xDJpu7l+IdFvBwNBxtALqzIQdr7wHnCTplw=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.5.0", "", { "dependencies": { "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-DkjF8UrN8L1rnv7MB3yvinv57M3iI0jUzc40rGFbnglDxIgsEquV90KjhNQK2XiyHK6QbjM/MkZ+ToWMYaQh0w=="],
 
-    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.4.1", "", {}, "sha512-FciM6ujS2fKzl5E7WshZRmdNit37KZqOP3OZhEhl/JfIS2omt2KWngNSthfOj6sC7vn5cU+Jtd36COMHOFBkEw=="],
+    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.5.0", "", {}, "sha512-z0lsN50ceNpBJeNIUIBGEIVrt4Jy4Oy94B5iR9oda/Pee3bi2QZUozP3q9mt+lVUaZEoo7z54tMjBcsVBjnWHQ=="],
 
     "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.6.3", "", { "peerDependencies": { "@oxlint/plugins": "1.88.0", "oxlint": "1.88.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-DxIid4Bu5t8bLuWcAIZlikLVLabSrJ1ai2siFB+E+7HdY3TPMgsUU44/Is+9RAQYVH8LEYjOQFVedH5MOXL5YQ=="],
 
