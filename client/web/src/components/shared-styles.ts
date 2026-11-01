@@ -300,18 +300,6 @@ export const shared = css`
   }
 
   /* Fields */
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--gw-space-1) * 1.5);
-  }
-
-  .field > label,
-  .label {
-    font-size: var(--gw-font-size-s);
-    font-weight: var(--gw-font-weight-strong);
-  }
-
   .hint {
     font-size: var(--gw-font-size-xs);
     color: var(--gw-color-text-secondary);
@@ -320,45 +308,6 @@ export const shared = css`
   .error-text {
     font-size: var(--gw-font-size-xs);
     color: var(--gw-color-danger);
-  }
-
-  .input {
-    width: 100%;
-    min-height: 2.5rem;
-    padding: 0 var(--gw-space-3);
-    font: inherit;
-    font-size: var(--gw-font-size-s);
-    color: var(--gw-color-text-primary);
-    background: var(--gw-color-surface-lower);
-    border: 1px solid var(--gw-color-border-normal);
-    border-radius: var(--gw-radius-m);
-    transition: border-color var(--gw-motion-fast) var(--gw-motion-easing);
-  }
-
-  .input::placeholder {
-    color: color-mix(in oklab, var(--gw-color-text-secondary) 80%, transparent);
-  }
-
-  .input:hover {
-    border-color: color-mix(
-      in oklab,
-      var(--gw-color-border-normal),
-      var(--gw-color-text-primary) 20%
-    );
-  }
-
-  .input:focus-visible {
-    outline: none;
-    border-color: var(--gw-color-accent);
-    box-shadow: 0 0 0 3px var(--gw-color-fill-accent-quiet);
-  }
-
-  .input[aria-invalid="true"] {
-    border-color: var(--gw-color-danger);
-  }
-
-  .input:disabled {
-    opacity: 0.6;
   }
 
   .checkbox {
@@ -377,11 +326,6 @@ export const shared = css`
     background: var(--gw-color-surface-raised);
     border: 1px solid var(--gw-color-border-normal);
     border-radius: var(--gw-radius-l);
-  }
-
-  .card.flush {
-    padding: 0;
-    overflow: hidden;
   }
 
   a.card {
