@@ -148,6 +148,8 @@ class Settings:
     desktop: SettingsDesktop = field(default_factory=SettingsDesktop)
     disks: SettingsDisks = field(default_factory=SettingsDisks)
     media: SettingsMedia = field(default_factory=SettingsMedia)
+    # The web client's own theme document as JSON text, empty when there's none
+    theme: str = field(default="")
 
     def __post_init__(self) -> None:
         """Post Init."""

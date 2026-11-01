@@ -134,6 +134,9 @@ type Settings struct {
 	Desktop    SettingsDesktop  `json:"desktop" mapstructure:"desktop"`
 	Disks      SettingsDisks    `json:"disks" mapstructure:"disks"`
 	Media      SettingsMedia    `json:"media" mapstructure:"media"`
+	// Theme is the web client's own theme, as its Groundwork theme document's
+	// JSON text, so every client of this host gets it. Empty when there's none.
+	Theme string `json:"theme" mapstructure:"theme"`
 }
 
 func Load() (*Settings, error) {
@@ -161,6 +164,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
+	viper.SetDefault("theme", "")
 
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
@@ -283,6 +287,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("desktop.hyprlandCode", cfg.Desktop.HyprlandCode)
 	viper.Set("disks.allowedSecondaryMountPoints", cfg.Disks.AllowedSecondaryMountPoints)
 	viper.Set("media.directories", cfg.Media.Directories)
+	viper.Set("theme", cfg.Theme)
 
 	if err := viper.WriteConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

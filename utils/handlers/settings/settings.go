@@ -28,5 +28,6 @@ func Update(current *Settings, new *Settings) error {
 	current.Disks = new.Disks
 	current.Media = new.Media
 	current.Commands = new.Commands
+	current.Theme = new.Theme
 	return current.Save()
 }

@@ -177,6 +177,7 @@ Whenever the settings are saved, through any of the events above, every connecte
 | `commands.allowlist` | array | Commands that can be run via [Execute Command](#execute-command). Each entry is `{ id, name, command, workingDir, arguments, prefab }`. `prefab` is a [prefab](#list-command-prefabs)'s ID, or empty. With a prefab and an empty `command`, the prefab's program runs. |
 | `disks.allowedSecondaryMountPoints` | array | Secondary mount points to include in disk data. |
 | `media.directories` | array | Custom media directories as `{ name, path }`, exposed as [base directories](#files--directories). |
+| `theme` | string | The web client's own theme, as a Groundwork theme document's JSON text, so every client of this host gets it. Empty when there's none. |
 
 :::note
 Changing `autostart` or `logLevel` is applied immediately by the backend.

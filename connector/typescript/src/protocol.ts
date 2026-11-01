@@ -311,6 +311,12 @@ export const Settings = Schema.Struct({
   desktop: SettingsDesktop,
   disks: SettingsDisks,
   media: SettingsMedia,
+  /**
+   * The web client's own theme, as its Groundwork theme document's JSON
+   * text, so every client of this host gets it. Empty when there's none.
+   * Optional so older backends still decode.
+   */
+  theme: Schema.optionalKey(Schema.String),
 });
 
 export interface Settings extends Schema.Schema.Type<typeof Settings> {}

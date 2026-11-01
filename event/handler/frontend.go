@@ -15,5 +15,6 @@ func settingsToFrontend(s *settings.Settings) map[string]interface{} {
 		"hotkeys":    s.Hotkeys,
 		"logLevel":   string(s.LogLevel),
 		"media":      s.Media,
+		"theme":      s.Theme,
 	}
 }
