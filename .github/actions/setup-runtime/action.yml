@@ -15,7 +15,7 @@ runs:
     # Rerunning mise-action on Windows fails when it self-updates the locked mise.exe.
     - name: Set up mise
       if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
-      uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5
+      uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5
       with:
         # CI container images already ship the tools in /mise
         cache: ${{ job.container.id == '' }}
