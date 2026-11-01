@@ -25,6 +25,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
@@ -169,7 +170,7 @@ export class PageDiscord extends SbPage {
 
   /** Buttons carry their action, and a user or sound when it needs one. */
   #onButton = (event: MouseEvent) => {
-    if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+    if (!(event.currentTarget instanceof HTMLElement)) return;
 
     const { action, user, sound, label } = event.currentTarget.dataset;
 
@@ -311,17 +312,18 @@ export class PageDiscord extends SbPage {
         ${
           call === null
             ? nothing
-            : html`<button
+            : html`<gw-button
                 slot="actions"
-                class="button danger small"
-                type="button"
-                ?disabled=${this.#busy("LEAVE_VOICE_CHANNEL:")}
+                variant="danger"
+                appearance="filled"
+                size="small"
+                icon=${mdiPhoneHangup}
+                ?loading=${this.#busy("LEAVE_VOICE_CHANNEL:")}
                 data-action="LEAVE_VOICE_CHANNEL"
                 data-label="Leave the call"
                 @click=${this.#onButton}
-              >
-                ${icon(mdiPhoneHangup)} Leave
-              </button>`
+                >Leave</gw-button
+              >`
         }
         <div class="toggles" role="group" aria-label="Voice">
           ${this.#toggle("TOGGLE_MUTE", {
@@ -573,22 +575,22 @@ export class PageDiscord extends SbPage {
 
     const buttons = sounds.map(
       (sound) =>
-        html`<button
-          class="button small"
-          type="button"
-          ?disabled=${!inCall || this.#busy(`PLAY_SOUND:${sound.id}`)}
+        html`<gw-button
+          variant="neutral"
+          appearance="filled"
+          size="small"
+          ?disabled=${!inCall}
+          ?loading=${this.#busy(`PLAY_SOUND:${sound.id}`)}
           data-action="PLAY_SOUND"
           data-sound=${sound.id}
           data-label="Play ${sound.name}"
           @click=${this.#onButton}
-        >
-          ${
+          >${
             sound.emoji === null
               ? nothing
-              : html`<span aria-hidden="true">${sound.emoji}</span>`
-          }
-          ${sound.name}
-        </button>`,
+              : html`<span slot="icon" aria-hidden="true">${sound.emoji}</span>`
+          }${sound.name}</gw-button
+        >`,
     );
 
     return html`

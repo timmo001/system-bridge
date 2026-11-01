@@ -26,6 +26,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
@@ -495,7 +496,7 @@ export class PageMedia extends SbPage {
   };
 
   #onShowClick = (event: MouseEvent) => {
-    if (event.currentTarget instanceof HTMLButtonElement) {
+    if (event.currentTarget instanceof HTMLElement) {
       this.#choose(event.currentTarget.dataset.player ?? null);
     }
   };
@@ -909,14 +910,14 @@ export class PageMedia extends SbPage {
             label: `${playing ? "Pause" : "Play"} ${name}`,
           },
         )}
-        <button
-          class="button plain small"
-          type="button"
+        <gw-button
+          variant="neutral"
+          appearance="plain"
+          size="small"
           data-player=${player.id}
           @click=${this.#onShowClick}
+          >Show</gw-button
         >
-          Show
-        </button>
       </div>
     </gw-card>`;
   }
