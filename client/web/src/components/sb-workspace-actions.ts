@@ -155,7 +155,7 @@ export class SbWorkspaceActions extends LitElement {
           size="small"
           name="name"
           label="New name for ${name}"
-          hide-label
+          label-hidden
           placeholder=${workspace.id}
           .value=${name}
         ></gw-input>

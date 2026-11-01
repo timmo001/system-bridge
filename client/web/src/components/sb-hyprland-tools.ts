@@ -145,7 +145,7 @@ const fieldInput = (field: ToolField) =>
     class=${field.number ? "number" : "text"}
     size="small"
     label=${field.label}
-    hide-label
+    label-hidden
     name=${field.name}
     type=${field.number ? "number" : "text"}
     step=${field.number ? "1" : nothing}

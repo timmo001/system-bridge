@@ -163,11 +163,6 @@ export class PageMedia extends SbPage {
         accent-color: var(--gw-color-accent);
       }
 
-      /* Shuffle or repeat that's on */
-      .controls .button.pressed {
-        color: var(--gw-color-accent);
-      }
-
       .players {
         display: grid;
         gap: var(--gw-space-4);
@@ -400,17 +395,6 @@ export class PageMedia extends SbPage {
           justify-content: center;
         }
       }
-
-      .controls .button.main {
-        width: 3.5rem;
-        --sb-icon-size: 1.75rem;
-      }
-
-      /* Unavailable, it keeps its circle, in grey */
-      .controls .button.main:disabled {
-        background: var(--gw-color-surface-lower);
-        border-color: var(--gw-color-border-normal);
-      }
     `,
   ];
 
@@ -502,7 +486,7 @@ export class PageMedia extends SbPage {
   };
 
   #onControlClick = (event: MouseEvent) => {
-    if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+    if (!(event.currentTarget instanceof HTMLElement)) return;
 
     const { action, player } = event.currentTarget.dataset;
 
@@ -575,18 +559,18 @@ export class PageMedia extends SbPage {
     const label = options.label ?? actionLabels[action];
 
     // A main button that can't be used is greyed, like the others
-    return html`<button
-      class="button round icon-only ${options.small ? "" : "large"} ${options.main ? "main" : ""} ${options.main && !disabled ? "filled" : "plain"}"
-      type="button"
-      aria-label=${label}
-      title=${label}
+    return html`<gw-button
+      variant=${options.main ? "brand" : "neutral"}
+      appearance=${options.main && !disabled ? "accent" : "plain"}
+      size=${options.main ? "xl" : options.small ? "small" : "large"}
+      labels="hide"
+      icon=${path}
       ?disabled=${disabled}
       data-action=${action}
       data-player=${options.player ?? ""}
       @click=${this.#onControlClick}
-    >
-      ${icon(path)}
-    </button>`;
+      >${label}</gw-button
+    >`;
   }
 
   /** A button that turns shuffle on or off, or moves repeat on. */
@@ -599,17 +583,18 @@ export class PageMedia extends SbPage {
   ) {
     const pending = this.#control.value.waiting && this.sent?.action === action;
 
-    return html`<button
-      class="button round icon-only plain ${pressed ? "pressed" : ""}"
-      type="button"
-      aria-label=${label}
-      aria-pressed=${pressed ? "true" : "false"}
-      title=${label}
+    return html`<gw-button
+      variant=${pressed ? "brand" : "neutral"}
+      appearance="plain"
+      size="large"
+      labels="hide"
+      toggle
+      ?pressed=${pressed}
+      icon=${path}
       ?disabled=${pending}
       @click=${onClick}
-    >
-      ${icon(path)}
-    </button>`;
+      >${label}</gw-button
+    >`;
   }
 
   /** Picks which player the card shows, when there's more than one. */

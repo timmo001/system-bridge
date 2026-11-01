@@ -152,24 +152,6 @@ export class PageOverview extends SbPage {
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
       }
 
-      .shortcut {
-        flex-direction: row;
-        align-items: center;
-        gap: var(--gw-space-3);
-        padding: var(--gw-space-3);
-      }
-
-      .shortcut > .icon {
-        flex-shrink: 0;
-        color: var(--gw-color-accent);
-      }
-
-      .shortcut .text {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-      }
-
       .gauges gw-gauge {
         --gw-gauge-size: 8rem;
       }
@@ -416,17 +398,16 @@ export class PageOverview extends SbPage {
       enabled: boolean | null | undefined,
       main = false,
     ) =>
-      html`<button
-        class="button round icon-only ${main ? "filled" : "plain"}"
-        type="button"
-        aria-label=${label}
-        title=${label}
+      html`<gw-button
+        variant=${main ? "brand" : "neutral"}
+        appearance=${main ? "accent" : "plain"}
+        labels="hide"
+        icon=${path}
         ?disabled=${waiting || enabled === false}
         data-action=${action}
         @click=${this.#onControlClick}
-      >
-        ${icon(path)}
-      </button>`;
+        >${label}</gw-button
+      >`;
 
     const players = data.media?.players ?? [];
 
@@ -525,7 +506,7 @@ export class PageOverview extends SbPage {
 
   /** Sends to the player the card shows, or the backend's pick without one. */
   #onControlClick = (event: MouseEvent) => {
-    if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+    if (!(event.currentTarget instanceof HTMLElement)) return;
 
     const { action } = event.currentTarget.dataset;
 
@@ -550,18 +531,12 @@ export class PageOverview extends SbPage {
 
     const shortcuts = moduleOrder.map(
       (module) =>
-        html`<a
-          class="card shortcut"
+        html`<gw-card
           href=${href("module", { params: { module } })}
-        >
-          ${icon(moduleInfo[module].icon)}
-          <span class="text">
-            <strong class="small">${moduleInfo[module].label}</strong>
-            <span class="muted xsmall truncate"
-              >${summary(module, data) || moduleInfo[module].description}</span
-            >
-          </span>
-        </a>`,
+          icon=${moduleInfo[module].icon}
+          heading=${moduleInfo[module].label}
+          description=${summary(module, data) || moduleInfo[module].description}
+        ></gw-card>`,
     );
 
     return html`

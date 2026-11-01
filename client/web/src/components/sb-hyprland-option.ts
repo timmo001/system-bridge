@@ -86,7 +86,7 @@ export class SbHyprlandOption extends LitElement {
               min="0"
               step="1"
               label=${option.name}
-              hide-label
+              label-hidden
               .value=${live(String(option.int ?? ""))}
               ?disabled=${this.#set.value.waiting}
               @change=${this.#onNumber}

@@ -31,7 +31,6 @@ import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
-import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
@@ -80,12 +79,6 @@ export class PageDiscord extends SbPage {
         display: flex;
         flex-wrap: wrap;
         gap: var(--gw-space-2);
-      }
-
-      .toggles .button[aria-pressed="true"] {
-        color: var(--gw-color-on-accent);
-        background: var(--gw-color-danger);
-        border-color: transparent;
       }
 
       gw-range {
@@ -253,18 +246,18 @@ export class PageDiscord extends SbPage {
       readonly disabled?: boolean;
     },
   ) {
-    return html`<button
-      class="button"
-      type="button"
-      aria-pressed=${options.pressed === true ? "true" : "false"}
+    return html`<gw-button
+      variant=${options.pressed === true ? "danger" : "neutral"}
+      appearance="outlined"
+      toggle
+      ?pressed=${options.pressed === true}
+      icon=${options.pressed === true ? options.on : options.off}
       ?disabled=${options.disabled === true || options.pressed === null || this.#busy(`${action}:`)}
       data-action=${action}
       data-label=${options.label}
       @click=${this.#onButton}
-    >
-      ${icon(options.pressed === true ? options.on : options.off)}
-      ${options.label}
-    </button>`;
+      >${options.label}</gw-button
+    >`;
   }
 
   #level(options: {
@@ -541,20 +534,20 @@ export class PageDiscord extends SbPage {
             : nothing
         }
       </span>
-      <button
-        class="button icon-only plain"
-        type="button"
-        aria-pressed=${muted ? "true" : "false"}
-        aria-label="Mute ${name} for you"
-        title=${muted ? `Unmute ${name}` : `Mute ${name}`}
+      <gw-button
+        variant=${muted ? "danger" : "neutral"}
+        appearance="plain"
+        labels="hide"
+        toggle
+        ?pressed=${muted}
+        icon=${muted ? mdiVolumeOff : mdiVolumeHigh}
         ?disabled=${this.#busy(`TOGGLE_USER_MUTE:${member.user.id}`)}
         data-action="TOGGLE_USER_MUTE"
         data-user=${member.user.id}
         data-label="Mute ${name}"
         @click=${this.#onButton}
+        >Mute ${name} for you</gw-button
       >
-        ${icon(muted ? mdiVolumeOff : mdiVolumeHigh)}
-      </button>
       ${this.#level({
         id: `volume-${member.user.id}`,
         label: `Volume for ${name}`,

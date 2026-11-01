@@ -231,17 +231,18 @@ export class SbAudioMain extends LitElement {
             ${
               device.muted === null
                 ? nothing
-                : html`<button
-                    class="button round icon-only large ${device.muted ? "plain" : "filled"}"
-                    type="button"
-                    aria-pressed=${device.muted ? "true" : "false"}
-                    aria-label="Mute ${device.name}"
-                    title=${device.muted ? `Unmute ${device.name}` : `Mute ${device.name}`}
+                : html`<gw-button
+                    variant=${device.muted ? "danger" : "brand"}
+                    appearance=${device.muted ? "filled" : "accent"}
+                    size="large"
+                    labels="hide"
+                    toggle
+                    ?pressed=${device.muted}
+                    icon=${device.muted ? kind.muted : kind.unmuted}
                     ?disabled=${waiting}
                     @click=${this.#onMute}
-                  >
-                    ${icon(device.muted ? kind.muted : kind.unmuted)}
-                  </button>`
+                    >Mute ${device.name}</gw-button
+                  >`
             }
             ${
               device.volume === null

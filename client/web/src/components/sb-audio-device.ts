@@ -7,7 +7,7 @@ import { live } from "lit/directives/live.js";
 import "@timmo001/groundwork-ui/gw-button.ts";
 import "@timmo001/groundwork-ui/gw-range.ts";
 import { rangeTarget } from "~/lib/select";
-import { icon, shared } from "./shared-styles";
+import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, audioControl, registry } from "~/lib/atoms";
 import { formatPercent } from "~/lib/format";
@@ -147,17 +147,18 @@ export class SbAudioDevice extends LitElement {
         ${
           target.muted === null
             ? nothing
-            : html`<button
-                class="button icon-only plain small"
-                type="button"
-                aria-pressed=${target.muted ? "true" : "false"}
-                aria-label="Mute ${target.name}"
-                title=${target.muted ? `Unmute ${target.name}` : `Mute ${target.name}`}
+            : html`<gw-button
+                variant=${target.muted ? "danger" : "neutral"}
+                appearance="plain"
+                size="small"
+                labels="hide"
+                toggle
+                ?pressed=${target.muted}
+                icon=${target.muted ? mdiVolumeOff : mdiVolumeHigh}
                 ?disabled=${waiting}
                 @click=${this.#onMute}
-              >
-                ${icon(target.muted ? mdiVolumeOff : mdiVolumeHigh)}
-              </button>`
+                >Mute ${target.name}</gw-button
+              >`
         }
         ${
           target.volume === null

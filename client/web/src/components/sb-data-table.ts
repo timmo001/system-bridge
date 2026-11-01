@@ -443,7 +443,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
           class="search"
           type="search"
           size="small"
-          hide-label
+          label-hidden
           label=${this.searchPlaceholder}
           placeholder=${this.searchPlaceholder}
           icon=${mdiMagnify}
