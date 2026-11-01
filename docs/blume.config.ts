@@ -116,11 +116,5 @@ export default defineConfig(
       { from: "/websocket/settings", to: "/api/websocket/system#settings" },
       { from: "/websocket/command-execute", to: "/api/websocket/system#execute-command" },
     ],
-    theme: {
-      accent: {
-        light: "#6d28d9",
-        dark: "#a78bfa",
-      },
-    },
   }),
 );

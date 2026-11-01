@@ -1,4 +1,8 @@
 @import "@timmo001/docs-kit/blume/theme.css";
+/* System Bridge's own Groundwork theme: Bridge, bright blue on charcoal */
+@import "@timmo001/docs-kit/blume/themes/bridge.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
 
 /* The logo is wider than it is tall, with space above and below the bridge,
    so show it larger and pull that space in. */
