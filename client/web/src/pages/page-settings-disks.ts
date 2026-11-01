@@ -34,16 +34,6 @@ export class PageSettingsDisks extends SbSettingsPage {
         align-items: center;
         gap: var(--gw-space-4);
         padding: var(--gw-space-3);
-        cursor: pointer;
-        border-radius: var(--gw-radius-m);
-      }
-
-      .mount:hover {
-        background: var(--gw-color-fill-neutral-hovered);
-      }
-
-      .mount.locked {
-        cursor: default;
       }
 
       .mount gw-meter {
@@ -90,15 +80,15 @@ export class PageSettingsDisks extends SbSettingsPage {
     const checked = locked || this.allowed.includes(mount.mount_point);
 
     return html`
-      <label class="mount ${locked ? "locked" : ""}">
-        <input
-          class="checkbox"
-          type="checkbox"
-          .value=${mount.mount_point}
-          .checked=${checked}
+      <div class="mount">
+        <gw-checkbox
+          label="Report ${mount.mount_point}"
+          label-hidden
+          value=${mount.mount_point}
+          ?checked=${checked}
           ?disabled=${locked || this.isSaving}
           @change=${this.#onChange}
-        />
+        ></gw-checkbox>
         <gw-meter
           label=${mount.mount_point}
           .value=${mount.usage?.percent ?? undefined}
@@ -111,7 +101,7 @@ export class PageSettingsDisks extends SbSettingsPage {
           .high=${80}
           .critical=${92}
         ></gw-meter>
-      </label>
+      </div>
     `;
   }
 
