@@ -108,11 +108,11 @@ export class SbAudioDevice extends LitElement {
           ? html`<span class="muted small truncate">${about}</span>`
           : nothing
       }
-      ${this.app.playing ? nothing : html`<span class="chip">Paused</span>`}`;
+      ${this.app.playing ? nothing : html`<gw-chip size="small">Paused</gw-chip>`}`;
     }
 
     if (this.device?.default) {
-      return html`<span class="chip accent">Default</span>`;
+      return html`<gw-chip size="small" tone="accent">Default</gw-chip>`;
     }
 
     return html`<button

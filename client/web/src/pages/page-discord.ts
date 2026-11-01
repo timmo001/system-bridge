@@ -562,7 +562,7 @@ export class PageDiscord extends SbPage {
         ${name}
         ${
           member.speaking
-            ? html`<span class="chip success">Speaking</span>`
+            ? html`<gw-chip size="small" tone="success">Speaking</gw-chip>`
             : nothing
         }
       </span>

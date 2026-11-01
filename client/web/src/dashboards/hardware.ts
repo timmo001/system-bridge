@@ -566,14 +566,17 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
           ></gw-gauge>
         </div>
         <div class="row" style="justify-content: center">
-          <span class="chip ${charging ? "success" : ""}">
-            ${icon(
+          <gw-chip
+            size="small"
+            tone=${charging ? "success" : "neutral"}
+            icon=${
               charging
                 ? mdiBatteryCharging
                 : battery.ac_connected
                   ? mdiPowerPlug
-                  : mdiBattery,
-            )}
+                  : mdiBattery
+            }
+          >
             ${
               battery.ac_connected === null
                 ? batteryStateLabels[state]
@@ -581,7 +584,7 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
                   ? "Plugged in"
                   : "On battery"
             }
-          </span>
+          </gw-chip>
         </div>
         ${facts([
           ["State", batteryStateLabels[state]],

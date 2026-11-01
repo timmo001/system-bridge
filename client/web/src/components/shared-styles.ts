@@ -1,5 +1,7 @@
 import { css, html, svg } from "lit";
 
+import "@timmo001/groundwork-ui/gw-chip.ts";
+import "@timmo001/groundwork-ui/gw-dot.ts";
 import "@timmo001/groundwork-ui/gw-spinner.ts";
 
 /** A Material Design icon, from one of `@mdi/js`'s paths. */
@@ -462,52 +464,6 @@ export const shared = css`
       var(--gw-color-accent) 50%,
       var(--gw-color-border-normal)
     );
-  }
-
-  /* Chips and badges */
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--gw-space-1) * 1.5);
-    min-height: 1.75rem;
-    padding: 0 var(--gw-space-3);
-    font-size: var(--gw-font-size-xs);
-    font-weight: var(--gw-font-weight-strong);
-    color: var(--sb-chip-color, var(--gw-color-text-primary));
-    background: color-mix(
-      in oklab,
-      var(--sb-chip-color, var(--gw-color-text-secondary)) 14%,
-      transparent
-    );
-    border-radius: var(--gw-radius-pill);
-    --sb-icon-size: 1rem;
-  }
-
-  .chip.success {
-    --sb-chip-color: var(--gw-color-success);
-  }
-
-  .chip.warning {
-    --sb-chip-color: var(--gw-color-warning);
-  }
-
-  .chip.danger {
-    --sb-chip-color: var(--gw-color-danger);
-  }
-
-  .chip.info {
-    --sb-chip-color: var(--gw-color-info);
-  }
-
-  .chip.accent {
-    --sb-chip-color: var(--gw-color-accent);
-  }
-
-  .dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    background: currentColor;
-    border-radius: 50%;
   }
 
   /* Label and value pairs */

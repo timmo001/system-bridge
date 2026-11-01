@@ -145,6 +145,8 @@ export class SbApp extends LitElement {
       }
 
       .status {
+        display: inline-flex;
+        border-radius: var(--gw-radius-chip);
         text-decoration: none;
       }
 
@@ -196,11 +198,14 @@ export class SbApp extends LitElement {
 
     return html`
       <a
-        class="chip ${kind} status"
+        class="status"
         href=${href("connection")}
         title=${error ?? (isConnected ? `Connected to ${host}:${port}` : "")}
       >
-        <span class="dot"></span><span class="label">${label}</span>
+        <gw-chip size="small" tone=${kind}
+          ><gw-dot slot="icon" tone=${kind}></gw-dot
+          ><span class="label">${label}</span></gw-chip
+        >
       </a>
     `;
   }

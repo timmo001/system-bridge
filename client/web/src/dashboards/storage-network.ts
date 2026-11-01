@@ -71,9 +71,12 @@ const bluetoothDevice = (device: BluetoothDevice, powered: boolean) => html`
   <li>
     ${icon(bluetoothIcons.get(device.type ?? "") ?? mdiBluetooth)}
     <span class="spacer truncate" title=${device.address}>${device.name}</span>
-    <span class="chip ${device.connected ? "success" : ""}"
-      ><span class="dot"></span
-      >${device.connected ? "Connected" : "Not connected"}</span
+    <gw-chip size="small" tone=${device.connected ? "success" : "neutral"}
+      ><gw-dot
+        slot="icon"
+        tone=${device.connected ? "success" : "neutral"}
+      ></gw-dot
+      >${device.connected ? "Connected" : "Not connected"}</gw-chip
     >
     <sb-bluetooth-actions
       .device=${device}
@@ -304,10 +307,15 @@ export const networksDashboard = ({
 
     return html`
       <gw-card class="third" heading=${network.name ?? "Interface"}>
-        <span
+        <gw-chip
           slot="actions"
-          class="chip ${network.stats?.isup ? "success" : ""}"
-          ><span class="dot"></span>${network.stats?.isup ? "Up" : "Down"}</span
+          size="small"
+          tone=${network.stats?.isup ? "success" : "neutral"}
+          ><gw-dot
+            slot="icon"
+            tone=${network.stats?.isup ? "success" : "neutral"}
+          ></gw-dot
+          >${network.stats?.isup ? "Up" : "Down"}</gw-chip
         >
         ${facts([
           [

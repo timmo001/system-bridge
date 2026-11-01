@@ -171,11 +171,6 @@ export class PageSettingsCommands extends SbSettingsPage {
         flex: none;
       }
 
-      .title .chip {
-        min-height: 1.25rem;
-        padding: 0 var(--gw-space-2);
-      }
-
       .details {
         display: flex;
         flex-wrap: wrap;
@@ -604,13 +599,14 @@ export class PageSettingsCommands extends SbSettingsPage {
 
     return html`
       <div class="stack" style="--sb-stack-gap: var(--gw-space-2)">
-        <span
-          class="chip ${ok ? "success" : "danger"}"
+        <gw-chip
+          size="small"
+          tone=${ok ? "success" : "danger"}
           style="align-self: start"
         >
           Exit code
           ${result.exitCode}${result.error ? ` · ${result.error}` : ""}
-        </span>
+        </gw-chip>
         ${result.stdout ? html`<pre>${result.stdout}</pre>` : nothing}
         ${
           result.stderr
@@ -656,15 +652,16 @@ ${result.stderr}</pre>`
             ${
               badge === ""
                 ? nothing
-                : html`<span class="chip info small">${badge}</span>`
+                : html`<gw-chip size="xs" tone="info">${badge}</gw-chip>`
             }
             ${
               unavailable === undefined
                 ? nothing
-                : html`<span
-                    class="chip danger small"
+                : html`<gw-chip
+                    size="xs"
+                    tone="danger"
                     id="unavailable-${command.id}"
-                    >${unavailable}</span
+                    >${unavailable}</gw-chip
                   >`
             }
           </div>

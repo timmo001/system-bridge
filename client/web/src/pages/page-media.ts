@@ -680,11 +680,13 @@ export class PageMedia extends SbPage {
                   ${icon(mdiMusicNote)}
                 </div>`
           }
-          <span
-            class="chip status ${playing ? "success" : ""}"
+          <gw-chip
+            class="status"
+            size="small"
+            tone=${playing ? "success" : "neutral"}
             role="status"
             aria-label="Player status: ${statusLabel(media?.status)}"
-            >${statusLabel(media?.status)}</span
+            >${statusLabel(media?.status)}</gw-chip
           >
           <div class="info">
             ${this.#renderPicker()}

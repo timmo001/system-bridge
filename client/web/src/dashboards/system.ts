@@ -290,19 +290,21 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
         <ul class="list">
           <li>
             ${icon(mdiWebcam)}<span class="spacer">Camera</span>
-            <span
-              class="chip ${system.camera_usage.length > 0 ? "warning" : ""}"
+            <gw-chip
+              size="small"
+              tone=${system.camera_usage.length > 0 ? "warning" : "neutral"}
             >
               ${system.camera_usage.length > 0 ? system.camera_usage.join(", ") : "Not in use"}
-            </span>
+            </gw-chip>
           </li>
           <li>
             ${icon(mdiMicrophone)}<span class="spacer">Microphone</span>
-            <span
-              class="chip ${system.microphone_usage.length > 0 ? "warning" : ""}"
+            <gw-chip
+              size="small"
+              tone=${system.microphone_usage.length > 0 ? "warning" : "neutral"}
             >
               ${system.microphone_usage.length > 0 ? system.microphone_usage.join(", ") : "Not in use"}
-            </span>
+            </gw-chip>
           </li>
         </ul>
       </gw-card>
@@ -544,9 +546,9 @@ const member = (call: DiscordCallMember) =>
     <span class="spacer"
       >${call.nick ?? call.user.global_name ?? call.user.username}</span
     >
-    ${call.speaking ? html`<span class="chip success">Speaking</span>` : nothing}
-    ${call.self_mute || call.server_mute ? html`<span class="chip">Muted</span>` : nothing}
-    ${call.self_deaf || call.server_deaf ? html`<span class="chip">Deafened</span>` : nothing}
+    ${call.speaking ? html`<gw-chip size="small" tone="success">Speaking</gw-chip>` : nothing}
+    ${call.self_mute || call.server_mute ? html`<gw-chip size="small">Muted</gw-chip>` : nothing}
+    ${call.self_deaf || call.server_deaf ? html`<gw-chip size="small">Deafened</gw-chip>` : nothing}
   </li>`;
 
 const hiddenTitle = html`<a
@@ -579,9 +581,11 @@ const windowStates = (window: DesktopWindow, extra?: HyprlandWindow) => {
     window.inhibiting_idle ? "Keeping awake" : null,
   ].filter((state) => state !== null);
 
-  const chips = states.map((state) => html`<span class="chip">${state}</span>`);
+  const chips = states.map(
+    (state) => html`<gw-chip size="small">${state}</gw-chip>`,
+  );
 
-  return html`${window.urgent ? html`<span class="chip warning">Urgent</span>` : nothing}
+  return html`${window.urgent ? html`<gw-chip size="small" tone="warning">Urgent</gw-chip>` : nothing}
   ${chips}`;
 };
 
@@ -603,7 +607,7 @@ const windowColumns = (() => {
       cell: ({ getValue, row }) =>
         html`<span class="row">
           ${getValue()}
-          ${row.original.window.focused ? html`<span class="chip accent">Focused</span>` : nothing}
+          ${row.original.window.focused ? html`<gw-chip size="small" tone="accent">Focused</gw-chip>` : nothing}
         </span>`,
     }),
     column.accessor((row) => row.window.title ?? "", {
@@ -674,7 +678,7 @@ const workspaceColumns = (() => {
 
         return html`<span class="row">
           ${getValue()}
-          ${workspace.focused ? html`<span class="chip accent">Focused</span>` : workspace.active ? html`<span class="chip">Shown</span>` : nothing}
+          ${workspace.focused ? html`<gw-chip size="small" tone="accent">Focused</gw-chip>` : workspace.active ? html`<gw-chip size="small">Shown</gw-chip>` : nothing}
         </span>`;
       },
     }),
@@ -699,9 +703,9 @@ const workspaceColumns = (() => {
         const { workspace, extra } = row.original;
 
         return html`<span class="row wrap">
-          ${workspace.special ? html`<span class="chip">Special</span>` : nothing}
-          ${workspace.fullscreen ? html`<span class="chip">Fullscreen</span>` : nothing}
-          ${extra?.persistent ? html`<span class="chip">Persistent</span>` : nothing}
+          ${workspace.special ? html`<gw-chip size="small">Special</gw-chip>` : nothing}
+          ${workspace.fullscreen ? html`<gw-chip size="small">Fullscreen</gw-chip>` : nothing}
+          ${extra?.persistent ? html`<gw-chip size="small">Persistent</gw-chip>` : nothing}
         </span>`;
       },
     }),
@@ -800,12 +804,12 @@ const displayColumns = (() => {
         const { display } = row.original;
 
         return html`<span class="row wrap">
-          ${display.dpms ? nothing : html`<span class="chip">Off</span>`}
-          ${display.vrr ? html`<span class="chip">VRR</span>` : nothing}
-          ${display.tearing ? html`<span class="chip">Tearing</span>` : nothing}
-          ${display.direct_scanout ? html`<span class="chip">Direct scanout</span>` : nothing}
-          ${display.mirror_of === null ? nothing : html`<span class="chip">Mirrors ${display.mirror_of}</span>`}
-          ${display.special_workspace === null ? nothing : html`<span class="chip">Special workspace shown</span>`}
+          ${display.dpms ? nothing : html`<gw-chip size="small">Off</gw-chip>`}
+          ${display.vrr ? html`<gw-chip size="small">VRR</gw-chip>` : nothing}
+          ${display.tearing ? html`<gw-chip size="small">Tearing</gw-chip>` : nothing}
+          ${display.direct_scanout ? html`<gw-chip size="small">Direct scanout</gw-chip>` : nothing}
+          ${display.mirror_of === null ? nothing : html`<gw-chip size="small">Mirrors ${display.mirror_of}</gw-chip>`}
+          ${display.special_workspace === null ? nothing : html`<gw-chip size="small">Special workspace shown</gw-chip>`}
         </span>`;
       },
     }),
@@ -830,7 +834,7 @@ const inputColumns = (() => {
       cell: ({ getValue, row }) =>
         html`<span class="row">
           <span class="mono xsmall">${getValue()}</span>
-          ${row.original.main ? html`<span class="chip accent">Last used</span>` : nothing}
+          ${row.original.main ? html`<gw-chip size="small" tone="accent">Last used</gw-chip>` : nothing}
         </span>`,
     }),
     column.accessor("type", { header: "Type" }),
@@ -941,11 +945,11 @@ const bindColumns = (() => {
         const bind = row.original;
 
         return html`<span class="row wrap">
-          ${bind.locked ? html`<span class="chip">Lock screen</span>` : nothing}
-          ${bind.release ? html`<span class="chip">On release</span>` : nothing}
-          ${bind.repeat ? html`<span class="chip">Repeats</span>` : nothing}
-          ${bind.long_press ? html`<span class="chip">Long press</span>` : nothing}
-          ${bind.non_consuming ? html`<span class="chip">Passes through</span>` : nothing}
+          ${bind.locked ? html`<gw-chip size="small">Lock screen</gw-chip>` : nothing}
+          ${bind.release ? html`<gw-chip size="small">On release</gw-chip>` : nothing}
+          ${bind.repeat ? html`<gw-chip size="small">Repeats</gw-chip>` : nothing}
+          ${bind.long_press ? html`<gw-chip size="small">Long press</gw-chip>` : nothing}
+          ${bind.non_consuming ? html`<gw-chip size="small">Passes through</gw-chip>` : nothing}
         </span>`;
       },
     }),
@@ -1699,12 +1703,17 @@ export const discordDashboard = ({ data }: DashboardContext) => {
     <div class="dashboard">
       <gw-card class="third" heading="Status">
         <div class="row wrap">
-          <span class="chip ${discord.connected ? "success" : "danger"}"
-            ><span class="dot"></span
-            >${discord.connected ? "Connected" : "Not connected"}</span
+          <gw-chip size="small" tone=${discord.connected ? "success" : "danger"}
+            ><gw-dot
+              slot="icon"
+              tone=${discord.connected ? "success" : "danger"}
+            ></gw-dot
+            >${discord.connected ? "Connected" : "Not connected"}</gw-chip
           >
-          <span class="chip ${discord.authenticated ? "success" : ""}"
-            >${discord.authenticated ? "Signed in" : "Not signed in"}</span
+          <gw-chip
+            size="small"
+            tone=${discord.authenticated ? "success" : "neutral"}
+            >${discord.authenticated ? "Signed in" : "Not signed in"}</gw-chip
           >
         </div>
         ${
