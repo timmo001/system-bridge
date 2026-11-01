@@ -26,10 +26,10 @@ import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "@timmo001/groundwork-ui/gw-card.ts";
-import "~/components/sb-range";
+import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
-import { selectValue } from "~/lib/select";
+import { rangeTarget, selectValue } from "~/lib/select";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -88,10 +88,8 @@ export class PageDiscord extends SbPage {
         border-color: transparent;
       }
 
-      .range {
-        width: 100%;
-        margin: 0;
-        accent-color: var(--sb-color-accent);
+      gw-range {
+        flex: 1;
       }
 
       .level {
@@ -202,13 +200,15 @@ export class PageDiscord extends SbPage {
 
   /** Sliders send once let go, not on every step. */
   #onRange = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLInputElement)) return;
+    const range = rangeTarget(event);
 
-    const { action, user, label } = event.currentTarget.dataset;
+    if (range === null) return;
+
+    const { action, user, label } = range.dataset;
 
     if (!isDiscordAction(action)) return;
 
-    const value = event.currentTarget.valueAsNumber;
+    const value = range.value;
 
     const control: DiscordControl =
       user === undefined ? { action, value } : { action, value, user_id: user };
@@ -292,24 +292,21 @@ export class PageDiscord extends SbPage {
           : `${Math.round(options.value)} ${unit}`;
 
     return html`<div class="level">
-      <sb-range unit=${unit}>
-        <input
-          class="range"
-          type="range"
-          id=${options.id}
-          min=${options.min ?? 0}
-          max=${options.max}
-          step=${options.step ?? 1}
-          aria-label=${options.label}
-          aria-valuetext=${text}
-          .value=${live(String(options.value ?? 0))}
-          ?disabled=${options.value === null}
-          data-action=${options.action}
-          data-label=${options.label}
-          data-user=${options.user ?? nothing}
-          @change=${this.#onRange}
-        />
-      </sb-range>
+      <gw-range
+        id=${options.id}
+        label=${options.label}
+        label-hidden
+        unit=${unit}
+        .min=${options.min ?? 0}
+        .max=${options.max}
+        .step=${options.step ?? 1}
+        .value=${live(options.value ?? 0)}
+        ?disabled=${options.value === null}
+        data-action=${options.action}
+        data-label=${options.label}
+        data-user=${options.user ?? nothing}
+        @change=${this.#onRange}
+      ></gw-range>
       <output class="muted small tabular" for=${options.id}>${text}</output>
     </div>`;
   }

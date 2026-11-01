@@ -3,9 +3,9 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "./sb-range";
+import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
-import { selectValue } from "~/lib/select";
+import { rangeTarget, selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, cameraControl, registry } from "~/lib/atoms";
@@ -34,10 +34,8 @@ export class SbCameraControls extends LitElement {
         flex: 1 1 14rem;
       }
 
-      .range {
-        width: 100%;
-        margin: 0;
-        accent-color: var(--sb-color-accent);
+      gw-range {
+        flex: 1;
       }
 
       .level output {
@@ -76,11 +74,9 @@ export class SbCameraControls extends LitElement {
 
   /** Sends once let go, not on every step. */
   #onRange = (event: Event) => {
-    if (event.currentTarget instanceof HTMLInputElement) {
-      const input = event.currentTarget;
+    const range = rangeTarget(event);
 
-      this.#set(input.name, input.valueAsNumber);
-    }
+    if (range !== null) this.#set(range.name, range.value);
   };
 
   #onSwitch = (event: Event) => {
@@ -132,21 +128,18 @@ export class SbCameraControls extends LitElement {
 
       case "integer":
         return html`<div class="level">
-          <sb-range unit="">
-            <input
-              class="range"
-              type="range"
-              name=${control.id}
-              id="${labelId}-input"
-              min=${control.minimum}
-              max=${control.maximum}
-              step=${control.step}
-              aria-labelledby=${labelId}
-              .value=${live(String(control.value))}
-              ?disabled=${disabled}
-              @change=${this.#onRange}
-            />
-          </sb-range>
+          <gw-range
+            id="${labelId}-input"
+            label=${control.name}
+            label-hidden
+            name=${control.id}
+            .min=${control.minimum}
+            .max=${control.maximum}
+            .step=${control.step}
+            .value=${live(control.value)}
+            ?disabled=${disabled}
+            @change=${this.#onRange}
+          ></gw-range>
           <output class="muted small tabular" for="${labelId}-input"
             >${formatNumber(control.value)}</output
           >

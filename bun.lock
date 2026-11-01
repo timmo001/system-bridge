@@ -43,8 +43,8 @@
         "@tanstack/charts": "1.1.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "@timmo001/groundwork-tokens": "0.9.21",
-        "@timmo001/groundwork-ui": "0.9.21",
+        "@timmo001/groundwork-tokens": "0.9.22",
+        "@timmo001/groundwork-ui": "0.9.22",
         "effect": "4.1.1",
         "lit": "^3.3.2",
       },
@@ -739,9 +739,9 @@
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.21", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-JLDybBADG6Y1haS/roYYVGo4uJQalvthr++MN9pwIH5yfkwzGYP0KUk1FTPUYZJHSXKsj7PznQUhzdHTE4JrBQ=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.22", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-QFXF2jWDMKNmLyQ/L60H3R6PlOzojiGenfNI+CXJxk+0FXo2AdGSBanRVQr+NiGQl7qJ+DsvE8HaYHEl07O2FA=="],
 
-    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.9.21", "", {}, "sha512-Ijhp20/YV39UzK6WLSFMdn0kXeK/XA1JVMtQMzXDMxG3mEyxmUiTETpsVh0KJNPKIkRd3wRvHcr/9tvCnTq32A=="],
+    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.9.22", "", {}, "sha512-LtBFquKF2XFzKdAm66DGa+PmpQwxyclXVFS4V3B1bol6W4CpxRppDVzbJYpI3hURAaGfpvZvcBsmnoNsxoYV3g=="],
 
     "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.6.3", "", { "peerDependencies": { "@oxlint/plugins": "1.88.0", "oxlint": "1.88.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-DxIid4Bu5t8bLuWcAIZlikLVLabSrJ1ai2siFB+E+7HdY3TPMgsUU44/Is+9RAQYVH8LEYjOQFVedH5MOXL5YQ=="],
 

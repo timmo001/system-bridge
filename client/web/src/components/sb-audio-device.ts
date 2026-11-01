@@ -4,7 +4,8 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "./sb-range";
+import "@timmo001/groundwork-ui/gw-range.ts";
+import { rangeTarget } from "~/lib/select";
 import { icon, shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, audioControl, registry } from "~/lib/atoms";
@@ -43,10 +44,8 @@ export class SbAudioDevice extends LitElement {
         gap: var(--sb-space-3);
       }
 
-      .range {
-        width: 100%;
-        margin: 0;
-        accent-color: var(--sb-color-accent);
+      gw-range {
+        flex: 1;
       }
 
       .level output {
@@ -77,13 +76,11 @@ export class SbAudioDevice extends LitElement {
   #onVolume = (event: Event) => {
     const target = this.#target;
 
-    if (!(event.currentTarget instanceof HTMLInputElement) || !target) {
-      return;
-    }
+    const range = rangeTarget(event);
 
-    registry.set(audioControl(target.id), {
-      volume: event.currentTarget.valueAsNumber,
-    });
+    if (range === null || !target) return;
+
+    registry.set(audioControl(target.id), { volume: range.value });
   };
 
   #onMute = () => {
@@ -163,21 +160,15 @@ export class SbAudioDevice extends LitElement {
         ${
           target.volume === null
             ? nothing
-            : html`<sb-range>
-                  <input
-                    class="range"
-                    type="range"
-                    id=${id}
-                    min="0"
-                    max="100"
-                    step="1"
-                    aria-label="Volume for ${target.name}"
-                    aria-valuetext=${formatPercent(target.volume)}
-                    .value=${live(String(Math.round(target.volume)))}
-                    ?disabled=${waiting}
-                    @change=${this.#onVolume}
-                  />
-                </sb-range>
+            : html`<gw-range
+                  id=${id}
+                  label="Volume for ${target.name}"
+                  label-hidden
+                  unit="%"
+                  .value=${live(Math.round(target.volume))}
+                  ?disabled=${waiting}
+                  @change=${this.#onVolume}
+                ></gw-range>
                 <output class="muted small tabular" for=${id}
                   >${target.muted ? "Muted" : formatPercent(target.volume)}</output
                 >`

@@ -1,3 +1,4 @@
+import { GwRange } from "@timmo001/groundwork-ui/gw-range.ts";
 import { GwSegmented } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
 import { Option, Schema } from "effect";
@@ -8,6 +9,10 @@ export const selectValue = (event: Event): string =>
   event.currentTarget instanceof GwSegmented
     ? event.currentTarget.value
     : "";
+
+/** The `gw-range` a `change` event came from, once it's let go. */
+export const rangeTarget = (event: Event): GwRange | null =>
+  event.currentTarget instanceof GwRange ? event.currentTarget : null;
 
 const MenuSelectDetail = Schema.Struct({ value: Schema.String });
 

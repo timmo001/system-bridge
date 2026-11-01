@@ -4,9 +4,9 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "./sb-range";
+import "@timmo001/groundwork-ui/gw-range.ts";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
-import { selectValue } from "~/lib/select";
+import { rangeTarget, selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, displayControl, registry } from "~/lib/atoms";
@@ -35,10 +35,8 @@ export class SbDisplayControls extends LitElement {
         gap: var(--sb-space-3);
       }
 
-      .range {
-        width: 100%;
-        margin: 0;
-        accent-color: var(--sb-color-accent);
+      gw-range {
+        flex: 1;
       }
 
       .level output {
@@ -57,12 +55,12 @@ export class SbDisplayControls extends LitElement {
 
   /** Sends once let go, not on every step. */
   #onBrightness = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLInputElement) || !this.display) {
-      return;
-    }
+    const range = rangeTarget(event);
+
+    if (range === null || !this.display) return;
 
     registry.set(displayControl(this.display.id), {
-      brightness: event.currentTarget.valueAsNumber,
+      brightness: range.value,
     });
   };
 
@@ -89,21 +87,15 @@ export class SbDisplayControls extends LitElement {
         display.brightness === null
           ? nothing
           : html`<div class="level">
-              <sb-range>
-                <input
-                  class="range"
-                  type="range"
-                  id=${id}
-                  min="0"
-                  max="100"
-                  step="1"
-                  aria-label="Brightness"
-                  aria-valuetext=${formatPercent(display.brightness)}
-                  .value=${live(String(Math.round(display.brightness)))}
-                  ?disabled=${this.#control.value.waiting}
-                  @change=${this.#onBrightness}
-                />
-              </sb-range>
+              <gw-range
+                id=${id}
+                label="Brightness"
+                label-hidden
+                unit="%"
+                .value=${live(Math.round(display.brightness))}
+                ?disabled=${this.#control.value.waiting}
+                @change=${this.#onBrightness}
+              ></gw-range>
               <output class="muted small tabular" for=${id}
                 >${formatPercent(display.brightness)}</output
               >
