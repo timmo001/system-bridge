@@ -35,7 +35,7 @@ export class SbProcessActions extends LitElement {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
     `,
   ];

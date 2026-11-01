@@ -455,7 +455,7 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
 
     return meters.length === 0
       ? html`<p class="muted small">Nothing busy right now.</p>`
-      : html`<div class="stack" style="--sb-stack-gap: var(--sb-space-3)">
+      : html`<div class="stack" style="--sb-stack-gap: var(--gw-space-3)">
           ${meters}
         </div>`;
   };

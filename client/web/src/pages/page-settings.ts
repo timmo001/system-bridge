@@ -48,7 +48,7 @@ export class PageSettings extends SbSettingsPage {
       .links {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         margin: 0;
         padding: 0;
         list-style: none;
@@ -58,7 +58,7 @@ export class PageSettings extends SbSettingsPage {
         justify-content: flex-start;
         width: 100%;
         height: auto;
-        padding-block: var(--sb-space-2);
+        padding-block: var(--gw-space-2);
         text-align: start;
       }
     `,
@@ -263,7 +263,7 @@ const elsewhereLinks = elsewhere.map(
 
 const placeholder = html`<span
   class="skeleton"
-  style="min-height: 18rem; border-radius: var(--sb-radius-l)"
+  style="min-height: 18rem; border-radius: var(--gw-radius-l)"
 ></span>`;
 
 declare global {

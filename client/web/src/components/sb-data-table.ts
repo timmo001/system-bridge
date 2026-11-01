@@ -111,7 +111,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
         min-width: 0;
       }
 
@@ -119,7 +119,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       .search {
@@ -132,9 +132,9 @@ export class SbDataTable<T extends RowData> extends LitElement {
       .search .icon {
         position: absolute;
         top: 50%;
-        left: var(--sb-space-3);
+        left: var(--gw-space-3);
         translate: 0 -50%;
-        color: var(--sb-color-muted);
+        color: var(--gw-color-text-secondary);
         pointer-events: none;
       }
 
@@ -144,22 +144,22 @@ export class SbDataTable<T extends RowData> extends LitElement {
 
       .scroller {
         overflow-x: auto;
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-l);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-l);
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: var(--sb-font-size-s);
+        font-size: var(--gw-font-size-s);
       }
 
       th,
       td {
-        padding: var(--sb-space-2) var(--sb-space-3);
+        padding: var(--gw-space-2) var(--gw-space-3);
         text-align: start;
         white-space: nowrap;
-        border-bottom: 1px solid var(--sb-color-border);
+        border-bottom: 1px solid var(--gw-color-border-normal);
       }
 
       tbody tr:last-child td {
@@ -167,23 +167,23 @@ export class SbDataTable<T extends RowData> extends LitElement {
       }
 
       tbody tr:hover {
-        background: var(--sb-color-hover);
+        background: var(--gw-color-fill-neutral-hovered);
       }
 
       th {
         position: sticky;
         top: 0;
         height: 2.5rem;
-        font-size: var(--sb-font-size-xs);
-        font-weight: var(--sb-font-weight-semibold);
-        color: var(--sb-color-muted);
-        background: var(--sb-color-sunken);
+        font-size: var(--gw-font-size-xs);
+        font-weight: var(--gw-font-weight-strong);
+        color: var(--gw-color-text-secondary);
+        background: var(--gw-color-surface-lower);
       }
 
       th button {
         display: inline-flex;
         align-items: center;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
         padding: 0;
         font: inherit;
         color: inherit;
@@ -195,7 +195,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
 
       th[aria-sort="ascending"] button,
       th[aria-sort="descending"] button {
-        color: var(--sb-color-text);
+        color: var(--gw-color-text-primary);
       }
 
       .numeric {
@@ -217,9 +217,9 @@ export class SbDataTable<T extends RowData> extends LitElement {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--sb-space-2);
-        font-size: var(--sb-font-size-s);
-        color: var(--sb-color-muted);
+        gap: var(--gw-space-2);
+        font-size: var(--gw-font-size-s);
+        color: var(--gw-color-text-secondary);
       }
 
       .pager select {
@@ -230,7 +230,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
       .pages {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
         white-space: nowrap;
       }
 
@@ -249,8 +249,8 @@ export class SbDataTable<T extends RowData> extends LitElement {
       }
 
       .none {
-        padding: var(--sb-space-8);
-        color: var(--sb-color-muted);
+        padding: var(--gw-space-8);
+        color: var(--gw-color-text-secondary);
         text-align: center;
       }
     `,

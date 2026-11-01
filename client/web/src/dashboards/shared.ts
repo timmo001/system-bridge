@@ -19,7 +19,7 @@ export interface DashboardContext {
 export const dashboardStyles = css`
   .dashboard {
     display: grid;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
@@ -45,12 +45,12 @@ export const dashboardStyles = css`
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
   }
 
   .meters {
     display: grid;
-    gap: var(--sb-space-3) var(--sb-space-6);
+    gap: var(--gw-space-3) var(--gw-space-6);
     grid-template-columns: repeat(
       auto-fill,
       minmax(min(100%, var(--sb-meters-min, 14rem)), 1fr)
@@ -60,76 +60,76 @@ export const dashboardStyles = css`
   .meters.compact {
     --sb-meters-min: 7.5rem;
     --gw-meter-height: 0.375rem;
-    column-gap: var(--sb-space-4);
+    column-gap: var(--gw-space-4);
   }
 
   .audio-devices > * + * {
-    margin-top: var(--sb-space-3);
-    padding-top: var(--sb-space-3);
-    border-top: 1px solid var(--sb-color-border);
+    margin-top: var(--gw-space-3);
+    padding-top: var(--gw-space-3);
+    border-top: 1px solid var(--gw-color-border-normal);
   }
 
   /* Outputs and inputs side by side, each with its other devices under its
      main card, split by a line */
   .audio-columns {
     display: grid;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
   }
 
   .audio-column {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
     min-width: 0;
   }
 
   .audio-column + .audio-column {
-    padding-top: var(--sb-space-4);
-    border-top: 1px solid var(--sb-color-border);
+    padding-top: var(--gw-space-4);
+    border-top: 1px solid var(--gw-color-border-normal);
   }
 
   .audio-others {
     display: grid;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
   }
 
   @media (min-width: 56rem) {
     .audio-columns {
       grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-      gap: var(--sb-space-6);
+      gap: var(--gw-space-6);
     }
 
     .audio-column + .audio-column {
       padding-top: 0;
-      padding-left: var(--sb-space-6);
+      padding-left: var(--gw-space-6);
       border-top: 0;
-      border-left: 1px solid var(--sb-color-border);
+      border-left: 1px solid var(--gw-color-border-normal);
     }
   }
 
   .stat {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-0-5);
+    gap: var(--gw-space-0-5);
   }
 
   .stat .value {
     overflow-wrap: anywhere;
-    font-size: var(--sb-font-size-xl);
-    font-weight: var(--sb-font-weight-semibold);
+    font-size: var(--gw-font-size-xl);
+    font-weight: var(--gw-font-weight-strong);
     font-variant-numeric: tabular-nums;
   }
 
   .stat .name {
-    font-size: var(--sb-font-size-xs);
-    color: var(--sb-color-muted);
+    font-size: var(--gw-font-size-xs);
+    color: var(--gw-color-text-secondary);
   }
 
   .stats {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
   }
 
   /* Each stat takes its natural width, so a long value moves to its own line
@@ -142,22 +142,22 @@ export const dashboardStyles = css`
   .focused-window {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-0-5);
-    margin-bottom: var(--sb-space-4);
-    padding-bottom: var(--sb-space-4);
-    border-bottom: 1px solid var(--sb-color-border);
+    gap: var(--gw-space-0-5);
+    margin-bottom: var(--gw-space-4);
+    padding-bottom: var(--gw-space-4);
+    border-bottom: 1px solid var(--gw-color-border-normal);
   }
 
   .focused-window .name,
   .focused-window .app {
-    font-size: var(--sb-font-size-xs);
-    color: var(--sb-color-muted);
+    font-size: var(--gw-font-size-xs);
+    color: var(--gw-color-text-secondary);
   }
 
   .focused-window .title {
     overflow-wrap: anywhere;
-    font-size: var(--sb-font-size-xl);
-    font-weight: var(--sb-font-weight-semibold);
+    font-size: var(--gw-font-size-xl);
+    font-weight: var(--gw-font-weight-strong);
   }
 
   .list {
@@ -171,37 +171,37 @@ export const dashboardStyles = css`
   .list > li {
     display: flex;
     align-items: center;
-    gap: var(--sb-space-3);
-    padding: var(--sb-space-2-5, 0.625rem) 0;
-    font-size: var(--sb-font-size-s);
+    gap: var(--gw-space-3);
+    padding: calc(var(--gw-space-1) * 2.5) 0;
+    font-size: var(--gw-font-size-s);
   }
 
   .list > li + li {
-    border-top: 1px solid var(--sb-color-border);
+    border-top: 1px solid var(--gw-color-border-normal);
   }
 
   .placeholder {
     min-height: var(--sb-placeholder-height, 14rem);
-    border-radius: var(--sb-radius-l);
+    border-radius: var(--gw-radius-l);
   }
 
   /* A group of cards only some systems have, headed like an embedded page */
   .dashboard-section {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-4);
-    scroll-margin-top: calc(var(--sb-header-height) + var(--sb-space-4));
+    gap: var(--gw-space-4);
+    scroll-margin-top: calc(var(--sb-header-height) + var(--gw-space-4));
   }
 
   .dashboard-section .page-header .tile {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: var(--sb-radius-m);
+    border-radius: var(--gw-radius-m);
     --sb-icon-size: 1.375rem;
   }
 
   .dashboard-section .page-header h2 {
-    font-size: var(--sb-font-size-l);
+    font-size: var(--gw-font-size-l);
   }
 `;
 

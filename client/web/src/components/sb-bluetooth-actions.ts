@@ -32,25 +32,25 @@ export class SbBluetoothActions extends LitElement {
         position: fixed;
         inset: unset;
         margin: 0;
-        padding: var(--sb-space-3);
+        padding: var(--gw-space-3);
         width: 18rem;
         max-width: calc(100vw - 1rem);
-        color: var(--sb-color-text);
-        background: var(--sb-color-raised);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-l);
-        box-shadow: var(--sb-shadow-l);
+        color: var(--gw-color-text-primary);
+        background: var(--gw-color-surface-overlay);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-l);
+        box-shadow: var(--gw-shadow-l);
       }
 
       [popover] p {
-        margin: 0 0 var(--sb-space-3);
-        font-size: var(--sb-font-size-s);
+        margin: 0 0 var(--gw-space-3);
+        font-size: var(--gw-font-size-s);
       }
 
       .buttons {
         display: flex;
         justify-content: flex-end;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
     `,
   ];

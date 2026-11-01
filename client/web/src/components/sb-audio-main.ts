@@ -55,7 +55,7 @@ export class SbAudioMain extends LitElement {
 
       .main {
         display: grid;
-        gap: var(--sb-space-6);
+        gap: var(--gw-space-6);
         grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
         align-items: center;
       }
@@ -74,17 +74,17 @@ export class SbAudioMain extends LitElement {
         width: 100%;
         max-width: 8rem;
         aspect-ratio: 1;
-        background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-xl);
-        box-shadow: var(--sb-shadow-m);
-        color: var(--sb-color-muted);
+        background: var(--gw-color-surface-lower);
+        border-radius: var(--gw-radius-xl);
+        box-shadow: var(--gw-shadow-m);
+        color: var(--gw-color-text-secondary);
         --sb-icon-size: 3rem;
       }
 
       .info {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         min-width: 0;
         width: 100%;
       }
@@ -96,14 +96,14 @@ export class SbAudioMain extends LitElement {
 
       .title {
         margin: 0;
-        font-size: var(--sb-font-size-2xl);
+        font-size: var(--gw-font-size-2xl);
       }
 
       .level {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
-        margin-top: var(--sb-space-2);
+        gap: var(--gw-space-3);
+        margin-top: var(--gw-space-2);
       }
 
       gw-range {
@@ -118,14 +118,14 @@ export class SbAudioMain extends LitElement {
 
       /* Beside another card: smaller art, and the picker names the device */
       :host([compact]) .main {
-        gap: var(--sb-space-4);
+        gap: var(--gw-space-4);
         grid-template-columns: 5rem minmax(0, 1fr);
         justify-items: stretch;
         text-align: start;
       }
 
       :host([compact]) .art {
-        border-radius: var(--sb-radius-m);
+        border-radius: var(--gw-radius-m);
         box-shadow: none;
         --sb-icon-size: 2rem;
       }

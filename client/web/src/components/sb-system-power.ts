@@ -47,14 +47,14 @@ export class SbSystemPower extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-4);
+        gap: var(--gw-space-4);
       }
 
       .row {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         text-align: start;
       }
 

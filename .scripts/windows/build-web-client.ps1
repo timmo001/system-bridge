@@ -12,10 +12,10 @@ if (!(Get-ChildItem 'client/web/dist/assets/*.js' -ErrorAction SilentlyContinue)
 
 Write-Host "Verifying the design tokens are in the CSS..."
 $css = Get-ChildItem 'client/web/dist/assets/*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw
-if ($css -match '--sb-color-') {
+if ($css -match '--gw-color-') {
     Write-Host '  [OK] Found the design tokens'
 } else {
-    Write-Host 'ERROR: The CSS has no --sb-color-* design tokens'
+    Write-Host 'ERROR: The CSS has no Groundwork --gw-color-* design tokens'
     Write-Host 'Check client/web/src/styles/tokens.css is imported by src/app.ts'
     exit 1
 }

@@ -20,7 +20,7 @@ import { SbSettingsPage } from "./sb-settings-page";
 
 const placeholder = html`<span
   class="skeleton"
-  style="min-height: 24rem; border-radius: var(--sb-radius-l)"
+  style="min-height: 24rem; border-radius: var(--gw-radius-l)"
 ></span>`;
 
 /** Which secondary disk mounts the Disks module reports. */
@@ -33,14 +33,14 @@ export class PageSettingsDisks extends SbSettingsPage {
       .mount {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-4);
-        padding: var(--sb-space-3);
+        gap: var(--gw-space-4);
+        padding: var(--gw-space-3);
         cursor: pointer;
-        border-radius: var(--sb-radius-m);
+        border-radius: var(--gw-radius-m);
       }
 
       .mount:hover {
-        background: var(--sb-color-hover);
+        background: var(--gw-color-fill-neutral-hovered);
       }
 
       .mount.locked {

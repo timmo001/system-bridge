@@ -198,7 +198,7 @@ export class PageModule extends SbPage {
       .sections {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
-        gap: var(--sb-space-6);
+        gap: var(--gw-space-6);
         align-items: start;
       }
 
@@ -208,15 +208,15 @@ export class PageModule extends SbPage {
 
       /* Clear of the sticky header when a link scrolls to one */
       [embedded] {
-        scroll-margin-top: calc(var(--sb-header-height) + var(--sb-space-4));
+        scroll-margin-top: calc(var(--sb-header-height) + var(--gw-space-4));
       }
 
       /* The JSON view loads when first shown; hold its space until then */
       sb-json-view:not(:defined) {
         display: block;
         height: var(--sb-json-height, 36rem);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-l);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-l);
       }
     `,
   ];

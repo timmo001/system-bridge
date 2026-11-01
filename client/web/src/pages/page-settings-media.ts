@@ -182,7 +182,7 @@ export class PageSettingsMedia extends SbSettingsPage {
               </div>`
             : html`<ul
                 class="stack"
-                style="margin: 0; padding: 0; list-style: none; --sb-stack-gap: var(--sb-space-2)"
+                style="margin: 0; padding: 0; list-style: none; --sb-stack-gap: var(--gw-space-2)"
               >
                 ${directories}
               </ul>`
@@ -204,7 +204,7 @@ export class PageSettingsMedia extends SbSettingsPage {
           () => this.#renderContent(),
           html`<span
             class="skeleton"
-            style="min-height: 24rem; border-radius: var(--sb-radius-l)"
+            style="min-height: 24rem; border-radius: var(--gw-radius-l)"
           ></span>`,
         )}
       </div>

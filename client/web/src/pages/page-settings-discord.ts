@@ -101,7 +101,7 @@ const steps = (setup: DiscordSetup): readonly Step[] => [
 
 const placeholder = html`<span
   class="skeleton"
-  style="min-height: 34rem; border-radius: var(--sb-radius-l)"
+  style="min-height: 34rem; border-radius: var(--gw-radius-l)"
 ></span>`;
 
 /** Connects System Bridge to the Discord desktop app. */
@@ -113,7 +113,7 @@ export class PageSettingsDiscord extends SbPage {
       .steps {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
         margin: 0;
         padding: 0;
         list-style: none;
@@ -122,42 +122,42 @@ export class PageSettingsDiscord extends SbPage {
       .step {
         display: flex;
         align-items: flex-start;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       .step > .icon {
         flex-shrink: 0;
-        color: var(--sb-color-muted);
+        color: var(--gw-color-text-secondary);
       }
 
       .step[data-state="done"] > .icon {
-        color: var(--sb-color-success);
+        color: var(--gw-color-success);
       }
 
       .step[data-state="waiting"] > .icon {
-        color: var(--sb-color-warning);
+        color: var(--gw-color-warning);
       }
 
       .step[data-state="failed"] > .icon {
-        color: var(--sb-color-danger);
+        color: var(--gw-color-danger);
       }
 
       .guide {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
         margin: 0;
-        padding-inline-start: var(--sb-space-5);
+        padding-inline-start: var(--gw-space-5);
       }
 
       .guide li::marker {
-        color: var(--sb-color-muted);
+        color: var(--gw-color-text-secondary);
       }
 
       .copy {
         display: inline-flex;
         align-items: center;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
     `,
   ];

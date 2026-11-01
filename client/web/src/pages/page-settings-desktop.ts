@@ -10,7 +10,7 @@ import { SbSettingsPage } from "./sb-settings-page";
 
 const placeholder = html`<span
   class="skeleton"
-  style="min-height: 6rem; border-radius: var(--sb-radius-l)"
+  style="min-height: 6rem; border-radius: var(--gw-radius-l)"
 ></span>`;
 
 /** Whether the Desktop module reports window titles and runs Hyprland code. */

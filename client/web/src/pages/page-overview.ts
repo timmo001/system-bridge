@@ -148,20 +148,20 @@ export class PageOverview extends SbPage {
     css`
       .shortcuts {
         display: grid;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
       }
 
       .shortcut {
         flex-direction: row;
         align-items: center;
-        gap: var(--sb-space-3);
-        padding: var(--sb-space-3);
+        gap: var(--gw-space-3);
+        padding: var(--gw-space-3);
       }
 
       .shortcut > .icon {
         flex-shrink: 0;
-        color: var(--sb-color-accent);
+        color: var(--gw-color-accent);
       }
 
       .shortcut .text {
@@ -177,7 +177,7 @@ export class PageOverview extends SbPage {
       /* Audio and Now playing side by side, the same height */
       .playback {
         display: grid;
-        gap: var(--sb-space-4);
+        gap: var(--gw-space-4);
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
       }
 
@@ -189,7 +189,7 @@ export class PageOverview extends SbPage {
       /* Art beside the picker and the track, as in the Audio card */
       .now-playing {
         display: grid;
-        gap: var(--sb-space-4);
+        gap: var(--gw-space-4);
         grid-template-columns: 5rem minmax(0, 1fr);
         align-items: center;
       }
@@ -200,23 +200,23 @@ export class PageOverview extends SbPage {
         width: 100%;
         aspect-ratio: 1;
         object-fit: cover;
-        background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-m);
-        color: var(--sb-color-muted);
+        background: var(--gw-color-surface-lower);
+        border-radius: var(--gw-radius-m);
+        color: var(--gw-color-text-secondary);
         --sb-icon-size: 2rem;
       }
 
       .now-playing .info {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         min-width: 0;
       }
 
       .now-playing .track {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       .now-playing .details {
@@ -230,7 +230,7 @@ export class PageOverview extends SbPage {
         display: flex;
         flex: none;
         align-items: center;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
     `,
   ];
@@ -354,7 +354,7 @@ export class PageOverview extends SbPage {
         ${
           meters.length === 0
             ? html`<p class="muted small">No disks reported.</p>`
-            : html`<div class="stack" style="--sb-stack-gap: var(--sb-space-3)">
+            : html`<div class="stack" style="--sb-stack-gap: var(--gw-space-3)">
                 ${meters}
               </div>`
         }
@@ -393,7 +393,7 @@ export class PageOverview extends SbPage {
         ${
           busiest.length === 0
             ? html`<p class="muted small">Nothing busy right now.</p>`
-            : html`<div class="stack" style="--sb-stack-gap: var(--sb-space-3)">
+            : html`<div class="stack" style="--sb-stack-gap: var(--gw-space-3)">
                 ${meters}
               </div>`
         }

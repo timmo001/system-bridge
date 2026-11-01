@@ -31,13 +31,13 @@ export class SbWorkspaceActions extends LitElement {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
 
       form {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
 
       .input {

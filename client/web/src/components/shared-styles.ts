@@ -24,8 +24,8 @@ export const spinner = () =>
  */
 export const shared = css`
   :host {
-    font-family: var(--sb-font-body);
-    color: var(--sb-color-text);
+    font-family: var(--gw-font-sans);
+    color: var(--gw-color-text-primary);
   }
 
   *,
@@ -47,59 +47,59 @@ export const shared = css`
   }
 
   h1 {
-    font-size: var(--sb-font-size-2xl);
-    font-weight: var(--sb-font-weight-semibold);
-    line-height: var(--sb-line-height-condensed);
+    font-size: var(--gw-font-size-2xl);
+    font-weight: var(--gw-font-weight-strong);
+    line-height: 1.2;
   }
 
   h2 {
-    font-size: var(--sb-font-size-l);
-    font-weight: var(--sb-font-weight-semibold);
-    line-height: var(--sb-line-height-condensed);
+    font-size: var(--gw-font-size-l);
+    font-weight: var(--gw-font-weight-strong);
+    line-height: 1.2;
   }
 
   h3 {
-    font-size: var(--sb-font-size-m);
-    font-weight: var(--sb-font-weight-semibold);
+    font-size: var(--gw-font-size-m);
+    font-weight: var(--gw-font-weight-strong);
   }
 
   a {
-    color: var(--sb-color-accent);
+    color: var(--gw-color-accent);
   }
 
   code,
   kbd,
   pre {
-    font-family: var(--sb-font-code);
+    font-family: var(--gw-font-mono);
   }
 
   kbd {
     display: inline-flex;
     align-items: center;
-    padding: var(--sb-space-0-5) var(--sb-space-1-5);
-    font-size: var(--sb-font-size-2xs);
+    padding: var(--gw-space-0-5) calc(var(--gw-space-1) * 1.5);
+    font-size: var(--gw-font-size-2xs);
     line-height: 1;
-    color: var(--sb-color-muted);
-    background: var(--sb-color-surface);
-    border: 1px solid var(--sb-color-border);
+    color: var(--gw-color-text-secondary);
+    background: var(--gw-color-surface-raised);
+    border: 1px solid var(--gw-color-border-normal);
     border-bottom-width: 2px;
-    border-radius: var(--sb-radius-s);
+    border-radius: var(--gw-radius-s);
   }
 
   .muted {
-    color: var(--sb-color-muted);
+    color: var(--gw-color-text-secondary);
   }
 
   .small {
-    font-size: var(--sb-font-size-s);
+    font-size: var(--gw-font-size-s);
   }
 
   .xsmall {
-    font-size: var(--sb-font-size-xs);
+    font-size: var(--gw-font-size-xs);
   }
 
   .mono {
-    font-family: var(--sb-font-code);
+    font-family: var(--gw-font-mono);
   }
 
   .tabular {
@@ -119,13 +119,13 @@ export const shared = css`
   .stack {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-stack-gap, var(--sb-space-4));
+    gap: var(--sb-stack-gap, var(--gw-space-4));
   }
 
   .row {
     display: flex;
     align-items: center;
-    gap: var(--sb-row-gap, var(--sb-space-2));
+    gap: var(--sb-row-gap, var(--gw-space-2));
   }
 
   .wrap {
@@ -138,7 +138,7 @@ export const shared = css`
 
   .grid {
     display: grid;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
     grid-template-columns: repeat(
       auto-fill,
       minmax(min(100%, var(--sb-grid-min, 18rem)), 1fr)
@@ -153,7 +153,7 @@ export const shared = css`
   }
 
   :focus-visible {
-    outline: 2px solid var(--sb-color-focus);
+    outline: 2px solid var(--gw-color-focus);
     outline-offset: 2px;
   }
 
@@ -162,65 +162,65 @@ export const shared = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--sb-space-2);
+    gap: var(--gw-space-2);
     min-height: 2.25rem;
-    padding: 0 var(--sb-space-4);
+    padding: 0 var(--gw-space-4);
     font: inherit;
-    font-size: var(--sb-font-size-s);
-    font-weight: var(--sb-font-weight-medium);
+    font-size: var(--gw-font-size-s);
+    font-weight: var(--gw-font-weight-strong);
     line-height: 1;
-    color: var(--sb-color-text);
+    color: var(--gw-color-text-primary);
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
-    background: var(--sb-color-raised);
-    border: 1px solid var(--sb-color-border);
-    border-radius: var(--sb-radius-m);
+    background: var(--gw-color-surface-overlay);
+    border: 1px solid var(--gw-color-border-normal);
+    border-radius: var(--gw-radius-m);
     transition:
-      background var(--sb-duration-fast) var(--sb-easing),
-      border-color var(--sb-duration-fast) var(--sb-easing),
-      color var(--sb-duration-fast) var(--sb-easing);
+      background var(--gw-motion-fast) var(--gw-motion-easing),
+      border-color var(--gw-motion-fast) var(--gw-motion-easing),
+      color var(--gw-motion-fast) var(--gw-motion-easing);
     --sb-icon-size: 1.125rem;
   }
 
   .button:hover {
     background: color-mix(
       in oklab,
-      var(--sb-color-raised),
-      var(--sb-color-text) 6%
+      var(--gw-color-surface-overlay),
+      var(--gw-color-text-primary) 6%
     );
   }
 
   .button:active {
     background: color-mix(
       in oklab,
-      var(--sb-color-raised),
-      var(--sb-color-text) 10%
+      var(--gw-color-surface-overlay),
+      var(--gw-color-text-primary) 10%
     );
   }
 
   .button.filled {
-    color: var(--sb-color-on-accent);
-    background: var(--sb-color-accent);
+    color: var(--gw-color-on-accent);
+    background: var(--gw-color-accent);
     border-color: transparent;
   }
 
   .button.filled:hover {
     background: color-mix(
       in oklab,
-      var(--sb-color-accent),
-      var(--sb-color-text) 12%
+      var(--gw-color-accent),
+      var(--gw-color-text-primary) 12%
     );
   }
 
   .button.tonal {
-    color: var(--sb-color-accent);
-    background: var(--sb-color-accent-soft);
+    color: var(--gw-color-accent);
+    background: var(--gw-color-fill-accent-quiet);
     border-color: transparent;
   }
 
   .button.tonal:hover {
-    background: color-mix(in oklab, var(--sb-color-accent) 24%, transparent);
+    background: color-mix(in oklab, var(--gw-color-accent) 24%, transparent);
   }
 
   .button.plain {
@@ -229,30 +229,30 @@ export const shared = css`
   }
 
   .button.plain:hover {
-    background: var(--sb-color-hover);
+    background: var(--gw-color-fill-neutral-hovered);
   }
 
   .button.danger {
-    color: var(--sb-color-danger);
-    background: var(--sb-color-danger-soft);
+    color: var(--gw-color-danger);
+    background: var(--gw-color-fill-danger-quiet);
     border-color: transparent;
   }
 
   .button.danger:hover {
-    background: color-mix(in oklab, var(--sb-color-danger) 26%, transparent);
+    background: color-mix(in oklab, var(--gw-color-danger) 26%, transparent);
   }
 
   .button.small {
     min-height: 1.875rem;
-    padding: 0 var(--sb-space-3);
-    font-size: var(--sb-font-size-xs);
+    padding: 0 var(--gw-space-3);
+    font-size: var(--gw-font-size-xs);
     --sb-icon-size: 1rem;
   }
 
   .button.large {
     min-height: 3rem;
-    padding: 0 var(--sb-space-6);
-    font-size: var(--sb-font-size-m);
+    padding: 0 var(--gw-space-6);
+    font-size: var(--gw-font-size-m);
     --sb-icon-size: 1.5rem;
   }
 
@@ -273,7 +273,7 @@ export const shared = css`
   }
 
   .button.round {
-    border-radius: var(--sb-radius-pill);
+    border-radius: var(--gw-radius-pill);
   }
 
   .button:disabled,
@@ -285,7 +285,7 @@ export const shared = css`
 
   .button.plain:disabled,
   .button.plain[aria-disabled="true"] {
-    color: var(--sb-color-muted);
+    color: var(--gw-color-text-secondary);
   }
 
   .spin {
@@ -302,58 +302,58 @@ export const shared = css`
   .field {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-1-5);
+    gap: calc(var(--gw-space-1) * 1.5);
   }
 
   .field > label,
   .label {
-    font-size: var(--sb-font-size-s);
-    font-weight: var(--sb-font-weight-medium);
+    font-size: var(--gw-font-size-s);
+    font-weight: var(--gw-font-weight-strong);
   }
 
   .hint {
-    font-size: var(--sb-font-size-xs);
-    color: var(--sb-color-muted);
+    font-size: var(--gw-font-size-xs);
+    color: var(--gw-color-text-secondary);
   }
 
   .error-text {
-    font-size: var(--sb-font-size-xs);
-    color: var(--sb-color-danger);
+    font-size: var(--gw-font-size-xs);
+    color: var(--gw-color-danger);
   }
 
   .input {
     width: 100%;
     min-height: 2.5rem;
-    padding: 0 var(--sb-space-3);
+    padding: 0 var(--gw-space-3);
     font: inherit;
-    font-size: var(--sb-font-size-s);
-    color: var(--sb-color-text);
-    background: var(--sb-color-sunken);
-    border: 1px solid var(--sb-color-border);
-    border-radius: var(--sb-radius-m);
-    transition: border-color var(--sb-duration-fast) var(--sb-easing);
+    font-size: var(--gw-font-size-s);
+    color: var(--gw-color-text-primary);
+    background: var(--gw-color-surface-lower);
+    border: 1px solid var(--gw-color-border-normal);
+    border-radius: var(--gw-radius-m);
+    transition: border-color var(--gw-motion-fast) var(--gw-motion-easing);
   }
 
   .input::placeholder {
-    color: color-mix(in oklab, var(--sb-color-muted) 80%, transparent);
+    color: color-mix(in oklab, var(--gw-color-text-secondary) 80%, transparent);
   }
 
   .input:hover {
     border-color: color-mix(
       in oklab,
-      var(--sb-color-border),
-      var(--sb-color-text) 20%
+      var(--gw-color-border-normal),
+      var(--gw-color-text-primary) 20%
     );
   }
 
   .input:focus-visible {
     outline: none;
-    border-color: var(--sb-color-accent);
-    box-shadow: 0 0 0 3px var(--sb-color-accent-soft);
+    border-color: var(--gw-color-accent);
+    box-shadow: 0 0 0 3px var(--gw-color-fill-accent-quiet);
   }
 
   .input[aria-invalid="true"] {
-    border-color: var(--sb-color-danger);
+    border-color: var(--gw-color-danger);
   }
 
   .input:disabled {
@@ -369,10 +369,10 @@ export const shared = css`
     height: 1.5rem;
     margin: 0;
     cursor: pointer;
-    background: var(--sb-color-sunken);
-    border: 1px solid var(--sb-color-border);
-    border-radius: var(--sb-radius-pill);
-    transition: background var(--sb-duration-fast) var(--sb-easing);
+    background: var(--gw-color-surface-lower);
+    border: 1px solid var(--gw-color-border-normal);
+    border-radius: var(--gw-radius-pill);
+    transition: background var(--gw-motion-fast) var(--gw-motion-easing);
   }
 
   .switch::after {
@@ -382,21 +382,21 @@ export const shared = css`
     left: 0.1875rem;
     width: 1rem;
     height: 1rem;
-    background: var(--sb-color-muted);
+    background: var(--gw-color-text-secondary);
     border-radius: 50%;
     transition:
-      translate var(--sb-duration-fast) var(--sb-easing),
-      background var(--sb-duration-fast) var(--sb-easing);
+      translate var(--gw-motion-fast) var(--gw-motion-easing),
+      background var(--gw-motion-fast) var(--gw-motion-easing);
   }
 
   .switch:checked {
-    background: var(--sb-color-accent);
+    background: var(--gw-color-accent);
     border-color: transparent;
   }
 
   .switch:checked::after {
     translate: 1rem 0;
-    background: var(--sb-color-on-accent);
+    background: var(--gw-color-on-accent);
   }
 
   .switch:disabled {
@@ -408,7 +408,7 @@ export const shared = css`
     width: 1.125rem;
     height: 1.125rem;
     margin: 0;
-    accent-color: var(--sb-color-accent);
+    accent-color: var(--gw-color-accent);
   }
 
   /* A row with a label on one side and a control on the other. A wide
@@ -418,8 +418,8 @@ export const shared = css`
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sb-space-2) var(--sb-space-4);
-    padding: var(--sb-space-3) 0;
+    gap: var(--gw-space-2) var(--gw-space-4);
+    padding: var(--gw-space-3) 0;
   }
 
   .setting > :first-child {
@@ -432,18 +432,18 @@ export const shared = css`
   }
 
   .setting + .setting {
-    border-top: 1px solid var(--sb-color-border);
+    border-top: 1px solid var(--gw-color-border-normal);
   }
 
   /* Cards */
   .card {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-4);
-    padding: var(--sb-space-5);
-    background: var(--sb-color-surface);
-    border: 1px solid var(--sb-color-border);
-    border-radius: var(--sb-radius-l);
+    gap: var(--gw-space-4);
+    padding: var(--gw-space-5);
+    background: var(--gw-color-surface-raised);
+    border: 1px solid var(--gw-color-border-normal);
+    border-radius: var(--gw-radius-l);
   }
 
   .card.flush {
@@ -454,14 +454,14 @@ export const shared = css`
   a.card {
     color: inherit;
     text-decoration: none;
-    transition: border-color var(--sb-duration-fast) var(--sb-easing);
+    transition: border-color var(--gw-motion-fast) var(--gw-motion-easing);
   }
 
   a.card:hover {
     border-color: color-mix(
       in oklab,
-      var(--sb-color-accent) 50%,
-      var(--sb-color-border)
+      var(--gw-color-accent) 50%,
+      var(--gw-color-border-normal)
     );
   }
 
@@ -469,39 +469,39 @@ export const shared = css`
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: var(--sb-space-1-5);
+    gap: calc(var(--gw-space-1) * 1.5);
     min-height: 1.75rem;
-    padding: 0 var(--sb-space-3);
-    font-size: var(--sb-font-size-xs);
-    font-weight: var(--sb-font-weight-medium);
-    color: var(--sb-chip-color, var(--sb-color-text));
+    padding: 0 var(--gw-space-3);
+    font-size: var(--gw-font-size-xs);
+    font-weight: var(--gw-font-weight-strong);
+    color: var(--sb-chip-color, var(--gw-color-text-primary));
     background: color-mix(
       in oklab,
-      var(--sb-chip-color, var(--sb-color-muted)) 14%,
+      var(--sb-chip-color, var(--gw-color-text-secondary)) 14%,
       transparent
     );
-    border-radius: var(--sb-radius-pill);
+    border-radius: var(--gw-radius-pill);
     --sb-icon-size: 1rem;
   }
 
   .chip.success {
-    --sb-chip-color: var(--sb-color-success);
+    --sb-chip-color: var(--gw-color-success);
   }
 
   .chip.warning {
-    --sb-chip-color: var(--sb-color-warning);
+    --sb-chip-color: var(--gw-color-warning);
   }
 
   .chip.danger {
-    --sb-chip-color: var(--sb-color-danger);
+    --sb-chip-color: var(--gw-color-danger);
   }
 
   .chip.info {
-    --sb-chip-color: var(--sb-color-info);
+    --sb-chip-color: var(--gw-color-info);
   }
 
   .chip.accent {
-    --sb-chip-color: var(--sb-color-accent);
+    --sb-chip-color: var(--gw-color-accent);
   }
 
   .dot {
@@ -517,12 +517,17 @@ export const shared = css`
     min-height: 1rem;
     background: linear-gradient(
       90deg,
-      var(--sb-color-sunken) 25%,
-      color-mix(in oklab, var(--sb-color-sunken), var(--sb-color-text) 6%) 50%,
-      var(--sb-color-sunken) 75%
+      var(--gw-color-surface-lower) 25%,
+      color-mix(
+          in oklab,
+          var(--gw-color-surface-lower),
+          var(--gw-color-text-primary) 6%
+        )
+        50%,
+      var(--gw-color-surface-lower) 75%
     );
     background-size: 200% 100%;
-    border-radius: var(--sb-radius-m);
+    border-radius: var(--gw-radius-m);
     animation: shimmer 1.4s ease-in-out infinite;
   }
 
@@ -548,9 +553,9 @@ export const shared = css`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--sb-space-2);
-    padding: var(--sb-space-8) var(--sb-space-4);
-    color: var(--sb-color-muted);
+    gap: var(--gw-space-2);
+    padding: var(--gw-space-8) var(--gw-space-4);
+    color: var(--gw-color-text-secondary);
     text-align: center;
     --sb-icon-size: 2.5rem;
   }
@@ -559,13 +564,13 @@ export const shared = css`
   dl.facts {
     display: grid;
     grid-template-columns: minmax(7rem, max-content) 1fr;
-    gap: var(--sb-space-2) var(--sb-space-4);
+    gap: var(--gw-space-2) var(--gw-space-4);
     margin: 0;
-    font-size: var(--sb-font-size-s);
+    font-size: var(--gw-font-size-s);
   }
 
   dl.facts dt {
-    color: var(--sb-color-muted);
+    color: var(--gw-color-text-secondary);
   }
 
   dl.facts dd {
@@ -584,7 +589,7 @@ export const pageStyles = css`
   .page {
     display: flex;
     flex-direction: column;
-    gap: var(--sb-space-6);
+    gap: var(--gw-space-6);
     width: 100%;
     max-width: var(--sb-page-width, var(--sb-content-width));
     margin: 0 auto;
@@ -597,7 +602,7 @@ export const pageStyles = css`
   /* A section of another page takes the room that page gives it, under a
      smaller heading */
   :host([embedded]) .page {
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
     max-width: none;
     margin: 0;
   }
@@ -605,19 +610,19 @@ export const pageStyles = css`
   :host([embedded]) .page-header .tile {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: var(--sb-radius-m);
+    border-radius: var(--gw-radius-m);
     --sb-icon-size: 1.375rem;
   }
 
   :host([embedded]) .page-header h2 {
-    font-size: var(--sb-font-size-l);
+    font-size: var(--gw-font-size-l);
   }
 
   .page-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--sb-space-4);
+    gap: var(--gw-space-4);
   }
 
   .page-header .tile {
@@ -625,9 +630,9 @@ export const pageStyles = css`
     place-items: center;
     width: 3rem;
     height: 3rem;
-    color: var(--sb-color-accent);
-    background: var(--sb-color-accent-soft);
-    border-radius: var(--sb-radius-l);
+    color: var(--gw-color-accent);
+    background: var(--gw-color-fill-accent-quiet);
+    border-radius: var(--gw-radius-l);
     --sb-icon-size: 1.625rem;
   }
 
@@ -635,13 +640,13 @@ export const pageStyles = css`
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(--sb-space-1);
+    gap: var(--gw-space-1);
     min-width: min(100%, 14rem);
   }
 
   .page-header .description {
-    font-size: var(--sb-font-size-s);
-    color: var(--sb-color-muted);
+    font-size: var(--gw-font-size-s);
+    color: var(--gw-color-text-secondary);
   }
 
   /* Controls sit at the top right, beside the title, at every width */
@@ -655,7 +660,7 @@ export const pageStyles = css`
     flex: none;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--sb-space-2);
+    gap: var(--gw-space-2);
     margin-inline-start: auto;
   }
 
@@ -670,16 +675,16 @@ export const pageStyles = css`
   }
 
   .section-title {
-    font-size: var(--sb-font-size-xs);
-    font-weight: var(--sb-font-weight-semibold);
+    font-size: var(--gw-font-size-xs);
+    font-weight: var(--gw-font-weight-strong);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--sb-color-muted);
+    color: var(--gw-color-text-secondary);
   }
 
   .connection-required {
     align-items: center;
-    padding: var(--sb-space-10) var(--sb-space-6);
+    padding: var(--gw-space-10) var(--gw-space-6);
     text-align: center;
   }
 
@@ -688,8 +693,8 @@ export const pageStyles = css`
     place-items: center;
     width: 3.5rem;
     height: 3.5rem;
-    color: var(--sb-color-danger);
-    background: var(--sb-color-danger-soft);
+    color: var(--gw-color-danger);
+    background: var(--gw-color-fill-danger-quiet);
     border-radius: 50%;
     --sb-icon-size: 1.75rem;
   }

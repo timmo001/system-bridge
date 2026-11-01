@@ -148,7 +148,7 @@ export class PageNotifications extends SbPage {
           id=${field.key}
           name=${field.key}
           rows="3"
-          style="padding-block: var(--sb-space-2); resize: vertical"
+          style="padding-block: var(--gw-space-2); resize: vertical"
           placeholder=${field.placeholder}
           ?required=${field.required === true}
           ?disabled=${sending}
@@ -247,7 +247,7 @@ export class PageNotifications extends SbPage {
           () => this.#renderForm(),
           html`<span
             class="skeleton"
-            style="min-height: 30rem; border-radius: var(--sb-radius-l)"
+            style="min-height: 30rem; border-radius: var(--gw-radius-l)"
           ></span>`,
         )}
       </div>

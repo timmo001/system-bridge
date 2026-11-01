@@ -145,7 +145,7 @@ export class PageOpen extends SbPage {
           () => this.#renderForm(kind),
           html`<span
             class="skeleton"
-            style="min-height: 15rem; border-radius: var(--sb-radius-l)"
+            style="min-height: 15rem; border-radius: var(--gw-radius-l)"
           ></span>`,
         )}
       </div>

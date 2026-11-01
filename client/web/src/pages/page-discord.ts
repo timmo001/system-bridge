@@ -79,12 +79,12 @@ export class PageDiscord extends SbPage {
       .toggles {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       .toggles .button[aria-pressed="true"] {
-        color: var(--sb-color-on-accent);
-        background: var(--sb-color-danger);
+        color: var(--gw-color-on-accent);
+        background: var(--gw-color-danger);
         border-color: transparent;
       }
 
@@ -95,7 +95,7 @@ export class PageDiscord extends SbPage {
       .level {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       .level output {
@@ -116,12 +116,12 @@ export class PageDiscord extends SbPage {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: center;
-        gap: var(--sb-space-2) var(--sb-space-3);
-        padding: var(--sb-space-3) 0;
+        gap: var(--gw-space-2) var(--gw-space-3);
+        padding: var(--gw-space-3) 0;
       }
 
       .member + .member {
-        border-top: 1px solid var(--sb-color-border);
+        border-top: 1px solid var(--gw-color-border-normal);
       }
 
       .member .level {
@@ -131,13 +131,13 @@ export class PageDiscord extends SbPage {
       .avatar {
         width: 2rem;
         height: 2rem;
-        background: var(--sb-color-sunken);
+        background: var(--gw-color-surface-lower);
         border-radius: 50%;
         object-fit: cover;
       }
 
       .avatar.speaking {
-        outline: 2px solid var(--sb-color-success);
+        outline: 2px solid var(--gw-color-success);
         outline-offset: 1px;
       }
 
@@ -154,7 +154,7 @@ export class PageDiscord extends SbPage {
       .sounds {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
     `,
   ];

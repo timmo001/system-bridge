@@ -24,13 +24,13 @@ export class SbCameraControls extends LitElement {
       }
 
       .setting {
-        padding: var(--sb-space-2) 0;
+        padding: var(--gw-space-2) 0;
       }
 
       .level {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
         flex: 1 1 14rem;
       }
 

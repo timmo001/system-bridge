@@ -24,13 +24,13 @@ export class SbAudioDevice extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       .heading {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       .heading .name {
@@ -41,7 +41,7 @@ export class SbAudioDevice extends LitElement {
       .level {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       gw-range {

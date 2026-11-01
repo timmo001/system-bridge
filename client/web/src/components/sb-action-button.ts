@@ -25,7 +25,7 @@ export class SbActionButton extends LitElement {
         display: inline-flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
     `,
   ];

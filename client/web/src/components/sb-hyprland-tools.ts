@@ -152,14 +152,14 @@ export class SbHyprlandTools extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       form {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       .input {
@@ -174,14 +174,14 @@ export class SbHyprlandTools extends LitElement {
       pre {
         margin: 0;
         max-height: 16rem;
-        padding: var(--sb-space-3);
+        padding: var(--gw-space-3);
         overflow: auto;
-        font-size: var(--sb-font-size-xs);
+        font-size: var(--gw-font-size-xs);
         white-space: pre-wrap;
         word-break: break-word;
-        background: var(--sb-color-surface);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-m);
+        background: var(--gw-color-surface-raised);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-m);
       }
     `,
   ];

@@ -93,8 +93,8 @@ export class SbTimeseries extends LitElement {
       :host {
         display: block;
         min-width: 0;
-        font-size: var(--sb-font-size-xs);
-        color: var(--sb-color-muted);
+        font-size: var(--gw-font-size-xs);
+        color: var(--gw-color-text-secondary);
       }
 
       .toolbar {
@@ -102,14 +102,14 @@ export class SbTimeseries extends LitElement {
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        gap: var(--sb-space-2) var(--sb-space-4);
-        margin-bottom: var(--sb-space-2);
+        gap: var(--gw-space-2) var(--gw-space-4);
+        margin-bottom: var(--gw-space-2);
       }
 
       .legend {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--sb-space-1) var(--sb-space-4);
+        gap: var(--gw-space-1) var(--gw-space-4);
       }
 
       .toolbar gw-segmented {
@@ -119,8 +119,8 @@ export class SbTimeseries extends LitElement {
       .legend span {
         display: inline-flex;
         align-items: center;
-        gap: var(--sb-space-1-5);
-        color: var(--sb-color-text);
+        gap: calc(var(--gw-space-1) * 1.5);
+        color: var(--gw-color-text-primary);
       }
 
       .legend i {
@@ -132,32 +132,32 @@ export class SbTimeseries extends LitElement {
       .summary {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--sb-space-1) var(--sb-space-4);
-        margin: var(--sb-space-2) 0 0;
+        gap: var(--gw-space-1) var(--gw-space-4);
+        margin: var(--gw-space-2) 0 0;
         padding: 0;
         list-style: none;
       }
 
       .summary strong {
-        font-weight: var(--sb-font-weight-semibold);
+        font-weight: var(--gw-font-weight-strong);
         font-variant-numeric: tabular-nums;
-        color: var(--sb-color-text);
+        color: var(--gw-color-text-primary);
       }
 
       .summary span {
-        color: var(--sb-color-text);
+        color: var(--gw-color-text-primary);
       }
 
       .waiting {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--sb-space-4);
+        padding: var(--gw-space-4);
         text-align: center;
         text-wrap: balance;
-        color: var(--sb-color-muted);
-        border: 1px dashed var(--sb-color-border);
-        border-radius: var(--sb-radius-m);
+        color: var(--gw-color-text-secondary);
+        border: 1px dashed var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-m);
       }
     `,
   ];

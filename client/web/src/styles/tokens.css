@@ -1,44 +1,17 @@
 /*
- * Design tokens. Colours, fonts, radii, shadows and motion come from the
- * Groundwork theme on `<html>` (`src/lib/theme.ts`); the `--sb-*` names point
- * at its roles, so components can move onto them one at a time. Sizes stay in
- * rem so everything follows the browser's font size.
+ * Design tokens. Colours, type, spacing, radii, shadows and motion are
+ * Groundwork's, from the theme on `<html>` (`src/lib/theme.ts`). Only what is
+ * System Bridge's own lives here: chart colours and the page layout.
  */
 @import "@timmo001/groundwork-tokens/themes.css";
 
 :root {
-  --sb-color-bg: var(--gw-color-surface-default);
-  --sb-color-surface: var(--gw-color-surface-raised);
-  --sb-color-raised: var(--gw-color-surface-overlay);
-  --sb-color-sunken: var(--gw-color-surface-lower);
-  --sb-color-text: var(--gw-color-text-primary);
-  --sb-color-muted: var(--gw-color-text-secondary);
-  --sb-color-border: var(--gw-color-border-normal);
-  --sb-color-accent: var(--gw-color-accent);
-  --sb-color-on-accent: var(--gw-color-on-accent);
-  --sb-color-success: var(--gw-color-success);
-  --sb-color-warning: var(--gw-color-warning);
-  --sb-color-danger: var(--gw-color-danger);
-  --sb-color-info: var(--gw-color-info);
   --sb-color-chart-1: var(--gw-color-accent);
   --sb-color-chart-2: var(--gw-color-warning);
   --sb-color-chart-3: var(--gw-color-success);
   --sb-color-chart-4: var(--gw-color-important);
   --sb-color-chart-5: var(--gw-color-danger);
   --sb-color-chart-6: var(--gw-color-info);
-
-  /* Derived colours */
-  --sb-color-hover: var(--gw-color-fill-neutral-hovered);
-  --sb-color-active: var(--gw-color-fill-neutral-pressed);
-  --sb-color-accent-soft: var(--gw-color-fill-accent-quiet);
-  --sb-color-success-soft: var(--gw-color-fill-success-quiet);
-  --sb-color-warning-soft: var(--gw-color-fill-warning-quiet);
-  --sb-color-danger-soft: var(--gw-color-fill-danger-quiet);
-  --sb-color-focus: var(--gw-color-focus);
-  --sb-color-scrim: oklch(0% 0 0 / 45%);
-  --sb-shadow-s: var(--gw-shadow-s);
-  --sb-shadow-m: var(--gw-shadow-m);
-  --sb-shadow-l: var(--gw-shadow-l);
 
   /* TanStack Charts palette, from the theme */
   --ts-chart-1: var(--sb-color-chart-1);
@@ -47,64 +20,21 @@
   --ts-chart-4: var(--sb-color-chart-4);
   --ts-chart-5: var(--sb-color-chart-5);
   --ts-chart-6: var(--sb-color-chart-6);
-  --ts-chart-tooltip-background: var(--sb-color-raised);
-  --ts-chart-tooltip-color: var(--sb-color-text);
-  --ts-chart-tooltip-border: 1px solid var(--sb-color-border);
-  --ts-chart-tooltip-border-radius: var(--sb-radius-m);
-  --ts-chart-tooltip-shadow: var(--sb-shadow-m);
-
-  /* Type */
-  --sb-font-body: var(--gw-font-sans);
-  --sb-font-code: var(--gw-font-mono);
-  --sb-font-size-2xs: 0.6875rem;
-  --sb-font-size-xs: 0.75rem;
-  --sb-font-size-s: 0.875rem;
-  --sb-font-size-m: 1rem;
-  --sb-font-size-l: 1.125rem;
-  --sb-font-size-xl: 1.25rem;
-  --sb-font-size-2xl: 1.5rem;
-  --sb-font-size-3xl: 2rem;
-  --sb-font-weight-normal: 400;
-  --sb-font-weight-medium: 500;
-  --sb-font-weight-semibold: 600;
-  --sb-font-weight-bold: 700;
-  --sb-line-height-condensed: 1.2;
-  --sb-line-height-normal: 1.5;
-
-  /* Spacing, in quarter rem steps */
-  --sb-space-0-5: 0.125rem;
-  --sb-space-1: 0.25rem;
-  --sb-space-1-5: 0.375rem;
-  --sb-space-2: 0.5rem;
-  --sb-space-3: 0.75rem;
-  --sb-space-4: 1rem;
-  --sb-space-5: 1.25rem;
-  --sb-space-6: 1.5rem;
-  --sb-space-8: 2rem;
-  --sb-space-10: 2.5rem;
-  --sb-space-12: 3rem;
-
-  /* Shape */
-  --sb-radius-s: var(--gw-radius-s);
-  --sb-radius-m: var(--gw-radius-m);
-  --sb-radius-l: var(--gw-radius-l);
-  --sb-radius-xl: var(--gw-radius-xl);
-  --sb-radius-pill: var(--gw-radius-pill);
+  --ts-chart-tooltip-background: var(--gw-color-surface-overlay);
+  --ts-chart-tooltip-color: var(--gw-color-text-primary);
+  --ts-chart-tooltip-border: 1px solid var(--gw-color-border-normal);
+  --ts-chart-tooltip-border-radius: var(--gw-radius-m);
+  --ts-chart-tooltip-shadow: var(--gw-shadow-m);
 
   /* Layout */
   --sb-header-height: 3.5rem;
   --sb-content-width: 90rem;
-  --sb-gutter: var(--sb-space-6);
-
-  /* Motion */
-  --sb-duration-fast: var(--gw-motion-fast);
-  --sb-duration-normal: var(--gw-motion-normal);
-  --sb-easing: var(--gw-motion-easing);
+  --sb-gutter: var(--gw-space-6);
 }
 
 @media (max-width: 40rem) {
   :root {
-    --sb-gutter: var(--sb-space-4);
+    --sb-gutter: var(--gw-space-4);
   }
 }
 
@@ -123,16 +53,17 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  font-family: var(--sb-font-body);
-  font-size: var(--sb-font-size-m);
-  line-height: var(--sb-line-height-normal);
-  color: var(--sb-color-text);
-  background: var(--sb-color-bg);
+  font-family: var(--gw-font-sans);
+  font-size: var(--gw-font-size-m);
+  font-weight: var(--gw-font-weight-regular);
+  line-height: 1.5;
+  color: var(--gw-color-text-primary);
+  background: var(--gw-color-surface-default);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--sb-color-accent-soft);
+  background: var(--gw-color-fill-accent-quiet);
 }
 
 /* Hide custom elements until they upgrade, so nothing flashes unstyled */

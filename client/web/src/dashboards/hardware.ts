@@ -637,7 +637,7 @@ const displayLayout = (
           width=${display.resolution_horizontal - gap}
           height=${display.resolution_vertical - gap}
           rx=${gap * 2}
-          style="fill: color-mix(in oklab, ${colour} 18%, var(--sb-color-surface)); stroke: ${colour}"
+          style="fill: color-mix(in oklab, ${colour} 18%, var(--gw-color-surface-raised)); stroke: ${colour}"
           stroke-width=${gap / 2}
         ></rect>
         <text
@@ -646,7 +646,7 @@ const displayLayout = (
           text-anchor="middle"
           dominant-baseline="middle"
           font-size=${Math.min(display.resolution_horizontal, display.resolution_vertical) / 9}
-          style="fill: var(--sb-color-text)"
+          style="fill: var(--gw-color-text-primary)"
         >${display.name}</text>
       </g>
     `;

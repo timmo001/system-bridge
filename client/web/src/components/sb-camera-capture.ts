@@ -32,7 +32,7 @@ export class SbCameraCapture extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       gw-select {
@@ -43,8 +43,8 @@ export class SbCameraCapture extends LitElement {
         display: block;
         width: 100%;
         height: auto;
-        border-radius: var(--sb-radius-m);
-        background: var(--sb-color-sunken);
+        border-radius: var(--gw-radius-m);
+        background: var(--gw-color-surface-lower);
       }
     `,
   ];

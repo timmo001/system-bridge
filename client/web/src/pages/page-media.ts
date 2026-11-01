@@ -85,7 +85,7 @@ const isRepeat = (value: string | null | undefined): value is Repeat =>
 
 const placeholder = html`<span
   class="skeleton"
-  style="min-height: 22rem; border-radius: var(--sb-radius-l)"
+  style="min-height: 22rem; border-radius: var(--gw-radius-l)"
 ></span>`;
 
 /** What's playing on this system, with controls for it. */
@@ -98,7 +98,7 @@ export class PageMedia extends SbPage {
       .player {
         position: relative;
         display: grid;
-        gap: var(--sb-space-6);
+        gap: var(--gw-space-6);
         grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
         align-items: center;
       }
@@ -134,21 +134,21 @@ export class PageMedia extends SbPage {
       .progress {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-1);
-        margin-top: var(--sb-space-4);
+        gap: var(--gw-space-1);
+        margin-top: var(--gw-space-4);
       }
 
       .progress .bar {
         height: 0.375rem;
         overflow: hidden;
-        background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-pill);
+        background: var(--gw-color-surface-lower);
+        border-radius: var(--gw-radius-pill);
       }
 
       .progress .bar span {
         display: block;
         height: 100%;
-        background: var(--sb-color-accent);
+        background: var(--gw-color-accent);
         border-radius: inherit;
       }
 
@@ -160,25 +160,25 @@ export class PageMedia extends SbPage {
       .progress .seek {
         width: 100%;
         margin: 0;
-        accent-color: var(--sb-color-accent);
+        accent-color: var(--gw-color-accent);
       }
 
       /* Shuffle or repeat that's on */
       .controls .button.pressed {
-        color: var(--sb-color-accent);
+        color: var(--gw-color-accent);
       }
 
       .players {
         display: grid;
-        gap: var(--sb-space-4);
+        gap: var(--gw-space-4);
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-        margin-top: var(--sb-space-4);
+        margin-top: var(--gw-space-4);
       }
 
       .other {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
+        gap: var(--gw-space-3);
       }
 
       .other .details {
@@ -191,7 +191,7 @@ export class PageMedia extends SbPage {
       .art.small {
         flex: none;
         width: 3rem;
-        border-radius: var(--sb-radius-m);
+        border-radius: var(--gw-radius-m);
         box-shadow: none;
         --sb-icon-size: 1.5rem;
       }
@@ -199,7 +199,7 @@ export class PageMedia extends SbPage {
       .picker {
         width: 20rem;
         max-width: calc(100% - 6.5rem);
-        margin-bottom: var(--sb-space-2);
+        margin-bottom: var(--gw-space-2);
       }
 
       @media (max-width: 40rem) {
@@ -213,28 +213,28 @@ export class PageMedia extends SbPage {
         max-width: 14rem;
         aspect-ratio: 1;
         object-fit: cover;
-        background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-xl);
-        box-shadow: var(--sb-shadow-m);
+        background: var(--gw-color-surface-lower);
+        border-radius: var(--gw-radius-xl);
+        box-shadow: var(--gw-shadow-m);
       }
 
       div.art {
         display: grid;
         place-items: center;
-        color: var(--sb-color-muted);
+        color: var(--gw-color-text-secondary);
         --sb-icon-size: 4rem;
       }
 
       .info {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
         min-width: 0;
         width: 100%;
       }
 
       .title {
-        font-size: var(--sb-font-size-2xl);
+        font-size: var(--gw-font-size-2xl);
       }
 
       /* Playback in the true centre, stop at the start and volume at the
@@ -244,14 +244,14 @@ export class PageMedia extends SbPage {
         grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         grid-template-areas: "stop transport levels";
         align-items: center;
-        gap: var(--sb-space-3) var(--sb-space-4);
-        margin-top: var(--sb-space-3);
+        gap: var(--gw-space-3) var(--gw-space-4);
+        margin-top: var(--gw-space-3);
       }
 
       .controls .group {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
       }
 
       .controls .stop {
@@ -270,7 +270,7 @@ export class PageMedia extends SbPage {
 
       .controls .volume {
         min-width: 4ch;
-        margin-inline-start: var(--sb-space-0-5);
+        margin-inline-start: var(--gw-space-0-5);
       }
 
       /* The volume shows its level, or a muted speaker. Hovering or
@@ -278,13 +278,13 @@ export class PageMedia extends SbPage {
          with the controls; the level stays put under the pointer. Touch
          screens can't hover, so they always show the group */
       .controls .levels {
-        padding: var(--sb-space-1) var(--sb-space-2) var(--sb-space-1)
-          var(--sb-space-1);
+        padding: var(--gw-space-1) var(--gw-space-2) var(--gw-space-1)
+          var(--gw-space-1);
         border: 1px solid transparent;
-        border-radius: var(--sb-radius-pill);
+        border-radius: var(--gw-radius-pill);
         transition:
-          background var(--sb-duration-fast) var(--sb-easing),
-          border-color var(--sb-duration-fast) var(--sb-easing);
+          background var(--gw-motion-fast) var(--gw-motion-easing),
+          border-color var(--gw-motion-fast) var(--gw-motion-easing);
       }
 
       .controls .volume {
@@ -303,19 +303,19 @@ export class PageMedia extends SbPage {
 
       .controls .reveal {
         display: flex;
-        gap: var(--sb-space-0-5);
+        gap: var(--gw-space-0-5);
         max-width: 0;
         overflow: hidden;
         opacity: 0;
         transition:
-          max-width var(--sb-duration-normal) var(--sb-easing),
-          opacity var(--sb-duration-normal) var(--sb-easing);
+          max-width var(--gw-motion-normal) var(--gw-motion-easing),
+          opacity var(--gw-motion-normal) var(--gw-motion-easing);
       }
 
       .controls .levels:hover,
       .controls .levels:focus-within {
-        background: var(--sb-color-sunken);
-        border-color: var(--sb-color-border);
+        background: var(--gw-color-surface-lower);
+        border-color: var(--gw-color-border-normal);
       }
 
       .controls .levels:hover .reveal,
@@ -326,8 +326,8 @@ export class PageMedia extends SbPage {
 
       @media (hover: none) {
         .controls .levels {
-          background: var(--sb-color-sunken);
-          border-color: var(--sb-color-border);
+          background: var(--gw-color-surface-lower);
+          border-color: var(--gw-color-border-normal);
         }
 
         .controls .reveal {
@@ -357,9 +357,9 @@ export class PageMedia extends SbPage {
         flex-wrap: wrap;
         align-items: start;
         justify-content: space-between;
-        gap: var(--sb-space-1) var(--sb-space-4);
+        gap: var(--gw-space-1) var(--gw-space-4);
         min-height: 1lh;
-        margin-top: var(--sb-space-3);
+        margin-top: var(--gw-space-3);
       }
 
       .footer .outcome {
@@ -370,9 +370,9 @@ export class PageMedia extends SbPage {
       .footer .message {
         display: inline-flex;
         align-items: start;
-        gap: var(--sb-space-1);
+        gap: var(--gw-space-1);
         text-align: start;
-        animation: fade-in var(--sb-duration-normal) var(--sb-easing);
+        animation: fade-in var(--gw-motion-normal) var(--gw-motion-easing);
         --sb-icon-size: 1em;
       }
 
@@ -382,11 +382,11 @@ export class PageMedia extends SbPage {
       }
 
       .footer .message.success > .icon {
-        color: var(--sb-color-success);
+        color: var(--gw-color-success);
       }
 
       .footer .message.danger {
-        color: var(--sb-color-danger);
+        color: var(--gw-color-danger);
       }
 
       @keyframes fade-in {
@@ -408,8 +408,8 @@ export class PageMedia extends SbPage {
 
       /* Unavailable, it keeps its circle, in grey */
       .controls .button.main:disabled {
-        background: var(--sb-color-sunken);
-        border-color: var(--sb-color-border);
+        background: var(--gw-color-surface-lower);
+        border-color: var(--gw-color-border-normal);
       }
     `,
   ];

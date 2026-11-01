@@ -100,8 +100,8 @@ if [ -z "$CSS_FILE" ]; then
 	echo "ERROR: No CSS file found to verify"
 	exit 1
 fi
-if ! grep -q -- "--sb-color-" "$CSS_FILE" 2>/dev/null; then
-	echo "ERROR: The CSS has no --sb-color-* design tokens"
+if ! grep -q -- "--gw-color-" "$CSS_FILE" 2>/dev/null; then
+	echo "ERROR: The CSS has no Groundwork --gw-color-* design tokens"
 	echo "Check client/web/src/styles/tokens.css is imported by src/app.ts"
 	exit 1
 fi

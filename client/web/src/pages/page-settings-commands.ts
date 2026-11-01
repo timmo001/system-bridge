@@ -146,16 +146,16 @@ export class PageSettingsCommands extends SbSettingsPage {
       .command {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-1);
-        padding: var(--sb-space-2) var(--sb-space-3);
-        background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-m);
+        gap: var(--gw-space-1);
+        padding: var(--gw-space-2) var(--gw-space-3);
+        background: var(--gw-color-surface-lower);
+        border-radius: var(--gw-radius-m);
       }
 
       .head {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
       }
 
       .title {
@@ -163,7 +163,7 @@ export class PageSettingsCommands extends SbSettingsPage {
         flex: 1;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         min-width: 0;
       }
 
@@ -173,20 +173,20 @@ export class PageSettingsCommands extends SbSettingsPage {
 
       .title .chip {
         min-height: 1.25rem;
-        padding: 0 var(--sb-space-2);
+        padding: 0 var(--gw-space-2);
       }
 
       .details {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        column-gap: var(--sb-space-3);
-        row-gap: var(--sb-space-1);
-        font-size: var(--sb-font-size-xs);
+        column-gap: var(--gw-space-3);
+        row-gap: var(--gw-space-1);
+        font-size: var(--gw-font-size-xs);
       }
 
       .details code {
-        font-size: var(--sb-font-size-xs);
+        font-size: var(--gw-font-size-xs);
         overflow-wrap: anywhere;
       }
 
@@ -194,7 +194,7 @@ export class PageSettingsCommands extends SbSettingsPage {
         display: inline-flex;
         align-items: center;
         margin-inline-start: auto;
-        color: var(--sb-color-muted);
+        color: var(--gw-color-text-secondary);
       }
 
       /* A part of a command that opens its edit popover */
@@ -203,24 +203,24 @@ export class PageSettingsCommands extends SbSettingsPage {
         align-items: center;
         max-width: 100%;
         min-width: 0;
-        padding: 0.125rem var(--sb-space-1);
-        margin-inline: calc(-1 * var(--sb-space-1));
+        padding: 0.125rem var(--gw-space-1);
+        margin-inline: calc(-1 * var(--gw-space-1));
         font: inherit;
         color: inherit;
         text-align: start;
         cursor: pointer;
         background: none;
         border: 0;
-        border-radius: var(--sb-radius-s);
+        border-radius: var(--gw-radius-s);
       }
 
       .editable:hover:not(:disabled),
       .editable[aria-expanded="true"] {
-        background: var(--sb-color-surface);
+        background: var(--gw-color-surface-raised);
       }
 
       .editable:focus-visible {
-        outline: 2px solid var(--sb-color-accent);
+        outline: 2px solid var(--gw-color-accent);
         outline-offset: 1px;
       }
 
@@ -234,23 +234,23 @@ export class PageSettingsCommands extends SbSettingsPage {
         width: 22rem;
         max-width: calc(100vw - 1rem);
         margin: 0;
-        padding: var(--sb-space-3);
-        color: var(--sb-color-text);
-        background: var(--sb-color-raised);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-l);
-        box-shadow: var(--sb-shadow-l);
+        padding: var(--gw-space-3);
+        color: var(--gw-color-text-primary);
+        background: var(--gw-color-surface-overlay);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-l);
+        box-shadow: var(--gw-shadow-l);
       }
 
       pre {
         margin: 0;
         max-height: 12rem;
-        padding: var(--sb-space-3);
+        padding: var(--gw-space-3);
         overflow: auto;
-        font-size: var(--sb-font-size-xs);
-        background: var(--sb-color-surface);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-m);
+        font-size: var(--gw-font-size-xs);
+        background: var(--gw-color-surface-raised);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-m);
       }
     `,
   ];
@@ -603,7 +603,7 @@ export class PageSettingsCommands extends SbSettingsPage {
     const ok = result.exitCode === 0;
 
     return html`
-      <div class="stack" style="--sb-stack-gap: var(--sb-space-2)">
+      <div class="stack" style="--sb-stack-gap: var(--gw-space-2)">
         <span
           class="chip ${ok ? "success" : "danger"}"
           style="align-self: start"
@@ -614,7 +614,7 @@ export class PageSettingsCommands extends SbSettingsPage {
         ${result.stdout ? html`<pre>${result.stdout}</pre>` : nothing}
         ${
           result.stderr
-            ? html`<pre style="color: var(--sb-color-danger)">
+            ? html`<pre style="color: var(--gw-color-danger)">
 ${result.stderr}</pre>`
             : nothing
         }
@@ -1041,7 +1041,7 @@ ${result.stderr}</pre>`
                 ${icon(mdiConsoleLine)}
                 <p>No commands yet. Add one above.</p>
               </div>`
-            : html`<div class="stack" style="--sb-stack-gap: var(--sb-space-3)">
+            : html`<div class="stack" style="--sb-stack-gap: var(--gw-space-3)">
                 ${repeat(
                   this.commands,
                   (command) => command.id,
@@ -1069,7 +1069,7 @@ ${result.stderr}</pre>`
           () => this.#renderContent(),
           html`<span
             class="skeleton"
-            style="min-height: 28rem; border-radius: var(--sb-radius-l)"
+            style="min-height: 28rem; border-radius: var(--gw-radius-l)"
           ></span>`,
         )}
       </div>

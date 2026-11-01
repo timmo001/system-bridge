@@ -76,18 +76,22 @@ export class SbApp extends LitElement {
         z-index: 10;
         display: flex;
         align-items: center;
-        gap: var(--sb-space-3);
-        padding: 0 var(--sb-space-3) 0 var(--sb-space-2);
-        background: color-mix(in oklab, var(--sb-color-bg) 85%, transparent);
+        gap: var(--gw-space-3);
+        padding: 0 var(--gw-space-3) 0 var(--gw-space-2);
+        background: color-mix(
+          in oklab,
+          var(--gw-color-surface-default) 85%,
+          transparent
+        );
         backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--sb-color-border);
+        border-bottom: 1px solid var(--gw-color-border-normal);
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: var(--sb-space-2);
-        font-weight: var(--sb-font-weight-semibold);
+        gap: var(--gw-space-2);
+        font-weight: var(--gw-font-weight-strong);
         color: inherit;
         text-decoration: none;
         white-space: nowrap;
@@ -104,21 +108,21 @@ export class SbApp extends LitElement {
       .jump {
         display: flex;
         flex: 1 1 24rem;
-        gap: var(--sb-space-2);
+        gap: var(--gw-space-2);
         align-items: center;
         min-width: 0;
         max-width: 26rem;
         height: 2.25rem;
-        margin-inline-start: var(--sb-space-4);
-        padding: 0 var(--sb-space-2) 0 var(--sb-space-3);
+        margin-inline-start: var(--gw-space-4);
+        padding: 0 var(--gw-space-2) 0 var(--gw-space-3);
         font: inherit;
-        color: var(--sb-color-text);
+        color: var(--gw-color-text-primary);
         text-align: start;
         cursor: pointer;
-        background: var(--sb-color-sunken);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-m);
-        transition: border-color var(--sb-duration-fast) var(--sb-easing);
+        background: var(--gw-color-surface-lower);
+        border: 1px solid var(--gw-color-border-normal);
+        border-radius: var(--gw-radius-m);
+        transition: border-color var(--gw-motion-fast) var(--gw-motion-easing);
       }
 
       .jump:hover {
@@ -146,7 +150,7 @@ export class SbApp extends LitElement {
 
       main {
         min-width: 0;
-        padding: var(--sb-space-6) var(--sb-gutter) var(--sb-space-12);
+        padding: var(--gw-space-6) var(--sb-gutter) var(--gw-space-12);
       }
 
       @media (max-width: 64rem) {
