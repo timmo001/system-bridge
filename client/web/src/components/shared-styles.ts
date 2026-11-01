@@ -164,13 +164,6 @@ export const shared = css`
     font-size: var(--gw-font-size-xs);
     color: var(--gw-color-danger);
   }
-
-  .checkbox {
-    width: 1.125rem;
-    height: 1.125rem;
-    margin: 0;
-    accent-color: var(--gw-color-accent);
-  }
 `;
 
 /** The layout every page shares: a header, then its content. */
