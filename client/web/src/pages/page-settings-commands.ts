@@ -1067,10 +1067,9 @@ ${result.stderr}</pre>`
         ${this.renderResult(actionResult(this.#change.value, "Command saved."))}
         ${this.gate(
           () => this.#renderContent(),
-          html`<span
-            class="skeleton"
+          html`<gw-skeleton
             style="min-height: 28rem; border-radius: var(--gw-radius-l)"
-          ></span>`,
+          ></gw-skeleton>`,
         )}
       </div>
     `;

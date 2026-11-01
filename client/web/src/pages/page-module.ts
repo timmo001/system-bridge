@@ -177,10 +177,10 @@ const sections: Partial<
 /** Placeholders the size of a typical dashboard, so loading doesn't jump. */
 const placeholder = html`
   <div class="dashboard" aria-busy="true" aria-label="Loading">
-    <span class="skeleton placeholder third"></span>
-    <span class="skeleton placeholder two-thirds"></span>
-    <span class="skeleton placeholder half"></span>
-    <span class="skeleton placeholder half"></span>
+    <gw-skeleton class="placeholder third"></gw-skeleton>
+    <gw-skeleton class="placeholder two-thirds"></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
   </div>
 `;
 

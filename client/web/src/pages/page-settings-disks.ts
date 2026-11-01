@@ -18,10 +18,9 @@ import { formatBytes } from "~/lib/format";
 
 import { SbSettingsPage } from "./sb-settings-page";
 
-const placeholder = html`<span
-  class="skeleton"
+const placeholder = html`<gw-skeleton
   style="min-height: 24rem; border-radius: var(--gw-radius-l)"
-></span>`;
+></gw-skeleton>`;
 
 /** Which secondary disk mounts the Disks module reports. */
 @customElement("page-settings-disks")

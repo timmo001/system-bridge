@@ -261,10 +261,9 @@ const elsewhereLinks = elsewhere.map(
     </li>`,
 );
 
-const placeholder = html`<span
-  class="skeleton"
+const placeholder = html`<gw-skeleton
   style="min-height: 18rem; border-radius: var(--gw-radius-l)"
-></span>`;
+></gw-skeleton>`;
 
 declare global {
   interface HTMLElementTagNameMap {

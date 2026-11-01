@@ -127,14 +127,14 @@ const summary = (module: ModuleName, data: ModulesData): string => {
 
 const placeholder = html`
   <div class="dashboard" aria-busy="true" aria-label="Loading">
-    <span
-      class="skeleton placeholder"
+    <gw-skeleton
+      class="placeholder"
       style="--sb-placeholder-height: 13rem"
-    ></span>
-    <span class="skeleton placeholder half"></span>
-    <span class="skeleton placeholder half"></span>
-    <span class="skeleton placeholder half"></span>
-    <span class="skeleton placeholder half"></span>
+    ></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
+    <gw-skeleton class="placeholder half"></gw-skeleton>
   </div>
 `;
 

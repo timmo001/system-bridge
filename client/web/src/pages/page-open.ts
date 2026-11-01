@@ -143,10 +143,9 @@ export class PageOpen extends SbPage {
         )}
         ${this.gate(
           () => this.#renderForm(kind),
-          html`<span
-            class="skeleton"
+          html`<gw-skeleton
             style="min-height: 15rem; border-radius: var(--gw-radius-l)"
-          ></span>`,
+          ></gw-skeleton>`,
         )}
       </div>
     `;

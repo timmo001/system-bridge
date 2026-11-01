@@ -1,5 +1,6 @@
-import { mdiLoading } from "@mdi/js";
 import { css, html, svg } from "lit";
+
+import "@timmo001/groundwork-ui/gw-spinner.ts";
 
 /** A Material Design icon, from one of `@mdi/js`'s paths. */
 export const icon = (path: string, label?: string) =>
@@ -13,13 +14,15 @@ export const icon = (path: string, label?: string) =>
     ${svg`<path d=${path}></path>`}
   </svg>`;
 
-/** A spinning icon, for a button while its action runs. */
-export const spinner = () =>
-  html`<span class="row spin" aria-hidden="true">${icon(mdiLoading)}</span>`;
+/**
+ * A spinner in place of a button's icon while its action runs. It waits
+ * before fading in, so a quick action never flashes it.
+ */
+export const spinner = () => html`<gw-spinner label="Working"></gw-spinner>`;
 
 /**
- * Styles every component shares: type, icons, buttons, fields, cards, chips,
- * alerts and skeletons. Buttons and fields are native elements with classes,
+ * Styles every component shares: type, icons, buttons, fields, chips and
+ * facts. Buttons and fields are native elements with classes,
  * so forms, focus and keyboard behaviour work as the browser intends.
  */
 export const shared = css`
@@ -288,14 +291,10 @@ export const shared = css`
     color: var(--gw-color-text-secondary);
   }
 
-  .spin {
-    animation: spin 0.9s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  /* Matches the icon it stands in for */
+  gw-spinner {
+    --gw-spinner-size: var(--sb-icon-size, 1.25rem);
+    color: currentColor;
   }
 
   /* Fields */
@@ -509,43 +508,6 @@ export const shared = css`
     height: 0.5rem;
     background: currentColor;
     border-radius: 50%;
-  }
-
-  /* Placeholders while data loads, sized like what they stand in for */
-  .skeleton {
-    display: block;
-    min-height: 1rem;
-    background: linear-gradient(
-      90deg,
-      var(--gw-color-surface-lower) 25%,
-      color-mix(
-          in oklab,
-          var(--gw-color-surface-lower),
-          var(--gw-color-text-primary) 6%
-        )
-        50%,
-      var(--gw-color-surface-lower) 75%
-    );
-    background-size: 200% 100%;
-    border-radius: var(--gw-radius-m);
-    animation: shimmer 1.4s ease-in-out infinite;
-  }
-
-  @keyframes shimmer {
-    from {
-      background-position: 100% 0;
-    }
-
-    to {
-      background-position: -100% 0;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton,
-    .spin {
-      animation: none;
-    }
   }
 
   .empty {

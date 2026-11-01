@@ -202,10 +202,9 @@ export class PageSettingsMedia extends SbSettingsPage {
         ${this.renderResult(this.saveResult)}
         ${this.gate(
           () => this.#renderContent(),
-          html`<span
-            class="skeleton"
+          html`<gw-skeleton
             style="min-height: 24rem; border-radius: var(--gw-radius-l)"
-          ></span>`,
+          ></gw-skeleton>`,
         )}
       </div>
     `;

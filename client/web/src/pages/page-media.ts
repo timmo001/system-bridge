@@ -83,10 +83,9 @@ const repeatModes: Readonly<
 const isRepeat = (value: string | null | undefined): value is Repeat =>
   value === "NONE" || value === "LIST" || value === "TRACK";
 
-const placeholder = html`<span
-  class="skeleton"
+const placeholder = html`<gw-skeleton
   style="min-height: 22rem; border-radius: var(--gw-radius-l)"
-></span>`;
+></gw-skeleton>`;
 
 /** What's playing on this system, with controls for it. */
 @customElement("page-media")

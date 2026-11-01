@@ -8,10 +8,9 @@ import "@timmo001/groundwork-ui/gw-card.ts";
 
 import { SbSettingsPage } from "./sb-settings-page";
 
-const placeholder = html`<span
-  class="skeleton"
+const placeholder = html`<gw-skeleton
   style="min-height: 6rem; border-radius: var(--gw-radius-l)"
-></span>`;
+></gw-skeleton>`;
 
 /** Whether cameras can take pictures. */
 @customElement("page-settings-cameras")

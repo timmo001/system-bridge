@@ -99,10 +99,9 @@ const steps = (setup: DiscordSetup): readonly Step[] => [
   },
 ];
 
-const placeholder = html`<span
-  class="skeleton"
+const placeholder = html`<gw-skeleton
   style="min-height: 34rem; border-radius: var(--gw-radius-l)"
-></span>`;
+></gw-skeleton>`;
 
 /** Connects System Bridge to the Discord desktop app. */
 @customElement("page-settings-discord")

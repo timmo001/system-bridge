@@ -245,10 +245,9 @@ export class PageNotifications extends SbPage {
         )}
         ${this.gate(
           () => this.#renderForm(),
-          html`<span
-            class="skeleton"
+          html`<gw-skeleton
             style="min-height: 30rem; border-radius: var(--gw-radius-l)"
-          ></span>`,
+          ></gw-skeleton>`,
         )}
       </div>
     `;

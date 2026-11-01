@@ -1,5 +1,6 @@
 import { mdiLanDisconnect, mdiRefresh } from "@mdi/js";
 import "@timmo001/groundwork-ui/gw-alert.ts";
+import "@timmo001/groundwork-ui/gw-skeleton.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
