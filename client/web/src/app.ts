@@ -1,3 +1,4 @@
+import "@timmo001/groundwork-ui/gw-app-bar.ts";
 import "@timmo001/groundwork-ui/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/gw-command-menu.ts";
@@ -15,6 +16,7 @@ import { type NavItem, navigation } from "./lib/navigation";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
+import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
 import "./pages/page-not-found";
@@ -37,6 +39,8 @@ const jumpOptions: readonly OptionItem[] = jumpItems.map((item) => ({
   icon: item.icon,
   group: item.group,
 }));
+
+registerPageTools();
 
 const renderPage = (location: Location) => {
   switch (location.name) {
@@ -67,25 +71,12 @@ export class SbApp extends LitElement {
       :host {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: var(--sb-header-height) 1fr;
+        grid-template-rows: auto 1fr;
         min-height: 100dvh;
       }
 
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: var(--gw-space-3);
-        padding: 0 var(--gw-space-3) 0 var(--gw-space-2);
-        background: color-mix(
-          in oklab,
-          var(--gw-color-surface-default) 85%,
-          transparent
-        );
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--gw-color-border-normal);
+      gw-app-bar {
+        --gw-content-width: var(--sb-content-width);
       }
 
       .brand {
@@ -114,7 +105,7 @@ export class SbApp extends LitElement {
         min-width: 0;
         max-width: 26rem;
         height: 2.25rem;
-        margin-inline-start: var(--gw-space-4);
+        margin-inline: var(--gw-space-4) auto;
         padding: 0 var(--gw-space-2) 0 var(--gw-space-3);
         font: inherit;
         color: var(--gw-color-text-primary);
@@ -217,8 +208,8 @@ export class SbApp extends LitElement {
     const active = jumpItems.find((item) => item.matches(location));
 
     return html`
-      <header>
-        <a class="brand" href=${href("overview")}>
+      <gw-app-bar>
+        <a slot="brand" class="brand" href=${href("overview")}>
           <img
             class="logo"
             src="${import.meta.env.BASE_URL}icon.svg"
@@ -229,6 +220,7 @@ export class SbApp extends LitElement {
           <span>System Bridge</span>
         </a>
         <button
+          slot="actions"
           class="jump"
           type="button"
           aria-haspopup="dialog"
@@ -239,15 +231,16 @@ export class SbApp extends LitElement {
           <kbd>${navigator.userAgent.includes("Mac") ? "⌘ K" : "Ctrl K"}</kbd>
         </button>
         <gw-command-menu
+          slot="actions"
           class="commands"
           label="Go to page"
           placeholder="Search pages"
           .options=${jumpOptions}
           @pick=${this.#onJump}
         ></gw-command-menu>
-        <span class="spacer"></span>
-        ${this.#renderStatus()}
+        <span slot="actions">${this.#renderStatus()}</span>
         <gw-button
+          slot="actions"
           variant="neutral"
           appearance="plain"
           labels="hide"
@@ -256,6 +249,7 @@ export class SbApp extends LitElement {
           >Appearance</gw-button
         >
         <gw-button
+          slot="actions"
           variant="neutral"
           appearance="plain"
           labels="hide"
@@ -264,7 +258,7 @@ export class SbApp extends LitElement {
             >Documentation</a
           ></gw-button
         >
-      </header>
+      </gw-app-bar>
       <main>${renderPage(location)}</main>
     `;
   }
