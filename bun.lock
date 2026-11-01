@@ -43,7 +43,7 @@
         "@tanstack/charts": "1.1.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "@timmo001/groundwork-tokens": "0.9.22",
+        "@timmo001/groundwork-tokens": "0.9.23",
         "@timmo001/groundwork-ui": "0.9.22",
         "effect": "4.1.1",
         "lit": "^3.3.2",
@@ -739,7 +739,7 @@
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.22", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-QFXF2jWDMKNmLyQ/L60H3R6PlOzojiGenfNI+CXJxk+0FXo2AdGSBanRVQr+NiGQl7qJ+DsvE8HaYHEl07O2FA=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.23", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.1" } }, "sha512-4tIRRMtxBBtdgbGzEyD/+69Bo0llagMcVhrejq4X0DSSWw5XApEYpFNTBgaDGq0upth4wkJuopDJsbGKDpOz8w=="],
 
     "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.9.22", "", {}, "sha512-LtBFquKF2XFzKdAm66DGa+PmpQwxyclXVFS4V3B1bol6W4CpxRppDVzbJYpI3hURAaGfpvZvcBsmnoNsxoYV3g=="],
 
