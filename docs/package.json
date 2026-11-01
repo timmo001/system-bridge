@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.3",
-    "@timmo001/docs-kit": "0.2.0",
+    "@timmo001/docs-kit": "0.3.0",
     "blume": "2.2.6",
     "sharp": "0.35.5"
   },
