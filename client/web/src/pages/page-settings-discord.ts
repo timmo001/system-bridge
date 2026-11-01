@@ -15,7 +15,7 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -240,7 +240,7 @@ export class PageSettingsDiscord extends SbPage {
     );
 
     return html`
-      <sb-card heading="Status">
+      <gw-card level=${this.cardLevel} heading="Status">
         <ol class="steps" aria-label="Setup progress">
           ${items}
         </ol>
@@ -255,7 +255,7 @@ export class PageSettingsDiscord extends SbPage {
                 </div>
               </div>`
         }
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -272,9 +272,10 @@ export class PageSettingsDiscord extends SbPage {
     const invalid = result?.success === false;
 
     return html`
-      <sb-card
+      <gw-card
+        level=${this.cardLevel}
         heading="Discord application"
-        subheading="Discord only lets apps you own read your voice settings"
+        description="Discord only lets apps you own read your voice settings"
       >
         <ol class="guide small">
           <li>
@@ -388,7 +389,7 @@ export class PageSettingsDiscord extends SbPage {
             </button>
           </div>
         </form>
-      </sb-card>
+      </gw-card>
     `;
   }
 

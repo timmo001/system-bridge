@@ -9,7 +9,7 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-meter.ts";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -126,9 +126,13 @@ export class PageSettingsDisks extends SbSettingsPage {
 
     return rows.length === 0
       ? nothing
-      : html`<sb-card heading=${heading} subheading=${description}>
+      : html`<gw-card
+          level=${this.cardLevel}
+          heading=${heading}
+          description=${description}
+        >
           <div>${rows}</div>
-        </sb-card>`;
+        </gw-card>`;
   }
 
   #renderContent() {

@@ -43,6 +43,11 @@ export abstract class SbPage extends LitElement {
   /** The page's name for the browser tab. */
   protected abstract readonly pageTitle: string;
 
+  /** Cards go a level under the section heading when embedded. */
+  protected get cardLevel(): number {
+    return this.embedded ? 3 : 2;
+  }
+
   protected get status(): ConnectionStatus {
     return this.#status.value;
   }

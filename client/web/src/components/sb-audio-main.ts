@@ -10,7 +10,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "./sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "./sb-range";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
@@ -49,7 +49,7 @@ export class SbAudioMain extends LitElement {
       }
 
       /* Fills the host when a grid stretches it beside another card */
-      sb-card {
+      gw-card {
         height: 100%;
       }
 
@@ -218,7 +218,12 @@ export class SbAudioMain extends LitElement {
     const waiting = this.#control.value.waiting;
     const result = actionResult(this.#control.value, "");
 
-    return html`<sb-card heading=${this.heading} href=${this.href}>
+    return html`<gw-card heading=${this.href === "" ? this.heading : ""}>
+      ${
+        this.href === ""
+          ? nothing
+          : html`<a slot="heading" href=${this.href}>${this.heading}</a>`
+      }
       <div class="main" role="region" aria-label=${kind.label}>
         <div class="art" aria-hidden="true">${icon(kind.art)}</div>
         <div class="info">
@@ -272,7 +277,7 @@ export class SbAudioMain extends LitElement {
           }
         </div>
       </div>
-    </sb-card>`;
+    </gw-card>`;
   }
 }
 

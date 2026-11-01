@@ -7,7 +7,7 @@ import "~/components/sb-audio-device";
 import "~/components/sb-audio-main";
 import "~/components/sb-camera-capture";
 import "~/components/sb-camera-controls";
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "~/components/sb-data-table";
 import "~/components/sb-display-controls";
 import "~/components/sb-history-export";

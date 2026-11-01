@@ -26,7 +26,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { selectValue } from "~/lib/select";
@@ -668,7 +668,7 @@ export class PageMedia extends SbPage {
     const repeat = isRepeat(media?.repeat) ? repeatModes[media.repeat] : null;
 
     return html`
-      <sb-card>
+      <gw-card level=${this.cardLevel}>
         <div class="player" role="region" aria-label="Player">
           ${
             media?.thumbnail
@@ -852,7 +852,7 @@ export class PageMedia extends SbPage {
             </div>
           </div>
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -875,7 +875,7 @@ export class PageMedia extends SbPage {
     const playing = player.status === "PLAYING";
     const name = player.title || player.name;
 
-    return html`<sb-card>
+    return html`<gw-card level=${this.cardLevel}>
       <div class="other" role="region" aria-label=${name}>
         ${
           player.thumbnail
@@ -917,7 +917,7 @@ export class PageMedia extends SbPage {
           Show
         </button>
       </div>
-    </sb-card>`;
+    </gw-card>`;
   }
 
   override render() {

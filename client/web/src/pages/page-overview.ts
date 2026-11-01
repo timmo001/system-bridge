@@ -16,7 +16,7 @@ import { css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 
 import "~/components/sb-audio-main";
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "~/components/sb-history-export";
 import "@timmo001/groundwork-ui/gw-gauge.ts";
 import "@timmo001/groundwork-ui/gw-meter.ts";
@@ -253,15 +253,18 @@ export class PageOverview extends SbPage {
     const gpu = gpus?.[0];
 
     return html`
-      <sb-card
-        heading=${data.system?.hostname ?? "This system"}
-        subheading=${
+      <gw-card
+        description=${
           data.system
             ? `${data.system.platform} ${data.system.platform_version} · up ${formatUptime(data.system.uptime)}`
             : ""
         }
-        href=${href("module", { params: { module: "system" } })}
       >
+        <a
+          slot="heading"
+          href=${href("module", { params: { module: "system" } })}
+          >${data.system?.hostname ?? "This system"}</a
+        >
         <div class="gauges">
           <gw-gauge
             label="CPU"
@@ -317,7 +320,7 @@ export class PageOverview extends SbPage {
                 ></gw-gauge>`
           }
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -343,11 +346,12 @@ export class PageOverview extends SbPage {
     );
 
     return html`
-      <sb-card
-        class="half"
-        heading="Storage"
-        href=${href("module", { params: { module: "disks" } })}
-      >
+      <gw-card class="half">
+        <a
+          slot="heading"
+          href=${href("module", { params: { module: "disks" } })}
+          >Storage</a
+        >
         ${
           meters.length === 0
             ? html`<p class="muted small">No disks reported.</p>`
@@ -355,7 +359,7 @@ export class PageOverview extends SbPage {
                 ${meters}
               </div>`
         }
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -381,12 +385,12 @@ export class PageOverview extends SbPage {
     );
 
     return html`
-      <sb-card
-        class="half"
-        heading="Top processes"
-        subheading="By CPU"
-        href=${href("module", { params: { module: "processes" } })}
-      >
+      <gw-card class="half" description="By CPU">
+        <a
+          slot="heading"
+          href=${href("module", { params: { module: "processes" } })}
+          >Top processes</a
+        >
         ${
           busiest.length === 0
             ? html`<p class="muted small">Nothing busy right now.</p>`
@@ -394,7 +398,7 @@ export class PageOverview extends SbPage {
                 ${meters}
               </div>`
         }
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -450,10 +454,12 @@ export class PageOverview extends SbPage {
     const nothingPlaying = !media?.title;
 
     return html`
-      <sb-card
-        heading="Now playing"
-        href=${href("module", { params: { module: "media" } })}
-      >
+      <gw-card>
+        <a
+          slot="heading"
+          href=${href("module", { params: { module: "media" } })}
+          >Now playing</a
+        >
         <div class="now-playing">
           ${
             media?.thumbnail
@@ -503,7 +509,7 @@ export class PageOverview extends SbPage {
             </div>
           </div>
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -576,11 +582,12 @@ export class PageOverview extends SbPage {
             : nothing
         }
         ${this.#renderGauges(data)}
-        <sb-card
-          class="half"
-          heading="CPU and memory"
-          href=${href("module", { params: { module: "cpu" } })}
-        >
+        <gw-card class="half">
+          <a
+            slot="heading"
+            href=${href("module", { params: { module: "cpu" } })}
+            >CPU and memory</a
+          >
           <sb-timeseries
             label="CPU and memory usage over time"
             .series=${[
@@ -590,17 +597,20 @@ export class PageOverview extends SbPage {
             .max=${100}
             .format=${percent}
           ></sb-timeseries>
-        </sb-card>
-        <sb-card
+        </gw-card>
+        <gw-card
           class="half"
-          heading="Network"
-          subheading=${
+          description=${
             history.networkReceive.length === 0
               ? ""
               : `${formatRate(history.networkReceive.at(-1)?.value)} down · ${formatRate(history.networkSend.at(-1)?.value)} up`
           }
-          href=${href("module", { params: { module: "networks" } })}
         >
+          <a
+            slot="heading"
+            href=${href("module", { params: { module: "networks" } })}
+            >Network</a
+          >
           <sb-timeseries
             label="Network traffic over time"
             .series=${[
@@ -609,36 +619,38 @@ export class PageOverview extends SbPage {
             ]}
             .format=${formatRate}
           ></sb-timeseries>
-        </sb-card>
+        </gw-card>
         ${
           temperatures.length === 0
             ? nothing
-            : html`<sb-card
-                class="half"
-                heading="Temperatures"
-                href=${href("module", { params: { module: "sensors" } })}
-              >
+            : html`<gw-card class="half">
+                <a
+                  slot="heading"
+                  href=${href("module", { params: { module: "sensors" } })}
+                  >Temperatures</a
+                >
                 <sb-timeseries
                   label="CPU and GPU temperatures over time"
                   .series=${temperatures}
                   .format=${formatTemperature}
                 ></sb-timeseries>
-              </sb-card>`
+              </gw-card>`
         }
         ${
           power.length === 0
             ? nothing
-            : html`<sb-card
-                class="half"
-                heading="Power"
-                href=${href("module", { params: { module: "system" } })}
-              >
+            : html`<gw-card class="half">
+                <a
+                  slot="heading"
+                  href=${href("module", { params: { module: "system" } })}
+                  >Power</a
+                >
                 <sb-timeseries
                   label="Power use over time"
                   .series=${power}
                   .format=${formatWatts}
                 ></sb-timeseries>
-              </sb-card>`
+              </gw-card>`
         }
         <div class="playback">
           ${
@@ -655,12 +667,12 @@ export class PageOverview extends SbPage {
           ${this.#renderMedia(data)}
         </div>
         ${this.#renderStorage(data)} ${this.#renderProcesses(data)}
-        <sb-card
+        <gw-card
           heading="Modules"
-          subheading="All the data System Bridge reports"
+          description="All the data System Bridge reports"
         >
           <div class="shortcuts">${shortcuts}</div>
-        </sb-card>
+        </gw-card>
       </div>
     `;
   }

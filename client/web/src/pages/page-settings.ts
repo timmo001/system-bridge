@@ -13,7 +13,7 @@ import { Schema, Struct } from "effect";
 import { css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import { icon, spinner } from "~/components/shared-styles";
@@ -189,14 +189,14 @@ export class PageSettings extends SbSettingsPage {
         })}
         ${this.renderResult(this.saveResult)}
         ${this.gate(() => this.#renderForm(), placeholder)}
-        <sb-card
+        <gw-card
           heading="More settings"
-          subheading="Kept with the data they change"
+          description="Kept with the data they change"
         >
           <ul class="links">
             ${elsewhereLinks}
           </ul>
-        </sb-card>
+        </gw-card>
       </div>
     `;
   }

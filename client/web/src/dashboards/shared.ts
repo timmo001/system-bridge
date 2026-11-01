@@ -221,10 +221,10 @@ export interface GraphCard {
 
 /** A card with a graph of readings over time. */
 export const graphCard = (graph: GraphCard) =>
-  html`<sb-card
+  html`<gw-card
     class=${graph.width === "full" ? "" : (graph.width ?? "half")}
     heading=${graph.heading}
-    subheading=${graph.subheading ?? ""}
+    description=${graph.subheading ?? ""}
   >
     <sb-timeseries
       label=${graph.label}
@@ -233,7 +233,7 @@ export const graphCard = (graph: GraphCard) =>
       .max=${graph.max}
       .height=${graph.height ?? 180}
     ></sb-timeseries>
-  </sb-card>`;
+  </gw-card>`;
 
 /**
  * Whether a graph has anything to show: a current reading, or readings
@@ -325,11 +325,11 @@ export const yesNo = (value: boolean | null | undefined) =>
 
 /** Shown when a module has no data on this system. */
 export const noData = (what: string) =>
-  html`<sb-card>
+  html`<gw-card>
     <div class="empty">
       <p>No ${what} reported on this system.</p>
     </div>
-  </sb-card>`;
+  </gw-card>`;
 
 /** A table's state from the page's URL, with defaults for what's missing. */
 export const tableState = (

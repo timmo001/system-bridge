@@ -184,9 +184,9 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
             </div>`
           : nothing
       }
-      <sb-card
+      <gw-card
         heading=${system.hostname}
-        subheading=${system.fqdn === system.hostname ? "" : system.fqdn}
+        description=${system.fqdn === system.hostname ? "" : system.fqdn}
       >
         <div class="stats">
           ${stat("Uptime", formatUptime(system.uptime))}
@@ -211,7 +211,7 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
                 : `${system.package_updates} waiting`,
           )}
         </div>
-      </sb-card>
+      </gw-card>
       ${
         power.length === 0
           ? nothing
@@ -227,11 +227,11 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
       ${
         system.power_profile === null && system.keep_awake === null
           ? nothing
-          : html`<sb-card class="half" heading="Power">
+          : html`<gw-card class="half" heading="Power">
               <sb-system-power .system=${system}></sb-system-power>
-            </sb-card>`
+            </gw-card>`
       }
-      <sb-card class="third" heading="Software">
+      <gw-card class="third" heading="Software">
         ${facts([
           ["System Bridge", system.version],
           ["Platform version", system.platform_version],
@@ -240,15 +240,15 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
           ["Booted", formatDateTime(system.boot_time * 1000)],
           ["UUID", html`<span class="mono xsmall">${system.uuid}</span>`],
         ])}
-      </sb-card>
-      <sb-card class="third" heading="Network">
+      </gw-card>
+      <gw-card class="third" heading="Network">
         ${facts([
           ["IPv4", system.ip_address_4],
           ["IPv6", system.ip_address_6],
           ["MAC address", system.mac_address],
         ])}
-      </sb-card>
-      <sb-card class="third" heading="Device">
+      </gw-card>
+      <gw-card class="third" heading="Device">
         ${
           device === null
             ? html`<p class="muted small">No device details reported.</p>`
@@ -271,21 +271,21 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
                 ],
               ])
         }
-      </sb-card>
+      </gw-card>
       ${
         updates.length === 0
           ? nothing
-          : html`<sb-card
+          : html`<gw-card
               class="half"
               heading="Package updates"
-              subheading=${`${updates.length} waiting`}
+              description=${`${updates.length} waiting`}
             >
               <ul class="list">
                 ${updates}
               </ul>
-            </sb-card>`
+            </gw-card>`
       }
-      <sb-card class="half" heading="Users" subheading="Signed in now">
+      <gw-card class="half" heading="Users" description="Signed in now">
         ${
           users.length === 0
             ? html`<p class="muted small">Nobody is signed in.</p>`
@@ -293,11 +293,11 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
                 ${users}
               </ul>`
         }
-      </sb-card>
-      <sb-card
+      </gw-card>
+      <gw-card
         class="half"
         heading="Privacy"
-        subheading="Apps using the camera or microphone"
+        description="Apps using the camera or microphone"
       >
         <ul class="list">
           <li>
@@ -317,11 +317,11 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
             </span>
           </li>
         </ul>
-      </sb-card>
+      </gw-card>
       ${
         system.failed_units === null
           ? nothing
-          : html`<sb-card heading="Failed units" subheading="From systemd">
+          : html`<gw-card heading="Failed units" description="From systemd">
               ${
                 failedUnits.length === 0
                   ? html`<p class="muted small">Nothing has failed.</p>`
@@ -336,7 +336,7 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
                       .state=${failedUnitTableState}
                     ></sb-data-table>`
               }
-            </sb-card>`
+            </gw-card>`
       }
     </div>
   `;
@@ -474,13 +474,16 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      <sb-card class="half" heading="Busiest" subheading="By CPU">
+      <gw-card class="half" heading="Busiest" description="By CPU">
         ${topList("cpu_usage")}
-      </sb-card>
-      <sb-card class="half" heading="Largest" subheading="By memory">
+      </gw-card>
+      <gw-card class="half" heading="Largest" description="By memory">
         ${topList("memory_usage")}
-      </sb-card>
-      <sb-card heading="All processes" subheading="${processes.length} running">
+      </gw-card>
+      <gw-card
+        heading="All processes"
+        description="${processes.length} running"
+      >
         <sb-data-table
           label="Processes"
           search-placeholder="Search processes"
@@ -495,7 +498,7 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
           })}
           @table-state-change=${onTableChange(location)}
         ></sb-data-table>
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };
@@ -508,7 +511,7 @@ export const mediaDashboard = ({ data, mediaPlayer }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      <sb-card heading="Details">
+      <gw-card heading="Details">
         ${facts([
           ["Status", formatPlayerStatus(media.status)],
           ["Type", media.type],
@@ -532,7 +535,7 @@ export const mediaDashboard = ({ data, mediaPlayer }: DashboardContext) => {
               : formatAgo(media.updated_at * 1000),
           ],
         ])}
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };
@@ -1118,7 +1121,7 @@ const dispatcherCard = () => {
   const allGroups = allGroupButtons.map(dispatcherButton);
 
   return html`
-    <sb-card class="half" heading="Focused window" subheading="Dispatchers">
+    <gw-card class="half" heading="Focused window" description="Dispatchers">
       ${facts([
         [
           "Move focus",
@@ -1136,7 +1139,7 @@ const dispatcherCard = () => {
         ["All groups", html`<div class="row wrap">${allGroups}</div>`],
       ])}
       <div class="row wrap">${buttons}</div>
-    </sb-card>
+    </gw-card>
   `;
 };
 
@@ -1261,7 +1264,7 @@ const dashboardSection = (section: {
 `;
 
 const omarchyCards = (omarchy: OmarchyData) => html`
-  <sb-card heading="Menus" subheading="${omarchy.menus.length} routes">
+  <gw-card heading="Menus" description="${omarchy.menus.length} routes">
     <sb-action-button
       slot="actions"
       quiet
@@ -1279,10 +1282,10 @@ const omarchyCards = (omarchy: OmarchyData) => html`
       .wide=${["aliases"]}
       .state=${omarchyMenuTableState}
     ></sb-data-table>
-  </sb-card>
-  <sb-card
+  </gw-card>
+  <gw-card
     heading="Panels"
-    subheading="${omarchy.panels.length} from enabled plugins"
+    description="${omarchy.panels.length} from enabled plugins"
   >
     <sb-data-table
       local
@@ -1293,8 +1296,8 @@ const omarchyCards = (omarchy: OmarchyData) => html`
       .rowId=${omarchyId}
       .state=${omarchyTableState}
     ></sb-data-table>
-  </sb-card>
-  <sb-card heading="Shell IPC" subheading="${omarchy.targets.length} targets">
+  </gw-card>
+  <gw-card heading="Shell IPC" description="${omarchy.targets.length} targets">
     <sb-data-table
       local
       label="Omarchy shell IPC targets"
@@ -1305,7 +1308,7 @@ const omarchyCards = (omarchy: OmarchyData) => html`
       .wide=${["functions"]}
       .state=${omarchyTableState}
     ></sb-data-table>
-  </sb-card>
+  </gw-card>
 `;
 
 const onSubmap = (event: Event) => {
@@ -1335,7 +1338,7 @@ const hyprlandCards = (hyprland: HyprlandData) => {
   );
 
   return html`
-    <sb-card class="half" heading="Details">
+    <gw-card class="half" heading="Details">
       ${facts([
         ["Version", hyprland.version.version],
         [
@@ -1362,30 +1365,30 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         ],
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}
-    </sb-card>
+    </gw-card>
     ${dispatcherCard()}
     ${
       options.length === 0
         ? nothing
-        : html`<sb-card
+        : html`<gw-card
             class="half"
             heading="Options"
-            subheading="Until the config reloads"
+            description="Until the config reloads"
           >
             ${facts(options)}
-          </sb-card>`
+          </gw-card>`
     }
-    <sb-card class="half" heading="Custom events" subheading="Sent by binds">
+    <gw-card class="half" heading="Custom events" description="Sent by binds">
       <sb-hyprland-events></sb-hyprland-events>
-    </sb-card>
-    <sb-card
+    </gw-card>
+    <gw-card
       class="half"
       heading="Tools"
-      subheading="Options, the cursor, the log and code"
+      description="Options, the cursor, the log and code"
     >
       <sb-hyprland-tools></sb-hyprland-tools>
-    </sb-card>
-    <sb-card heading="Displays" subheading="As Hyprland sees them">
+    </gw-card>
+    <gw-card heading="Displays" description="As Hyprland sees them">
       <sb-data-table
         local
         label="Displays"
@@ -1397,8 +1400,8 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         .wide=${["layers"]}
         .state=${displayTableState}
       ></sb-data-table>
-    </sb-card>
-    <sb-card heading="Global shortcuts" subheading="Registered by apps">
+    </gw-card>
+    <gw-card heading="Global shortcuts" description="Registered by apps">
       <sb-data-table
         local
         label="Global shortcuts"
@@ -1408,8 +1411,8 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         .rowId=${shortcutId}
         .state=${shortcutTableState}
       ></sb-data-table>
-    </sb-card>
-    <sb-card heading="Input devices" subheading="${inputs.length} connected">
+    </gw-card>
+    <gw-card heading="Input devices" description="${inputs.length} connected">
       <sb-data-table
         local
         label="Input devices"
@@ -1420,10 +1423,10 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         .wide=${["details", "name"]}
         .state=${inputTableState}
       ></sb-data-table>
-    </sb-card>
-    <sb-card
+    </gw-card>
+    <gw-card
       heading="Key bindings"
-      subheading="${hyprland.binds.length} in the config"
+      description="${hyprland.binds.length} in the config"
     >
       <sb-data-table
         local
@@ -1435,7 +1438,7 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         .wide=${["action", "description"]}
         .state=${bindTableState}
       ></sb-data-table>
-    </sb-card>
+    </gw-card>
   `;
 };
 
@@ -1581,9 +1584,9 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
               </div>
             </div>`
       }
-      <sb-card
+      <gw-card
         heading=${compositorName[desktop.compositor]}
-        subheading=${hyprland === null ? "" : hyprland.version.version}
+        description=${hyprland === null ? "" : hyprland.version.version}
       >
         ${
           focused === undefined
@@ -1607,8 +1610,8 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
           ${stat("Windows", String(desktop.windows.length))}
           ${stat("Workspaces", desktop.workspaces.length === 0 ? "" : String(desktop.workspaces.length))}
         </div>
-      </sb-card>
-      <sb-card heading="Windows" subheading="${desktop.windows.length} open">
+      </gw-card>
+      <gw-card heading="Windows" description="${desktop.windows.length} open">
         <sb-data-table
           label="Windows"
           search-placeholder="Search windows"
@@ -1623,11 +1626,11 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
           })}
           @table-state-change=${onTableChange(location)}
         ></sb-data-table>
-      </sb-card>
+      </gw-card>
       ${
         desktop.workspaces.length === 0
           ? nothing
-          : html`<sb-card heading="Workspaces">
+          : html`<gw-card heading="Workspaces">
               <sb-data-table
                 local
                 label="Workspaces"
@@ -1638,9 +1641,9 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
                 .numeric=${["windows"]}
                 .state=${workspaceTableState}
               ></sb-data-table>
-            </sb-card>`
+            </gw-card>`
       }
-      <sb-card class="half" heading="Keyboard layout">
+      <gw-card class="half" heading="Keyboard layout">
         ${facts([
           ["Layout", desktop.keyboard.layout],
           ["Name", desktop.keyboard.name],
@@ -1654,7 +1657,7 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
                 ${layouts}
               </div>`
         }
-      </sb-card>
+      </gw-card>
     </div>
     ${
       hyprland === null
@@ -1692,7 +1695,7 @@ export const discordDashboard = ({ data }: DashboardContext) => {
 
   // The module only exists once Discord is set up
   if (discord === undefined) {
-    return html`<sb-card>
+    return html`<gw-card>
       <div class="empty">
         ${icon(mdiHeadset)}
         <p>Discord isn't set up yet.</p>
@@ -1709,14 +1712,14 @@ export const discordDashboard = ({ data }: DashboardContext) => {
           >Set up Discord</a
         >
       </div>
-    </sb-card>`;
+    </gw-card>`;
   }
 
   const members = discord.call?.members.map(member) ?? [];
 
   return html`
     <div class="dashboard">
-      <sb-card class="third" heading="Status">
+      <gw-card class="third" heading="Status">
         <div class="row wrap">
           <span class="chip ${discord.connected ? "success" : "danger"}"
             ><span class="dot"></span
@@ -1766,11 +1769,11 @@ export const discordDashboard = ({ data }: DashboardContext) => {
           ["Noise suppression", yesNo(discord.processing?.noise_suppression)],
           ["Echo cancellation", yesNo(discord.processing?.echo_cancellation)],
         ])}
-      </sb-card>
-      <sb-card
+      </gw-card>
+      <gw-card
         class="two-thirds"
         heading="Call"
-        subheading=${
+        description=${
           discord.call === null
             ? "Not in a call"
             : [discord.call.server?.name, discord.call.channel.name]
@@ -1795,14 +1798,14 @@ export const discordDashboard = ({ data }: DashboardContext) => {
                   ],
                 ])}`
         }
-      </sb-card>
+      </gw-card>
       ${
         discord.notification === null
           ? nothing
-          : html`<sb-card heading="Latest notification">
+          : html`<gw-card heading="Latest notification">
               <strong>${discord.notification.title}</strong>
               <p class="small">${discord.notification.body}</p>
-            </sb-card>`
+            </gw-card>`
       }
     </div>
   `;

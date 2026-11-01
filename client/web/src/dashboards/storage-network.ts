@@ -108,9 +108,9 @@ export const bluetoothDashboard = ({ data }: DashboardContext) => {
   return html`
     <div class="dashboard">
       <sb-action-alert .failures=${failures}></sb-action-alert>
-      <sb-card
+      <gw-card
         heading="Paired devices"
-        subheading="${connected.length} of ${bluetooth.devices.length} connected"
+        description="${connected.length} of ${bluetooth.devices.length} connected"
       >
         ${
           bluetooth.powered === null
@@ -127,7 +127,7 @@ export const bluetoothDashboard = ({ data }: DashboardContext) => {
                 ${rows}
               </ul>`
         }
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };
@@ -159,10 +159,10 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
     const count = formatQuantity(disk.partitions.length, "partition");
 
     return html`
-      <sb-card
+      <gw-card
         class="half"
         heading=${disk.name}
-        subheading=${
+        description=${
           disk.temperature === null
             ? count
             : `${count} · ${formatTemperature(disk.temperature)}`
@@ -193,13 +193,13 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
                 ["Written", formatBytes(disk.io_counters.write_bytes)],
               ])
         }
-      </sb-card>
+      </gw-card>
     `;
   });
 
   return html`
     <div class="dashboard">
-      <sb-card class="two-thirds" heading="Activity" subheading="All disks">
+      <gw-card class="two-thirds" heading="Activity" description="All disks">
         <sb-timeseries
           label="Disk read and write rates over time"
           .series=${[
@@ -209,8 +209,8 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
           .format=${formatRate}
           .height=${220}
         ></sb-timeseries>
-      </sb-card>
-      <sb-card class="third" heading="Totals">
+      </gw-card>
+      <gw-card class="third" heading="Totals">
         <div class="stats">
           ${stat("Reading", formatRate(io?.read_bytes_rate))}
           ${stat("Writing", formatRate(io?.write_bytes_rate))}
@@ -219,7 +219,7 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
           ${stat("Reads", formatCount(io?.read_count))}
           ${stat("Writes", formatCount(io?.write_count))}
         </div>
-      </sb-card>
+      </gw-card>
       ${
         history.diskTemperatures.size === 0
           ? nothing
@@ -303,7 +303,7 @@ export const networksDashboard = ({
         : `${wifi.signal} dBm${percent ? ` (${percent})` : ""}`;
 
     return html`
-      <sb-card class="third" heading=${network.name ?? "Interface"}>
+      <gw-card class="third" heading=${network.name ?? "Interface"}>
         <span
           slot="actions"
           class="chip ${network.stats?.isup ? "success" : ""}"
@@ -342,13 +342,17 @@ export const networksDashboard = ({
           ["Duplex", network.stats?.duplex],
           ...addresses,
         ])}
-      </sb-card>
+      </gw-card>
     `;
   });
 
   return html`
     <div class="dashboard">
-      <sb-card class="two-thirds" heading="Traffic" subheading="All interfaces">
+      <gw-card
+        class="two-thirds"
+        heading="Traffic"
+        description="All interfaces"
+      >
         <sb-timeseries
           label="Network receive and send rates over time"
           .series=${[
@@ -358,8 +362,8 @@ export const networksDashboard = ({
           .format=${formatRate}
           .height=${220}
         ></sb-timeseries>
-      </sb-card>
-      <sb-card class="third" heading="Totals">
+      </gw-card>
+      <gw-card class="third" heading="Totals">
         <div class="stats">
           ${stat("Receiving", rate(mdiArrowDown, history.networkReceive))}
           ${stat("Sending", rate(mdiArrowUp, history.networkSend))}
@@ -370,11 +374,11 @@ export const networksDashboard = ({
           ${stat("Errors", formatCount((io?.errin ?? 0) + (io?.errout ?? 0)))}
           ${stat("Dropped", formatCount((io?.dropin ?? 0) + (io?.dropout ?? 0)))}
         </div>
-      </sb-card>
+      </gw-card>
       ${interfaces}
-      <sb-card
+      <gw-card
         heading="Connections"
-        subheading="${networks.connections.length} open"
+        description="${networks.connections.length} open"
       >
         <sb-data-table
           label="Network connections"
@@ -389,7 +393,7 @@ export const networksDashboard = ({
           })}
           @table-state-change=${onTableChange(location)}
         ></sb-data-table>
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };

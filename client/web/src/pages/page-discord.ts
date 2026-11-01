@@ -25,7 +25,7 @@ import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import "~/components/sb-range";
 import "@timmo001/groundwork-ui/gw-segmented.ts";
 import "@timmo001/groundwork-ui/gw-select.ts";
@@ -318,9 +318,10 @@ export class PageDiscord extends SbPage {
     const call = discord.call;
 
     return html`
-      <sb-card
+      <gw-card
+        level=${this.cardLevel}
         heading="Voice"
-        subheading=${
+        description=${
           call === null
             ? "Not in a call"
             : `In ${[call.server?.name, call.channel.name].filter(Boolean).join(" › ")}`
@@ -369,13 +370,13 @@ export class PageDiscord extends SbPage {
             disabled: call === null,
           })}
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
   #renderAudio(discord: DiscordData) {
     return html`
-      <sb-card heading="Audio">
+      <gw-card level=${this.cardLevel} heading="Audio">
         <div class="setting">
           <span class="label" id="input-label">Input</span>
           <gw-select
@@ -414,7 +415,7 @@ export class PageDiscord extends SbPage {
             max: limits.output,
           })}
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -423,7 +424,7 @@ export class PageDiscord extends SbPage {
     const pushToTalk = mode?.type === "PUSH_TO_TALK";
 
     return html`
-      <sb-card heading="Voice settings">
+      <gw-card level=${this.cardLevel} heading="Voice settings">
         <gw-segmented
           label="Input mode"
           size="small"
@@ -482,7 +483,7 @@ export class PageDiscord extends SbPage {
             ["ENABLE_SILENCE_WARNING", "DISABLE_SILENCE_WARNING"],
           )}
         </div>
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -530,7 +531,11 @@ export class PageDiscord extends SbPage {
       .map((member) => this.#renderMember(member));
 
     return html`
-      <sb-card heading="In the call" subheading="Only changes what you hear">
+      <gw-card
+        level=${this.cardLevel}
+        heading="In the call"
+        description="Only changes what you hear"
+      >
         ${
           others.length === 0
             ? html`<p class="muted small">Nobody else is here.</p>`
@@ -538,7 +543,7 @@ export class PageDiscord extends SbPage {
                 ${others}
               </ul>`
         }
-      </sb-card>
+      </gw-card>
     `;
   }
 
@@ -617,13 +622,14 @@ export class PageDiscord extends SbPage {
     );
 
     return html`
-      <sb-card
+      <gw-card
+        level=${this.cardLevel}
         class="wide"
         heading="Soundboard"
-        subheading=${inCall ? "Plays in the call" : "Join a call to play sounds"}
+        description=${inCall ? "Plays in the call" : "Join a call to play sounds"}
       >
         <div class="sounds" role="group" aria-label="Sounds">${buttons}</div>
-      </sb-card>
+      </gw-card>
     `;
   }
 

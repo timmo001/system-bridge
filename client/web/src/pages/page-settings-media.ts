@@ -12,7 +12,7 @@ import { Struct } from "effect";
 import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, addMediaDirectory, registry } from "~/lib/atoms";
@@ -115,7 +115,11 @@ export class PageSettingsMedia extends SbSettingsPage {
     );
 
     return html`
-      <sb-card heading="Add a directory" subheading="It must already exist">
+      <gw-card
+        level=${this.cardLevel}
+        heading="Add a directory"
+        description="It must already exist"
+      >
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 14rem">
             <div class="field">
@@ -164,10 +168,11 @@ export class PageSettingsMedia extends SbSettingsPage {
             </button>
           </div>
         </form>
-      </sb-card>
-      <sb-card
+      </gw-card>
+      <gw-card
+        level=${this.cardLevel}
         heading="Directories"
-        subheading="${this.directories.length} shared"
+        description="${this.directories.length} shared"
       >
         ${
           this.directories.length === 0
@@ -182,7 +187,7 @@ export class PageSettingsMedia extends SbSettingsPage {
                 ${directories}
               </ul>`
         }
-      </sb-card>
+      </gw-card>
     `;
   }
 

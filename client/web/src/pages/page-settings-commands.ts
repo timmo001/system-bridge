@@ -20,7 +20,7 @@ import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 import { icon, pageStyles, shared, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -1008,7 +1008,7 @@ ${result.stderr}</pre>`
     const prefab = this.#prefab(this.form.prefab);
 
     return html`
-      <sb-card heading="Add a command">
+      <gw-card level=${this.cardLevel} heading="Add a command">
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 16rem">
             ${this.#renderPrefabSelect()}
@@ -1029,8 +1029,12 @@ ${result.stderr}</pre>`
             </button>
           </div>
         </form>
-      </sb-card>
-      <sb-card heading="Commands" subheading="${this.commands.length} allowed">
+      </gw-card>
+      <gw-card
+        level=${this.cardLevel}
+        heading="Commands"
+        description="${this.commands.length} allowed"
+      >
         ${
           this.commands.length === 0
             ? html`<div class="empty">
@@ -1045,7 +1049,7 @@ ${result.stderr}</pre>`
                 )}
               </div>`
         }
-      </sb-card>
+      </gw-card>
       ${this.#renderEditPopover()}
     `;
   }

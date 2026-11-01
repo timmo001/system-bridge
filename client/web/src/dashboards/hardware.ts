@@ -88,7 +88,7 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      <sb-card class="third" heading="Usage" subheading=${cpu.name ?? ""}>
+      <gw-card class="third" heading="Usage" description=${cpu.name ?? ""}>
         <div class="gauges">
           <gw-gauge
             label="CPU"
@@ -107,8 +107,8 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
           )}
           ${stat("Power", formatWatts(cpu.power))}
         </div>
-      </sb-card>
-      <sb-card class="two-thirds" heading="Usage over time">
+      </gw-card>
+      <gw-card class="two-thirds" heading="Usage over time">
         <sb-timeseries
           label="CPU usage over time"
           .series=${[{ label: "CPU", samples: history.cpu }]}
@@ -116,7 +116,7 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
           .format=${percent}
           .height=${240}
         ></sb-timeseries>
-      </sb-card>
+      </gw-card>
       ${
         hasReadings(cpu.temperature, history.cpuTemperature)
           ? graphCard({
@@ -157,17 +157,17 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
             })
           : nothing
       }
-      <sb-card heading="Cores" subheading="Usage of each logical core">
+      <gw-card heading="Cores" description="Usage of each logical core">
         <div class="meters compact">${cores}</div>
-      </sb-card>
+      </gw-card>
       ${
         timeMeters.length === 0
           ? nothing
-          : html`<sb-card class="half" heading="Time spent">
+          : html`<gw-card class="half" heading="Time spent">
               <div class="meters">${timeMeters}</div>
-            </sb-card>`
+            </gw-card>`
       }
-      <sb-card class="half" heading="Details">
+      <gw-card class="half" heading="Details">
         ${facts([
           ["Model", cpu.name],
           ["Vendor", cpu.vendor],
@@ -188,7 +188,7 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
           ["Soft interrupts", formatCount(cpu.stats?.soft_interrupts)],
           ["System calls", formatCount(cpu.stats?.syscalls)],
         ])}
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };
@@ -228,7 +228,7 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      <sb-card class="third" heading="In use">
+      <gw-card class="third" heading="In use">
         <div class="gauges">
           <gw-gauge
             label="Memory"
@@ -245,8 +245,8 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
               : nothing
           }
         </div>
-      </sb-card>
-      <sb-card class="two-thirds" heading="Usage over time">
+      </gw-card>
+      <gw-card class="two-thirds" heading="Usage over time">
         <sb-timeseries
           label="Memory and swap usage over time"
           .series=${[
@@ -257,11 +257,11 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
           .format=${percent}
           .height=${240}
         ></sb-timeseries>
-      </sb-card>
-      <sb-card class="half" heading="Physical memory">
+      </gw-card>
+      <gw-card class="half" heading="Physical memory">
         <div class="meters">${partMeters}</div>
-      </sb-card>
-      <sb-card class="half" heading="Details">
+      </gw-card>
+      <gw-card class="half" heading="Details">
         ${facts([
           ["Total", formatBytes(total)],
           ["Free", formatBytes(virtual?.free)],
@@ -270,7 +270,7 @@ export const memoryDashboard = ({ data, history }: DashboardContext) => {
           ["Swapped in", swap?.sin ? formatBytes(swap.sin) : null],
           ["Swapped out", swap?.sout ? formatBytes(swap.sout) : null],
         ])}
-      </sb-card>
+      </gw-card>
     </div>
   `;
 };
@@ -293,7 +293,7 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
     const recorded = gpuHistory(history, gpu.id);
 
     return html`
-      <sb-card class="half" heading=${gpu.name} subheading="GPU ${gpu.id}">
+      <gw-card class="half" heading=${gpu.name} description="GPU ${gpu.id}">
         <div class="gauges">
           <gw-gauge
             label="Core"
@@ -336,7 +336,7 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
           ${stat("Decoder", formatPercent(gpu.decoder_load))}
           ${stat("Performance state", gpu.performance_state ?? "")}
         </div>
-      </sb-card>
+      </gw-card>
     `;
   });
 
@@ -394,7 +394,7 @@ const sensorReading = (sensor: SensorsWindowsSensor): string =>
 const windowsHardware = (hardware: SensorsWindowsHardware): TemplateResult => {
   const children = hardware.subhardware.map(windowsHardware);
 
-  return html`<sb-card heading=${hardware.name} subheading=${hardware.type}>
+  return html`<gw-card heading=${hardware.name} description=${hardware.type}>
     ${facts(
       hardware.sensors.map(
         (sensor) =>
@@ -402,7 +402,7 @@ const windowsHardware = (hardware: SensorsWindowsHardware): TemplateResult => {
       ),
     )}
     ${children}
-  </sb-card>`;
+  </gw-card>`;
 };
 
 export const sensorsDashboard = ({ data, history }: DashboardContext) => {
@@ -479,14 +479,14 @@ export const sensorsDashboard = ({ data, history }: DashboardContext) => {
   return html`
     <div class="dashboard">
       ${temperatureGraph} ${fanGraph}
-      <sb-card heading="Temperatures">
+      <gw-card heading="Temperatures">
         ${
           temperatures.length === 0
             ? html`<p class="muted small">No temperature sensors reported.</p>`
             : html`<div class="meters">${temperatures}</div>`
         }
-      </sb-card>
-      <sb-card heading="Fans">
+      </gw-card>
+      <gw-card heading="Fans">
         ${
           fans.length === 0
             ? html`<p class="muted small">No fans reported.</p>`
@@ -494,7 +494,7 @@ export const sensorsDashboard = ({ data, history }: DashboardContext) => {
                 ${fans}
               </ul>`
         }
-      </sb-card>
+      </gw-card>
       ${hardware}
     </div>
   `;
@@ -542,11 +542,11 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
       ></gw-meter>`,
   );
 
-  const otherCard = html`<sb-card
+  const otherCard = html`<gw-card
     heading=${primary ? "Other batteries" : "Batteries"}
   >
     <div class="meters">${otherMeters}</div>
-  </sb-card>`;
+  </gw-card>`;
 
   if (battery.percentage == null) {
     return html`<div class="dashboard">${otherCard}</div>`;
@@ -554,7 +554,7 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
-      <sb-card class="third" heading="Charge">
+      <gw-card class="third" heading="Charge">
         <div class="gauges">
           <gw-gauge
             label="Battery"
@@ -599,8 +599,8 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
               : `${formatNumber(battery.voltage)} V`,
           ],
         ])}
-      </sb-card>
-      <sb-card class="two-thirds" heading="Charge over time">
+      </gw-card>
+      <gw-card class="two-thirds" heading="Charge over time">
         <sb-timeseries
           label="Battery charge over time"
           .series=${[{ label: "Battery", samples: history.battery }]}
@@ -608,7 +608,7 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
           .format=${percent}
           .height=${240}
         ></sb-timeseries>
-      </sb-card>
+      </gw-card>
       ${others.length > 0 ? otherCard : nothing}
     </div>
   `;
@@ -671,10 +671,10 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
 
   const cards = displays.map(
     (display) => html`
-      <sb-card
+      <gw-card
         class="half"
         heading=${display.name}
-        subheading=${display.is_primary ? "Primary" : display.name === display.id ? "" : display.id}
+        description=${display.is_primary ? "Primary" : display.name === display.id ? "" : display.id}
       >
         ${
           display.brightness === null && display.power_state === null
@@ -714,7 +714,7 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
           ],
           ["Primary", yesNo(display.is_primary)],
         ])}
-      </sb-card>
+      </gw-card>
     `,
   );
 
@@ -730,8 +730,8 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
     <div class="dashboard">
       ${
         placed.length === displays.length
-          ? html`<sb-card heading="Arrangement"
-              >${displayLayout(placed)}</sb-card
+          ? html`<gw-card heading="Arrangement"
+              >${displayLayout(placed)}</gw-card
             >`
           : nothing
       }
@@ -755,16 +755,16 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
 
     const sets = groups.map(
       (group) => html`
-        <sb-card
+        <gw-card
           class="half"
           heading=${group || "Controls"}
-          subheading=${camera.name}
+          description=${camera.name}
         >
           <sb-camera-controls
             .camera=${camera}
             group=${group}
           ></sb-camera-controls>
-        </sb-card>
+        </gw-card>
       `,
     );
 
@@ -778,7 +778,7 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
       .join(", ");
 
     return html`
-      <sb-card heading=${camera.name} subheading=${camera.device}>
+      <gw-card heading=${camera.name} description=${camera.device}>
         ${facts([
           ["Driver", camera.driver],
           [
@@ -789,7 +789,7 @@ export const camerasDashboard = ({ data }: DashboardContext) => {
           ["Supported formats", supported || null],
         ])}
         <sb-camera-capture slot="footer" .camera=${camera}></sb-camera-capture>
-      </sb-card>
+      </gw-card>
       ${sets}
     `;
   });
@@ -812,9 +812,9 @@ const audioColumn = (
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
       (device) =>
-        html`<sb-card subheading=${heading}>
+        html`<gw-card description=${heading}>
           <sb-audio-device .device=${device}></sb-audio-device>
-        </sb-card>`,
+        </gw-card>`,
     );
 
   return html`<div class="audio-column">
@@ -860,9 +860,9 @@ export const audioDashboard = ({ data }: DashboardContext) => {
       ${
         apps.length === 0
           ? nothing
-          : html`<sb-card heading="Apps">
+          : html`<gw-card heading="Apps">
               <div class="audio-devices">${apps}</div>
-            </sb-card>`
+            </gw-card>`
       }
     </div>
   `;

@@ -4,7 +4,7 @@ import { Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "~/components/sb-card";
+import "@timmo001/groundwork-ui/gw-card.ts";
 
 import { SbSettingsPage } from "./sb-settings-page";
 
@@ -39,7 +39,7 @@ export class PageSettingsCameras extends SbSettingsPage {
 
   #renderContent() {
     return html`
-      <sb-card>
+      <gw-card level=${this.cardLevel}>
         <label class="setting">
           <span class="stack" style="--sb-stack-gap: 0">
             <span class="label" id="camera-capture-label">Take pictures</span>
@@ -59,7 +59,7 @@ export class PageSettingsCameras extends SbSettingsPage {
             @change=${this.#onCaptureChange}
           />
         </label>
-      </sb-card>
+      </gw-card>
     `;
   }
 
