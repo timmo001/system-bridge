@@ -28,13 +28,16 @@ Requires Home Assistant 2026.10 or later.
 2. Select **Add dashboard** and choose **System Bridge**.
 3. With more than one System Bridge device, choose one in **Edit dashboard**.
 
-See the [dashboard documentation](https://system-bridge.timmo.dev/using/home-assistant#dashboard)
-for its options, manual installation and adding its sections to other
-dashboards.
+The [documentation](https://system-bridge.timmo.dev/using/home-assistant#dashboard)
+covers the dashboard's options and how to add its sections to other dashboards.
+
+<!-- ha-marketplace:exclude-start -->
 
 Each release's `system-bridge-dashboard.js` has a build provenance attestation
 from the System Bridge repository. Check a download with
 `gh attestation verify system-bridge-dashboard.js -R timmo001/system-bridge`.
+
+<!-- ha-marketplace:exclude-end -->
 
 This repository is generated from
 [timmo001/system-bridge](https://github.com/timmo001/system-bridge/tree/dev/client/home-assistant/frontend).
