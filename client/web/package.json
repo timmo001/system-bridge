@@ -25,7 +25,7 @@
     "@lezer/highlight": "^1.2.3",
     "@lit/context": "^1.1.6",
     "@mdi/js": "7.4.47",
-    "@tanstack/charts": "1.1.0",
+    "@tanstack/charts": "1.2.0",
     "@tanstack/lit-table": "9.3.1",
     "@timmo001/effect-system-bridge": "workspace:*",
     "@timmo001/groundwork-tokens": "0.9.30",
