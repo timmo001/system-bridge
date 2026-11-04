@@ -21,15 +21,15 @@ tools:
     reviewed: 2026.10.4
     review: Bring the Python connector in line with Core's pyproject.toml at the new tag (requires-python, the aiohttp pin and the Ruff and pylint rules connector/python/pyproject.toml copies), and check homeassistant/components/system_bridge for calls into the connector that changed or that it no longer supports. Then check the TODO(Core) comments in client/home-assistant/frontend/src (pages.ts and sections.ts) against the entities the release adds. Uncomment a page or add to a section once its entities exist, and gate the new translation keys at this release in release.ts's RELEASE_GATES. Raise MINIMUM_RELEASE there when the dashboard starts to need a newer release. Also check registry.ts's ITEM_RULES against changed unique ID keys and translation keys in sensor.py, and its use of the config/entity_registry/list command.
   - repo: home-assistant/frontend
-    reviewed: "20261028.2"
+    reviewed: "20261028.4"
     prereleases: true
     review: Check the dashboard, view and section strategies in client/home-assistant/frontend against changes to the strategy API in src/panels/lovelace/strategies (get-strategy.ts and types.ts, registryDependencies, getConfigElement, getCreateSuggestions and window.customStrategies), the heading, tile, history-graph and entity badge config built in src/cards.ts and src/sections.ts, the tile features they use (bar-gauge, media-player-playback and media-player-volume-slider), and the ha-form selectors in src/editor.ts. Note new built-in strategies, such as the device section strategy, that could replace a generated section.
   - repo: omacom/omarchy
-    reviewed: v4.5.0-rc2
+    reviewed: v4.5.0
     prereleases: true
     review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, omarchy-system logout, omarchy-launch-terminal, omarchy-launch-nautilus, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes). Also check data/module/system/keep_awake_linux.go, which runs omarchy-toggle-idle stay-awake, allow-idle and status, and reads enabled from the status JSON. Omarchy decides which Hyprland System Bridge must still support. Once the release ships Hyprland 0.57 or newer, remove the pre-0.57 support in data/module/desktop and the command prefabs - the TODO(Omarchy) fallbacks, the classic forms of each hyprlandCommand, the keyword request, the onHyprlandLua probe and hyprctl dispatch exit candidate, and the workspace ID fallback in hyprlandWorkspaceRef.key.
   - repo: hyprwm/Hyprland
-    reviewed: v0.57.0
+    reviewed: v0.57.1
     review: Check the desktop module's Hyprland IPC in data/module/desktop (hyprland_linux.go for the instance discovery, .socket.sock and .socket2.sock and the batched j/ requests; hyprland_build_linux.go for the version, configerrors, globalshortcuts, binds and status replies it decodes; desktop_linux.go for the socket2 events it listens to, such as configreloaded; actions_linux.go for the dispatchers it sends in both the Lua and classic config forms, and the reload request) against changed socket paths, request names, event names, JSON fields and dispatchers. Also check the Hyprland tools the command prefabs run in utils/handlers/command/prefab/prefab.go (hyprctl dispatch 'hl.dsp.exit()' with a Lua config or hyprctl dispatch exit, grimblast save screen, active and area, and hyprshot's window and region modes).
   - repo: OpenAsar/arrpc
     reviewed: 3.7.0
@@ -44,7 +44,7 @@ tools:
     reviewed: "5.87"
     review: Check the Bluetooth module's D-Bus use in data/module/bluetooth (bluetooth_linux.go reads org.bluez Adapter1 and Device1 through ObjectManager.GetManagedObjects; watch_linux.go follows PropertiesChanged, InterfacesAdded and InterfacesRemoved; actions_linux.go calls Device1.Connect and Disconnect, Adapter1.RemoveDevice and sets Adapter1.Powered) against changed interfaces, methods, properties and errors.
   - repo: rpm-software-management/dnf5
-    reviewed: 5.4.6.0
+    reviewed: 5.4.7.0
     review: Check the Fedora package checks. data/module/system/updates_linux.go runs dnf --quiet check-update with LC_ALL=C, takes exit code 100 as updates waiting, counts its three-field lines and stops at the Obsoleting section. data/module/system/system_linux.go runs dnf --disablerepo=* needs-restarting --reboothint and reads exit code 1 with "Reboot is required". Check both against changed commands, flags, output and exit codes.
   - repo: flatpak/xdg-desktop-portal
     reviewed: 1.22.1
