@@ -434,19 +434,19 @@ run = "bun run format"
 
 [tasks."lint:connector:typescript"]
 description = "Lint the TypeScript connector with Oxlint and check its formatting"
-depends = ["install:js"]
+depends = ["generate:schemas"]
 dir = "connector/typescript"
 run = "bun run --parallel --no-exit-on-error lint format:check"
 
 [tasks."typecheck:connector:typescript"]
 description = "Type check the TypeScript connector"
-depends = ["install:js"]
+depends = ["generate:schemas"]
 dir = "connector/typescript"
 run = "bun run typecheck"
 
 [tasks."test:connector:typescript"]
 description = "Run the TypeScript connector tests"
-depends = ["install:js"]
+depends = ["generate:schemas"]
 dir = "connector/typescript"
 run = "bun run test"
 
