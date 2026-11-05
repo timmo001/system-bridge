@@ -75,6 +75,7 @@ export interface HistoryGraphCardConfig {
   title?: string;
   hours_to_show: number;
   entities: string[];
+  grid_options?: { columns: number | "full" };
 }
 
 export interface MarkdownCardConfig {
@@ -82,11 +83,20 @@ export interface MarkdownCardConfig {
   content: string;
 }
 
+export interface GridCardConfig {
+  type: "grid";
+  columns: number;
+  square: boolean;
+  cards: LovelaceCardConfig[];
+  grid_options?: { columns: number | "full" };
+}
+
 export type LovelaceCardConfig =
   | HeadingCardConfig
   | TileCardConfig
   | HistoryGraphCardConfig
-  | MarkdownCardConfig;
+  | MarkdownCardConfig
+  | GridCardConfig;
 
 export interface EntityBadgeConfig {
   type: "entity";
@@ -173,13 +183,20 @@ export const DEFAULT_AUDIO_FEATURES: AudioFeature[] = [
   "volume_buttons",
 ];
 
+export const DEFAULT_MAX_COLUMNS = 4;
+
 interface StrategyOptions extends SectionOptions {
   type: typeof STRATEGY_TYPE;
   /** The System Bridge device. Optional when there is only one. */
   device_id?: string;
 }
 
-export interface DashboardStrategyConfig extends StrategyOptions {
+interface ViewOptions extends StrategyOptions {
+  /** The most columns of sections a page shows side by side. Defaults to 4. */
+  max_columns?: number;
+}
+
+export interface DashboardStrategyConfig extends ViewOptions {
   /** The pages to show, in order. Leaving it out shows every page. */
   pages?: string[];
   /** The pages that show their icon and title in the tab. Defaults to all. */
@@ -188,7 +205,7 @@ export interface DashboardStrategyConfig extends StrategyOptions {
   top_links_pages?: string[];
 }
 
-export interface ViewStrategyConfig extends StrategyOptions {
+export interface ViewStrategyConfig extends ViewOptions {
   page: string;
   show_icon_and_title?: boolean;
   show_top_links?: boolean;

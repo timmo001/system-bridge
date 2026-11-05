@@ -14,6 +14,7 @@ import {
   REGISTRY_DEPENDENCIES,
 } from "./section-strategy";
 import {
+  DEFAULT_MAX_COLUMNS,
   type HomeAssistant,
   type LovelaceStrategySectionConfig,
   type LovelaceViewConfig,
@@ -35,8 +36,12 @@ export const pageSections = (
 ): LovelaceStrategySectionConfig[] =>
   page
     .sections(entities)
-    .filter((ref) => buildSection(entities, ref, options) !== undefined)
-    .map(({ link, ...ref }) => {
+    .flatMap((ref) => {
+      const section = buildSection(entities, ref, options);
+
+      return section ? [{ ref, columnSpan: section.column_span }] : [];
+    })
+    .map(({ ref: { link, ...ref }, columnSpan }) => {
       const strategy: SectionStrategyConfig = {
         type: STRATEGY_TYPE,
         device_id: entities.device.id,
@@ -68,7 +73,8 @@ export const pageSections = (
         strategy.show_input_source = options.show_input_source;
       }
 
-      return { strategy };
+      // The view reads the span from here, not from the generated section
+      return columnSpan ? { strategy, column_span: columnSpan } : { strategy };
     });
 
 export const pageView = (
@@ -77,6 +83,7 @@ export const pageView = (
   options: SectionOptions & {
     show_icon_and_title?: boolean;
     show_top_links?: boolean;
+    max_columns?: number;
   },
   views?: ReadonlySet<string>,
 ): LovelaceViewConfig => ({
@@ -85,7 +92,7 @@ export const pageView = (
   path: page.page,
   icon: page.icon,
   show_icon_and_title: options.show_icon_and_title ?? true,
-  max_columns: 3,
+  max_columns: options.max_columns ?? DEFAULT_MAX_COLUMNS,
   badges: [
     ...(options.show_top_links === false
       ? []

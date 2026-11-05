@@ -15,6 +15,7 @@ import {
   AUDIO_FEATURES,
   type DashboardStrategyConfig,
   DEFAULT_AUDIO_FEATURES,
+  DEFAULT_MAX_COLUMNS,
   DEFAULT_MEDIA_FEATURES,
   type HomeAssistant,
   MEDIA_FEATURES,
@@ -35,6 +36,7 @@ const LABELS = new Map([
   ["item", "Item"],
   ["show_icon_and_title", "Icon and title"],
   ["show_top_links", "Web client link"],
+  ["max_columns", "Maximum columns"],
   ["pages_options", "Page options"],
   ["pages", "Pages"],
   ["icon_and_title_pages", "Icon and title"],
@@ -108,6 +110,7 @@ const DEFAULTS = {
   show_icon_and_title: true,
   show_top_links: true,
   show_input_source: true,
+  max_columns: DEFAULT_MAX_COLUMNS,
   media_features: DEFAULT_MEDIA_FEATURES,
   audio_features: DEFAULT_AUDIO_FEATURES,
 };
@@ -218,6 +221,7 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
     "One display: power, brightness, resolution and refresh rate. Set the item to the display name.",
   gpu: "One GPU: load, encoder and decoder, memory, power, temperature, clocks, fan and performance state. Set the item to the GPU name.",
   network: "Download and upload rates, with a graph.",
+  "network-activity": "Download and upload rates, with a graph of each.",
   interface:
     "One network interface: rates, Wi-Fi details and a graph. Set the item to the interface name.",
   desktop: "Whether the session is locked, and how long it's been idle.",
@@ -235,6 +239,10 @@ const HELPERS = new Map([
     "For sections about one thing: its mount point, GPU, display or interface name.",
   ],
   ["hours_to_show", "Hours that graphs go back."],
+  [
+    "max_columns",
+    "The most columns of sections a page shows side by side on a wide screen.",
+  ],
   ["tile_feature", "Shown under percentages such as CPU and memory usage."],
   ["show_icon_and_title", "Show the icon next to the title in the tab."],
   ["show_top_links", "Show a link to the System Bridge web client at the top."],
@@ -268,6 +276,7 @@ const HISTORY_SECTIONS = new Set<string>([
   "disk-activity",
   "gpu",
   "network",
+  "network-activity",
   "interface",
   "desktop",
   "processes",
@@ -427,6 +436,16 @@ const generalSchema = (
             { name: "show_icon_and_title", selector: { boolean: {} } },
             { name: "show_top_links", selector: { boolean: {} } },
           ],
+        },
+      ]
+    : []),
+  ...(!("section" in config)
+    ? [
+        {
+          name: "max_columns",
+          selector: {
+            number: { min: 1, max: 6, mode: "slider", slider_ticks: true },
+          },
         },
       ]
     : []),
@@ -665,6 +684,10 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
     if ("show_top_links" in config && config.show_top_links) {
       delete config.show_top_links;
+    }
+
+    if ("max_columns" in config && config.max_columns === DEFAULT_MAX_COLUMNS) {
+      delete config.max_columns;
     }
 
     if (

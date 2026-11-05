@@ -124,6 +124,9 @@ const DRAWINGS: Record<SectionName, string> = {
   network:
     area("M30 8 L40 20 L34 20 L34 34 L26 34 L26 20 L20 20 Z", 0.48) +
     area("M64 36 L74 24 L68 24 L68 10 L60 10 L60 24 L54 24 Z", 0.32),
+  "network-activity":
+    line("M8 30 L18 24 L28 28 L38 14 L44 18", 0.72) +
+    line("M50 34 L60 30 L70 32 L80 26 L86 28", 0.32),
   interface:
     dot(20, 22, 6, 0.48) +
     dot(74, 22, 6, 0.48) +

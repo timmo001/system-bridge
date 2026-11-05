@@ -126,7 +126,7 @@ export const PAGES: readonly Page[] = [
     title: "Networks",
     icon: "mdi:lan",
     sections: (entities) => [
-      { section: "network" },
+      { section: "network-activity" },
       ...each(entities, "interface", "interface"),
     ],
   },

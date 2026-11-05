@@ -28,7 +28,12 @@ type SectionBuilder = (
   context: SectionContext,
 ) => LovelaceSectionConfig | undefined;
 
-/** A grid section, or nothing when no card besides the headings has an entity. */
+/**
+ * A grid section, or nothing when no card besides the headings has an entity.
+ * In a wide section graphs sit in pairs, and one left on its own fills the
+ * row. After tiles each pair goes in a full-width grid card, as a graph would
+ * otherwise fill the gap beside the last tiles.
+ */
 const grid = (
   cards: (LovelaceCardConfig | undefined)[],
   columnSpan?: number,
@@ -43,6 +48,46 @@ const grid = (
 
   if (columnSpan) {
     section.column_span = columnSpan;
+  }
+
+  if (columnSpan && columnSpan > 1) {
+    const graphs = shown.filter((card) => card.type === "history-graph");
+
+    const others = shown.filter((card) => card.type !== "history-graph");
+
+    const onlyGraphs = others.every((card) => card.type === "heading");
+
+    const pairs = Array.from(
+      { length: Math.ceil(graphs.length / 2) },
+      (_, index) => graphs.slice(index * 2, index * 2 + 2),
+    );
+
+    section.cards = [
+      ...others,
+      ...pairs.flatMap((pair): LovelaceCardConfig[] => {
+        const [first, second] = pair;
+
+        if (!first) {
+          return [];
+        }
+
+        if (!second) {
+          return [{ ...first, grid_options: { columns: "full" } }];
+        }
+
+        return onlyGraphs
+          ? pair
+          : [
+              {
+                type: "grid",
+                columns: 2,
+                square: false,
+                cards: pair,
+                grid_options: { columns: "full" },
+              },
+            ];
+      }),
+    ];
   }
 
   return section;
@@ -326,18 +371,21 @@ export const SECTIONS = {
   "disk-activity": ({ entities, hours }) => {
     const totals = singles(entities, "disk_read_rate", "disk_write_rate");
 
-    return grid([
-      heading("Activity", "mdi:swap-vertical"),
-      ...totals.map((entity) => tile(entity)),
-      graph(totals, hours),
-      graph(
-        [...entities.items.disk.values()].flatMap((disk) =>
-          fields(disk, "read_rate", "write_rate"),
+    return grid(
+      [
+        heading("Activity", "mdi:swap-vertical"),
+        ...totals.map((entity) => tile(entity)),
+        graph(totals, hours),
+        graph(
+          [...entities.items.disk.values()].flatMap((disk) =>
+            fields(disk, "read_rate", "write_rate"),
+          ),
+          hours,
+          "Per disk",
         ),
-        hours,
-        "Per disk",
-      ),
-    ]);
+      ],
+      2,
+    );
   },
 
   display: ({ entities, item }) => {
@@ -368,49 +416,49 @@ export const SECTIONS = {
 
     const name = gpu?.name ?? "";
 
-    return grid([
-      heading(name, "mdi:expansion-card-variant"),
-      ...itemTiles(
-        gpu,
-        name,
-        [
-          "usage_percentage",
-          "memory_used_percentage",
-          "encoder_usage_percentage",
-          "decoder_usage_percentage",
-        ],
-        percentage,
-      ),
-      ...itemTiles(gpu, name, [
-        "memory_used",
-        "memory_free",
-        "memory_total",
-        "power_usage",
-        "power_limit",
-        "temperature",
-        "core_clock_speed",
-        "memory_clock_speed",
-        "fan_speed",
-        "fan_speed_percentage",
-        "performance_state",
-      ]),
-      graph(
-        fields(
+    return grid(
+      [
+        heading(name, "mdi:expansion-card-variant"),
+        ...itemTiles(
           gpu,
-          "usage_percentage",
-          "memory_used_percentage",
-          "encoder_usage_percentage",
-          "decoder_usage_percentage",
+          name,
+          [
+            "usage_percentage",
+            "memory_used_percentage",
+            "encoder_usage_percentage",
+            "decoder_usage_percentage",
+          ],
+          percentage,
         ),
-        hours,
-        "Load over time",
-      ),
-      graph(
-        fields(gpu, "power_usage", "temperature"),
-        hours,
-        "Power and temperature",
-      ),
-    ]);
+        ...itemTiles(gpu, name, [
+          "memory_used",
+          "memory_free",
+          "memory_total",
+          "power_usage",
+          "power_limit",
+          "temperature",
+          "core_clock_speed",
+          "memory_clock_speed",
+          "fan_speed",
+          "fan_speed_percentage",
+          "performance_state",
+        ]),
+        graph(
+          fields(
+            gpu,
+            "usage_percentage",
+            "encoder_usage_percentage",
+            "decoder_usage_percentage",
+          ),
+          hours,
+          "Load",
+        ),
+        graph(fields(gpu, "memory_used_percentage"), hours, "Memory"),
+        graph(fields(gpu, "power_usage"), hours, "Power"),
+        graph(fields(gpu, "temperature"), hours, "Temperature"),
+      ],
+      2,
+    );
   },
 
   network: ({ entities, hours, link }) => {
@@ -427,38 +475,65 @@ export const SECTIONS = {
     ]);
   },
 
+  "network-activity": ({ entities, hours }) => {
+    const download = singles(entities, "network_download_rate");
+    const upload = singles(entities, "network_upload_rate");
+
+    return grid(
+      [
+        heading("Network", "mdi:lan"),
+        ...[...download, ...upload].map((entity) => tile(entity)),
+        graph(download, hours, "Download"),
+        graph(upload, hours, "Upload"),
+      ],
+      2,
+    );
+  },
+
   interface: ({ entities, item, hours }) => {
     const networkInterface =
       item === undefined ? undefined : entities.items.interface.get(item);
 
     const name = networkInterface?.name ?? "";
 
-    return grid([
-      heading(name, "mdi:ethernet"),
-      ...itemTiles(networkInterface, name, [
-        "download_rate",
-        "upload_rate",
-        "ssid",
-        "signal_strength",
-        "link_rate",
-      ]),
-      graph(fields(networkInterface, "download_rate", "upload_rate"), hours),
-    ]);
+    return grid(
+      [
+        heading(name, "mdi:ethernet"),
+        ...itemTiles(networkInterface, name, [
+          "download_rate",
+          "upload_rate",
+          "ssid",
+          "signal_strength",
+          "link_rate",
+        ]),
+        graph(fields(networkInterface, "download_rate"), hours, "Download"),
+        graph(fields(networkInterface, "upload_rate"), hours, "Upload"),
+      ],
+      2,
+    );
   },
 
   desktop: ({ entities, hours }) =>
-    grid([
-      heading("Session", "mdi:account-clock-outline"),
-      ...singles(entities, "locked", "idle_time").map((entity) => tile(entity)),
-      graph(singles(entities, "idle_time"), hours),
-    ]),
+    grid(
+      [
+        heading("Session", "mdi:account-clock-outline"),
+        ...singles(entities, "locked", "idle_time").map((entity) =>
+          tile(entity),
+        ),
+        graph(singles(entities, "idle_time"), hours),
+      ],
+      2,
+    ),
 
   processes: ({ entities, hours }) =>
-    grid([
-      heading("Processes", "mdi:application-cog-outline"),
-      tileOf(entities.single.get("processes_count")),
-      graph(singles(entities, "processes_count"), hours),
-    ]),
+    grid(
+      [
+        heading("Processes", "mdi:application-cog-outline"),
+        tileOf(entities.single.get("processes_count")),
+        graph(singles(entities, "processes_count"), hours),
+      ],
+      2,
+    ),
 
   // TODO(Core): add the saved command buttons with roadmap item 7b
   commands: ({ entities }) =>

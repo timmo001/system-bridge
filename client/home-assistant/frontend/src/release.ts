@@ -128,6 +128,11 @@ export const SECTION_RELEASES = new Map([
   ),
   gatedSection("network", "network_download_rate", "network_upload_rate"),
   gatedSection(
+    "network-activity",
+    "network_download_rate",
+    "network_upload_rate",
+  ),
+  gatedSection(
     "interface",
     "network_interface_download_rate",
     "network_interface_upload_rate",
@@ -158,5 +163,5 @@ const gatedPage = (page: string, ...sections: string[]) =>
 export const PAGE_RELEASES = new Map([
   gatedPage("audio", "audio-outputs", "audio-inputs"),
   gatedPage("desktop", "desktop"),
-  gatedPage("networks", "network", "interface"),
+  gatedPage("networks", "network-activity", "interface"),
 ]);
