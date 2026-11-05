@@ -73,10 +73,11 @@
     },
     "testing": {
       "source": "timmo001/skills",
-      "ref": "5182d0da35236f171145ddc3090db5200154cc61",
+      "ref": "88d6445011cb108942f0430836e395ef095dfb4f",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
-      "computedHash": "ed01eeae5d38ed4992c0118bca55a1502e9c6323b62bb28ed1feac1a038b3d58"
+      "computedHash": "6fabc5676eba0009a4f57f41a26e886d8b0611cfefb7b8bffe82adbaaa86cbba",
+      "installMode": "copy"
     },
     "types-enforce-ts": {
       "source": "timmo001/skills",
