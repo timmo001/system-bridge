@@ -78,7 +78,7 @@
         "typescript": "7.0.2",
       },
       "peerDependencies": {
-        "effect": "4.1.2",
+        "effect": "^4.1.2",
       },
     },
     "docs": {

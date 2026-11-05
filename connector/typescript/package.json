@@ -51,7 +51,7 @@
     "prepack": "bun run build"
   },
   "peerDependencies": {
-    "effect": "4.1.2"
+    "effect": "^4.1.2"
   },
   "devDependencies": {
     "@effect/tsgo": "0.63.0",
