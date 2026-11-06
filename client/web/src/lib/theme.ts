@@ -54,10 +54,9 @@ const families = [
   {
     group: "Tokyo Night",
     themes: [
-      ["tokyo-night-day", "Day", "light"],
-      ["tokyo-night", "Night", "dark"],
-      ["tokyo-night-storm", "Storm", "dark"],
-      ["tokyo-night-moon", "Moon", "dark"],
+      ["tokyo-night", "Night", undefined],
+      ["tokyo-night-storm", "Storm", undefined],
+      ["tokyo-night-moon", "Moon", undefined],
     ],
   },
 ] as const;
@@ -82,7 +81,6 @@ const page = pageTheme({
       import("@timmo001/groundwork-tokens/themes/catppuccin-frappe.json"),
       import("@timmo001/groundwork-tokens/themes/catppuccin-macchiato.json"),
       import("@timmo001/groundwork-tokens/themes/catppuccin-mocha.json"),
-      import("@timmo001/groundwork-tokens/themes/tokyo-night-day.json"),
       import("@timmo001/groundwork-tokens/themes/tokyo-night.json"),
       import("@timmo001/groundwork-tokens/themes/tokyo-night-storm.json"),
       import("@timmo001/groundwork-tokens/themes/tokyo-night-moon.json"),
