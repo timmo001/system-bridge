@@ -43,8 +43,8 @@
         "@tanstack/charts": "1.1.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "@timmo001/groundwork-tokens": "0.9.37",
-        "@timmo001/groundwork-ui": "0.9.37",
+        "@timmo001/groundwork-tokens": "0.9.40",
+        "@timmo001/groundwork-ui": "0.9.40",
         "effect": "4.1.2",
         "lit": "^3.3.2",
       },
@@ -88,7 +88,7 @@
         "@astrojs/cloudflare": "14.4.4",
         "@fontsource-variable/inter": "5.3.0",
         "@fontsource-variable/jetbrains-mono": "5.3.0",
-        "@timmo001/docs-kit": "0.9.37",
+        "@timmo001/docs-kit": "0.9.40",
         "blume": "2.2.6",
         "sharp": "0.35.5",
       },
@@ -737,13 +737,13 @@
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.19.11", "", {}, "sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A=="],
 
-    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.9.37", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.9.37", "@timmo001/groundwork-ui": "0.9.37", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-dV3s8wBkLd3b0rXMmcQ9TrXpfYkwYQ2ZhDT4cH0uQR5GepP1WOFSejYLBpes1qjmz+0lkEcvEmIMR4bAPH1InQ=="],
+    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.9.40", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.9.40", "@timmo001/groundwork-ui": "0.9.40", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-qaTKNnq/FzTe0gi6Jvqvh9qkcEZedJhomLAO2YfjbkpRPodRcGkdFT6X+bmoFWXBUyQJ6M0/BBl7IT4iXTckJw=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.37", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.2" } }, "sha512-lFi8NCjOtpCsBs9LwxEs0D9mGPNw1gnXrBMNCnMUuMmHjkQcvkAQFxQFzjyRfPV7Fpy8MbeeDVdn17mok8DGdA=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.9.40", "", { "dependencies": { "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.2" } }, "sha512-WEvGIesZwdFvZxR8VQJPh1n3LgnX4nGd7/xNpQpx2Pqz6YikpraBthU/zo2R0mUbptYg1fAXF3MbjStefV3qqQ=="],
 
-    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.9.37", "", { "dependencies": { "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11" } }, "sha512-3sCcAZaZCw1tVyo7JJ2G3vYowB7AzPuCq7N2ctY8PUm4NmOxuiMuDf6MCFj53m4B//+IW7AoDMTQnL/Hny9wVg=="],
+    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.9.40", "", { "dependencies": { "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11" } }, "sha512-qGTHyw8lugheoWaZDprv5oJRgP9jjSXOEHKGFnb3QDUd33zXXgq40WNeNpfltrfuE2ZSMBddQ7uFRz0ov5NrVg=="],
 
     "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.6.4", "", { "peerDependencies": { "@oxlint/plugins": "^1.91.0", "oxlint": "^1.91.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-FHVvFrgyhw8JuE+eL+1/ABEWTynttmornkOU5a2WutAZeAkNQK38olP//u0OGOEKgtmHORTbUWD9jq9CmeJXmA=="],
 
