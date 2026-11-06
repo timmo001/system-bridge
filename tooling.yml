@@ -41,7 +41,7 @@ tools:
     reviewed: v0.3.2
     review: Check the Omarchy shell calls in data/module/desktop/omarchy_linux.go, which fall back to qs ipc -n -p <shell> call <target> <function> and list targets with qs ipc -n -p <shell> show, parsing its target and function lines with the ipcTarget and ipcFunction patterns in omarchyTargets, against changed flags, output and exit codes.
   - repo: bluez/bluez
-    reviewed: "5.87"
+    reviewed: "5.88"
     review: Check the Bluetooth module's D-Bus use in data/module/bluetooth (bluetooth_linux.go reads org.bluez Adapter1 and Device1 through ObjectManager.GetManagedObjects; watch_linux.go follows PropertiesChanged, InterfacesAdded and InterfacesRemoved; actions_linux.go calls Device1.Connect and Disconnect, Adapter1.RemoveDevice and sets Adapter1.Powered) against changed interfaces, methods, properties and errors.
   - repo: rpm-software-management/dnf5
     reviewed: 5.4.7.0
