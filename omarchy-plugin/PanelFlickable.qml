@@ -9,6 +9,8 @@ Flickable {
   // Mouse wheel: pixels moved per notch, animated so it stays smooth.
   property real wheelStep: 92
   property real wheelTarget: 0
+  // How long a wheel notch takes to scroll, in milliseconds.
+  property int wheelDuration: 200
 
   function clampContentY(value) {
     return Math.max(root.originY, Math.min(
@@ -19,7 +21,7 @@ Flickable {
     id: wheelAnimation
     target: root
     property: "contentY"
-    duration: 200
+    duration: root.wheelDuration
     easing.type: Easing.OutCubic
   }
 

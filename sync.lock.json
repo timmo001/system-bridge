@@ -7,8 +7,8 @@
     },
     "omarchy-plugin/PanelFlickable.qml": {
       "item": "panel-flickable",
-      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
-      "hash": "3aeaf51bf09b1d671fbd6ad6c122f5561d27ff62dd9219015c4c7ba053b13065"
+      "sha": "0969862b88540de9f8f7cc8e1e33b4c5172d8b4b",
+      "hash": "81d38ae8379da73a851fe863d9f4fc09ba21f33ba4ebaf7586a032a1012e9ee4"
     },
     "omarchy-plugin/PanelHeader.qml": {
       "item": "panel-header",
