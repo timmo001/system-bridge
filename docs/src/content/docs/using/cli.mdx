@@ -3,7 +3,7 @@ title: CLI
 description: Get your token, send notifications, read and stream data, and run the backend from the terminal.
 ---
 
-The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `version` and `completions` are top-level commands. Running `system-bridge` without a subcommand shows help.
+The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `agent`, `version` and `completions` are top-level commands. Running `system-bridge` without a subcommand shows help.
 
 ## Token
 
@@ -361,6 +361,17 @@ system-bridge backend --open-web-client
 ```
 
 See [Running](/running/) for autostart and service setup.
+
+## Agent
+
+The top-level `agent` commands are for agent plugins, such as the [OpenCode plugin](/api/mcp/#opencode-plugin). They expose the [MCP server's tools](/api/mcp/#tools) without the `system_bridge_` prefix:
+
+```bash
+system-bridge agent tools --json
+echo '{"modules":["cpu"]}' | system-bridge agent call get_data
+```
+
+`agent tools` prints every tool with its input schema and whether it only reads, and whether this machine has a token, without needing the backend. `agent call` checks the input against the tool's schema, runs it on the local backend and prints its result as JSON.
 
 ## Version
 

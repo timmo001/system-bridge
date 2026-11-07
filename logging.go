@@ -259,7 +259,7 @@ func isManagedLogFile(name string) bool {
 
 // shouldLogToStdout returns true when the application should emit logs to stdout.
 // We only log to stdout for the `backend` command to avoid polluting CLI output
-// (e.g. JSON) for `client` commands.
+// (e.g. JSON) for `client` and `agent` commands.
 func shouldLogToStdout() bool {
 	// Expect subcommand in os.Args[1]
 	if len(os.Args) < 2 {
@@ -269,7 +269,7 @@ func shouldLogToStdout() bool {
 	// Prefer explicit checks for known top-level commands and their aliases
 	for _, arg := range os.Args[1:] {
 		switch arg {
-		case "client", "c", "cli":
+		case "client", "c", "cli", "agent":
 			return false
 		case "backend", "b":
 			return true

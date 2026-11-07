@@ -819,6 +819,7 @@ func main() {
 					},
 				},
 			},
+			agentCommand(),
 			{
 				Name:  "version",
 				Usage: "Show the version of the application",
