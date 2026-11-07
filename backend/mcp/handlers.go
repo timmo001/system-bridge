@@ -550,6 +550,88 @@ func (h toolHandlers) handleCameraCapture(_ context.Context, _ *sdkmcp.CallToolR
 	}}, *picture, nil
 }
 
+type listFilesInput struct {
+	Base string `json:"base"`
+	Path string `json:"path,omitempty"`
+}
+
+// mediaDirectory is one directory files can be listed from
+type mediaDirectory struct {
+	Key  string `json:"key"`
+	Path string `json:"path"`
+}
+
+// mediaDirectoriesOutput wraps the directories, as structured output must be an object
+type mediaDirectoriesOutput struct {
+	Directories []mediaDirectory `json:"directories"`
+}
+
+// mediaFile is one entry in a media directory
+type mediaFile struct {
+	Name        string    `json:"name"`
+	Path        string    `json:"path"`
+	Size        int64     `json:"size"`
+	IsDirectory bool      `json:"isDirectory"`
+	ModTime     time.Time `json:"modTime"`
+	Permissions string    `json:"permissions"`
+	ContentType string    `json:"contentType,omitempty"`
+	Extension   string    `json:"extension,omitempty"`
+}
+
+// mediaFilesOutput wraps the files, as structured output must be an object
+type mediaFilesOutput struct {
+	Files []mediaFile `json:"files"`
+}
+
+// replyData decodes an event reply's data into out, through JSON, so this
+// package doesn't depend on the handlers' own types
+func replyData(data any, out any) error {
+	encoded, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("encode reply data: %v", err)
+	}
+	if err := json.Unmarshal(encoded, out); err != nil {
+		return fmt.Errorf("decode reply data: %v", err)
+	}
+	return nil
+}
+
+func (h toolHandlers) handleListMediaDirectories(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, mediaDirectoriesOutput, error) {
+	response := h.eventRouter.HandleMessage("mcp", event.Message{ID: generateID(), Event: event.EventGetDirectories, Data: map[string]interface{}{}})
+	if response.Type == event.ResponseTypeError {
+		return nil, mediaDirectoriesOutput{}, fmt.Errorf("%s", response.Message)
+	}
+	output := mediaDirectoriesOutput{Directories: []mediaDirectory{}}
+	if err := replyData(response.Data, &output.Directories); err != nil {
+		return nil, mediaDirectoriesOutput{}, err
+	}
+	return toolResult(output.Directories, output)
+}
+
+func (h toolHandlers) handleListFiles(_ context.Context, _ *sdkmcp.CallToolRequest, input listFilesInput) (*sdkmcp.CallToolResult, mediaFilesOutput, error) {
+	arguments := map[string]interface{}{"base": input.Base}
+	if input.Path != "" {
+		arguments["path"] = input.Path
+	}
+	response := h.eventRouter.HandleMessage("mcp", event.Message{ID: generateID(), Event: event.EventGetFiles, Data: arguments})
+	if response.Type == event.ResponseTypeError {
+		if response.Message == "" {
+			return nil, mediaFilesOutput{}, fmt.Errorf("no media directory %q", input.Base)
+		}
+		return nil, mediaFilesOutput{}, fmt.Errorf("%s", response.Message)
+	}
+	output := mediaFilesOutput{Files: []mediaFile{}}
+	if response.Data != nil {
+		if err := replyData(response.Data, &output.Files); err != nil {
+			return nil, mediaFilesOutput{}, err
+		}
+	}
+	if output.Files == nil {
+		output.Files = []mediaFile{}
+	}
+	return toolResult(output.Files, output)
+}
+
 func generateID() string {
 	return fmt.Sprintf("mcp-%d", time.Now().UnixNano())
 }

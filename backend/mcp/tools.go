@@ -15,6 +15,9 @@ import (
 
 func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, dataStore *data.DataStore) {
 	handlers := toolHandlers{eventRouter: eventRouter, dataStore: dataStore, loadSettings: settings.Load}
+	// Marks the tools that only read, so clients such as code mode can run
+	// them without asking
+	readOnly := &sdkmcp.ToolAnnotations{ReadOnlyHint: true}
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_audio_control",
@@ -160,6 +163,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{"modules"}),
 		OutputSchema: getDataOutputSchema(),
+		Annotations:  readOnly,
 	}, handlers.handleGetData)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
@@ -180,6 +184,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 				},
 			},
 		}, []string{}),
+		Annotations: readOnly,
 	}, handlers.handleGetHistory)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
@@ -267,12 +272,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		InputSchema: objectSchema(map[string]any{
 			"name": map[string]any{"type": "string", "description": "Option name, such as general.col.active_border or general:layout"},
 		}, []string{"name"}),
+		Annotations: readOnly,
 	}, queryTool[hyprlandOptionNameInput, types.HyprlandOptionValue](handlers, event.EventHyprlandGetOption))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_get_cursor_position",
 		Description: "Get where the pointer is on Hyprland, in pixels across every display",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
 	}, queryTool[struct{}, types.HyprlandCursorPosition](handlers, event.EventHyprlandGetCursorPosition))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
@@ -288,6 +295,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		Name:        "system_bridge_hyprland_get_log",
 		Description: "Get the end of Hyprland's log, oldest line first",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
 	}, queryTool[struct{}, types.HyprlandLog](handlers, event.EventHyprlandGetLog))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
@@ -365,13 +373,32 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		Name:        "system_bridge_list_commands",
 		Description: "List the commands the user has allowed System Bridge to run. An entry with a prefab and no command runs that prefab's program for the platform.",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
 	}, handlers.handleListCommands)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_command_prefabs",
 		Description: "List the ready-made commands System Bridge has, such as locking the screen, with whether each can run on this system, what it would run, and why not. They only run once the user adds them to the allowlist.",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
 	}, handlers.handleListCommandPrefabs)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_list_media_directories",
+		Description: "List the media directories files can be listed from: the user's own folders and those added in the media settings, by key",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
+	}, handlers.handleListMediaDirectories)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_list_files",
+		Description: "List the files and folders in a media directory, by its key from system_bridge_list_media_directories, optionally in a subfolder of it",
+		InputSchema: objectSchema(map[string]any{
+			"base": map[string]any{"type": "string", "description": "Directory key from system_bridge_list_media_directories, such as downloads"},
+			"path": map[string]any{"type": "string", "description": "A subfolder of the directory, such as photos/2026. Leave out for the directory itself."},
+		}, []string{"base"}),
+		Annotations: readOnly,
+	}, handlers.handleListFiles)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_media_control",
@@ -468,6 +495,7 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		Name:        "system_bridge_get_clipboard",
 		Description: "Read the text on the system's clipboard",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
 	}, queryTool[struct{}, types.ClipboardText](handlers, event.EventClipboardGetText))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{

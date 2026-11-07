@@ -122,6 +122,10 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.
+- `system_bridge_list_files` lists a media directory's files through
+  `GET_FILES`.
+- `system_bridge_list_media_directories` lists the media directories through
+  `GET_DIRECTORIES`.
 - `system_bridge_lock` locks the screen through `POWER_LOCK`. The other power
   actions aren't tools.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
