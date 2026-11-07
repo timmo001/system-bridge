@@ -291,7 +291,7 @@ depends = [
 ]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client, Home Assistant frontend, Python and TypeScript connectors)"
+description = "Run all linters (Go, web client, Home Assistant frontend, Python and TypeScript connectors, OpenCode plugin)"
 depends = [
   "lint:go",
   "lint:client:web",
@@ -300,6 +300,7 @@ depends = [
   "typecheck:connector:python",
   "lint:connector:typescript",
   "typecheck:connector:typescript",
+  "typecheck:opencode-plugin",
 ]
 
 [tasks."lint:go"]
@@ -449,6 +450,12 @@ description = "Run the TypeScript connector tests"
 depends = ["generate:schemas"]
 dir = "connector/typescript"
 run = "bun run test"
+
+[tasks."typecheck:opencode-plugin"]
+description = "Type check the OpenCode plugin"
+depends = ["install:js"]
+dir = "opencode-plugin"
+run = "bun run typecheck"
 
 [tasks."build:connector:typescript"]
 description = "Build the TypeScript connector"

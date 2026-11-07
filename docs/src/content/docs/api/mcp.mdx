@@ -87,6 +87,20 @@ await sb.system_bridge_send_notification({
 })
 ```
 
+Tools that only read, such as `system_bridge_get_data`, are marked with the `readOnlyHint` annotation, so clients can run them without asking first.
+
+### OpenCode plugin
+
+The OpenCode plugin in `opencode-plugin/` gives OpenCode the same tools as a `system-bridge` Code Mode namespace, without an MCP server entry or a token in your config. Load it from the repository:
+
+```json
+{
+  "plugins": ["github:timmo001/system-bridge#dev::path:opencode-plugin"]
+}
+```
+
+It reads the tools from `system-bridge agent tools --json` and runs each with `system-bridge agent call`, which calls this server on the local backend with your token, so they always match the `system-bridge` on your `PATH`. Tool names drop the `system_bridge_` prefix, so `system_bridge_get_data` is `tools["system-bridge"].get_data`. Tools that change something ask first, and "always allow" on `media_control`, `hyprland_dispatch`, `hyprland_set_option`, `discord_control`, `set_power_profile` or `run_command` covers one action, dispatcher, option, profile or command.
+
 ## Tools
 
 ### `system_bridge_audio_control`
@@ -400,6 +414,19 @@ List the [prefab commands](/features/commands/#prefab-commands), with whether ea
 ### `system_bridge_list_commands`
 
 List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments`, `workingDir` and `prefab`. It takes no arguments.
+
+### `system_bridge_list_files`
+
+List the files and folders in a media directory. See [list files](/api/websocket/system/#list-files).
+
+- `base` (required): The directory's `key` from `system_bridge_list_media_directories`, such as `downloads`.
+- `path` (optional): A subfolder of the directory, such as `photos/2026`.
+
+It returns `{ "files": [...] }`, each with its `name`, `path`, `size`, `isDirectory`, `modTime`, `permissions`, and its `contentType` and `extension` when it has them.
+
+### `system_bridge_list_media_directories`
+
+List the directories files can be listed from: your own folders, such as `downloads` and `pictures`, and those added in the media settings. It takes no arguments and returns `{ "directories": [...] }`, each with its `key` and `path`.
 
 ### `system_bridge_lock`
 

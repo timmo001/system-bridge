@@ -1,0 +1,22 @@
+{
+  "name": "@system-bridge/opencode",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.2.6",
+    "@opencode/schema": "2.2.6",
+    "effect": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "typescript": "7.0.2"
+  }
+}
