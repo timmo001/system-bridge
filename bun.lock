@@ -43,8 +43,8 @@
         "@tanstack/charts": "1.1.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "@timmo001/groundwork-tokens": "0.11.1",
-        "@timmo001/groundwork-ui": "0.11.1",
+        "@timmo001/groundwork-tokens": "0.11.2",
+        "@timmo001/groundwork-ui": "0.11.2",
         "effect": "4.1.2",
         "lit": "^3.3.2",
       },
@@ -88,7 +88,7 @@
         "@astrojs/cloudflare": "14.4.6",
         "@fontsource-variable/inter": "5.3.0",
         "@fontsource-variable/jetbrains-mono": "5.3.0",
-        "@timmo001/docs-kit": "0.11.1",
+        "@timmo001/docs-kit": "0.11.2",
         "blume": "2.2.6",
         "sharp": "0.35.5",
       },
@@ -924,13 +924,13 @@
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.19.11", "", {}, "sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A=="],
 
-    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.11.1", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.11.1", "@timmo001/groundwork-ui": "0.11.1", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-rSTXYx68lag/dHLvQU5vR/P6/ieTg/0yJUm8FDXHH0aGILGOdKLpSq+aJ+uWXPEaWqk39MvXvvEWpA6EfkulhA=="],
+    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.11.2", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.11.2", "@timmo001/groundwork-ui": "0.11.2", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-DaiwmvGU36xmxcjGKel+QwJYXx3EidAwlKW1upbwqEKjS74SNXG9g/3kJTX/VDxhS8A5ErRtMPlwVY5leAqJ4w=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.11.1", "", { "dependencies": { "@effect/platform-node": "4.1.2", "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.2" }, "bin": { "groundwork-tokens": "src/bin.ts" } }, "sha512-XOP3Ad0yUIO0U5gISjCwEKixYR0Eg58M6Dxp+BP1Fn51LPyWFFBe8ozXz39pRwhpPvzF5tou+ofC/JFZhqb1Xw=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.11.2", "", { "dependencies": { "@effect/platform-node": "4.1.2", "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.2" }, "bin": { "groundwork-tokens": "src/bin.ts" } }, "sha512-nBN/NMtUWNEWQK79YJmXhex+VIJMxZU0jpjXGJAv/FXzjcQRV0mle4YYRvzbnI+3NgKaCrCDBjSCftDbNJNE/A=="],
 
-    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.11.1", "", { "dependencies": { "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11", "micromark": "4.0.3", "micromark-extension-gfm": "3.0.0" } }, "sha512-uMu1gr75Nk9LCq3zaygI1MNVC8Yay6tfcF6k1WEr9A+mhRxKrk+tx+h4zVxd2zBzSSDj9MOkPgtKp0huMGIbJg=="],
+    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.11.2", "", { "dependencies": { "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11", "micromark": "4.0.3", "micromark-extension-gfm": "3.0.0" } }, "sha512-TcCS8hnOHo23DF33l0QRH6RZTw5ktvrbkK82yNc8DU7plAdBAhLca5KR78p1HHT3+3PSHaR2wW0O8HoZ2lBP7w=="],
 
     "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.6.4", "", { "peerDependencies": { "@oxlint/plugins": "^1.91.0", "oxlint": "^1.91.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-FHVvFrgyhw8JuE+eL+1/ABEWTynttmornkOU5a2WutAZeAkNQK38olP//u0OGOEKgtmHORTbUWD9jq9CmeJXmA=="],
 
