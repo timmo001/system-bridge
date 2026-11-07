@@ -1,7 +1,7 @@
 import { css, html, svg } from "lit";
 
-import "@timmo001/groundwork-ui/gw-chip.ts";
-import "@timmo001/groundwork-ui/gw-dot.ts";
+import "@timmo001/groundwork-ui/define/gw-chip.ts";
+import "@timmo001/groundwork-ui/define/gw-dot.ts";
 
 /** A Material Design icon, from one of `@mdi/js`'s paths. */
 export const icon = (path: string, label?: string) =>

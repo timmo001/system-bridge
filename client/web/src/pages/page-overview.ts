@@ -15,11 +15,11 @@ import { css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 
 import "~/components/sb-audio-main";
-import "@timmo001/groundwork-ui/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
 import "~/components/sb-history-export";
-import "@timmo001/groundwork-ui/gw-gauge.ts";
-import "@timmo001/groundwork-ui/gw-meter.ts";
-import "@timmo001/groundwork-ui/gw-select.ts";
+import "@timmo001/groundwork-ui/define/gw-gauge.ts";
+import "@timmo001/groundwork-ui/define/gw-meter.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import "~/components/sb-timeseries";
 import { icon, pageStyles, shared } from "~/components/shared-styles";

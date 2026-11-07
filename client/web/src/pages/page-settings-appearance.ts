@@ -1,5 +1,5 @@
 import { mdiPaletteOutline } from "@mdi/js";
-import "@timmo001/groundwork-ui/gw-theme-picker.ts";
+import "@timmo001/groundwork-ui/define/gw-theme-picker.ts";
 import type { GwThemePicker } from "@timmo001/groundwork-ui/gw-theme-picker.ts";
 import { html } from "lit";
 import { customElement, query } from "lit/decorators.js";

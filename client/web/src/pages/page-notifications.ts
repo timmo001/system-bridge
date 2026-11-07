@@ -4,7 +4,7 @@ import { Option, Schema } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-segmented.ts";
+import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
 import { AtomController } from "~/controllers/atom-controller";

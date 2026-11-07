@@ -12,8 +12,8 @@ import { Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-button.ts";
-import "@timmo001/groundwork-ui/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, addMediaDirectory, registry } from "~/lib/atoms";

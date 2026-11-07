@@ -1,7 +1,7 @@
-import "@timmo001/groundwork-ui/gw-app-bar.ts";
-import "@timmo001/groundwork-ui/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-app-bar.ts";
+import "@timmo001/groundwork-ui/define/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
-import "@timmo001/groundwork-ui/gw-command-menu.ts";
+import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { mdiBookOpenVariant, mdiMagnify, mdiPaletteOutline } from "@mdi/js";
 import { css, html, LitElement } from "lit";

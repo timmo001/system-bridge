@@ -9,7 +9,7 @@ import type { SystemData } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-segmented.ts";
+import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";

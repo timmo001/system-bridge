@@ -1,14 +1,14 @@
 import { mdiLanDisconnect, mdiRefresh } from "@mdi/js";
-import "@timmo001/groundwork-ui/gw-alert.ts";
-import "@timmo001/groundwork-ui/gw-button.ts";
-import "@timmo001/groundwork-ui/gw-card.ts";
-import "@timmo001/groundwork-ui/gw-checkbox.ts";
-import "@timmo001/groundwork-ui/gw-empty-state.ts";
-import "@timmo001/groundwork-ui/gw-facts.ts";
-import "@timmo001/groundwork-ui/gw-input.ts";
-import "@timmo001/groundwork-ui/gw-page-header.ts";
-import "@timmo001/groundwork-ui/gw-setting-row.ts";
-import "@timmo001/groundwork-ui/gw-skeleton.ts";
+import "@timmo001/groundwork-ui/define/gw-alert.ts";
+import "@timmo001/groundwork-ui/define/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-checkbox.ts";
+import "@timmo001/groundwork-ui/define/gw-empty-state.ts";
+import "@timmo001/groundwork-ui/define/gw-facts.ts";
+import "@timmo001/groundwork-ui/define/gw-input.ts";
+import "@timmo001/groundwork-ui/define/gw-page-header.ts";
+import "@timmo001/groundwork-ui/define/gw-setting-row.ts";
+import "@timmo001/groundwork-ui/define/gw-skeleton.ts";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 

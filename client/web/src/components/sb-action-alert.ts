@@ -1,4 +1,4 @@
-import "@timmo001/groundwork-ui/gw-alert.ts";
+import "@timmo001/groundwork-ui/define/gw-alert.ts";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { Atom } from "effect/reactivity";

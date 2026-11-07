@@ -9,8 +9,8 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-card.ts";
-import "@timmo001/groundwork-ui/gw-meter.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-meter.ts";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { diskMounts } from "~/lib/atoms";

@@ -20,9 +20,10 @@ import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
-import "@timmo001/groundwork-ui/gw-button.ts";
-import "@timmo001/groundwork-ui/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";

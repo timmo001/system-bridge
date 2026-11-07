@@ -8,7 +8,7 @@ import { registry } from "~/lib/atoms";
 import { exportHistory, historyModules } from "~/lib/history";
 import { moduleInfo } from "~/lib/navigation";
 
-import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import "@timmo001/groundwork-ui/define/gw-menu-button.ts";
 import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { menuCheck, menuValue } from "~/lib/select";
 

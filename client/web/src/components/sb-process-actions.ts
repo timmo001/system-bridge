@@ -3,7 +3,7 @@ import type { Process } from "@timmo001/effect-system-bridge";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-menu-button.ts";
+import "@timmo001/groundwork-ui/define/gw-menu-button.ts";
 import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";

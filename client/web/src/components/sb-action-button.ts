@@ -2,7 +2,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { AsyncResult, Atom } from "effect/reactivity";
 
-import "@timmo001/groundwork-ui/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-button.ts";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, type BridgeError, registry } from "~/lib/atoms";

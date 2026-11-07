@@ -13,8 +13,8 @@ import { Schema, Struct } from "effect";
 import { css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-card.ts";
-import "@timmo001/groundwork-ui/gw-select.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import { moduleInfo } from "~/lib/navigation";
 import { href } from "~/lib/router";

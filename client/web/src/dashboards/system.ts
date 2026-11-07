@@ -52,7 +52,7 @@ import "~/components/sb-action-button";
 import "~/components/sb-hyprland-events";
 import "~/components/sb-hyprland-tools";
 import "~/components/sb-hyprland-option";
-import "@timmo001/groundwork-ui/gw-select.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import "~/components/sb-system-power";
 import { dataTableColumns } from "~/components/sb-data-table";

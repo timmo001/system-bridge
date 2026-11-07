@@ -1,5 +1,8 @@
+import "@timmo001/groundwork-ui/define/gw-range.ts";
 import { GwRange } from "@timmo001/groundwork-ui/gw-range.ts";
+import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import { GwSegmented } from "@timmo001/groundwork-ui/gw-segmented.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
 import { Option, Schema } from "effect";
 

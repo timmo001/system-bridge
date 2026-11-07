@@ -12,7 +12,7 @@ import { registry } from "~/lib/atoms";
 import type { Series } from "~/lib/history";
 import { HistoryRange, historyRange } from "~/lib/preferences";
 
-import "@timmo001/groundwork-ui/gw-segmented.ts";
+import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";

@@ -4,7 +4,7 @@ import { Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import "@timmo001/groundwork-ui/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-card.ts";
 
 import { SbSettingsPage } from "./sb-settings-page";
 

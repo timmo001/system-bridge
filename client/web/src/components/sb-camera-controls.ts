@@ -3,10 +3,10 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import "@timmo001/groundwork-ui/gw-checkbox.ts";
-import "@timmo001/groundwork-ui/gw-range.ts";
-import "@timmo001/groundwork-ui/gw-select.ts";
-import "@timmo001/groundwork-ui/gw-setting-row.ts";
+import "@timmo001/groundwork-ui/define/gw-checkbox.ts";
+import "@timmo001/groundwork-ui/define/gw-range.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
+import "@timmo001/groundwork-ui/define/gw-setting-row.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
