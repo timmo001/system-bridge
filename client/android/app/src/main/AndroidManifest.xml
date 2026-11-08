@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   System Bridge's manifest: its activity with the share and deep link intent
-  filters, the Lock, Sleep, Keep awake, Mute and Play/pause tiles, the camera for scanning a pairing code,
+  filters, the Lock, Sleep, Keep awake, Mute, Play/pause and Send clipboard
+  tiles, the camera for scanning a pairing code,
   and the local network, which Android 17 gates for apps that target it and
   without which neither the computer's page nor the tiles can reach it. The
   shell's own manifest adds the internet and notifications. The app's push
@@ -115,6 +116,26 @@
         <action android:name="android.service.quicksettings.action.QS_TILE" />
       </intent-filter>
     </service>
+
+    <service
+      android:name=".ClipboardTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_clipboard"
+      android:label="@string/tile_clipboard"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+
+    <!-- Reads the clipboard for the tile, which only the app in front may -->
+    <activity
+      android:name=".SendClipboardActivity"
+      android:excludeFromRecents="true"
+      android:exported="false"
+      android:noHistory="true"
+      android:taskAffinity=""
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     <service
       android:name=".PlayPauseTileService"

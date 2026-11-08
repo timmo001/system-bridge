@@ -2,6 +2,7 @@
 // Run with: mise run generate:icons
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import {
+  mdiClipboardArrowUpOutline,
   mdiCoffee,
   mdiLockOutline,
   mdiPlayPause,
@@ -263,6 +264,10 @@ await write(`${android}/ic_tile_sleep.xml`, iconVector(mdiPowerSleep));
 await write(`${android}/ic_tile_keep_awake.xml`, iconVector(mdiCoffee));
 await write(`${android}/ic_tile_mute.xml`, iconVector(mdiVolumeOff));
 await write(`${android}/ic_tile_play_pause.xml`, iconVector(mdiPlayPause));
+await write(
+  `${android}/ic_tile_clipboard.xml`,
+  iconVector(mdiClipboardArrowUpOutline),
+);
 
 // The docs' header, banner and favicons. Their share cards and other brand
 // images come from `bun run brand` in docs/, which reads the same logo

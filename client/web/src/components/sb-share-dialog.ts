@@ -32,7 +32,8 @@ const sharedUrl = (share: Share): string | undefined => {
 
 /**
  * What to do with something shared from another app: open a link on the
- * computer, or put text on its clipboard. It opens while a share waits. In
+ * computer, or put text on its clipboard. It opens while a share waits, and
+ * plain text goes straight to the clipboard, so it only shows how that went. In
  * the app, with more than one computer paired, it says which one the share
  * is for, and sends it on to another when picked.
  */
@@ -58,9 +59,21 @@ export class SbShareDialog extends LitElement {
   @state() private computers: readonly Computer[] | undefined;
 
   protected override updated(): void {
-    if (!inApp || this.#share.value === null || this.computers !== undefined) {
-      return;
+    const share = this.#share.value;
+
+    if (share === null) return;
+
+    // Plain text goes straight to the computer's clipboard, and the dialog
+    // shows how it went; a link asks whether to open or copy it
+    if (
+      this.ran === undefined &&
+      sharedUrl(share) === undefined &&
+      (share.text ?? "") !== ""
+    ) {
+      this.#onCopy();
     }
+
+    if (!inApp || this.computers !== undefined) return;
 
     this.computers = [];
     void pairedComputers().then((computers) => {

@@ -12,6 +12,10 @@
   <string name="tile_keep_awake">Keep awake</string>
   <string name="tile_mute">Mute</string>
   <string name="tile_play_pause">Play/pause</string>
+  <string name="tile_clipboard">Send clipboard</string>
+  <string name="clipboard_empty">The clipboard is empty</string>
+  <string name="clipboard_no_computer">No computer to send it to</string>
+  <string name="clipboard_sent">Copied to %1$s</string>
   <string name="shortcut_removed">That computer was removed from the app</string>
   <string name="shortcut_share">Send to %1$s</string>
 </resources>
