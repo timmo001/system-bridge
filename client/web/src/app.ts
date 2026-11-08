@@ -160,10 +160,25 @@ export class SbApp extends LitElement {
         }
       }
 
+      /* The connection's status as a dot, sized like the icon buttons
+         beside it; its address is in its name and tooltip */
       .status {
-        display: inline-flex;
-        border-radius: var(--gw-radius-chip);
-        text-decoration: none;
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--gw-radius-pill);
+        transition: background-color var(--gw-motion-fast)
+          var(--gw-motion-easing);
+      }
+
+      .status:hover {
+        background: var(--gw-color-fill-neutral-hovered);
+      }
+
+      .status:focus-visible {
+        outline: var(--gw-focus-width) solid var(--gw-color-focus);
+        outline-offset: var(--gw-focus-offset);
       }
 
       main {
@@ -178,8 +193,7 @@ export class SbApp extends LitElement {
       }
 
       @media (max-width: 40rem) {
-        .brand span,
-        .status .label {
+        .brand span {
           display: none;
         }
       }
@@ -232,21 +246,19 @@ export class SbApp extends LitElement {
     const { host, port } = this.#settings.value;
 
     const [kind, label] = isConnected
-      ? ["success", `${host}:${port}`]
+      ? ["success", `Connected to ${host}:${port}`]
       : error === null
-        ? ["warning", "Connecting"]
-        : ["danger", "Disconnected"];
+        ? ["warning", `Connecting to ${host}:${port}`]
+        : ["danger", `Not connected: ${error}`];
 
     return html`
       <a
         class="status"
         href=${href("connection")}
-        title=${error ?? (isConnected ? `Connected to ${host}:${port}` : "")}
+        title=${label}
+        aria-label=${`${label}. Connection settings`}
       >
-        <gw-chip size="small" tone=${kind}
-          ><gw-dot slot="icon" tone=${kind}></gw-dot
-          ><span class="label">${label}</span></gw-chip
-        >
+        <gw-dot tone=${kind}></gw-dot>
       </a>
     `;
   }
