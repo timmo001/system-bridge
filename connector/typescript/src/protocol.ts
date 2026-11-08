@@ -404,7 +404,7 @@ export const Notification = Schema.Struct({
   sound: Schema.optionalKey(Schema.String),
   /** Critical ones stay until dismissed. Linux only. */
   urgency: Schema.optionalKey(Schema.Literals(["low", "normal", "critical"])),
-  /** Up to 3 buttons. Linux only. */
+  /** Up to 3 buttons. Linux and Windows only. */
   buttons: Schema.optionalKey(Schema.Array(NotificationButton)),
 });
 

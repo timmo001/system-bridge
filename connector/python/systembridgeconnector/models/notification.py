@@ -50,7 +50,7 @@ class Notification:
     sound: str | None = None
     # low, normal or critical. Critical ones stay until dismissed. Linux only.
     urgency: str | None = None
-    # Up to 3 buttons. Linux only.
+    # Up to 3 buttons. Linux and Windows only.
     buttons: list[NotificationButton] | None = None
 
     def __post_init__(self):

@@ -466,7 +466,7 @@ Available fields:
 - `actionPath` (optional): A file or folder path to open when the notification is clicked.
 - `sound` (optional): Path to a sound file to play with the notification.
 - `urgency` (optional): `low`, `normal` or `critical`. Critical notifications stay until they're dismissed. Linux only.
-- `buttons` (optional): Up to 3 buttons, each with an `id` and a `label`. The `id` can be anything but `default`. Linux only.
+- `buttons` (optional): Up to 3 buttons, each with an `id` and a `label`. The `id` can be anything but `default`. Linux and Windows only.
 
 The response type is `NOTIFICATION_SENT`, and its data is what was sent with the notification's `id` added. Use the `id` to dismiss it, and to match the events about it. It's `0` where the notification can't be followed, such as on Windows.
 
