@@ -5,6 +5,7 @@ import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import {
   mdiBookOpenVariant,
+  mdiDevices,
   mdiMagnify,
   mdiPaletteOutline,
   mdiServerNetwork,
@@ -302,6 +303,15 @@ export class SbApp extends LitElement {
         ></gw-command-menu>
         <span slot="actions">${this.#renderStatus()}</span>
         ${this.#renderComputers()}
+        <gw-button
+          slot="actions"
+          variant="neutral"
+          appearance="plain"
+          labels="hide"
+          icon=${mdiDevices}
+          href=${href("settingsDevices")}
+          >Devices</gw-button
+        >
         <gw-button
           slot="actions"
           variant="neutral"
