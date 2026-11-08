@@ -66,6 +66,7 @@ from systembridgeconnector.models.modules.disks import (
 )
 from systembridgeconnector.models.notification import (
     Notification,
+    NotificationButton,
     NotificationDismissRequest,
     NotificationEvent,
 )
@@ -484,7 +485,12 @@ async def test_listen_notification_events(
     async def notification_event_callback(event: NotificationEvent) -> None:
         received.append(event)
 
-    sent = {"id": 7, "title": "Title", "message": "Message"}
+    sent = {
+        "id": 7,
+        "title": "Title",
+        "message": "Message",
+        "buttons": [{"id": "snooze", "label": "Snooze"}],
+    }
     future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
     mock_websocket_client_connected._responses[REQUEST_ID] = (  # noqa: SLF001
         future,
@@ -513,7 +519,7 @@ async def test_listen_notification_events(
                     "id": "system",
                     "type": EventType.NOTIFICATION_ACTION,
                     "subtype": EventSubType.NONE,
-                    "data": {"id": 7, "action": "default"},
+                    "data": {"id": 7, "action": "snooze"},
                 },
                 {
                     "id": "system",
@@ -532,8 +538,13 @@ async def test_listen_notification_events(
 
     assert future.result().data == sent
     assert received == [
-        NotificationEvent(id=7, title="Title", message="Message"),
-        NotificationEvent(id=7, action="default"),
+        NotificationEvent(
+            id=7,
+            title="Title",
+            message="Message",
+            buttons=[NotificationButton(id="snooze", label="Snooze")],
+        ),
+        NotificationEvent(id=7, action="snooze"),
         NotificationEvent(id=7, reason="dismissed"),
     ]
 

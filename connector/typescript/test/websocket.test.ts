@@ -199,7 +199,12 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           id: "system",
           type: "NOTIFICATION_SENT",
           subtype: "NONE",
-          data: { id: 7, title: "Title", message: "Message" },
+          data: {
+            id: 7,
+            title: "Title",
+            message: "Message",
+            buttons: [{ id: "snooze", label: "Snooze" }],
+          },
         },
         {
           id: "system",
@@ -334,7 +339,12 @@ describe("SystemBridgeWebSocket", () => {
 
     expect(id).toBe(7);
     expect(events).toEqual([
-      { id: 7, title: "Title", message: "Message" },
+      {
+        id: 7,
+        title: "Title",
+        message: "Message",
+        buttons: [{ id: "snooze", label: "Snooze" }],
+      },
       { id: 7, reason: "dismissed" },
     ]);
   });

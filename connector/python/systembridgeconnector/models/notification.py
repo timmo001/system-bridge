@@ -152,7 +152,8 @@ class NotificationEvent:
     action is the button's id, or default for the notification itself, and is
     None when it was sent or closed. reason is expired, dismissed or closed,
     and is None when it was sent or clicked. A sent one has neither, and has
-    its title and message instead. Its id is 0 where it can't be followed.
+    its title, message and buttons instead. Its id is 0 where it can't be
+    followed.
     """
 
     id: int
@@ -160,3 +161,12 @@ class NotificationEvent:
     reason: str | None = None
     title: str | None = None
     message: str | None = None
+    buttons: list[NotificationButton] | None = None
+
+    def __post_init__(self):
+        """Post init."""
+        if isinstance(self.buttons, list):
+            self.buttons = [
+                NotificationButton(**cast(dict, b)) if isinstance(b, dict) else b
+                for b in self.buttons
+            ]

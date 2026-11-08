@@ -434,6 +434,8 @@ export const NotificationEvent = Schema.Struct({
   /** What was sent. Only when it was sent. */
   title: Schema.optionalKey(Schema.String),
   message: Schema.optionalKey(Schema.String),
+  /** Its buttons, to find a clicked one's label by its `action`. Only when it was sent. */
+  buttons: Schema.optionalKey(Schema.Array(NotificationButton)),
 });
 
 export interface NotificationEvent extends Schema.Schema.Type<

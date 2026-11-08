@@ -1661,6 +1661,7 @@ class WebSocketClient(Base):
                         reason=data.get("reason"),
                         title=data.get("title"),
                         message=data.get("message"),
+                        buttons=data.get("buttons"),
                     )
                 )
             elif (
