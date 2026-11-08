@@ -479,6 +479,11 @@ export const open = Atom.fn((target: OpenTarget, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.open(target))),
 );
 
+/** Puts text on the computer's clipboard. */
+export const setClipboard = Atom.fn((text: string, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.setClipboard({ text }))),
+);
+
 /** Sets an audio device's volume or mute, or makes it the default, one atom per device. */
 export const audioControl = Atom.family((id: string) =>
   Atom.fn((control: Omit<AudioControl, "id">, get) =>

@@ -8,6 +8,7 @@ import { css, html, LitElement } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
 import "./styles/tokens.css";
+import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
 import { connectionSettings, connectionStatus } from "./lib/atoms";
@@ -16,6 +17,8 @@ import { type NavItem, navigation } from "./lib/navigation";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
+// Connects to the Android app's shell, or the PWA's pieces outside it
+import "./lib/mobile";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
@@ -261,6 +264,7 @@ export class SbApp extends LitElement {
         >
       </gw-app-bar>
       <main>${renderPage(location)}</main>
+      <sb-share-dialog></sb-share-dialog>
     `;
   }
 }
