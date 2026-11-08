@@ -80,6 +80,11 @@
       "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
       "hash": "03a8a7b60320d958abf1b611284e3f385e50c9da0fff52a2e4d75cd3d8512e9f"
     },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Shortcuts.kt": {
+      "item": "android-shell",
+      "sha": "295d5c101a125ebd7a9fa190ee14868dbfab9140",
+      "hash": "6307345134e2b3954b63b5d9afe54b2ae7cf450fd87ae94d4072fc2c7be7d9f9"
+    },
     "client/android/shell/src/main/res/drawable/gw_notification_icon.xml": {
       "item": "android-shell",
       "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
