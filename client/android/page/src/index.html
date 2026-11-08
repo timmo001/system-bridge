@@ -1,8 +1,9 @@
 <!doctype html>
 <!--
-  The pairing page, bundled into the app: scan a computer's pairing code,
-  pick one found on the network, or enter one by hand. Once one is paired,
-  the app opens its own web client instead.
+  The computers page, bundled into the app: the paired computers, to open,
+  edit or remove, then three ways to add one: scan a computer's pairing
+  code, pick one found on the network, or enter one by hand. Once one is
+  paired, the app opens its own web client instead.
 -->
 <html lang="en" data-gw-theme="bridge">
   <head>
@@ -37,6 +38,17 @@
       >
         <gw-button class="allow" appearance="filled">Allow</gw-button>
       </gw-card>
+
+      <gw-card
+        id="paired"
+        hidden
+        heading="Your computers"
+        description="Tap one to open it."
+      >
+        <div class="list" role="list"></div>
+      </gw-card>
+
+      <h2 class="section">Add a computer</h2>
 
       <gw-card
         heading="Scan the QR code"
@@ -87,11 +99,52 @@
           <p class="error manual-error" role="alert"></p>
         </form>
       </gw-card>
-
-      <gw-card id="paired" hidden heading="Paired computers">
-        <div class="list"></div>
-      </gw-card>
     </main>
+
+    <gw-dialog id="edit" heading="Edit computer">
+      <form class="edit">
+        <gw-input
+          name="name"
+          label="Name"
+          autocomplete="off"
+          required
+        ></gw-input>
+        <gw-input
+          name="host"
+          label="Host"
+          placeholder="192.168.1.5 or desk.local"
+          autocomplete="off"
+          required
+        ></gw-input>
+        <gw-input
+          name="port"
+          label="Port"
+          inputmode="numeric"
+          required
+        ></gw-input>
+        <gw-switch name="https" label="HTTPS"></gw-switch>
+        <gw-input
+          name="token"
+          label="API token"
+          hint="Leave empty to keep the one it has."
+          optional
+          type="password"
+          monospace
+          reveal
+        ></gw-input>
+        <p class="error edit-error" role="alert"></p>
+      </form>
+      <gw-button slot="actions" value="" appearance="plain">Cancel</gw-button>
+      <gw-button slot="actions" class="save">Save</gw-button>
+    </gw-dialog>
+
+    <gw-dialog id="remove" heading="Remove computer">
+      <p class="remove-text"></p>
+      <gw-button slot="actions" value="" appearance="plain">Cancel</gw-button>
+      <gw-button slot="actions" class="confirm" variant="danger"
+        >Remove</gw-button
+      >
+    </gw-dialog>
     <script type="module" src="index.js"></script>
   </body>
 </html>

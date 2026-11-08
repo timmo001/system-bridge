@@ -1,8 +1,8 @@
 /**
  * System Bridge's activity: the shell, opening the paired computer's own web
- * client, or the bundled pairing page when there's none yet. The app's own
- * requests pair, add, switch and forget computers, for the pairing page and
- * the web client's computer menu.
+ * client, or the bundled computers page when there's none yet. The app's
+ * own requests pair, add, switch, edit and forget computers, for that page,
+ * which the web client's Computers button opens.
  */
 package dev.timmo.systembridge
 
@@ -198,6 +198,45 @@ class MainActivity : ShellActivity() {
 
         reply.ok(moved?.url)
         if (moved != null) refreshOrigins()
+      }
+    }
+
+    // A paired computer edited on the computers page: its name, and maybe a
+    // new address or token, which must reach the same computer before
+    // they're kept. A blank token keeps the one it has
+    bridge.handle("editServer") { request, reply ->
+      val params = request.paramsObject
+      val server = Servers.all(this).find { it.id == params.getString("id") }
+
+      if (server == null) {
+        reply.error("That computer isn't paired")
+        return@handle
+      }
+
+      val name = params.optString("name").trim().ifEmpty { server.name }
+      val url = Servers.baseUrl(params.optString("url").ifEmpty { server.url })
+      val token = params.optString("token").trim().ifEmpty { server.token }
+
+      if (url == server.url && token == server.token) {
+        Servers.update(this, server.copy(name = name))
+        reply.ok(true)
+        return@handle
+      }
+
+      Api.check(url, token) { result ->
+        result.fold(
+          { checked ->
+            if (checked.id != server.id) {
+              reply.error("A different computer answered at $url")
+            } else {
+              Servers.update(this, server.copy(name = name, url = url, token = token))
+              reply.ok(true)
+              // Stays on the computers page, with the new origin allowed
+              refreshOrigins(webView.url ?: pairingUrl)
+            }
+          },
+          { reply.error(it.message ?: "Couldn't reach the computer") },
+        )
       }
     }
 

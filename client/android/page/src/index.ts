@@ -18,7 +18,7 @@ import {
   themeOptions as pickerOptions,
   type ThemeMode,
 } from "@timmo001/groundwork-tokens/page";
-import { on } from "@timmo001/groundwork-ui";
+import { GwDialog, on } from "@timmo001/groundwork-ui";
 import { Schema } from "effect";
 
 import mobileConfig from "../mobile.config.ts";
@@ -105,9 +105,9 @@ const attempt = async (shown: HTMLElement, run: () => Promise<void>) => {
   }
 };
 
-/** One of the form's native fields, inside its Groundwork component. */
-const field = (name: string) => {
-  const input = manual.elements.namedItem(name);
+/** One of a form's native fields, inside its Groundwork component. */
+const fieldOf = (form: HTMLFormElement, name: string) => {
+  const input = form.elements.namedItem(name);
 
   if (!(input instanceof HTMLInputElement)) {
     throw new Error(`The form has no ${name}`);
@@ -115,6 +115,8 @@ const field = (name: string) => {
 
   return input;
 };
+
+const field = (name: string) => fieldOf(manual, name);
 
 /**
  * Asks for local network access where Android gates it, showing why it's
@@ -159,26 +161,133 @@ const open = async (id: string) => {
     await mobile.call("selectServer", Schema.Boolean, { id });
 };
 
+type Computer = (typeof Computers.Type)[number];
+
+// mdi's dots-vertical, pencil and delete, copied in rather than adding
+// @mdi/js to the page for three icons
+const icons = {
+  more: "M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z",
+  edit: "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z",
+  remove:
+    "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z",
+};
+
+const editDialog = find("#edit", GwDialog);
+const editForm = find("form.edit", HTMLFormElement);
+const editError = find(".edit-error", HTMLElement);
+const removeDialog = find("#remove", GwDialog);
+
+/** The computer the open dialog is about. */
+let chosen: Computer | undefined;
+
+const showEdit = (computer: Computer) => {
+  const url = new URL(computer.url);
+
+  chosen = computer;
+  editError.textContent = "";
+  fieldOf(editForm, "name").value = computer.name;
+  fieldOf(editForm, "host").value = url.hostname.replace(/^\[|\]$/g, "");
+  fieldOf(editForm, "port").value =
+    url.port || (url.protocol === "https:" ? "443" : "80");
+  fieldOf(editForm, "https").checked = url.protocol === "https:";
+  fieldOf(editForm, "token").value = "";
+  editDialog.show();
+};
+
+const showRemove = (computer: Computer) => {
+  chosen = computer;
+  find(".remove-text", HTMLElement).textContent =
+    `The app forgets ${computer.name} and stops getting its pushes. You can pair it again at any time.`;
+  removeDialog.show();
+};
+
+/** A paired computer's row: tap it to open, ⋮ to edit or remove it. */
+const computerRow = (computer: Computer) => {
+  const item = document.createElement("div");
+  const opener = document.createElement("button");
+  const name = document.createElement("span");
+  const url = document.createElement("span");
+  const menu = document.createElement("gw-menu-button");
+
+  item.className = "computer";
+  item.setAttribute("role", "listitem");
+  opener.type = "button";
+  opener.className = "open";
+  name.className = "name";
+  name.textContent = computer.name;
+  url.className = "url";
+  url.textContent = computer.url;
+  opener.append(name, url);
+  opener.addEventListener("click", () => void open(computer.id));
+
+  if (computer.current) {
+    const chip = document.createElement("gw-chip");
+
+    chip.setAttribute("size", "small");
+    chip.textContent = "Current";
+    name.append(" ", chip);
+  }
+
+  menu.setAttribute("appearance", "plain");
+  menu.setAttribute("labels", "hide");
+  menu.setAttribute("label", `More for ${computer.name}`);
+  menu.setAttribute("icon", icons.more);
+  menu.items = [
+    { value: "edit", label: "Edit", icon: icons.edit },
+    { value: "remove", label: "Remove", icon: icons.remove },
+  ];
+  on(menu, "select", (event) => {
+    if (event.detail.value === "edit") showEdit(computer);
+    else if (event.detail.value === "remove") showRemove(computer);
+  });
+
+  item.append(opener, menu);
+
+  return item;
+};
+
 const renderPaired = async () => {
   const computers = mobile.shell ? await mobile.call("servers", Computers) : [];
-  const list = find("#paired .list", HTMLElement);
 
   paired.hidden = computers.length === 0;
-  list.replaceChildren(
-    ...computers.map((computer) =>
-      row(computer.name, computer.url, [
-        button("Open", () => void open(computer.id), "filled"),
-        button("Remove", () => {
-          void mobile
-            .call("removeServer", Schema.Boolean, { id: computer.id })
-            .then(renderPaired);
-        }),
-      ]),
-    ),
+  find("#paired .list", HTMLElement).replaceChildren(
+    ...computers.map(computerRow),
   );
 
   return computers;
 };
+
+find("#edit gw-button.save", HTMLElement).addEventListener("click", () => {
+  const computer = chosen;
+
+  if (computer === undefined || !editForm.reportValidity()) return;
+
+  void attempt(editError, async () => {
+    const scheme = fieldOf(editForm, "https").checked ? "https" : "http";
+    const host = fieldOf(editForm, "host").value.trim();
+
+    await mobile.call("editServer", Schema.Boolean, {
+      id: computer.id,
+      name: fieldOf(editForm, "name").value.trim(),
+      url: `${scheme}://${host.includes(":") ? `[${host}]` : host}:${fieldOf(editForm, "port").value.trim()}/`,
+      token: fieldOf(editForm, "token").value.trim(),
+    });
+    editDialog.close();
+    await renderPaired();
+  });
+});
+
+find("#remove gw-button.confirm", HTMLElement).addEventListener("click", () => {
+  const computer = chosen;
+
+  removeDialog.close();
+
+  if (computer !== undefined) {
+    void mobile
+      .call("removeServer", Schema.Boolean, { id: computer.id })
+      .then(renderPaired);
+  }
+});
 
 /** Fills the form with a computer found on the network. */
 const fill = (service: DiscoveredService) => {

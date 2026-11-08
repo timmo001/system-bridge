@@ -53,6 +53,11 @@ object Servers {
     write(context, all(context).filter { it.id != server.id } + server, server.id)
   }
 
+  /** Changes a paired computer in its place, keeping which one is current. */
+  fun update(context: Context, server: Server) {
+    write(context, all(context).map { if (it.id == server.id) server else it }, current(context)?.id)
+  }
+
   /** Moves a paired computer to a new address, such as after its IP changed. */
   fun move(context: Context, id: String, url: String): Server? {
     val moved = all(context).find { it.id == id }?.copy(url = baseUrl(url)) ?: return null
