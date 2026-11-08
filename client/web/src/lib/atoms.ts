@@ -19,6 +19,7 @@ import {
   ModuleDataUpdate,
   type ModulesData,
   type Notification,
+  type NotificationEvent,
   type OmarchyAction,
   type OpenTarget,
   type Settings,
@@ -765,6 +766,92 @@ export const hyprlandEvents = Atom.make((get) =>
                 0,
                 HYPRLAND_EVENTS_KEPT,
               ),
+          ),
+        ),
+      ),
+    ),
+  ),
+).pipe(Atom.keepAlive);
+
+/** Something that happened to a notification System Bridge sent. */
+export type NotificationHappening =
+  | { readonly _tag: "Sent" }
+  | { readonly _tag: "Clicked"; readonly action: string }
+  | { readonly _tag: "Closed"; readonly reason: string };
+
+/** A notification sent while the page was open, and what happened to it. */
+export interface FollowedNotification {
+  readonly id: number;
+  readonly title: string;
+  readonly message: string;
+  /** Oldest first. */
+  readonly happened: readonly NotificationHappening[];
+  readonly updated: number;
+}
+
+const NOTIFICATIONS_KEPT = 20;
+
+const happening = (event: NotificationEvent): NotificationHappening => {
+  if (event.action !== undefined) {
+    return { _tag: "Clicked", action: event.action };
+  }
+
+  if (event.reason !== undefined) {
+    return { _tag: "Closed", reason: event.reason };
+  }
+
+  return { _tag: "Sent" };
+};
+
+const followNotification = (
+  notifications: readonly FollowedNotification[],
+  event: NotificationEvent,
+): readonly FollowedNotification[] => {
+  const happened = happening(event);
+  const updated = Date.now();
+
+  if (happened._tag === "Sent") {
+    return [
+      {
+        id: event.id,
+        title: event.title ?? "",
+        message: event.message ?? "",
+        happened: [happened],
+        updated,
+      },
+      ...notifications,
+    ].slice(0, NOTIFICATIONS_KEPT);
+  }
+
+  // One sent before the page opened, or with an id of 0, can't be matched.
+  // The daemon can reuse ids, so it's the newest with this one.
+  const index = notifications.findIndex(
+    (notification) => notification.id !== 0 && notification.id === event.id,
+  );
+
+  return notifications.map((notification, at) =>
+    at === index
+      ? {
+          ...notification,
+          happened: [...notification.happened, happened],
+          updated,
+        }
+      : notification,
+  );
+};
+
+/**
+ * The notifications System Bridge sent while the page was open, whoever sent
+ * them, and what happened to each, newest first.
+ */
+export const recentNotifications = Atom.make((get) =>
+  Stream.unwrap(
+    socket(get).pipe(
+      Effect.map((bridge) =>
+        bridge.notificationEvents.pipe(
+          Stream.scan(
+            (): readonly FollowedNotification[] => [],
+            followNotification,
           ),
         ),
       ),

@@ -6,6 +6,7 @@ import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
+import "~/components/sb-recent-notifications";
 import { selectValue } from "~/lib/select";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, registry, sendNotification } from "~/lib/atoms";
@@ -218,7 +219,15 @@ export class PageNotifications extends SbPage {
           actionResult(this.#send.value, "The notification was sent."),
         )}
         ${this.gate(
-          () => this.#renderForm(),
+          () =>
+            html`${this.#renderForm()}
+              <gw-card
+                level=${this.cardLevel}
+                heading="Recent notifications"
+                description="Sent while this page was open, from anywhere"
+              >
+                <sb-recent-notifications></sb-recent-notifications>
+              </gw-card>`,
           html`<gw-skeleton
             style="min-height: 30rem; border-radius: var(--gw-radius-l)"
           ></gw-skeleton>`,
