@@ -1,9 +1,9 @@
 ---
 # Builds the Android app, so it and the synced Groundwork shell keep building
-# with the pinned SDK, JDK and Gradle. On a stable release it signs the APK
-# with the shared Groundwork key, attaches it to the release, and adds it to
-# the shared F-Droid repository on R2. Without the signing or R2 secrets, the
-# release steps say so and skip.
+# with the pinned SDK, JDK and Gradle. On a stable release the shared
+# publish-android-release workflow signs the APK with the shared Groundwork
+# key, attaches it to the release, and adds it to the shared F-Droid
+# repository on R2. Without the signing or R2 secrets, it says so and skips.
 name: Android
 
 # yamllint disable-line rule:truthy
@@ -23,7 +23,12 @@ on:
       - .github/workflows/android.yml
       - bun.lock
       - client/android/**
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: "Publish the Android app for this existing stable release, such as one whose Android job failed"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -69,105 +74,33 @@ jobs:
           path: client/android/app/build/outputs/apk/
           if-no-files-found: error
 
+  # Stable releases only, as with PyPI and npm, or a release tag given by hand
+  # to publish one again, such as one whose release job failed
   release:
     name: Release
-    # Stable releases only, as with PyPI and npm
-    if: github.event_name == 'release' && !github.event.release.prerelease
-    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'release' && !github.event.release.prerelease) ||
+      (github.event_name == 'workflow_dispatch' && inputs.release-tag != '')
     permissions:
       contents: write
-    env:
+    uses: timmo001/workflows/.github/workflows/publish-android-release.yml@8093949b6c3d684adde3812ddcfd96c6ef77f4b6 # 20261108.0
+    with:
+      release-tag: ${{ github.event.release.tag_name || inputs.release-tag }}
+      working-directory: client/android
+      mise-install-args: bun android-sdk java gradle
+      setup-command: |
+        android --no-metrics sdk install platform-tools "platforms/$ANDROID_API" build-tools/37.0.0
+        bun install --frozen-lockfile --cwd "$GITHUB_WORKSPACE" --filter ./client/android/page
+      build-command: mise run app:build
+      apk-path: client/android/app/build/outputs/apk/release/app-release.apk
+      asset-name: system-bridge
+      fdroid-directory: client/android/fdroid
+    secrets:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      APP_VERSION: ${{ github.event.release.tag_name }}
-      GH_TOKEN: ${{ github.token }}
-      TAG: ${{ github.event.release.tag_name }}
-    steps:
-      - name: Write the signing key
-        id: key
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "::notice::No ANDROID_KEYSTORE_BASE64 secret, so no signed APK or F-Droid repository for this release"
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-          echo "signed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout code
-        if: steps.key.outputs.signed == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Set up mise
-        if: steps.key.outputs.signed == 'true'
-        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
-        with:
-          working_directory: client/android
-          install_args: bun android-sdk java gradle python uv pipx:fdroidserver pipx:awscli
-
-      - name: Install the SDK packages
-        if: steps.key.outputs.signed == 'true'
-        working-directory: client/android
-        run: android --no-metrics sdk install platform-tools "platforms/$ANDROID_API" build-tools/37.0.0
-
-      - name: Install dependencies
-        if: steps.key.outputs.signed == 'true'
-        run: bun install --frozen-lockfile --filter ./client/android/page
-
-      - name: Build the signed APK
-        if: steps.key.outputs.signed == 'true'
-        working-directory: client/android
-        run: mise run app:build
-
-      - name: Attach the APK to the release
-        if: steps.key.outputs.signed == 'true'
-        run: |
-          cp client/android/app/build/outputs/apk/release/app-release.apk "system-bridge-$TAG.apk"
-          gh release upload "$TAG" "system-bridge-$TAG.apk" --clobber
-
-      # The F-Droid repository at android.timmo.dev is shared with Groundwork's
-      # apps, so this pulls its current state from R2, adds this release's APK
-      # and listing, re-signs the index and pushes it back. Without the R2
-      # secrets it's skipped.
-      - name: Check for the R2 secrets
-        id: r2
-        if: steps.key.outputs.signed == 'true'
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-        run: |
-          if [ -z "$R2_ACCESS_KEY_ID" ]; then
-            echo "::notice::No R2 secrets, so the F-Droid repository isn't updated for this release"
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Update the F-Droid repository
-        if: steps.r2.outputs.publish == 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-        run: |
-          dir="$RUNNER_TEMP/fdroid"
-          mkdir -p "$dir/repo" "$dir/metadata"
-          aws s3 sync "s3://$R2_BUCKET/repo/" "$dir/repo/" --endpoint-url "$R2_ENDPOINT" --no-progress
-          aws s3 sync "s3://$R2_BUCKET/metadata/" "$dir/metadata/" --endpoint-url "$R2_ENDPOINT" --no-progress
-          cp -r client/android/fdroid/. "$dir/"
-          cp "system-bridge-$TAG.apk" "$dir/repo/"
-          cd "$dir"
-          chmod 600 config.yml
-          fdroid update --pretty
-          aws s3 sync repo/ "s3://$R2_BUCKET/repo/" --endpoint-url "$R2_ENDPOINT" --no-progress \
-            --exclude '*' --include '*.apk' \
-            --cache-control "public, max-age=31536000, immutable"
-          aws s3 sync repo/ "s3://$R2_BUCKET/repo/" --endpoint-url "$R2_ENDPOINT" --no-progress \
-            --exclude '*.apk' \
-            --cache-control "public, max-age=60, must-revalidate"
-          aws s3 sync metadata/ "s3://$R2_BUCKET/metadata/" --endpoint-url "$R2_ENDPOINT" --no-progress
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
