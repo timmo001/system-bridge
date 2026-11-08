@@ -5,24 +5,40 @@ import { customElement } from "lit/decorators.js";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { dashboardStyles } from "~/dashboards/shared";
-import { type NotificationHappening, recentNotifications } from "~/lib/atoms";
+import {
+  type FollowedNotification,
+  type NotificationHappening,
+  recentNotifications,
+} from "~/lib/atoms";
 import { formatDateTime } from "~/lib/format";
 
-const describe = (happened: NotificationHappening): string => {
+/** A clicked button by its label, or its id when it has none. */
+const buttonLabel = (
+  notification: FollowedNotification,
+  action: string,
+): string =>
+  notification.buttons.find((button) => button.id === action)?.label ?? action;
+
+const describe = (
+  notification: FollowedNotification,
+  happened: NotificationHappening,
+): string => {
   switch (happened._tag) {
     case "Sent":
       return "sent";
     case "Clicked":
       return happened.action === "default"
         ? "clicked the notification"
-        : `clicked ${happened.action}`;
+        : `clicked ${buttonLabel(notification, happened.action)}`;
     case "Closed":
       return `closed (${happened.reason})`;
   }
 };
 
-const describeAll = (happened: readonly NotificationHappening[]): string => {
-  const text = happened.map(describe).join(", ");
+const describeAll = (notification: FollowedNotification): string => {
+  const text = notification.happened
+    .map((happened) => describe(notification, happened))
+    .join(", ");
 
   return `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 };
@@ -68,9 +84,7 @@ export class SbRecentNotifications extends LitElement {
           <div class="details spacer">
             <strong class="break">${notification.title}</strong>
             <span class="small break">${notification.message}</span>
-            <span class="muted xsmall">
-              ${describeAll(notification.happened)}
-            </span>
+            <span class="muted xsmall"> ${describeAll(notification)} </span>
           </div>
           <span class="muted xsmall">
             ${formatDateTime(notification.updated)}

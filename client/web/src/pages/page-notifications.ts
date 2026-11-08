@@ -1,4 +1,4 @@
-import { mdiBellOutline, mdiSend } from "@mdi/js";
+import { mdiBellOutline, mdiClose, mdiPlus, mdiSend } from "@mdi/js";
 import { Notification } from "@timmo001/effect-system-bridge";
 import { Option, Schema } from "effect";
 import { html } from "lit";
@@ -82,6 +82,38 @@ const urgencyOptions: readonly Segment[] = [
 
 const decodeNotification = Schema.decodeUnknownOption(Notification);
 
+interface ButtonForm {
+  readonly id: string;
+  readonly label: string;
+}
+
+/** As many buttons as notification daemons show. */
+const MAX_BUTTONS = 3;
+
+/** Why a button's id can't be used, if it can't. */
+const buttonIdError = (
+  buttons: readonly ButtonForm[],
+  index: number,
+): string => {
+  const id = buttons[index]?.id.trim() ?? "";
+
+  if (id === "default") {
+    return "default is clicking the notification itself.";
+  }
+
+  if (
+    id !== "" &&
+    buttons.findIndex((button) => button.id.trim() === id) !== index
+  ) {
+    return "Another button has this id.";
+  }
+
+  return "";
+};
+
+/** Button fields are named button-<index>-<id or label>. */
+const buttonField = /^button-(\d+)-(id|label)$/;
+
 const isFieldKey = (name: string): name is FieldKey =>
   fields.some((field) => field.key === name);
 
@@ -95,24 +127,58 @@ export class PageNotifications extends SbPage {
   /** Sent only when it isn't normal, which is the default. */
   @state() private urgency = "normal";
 
+  @state() private buttons: readonly ButtonForm[] = [];
+
   protected readonly pageTitle = "Notifications";
 
   /** Fields are named after their key in the form. */
   #onInput = (event: InputEvent) => {
     const target = event.target;
 
-    if (
-      (target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement) &&
-      isFieldKey(target.name)
-    ) {
+    if (!(
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement
+    )) {
+      return;
+    }
+
+    if (isFieldKey(target.name)) {
       this.form = { ...this.form, [target.name]: target.value };
+
+      return;
+    }
+
+    const button = buttonField.exec(target.name);
+
+    if (button !== null) {
+      const index = Number(button[1]);
+      const key = button[2] === "id" ? "id" : "label";
+
+      this.buttons = this.buttons.map((current, at) =>
+        at === index ? { ...current, [key]: target.value } : current,
+      );
+    }
+  };
+
+  #addButton = () => {
+    this.buttons = [...this.buttons, { id: "", label: "" }];
+  };
+
+  /** Remove buttons carry their row's index. */
+  #removeButton = (event: Event) => {
+    const target = event.currentTarget;
+
+    if (target instanceof HTMLElement) {
+      const index = Number(target.dataset.index);
+
+      this.buttons = this.buttons.filter((_, at) => at !== index);
     }
   };
 
   #clear = () => {
     this.form = emptyForm;
     this.urgency = "normal";
+    this.buttons = [];
   };
 
   #onUrgency = (event: Event) => {
@@ -132,8 +198,23 @@ export class PageNotifications extends SbPage {
     const urgency =
       this.urgency === "normal" ? [] : [["urgency", this.urgency] as const];
 
+    const buttons =
+      this.buttons.length === 0
+        ? []
+        : [
+            [
+              "buttons",
+              this.buttons.map((button) => ({
+                id: button.id.trim(),
+                label: button.label.trim(),
+              })),
+            ] as const,
+          ];
+
     Option.match(
-      decodeNotification(Object.fromEntries([...filled, ...urgency])),
+      decodeNotification(
+        Object.fromEntries([...filled, ...urgency, ...buttons]),
+      ),
       {
         onNone: () => undefined,
         onSome: (notification) => registry.set(sendNotification, notification),
@@ -159,11 +240,75 @@ export class PageNotifications extends SbPage {
     `;
   }
 
+  #renderButtons(sending: boolean) {
+    const rows = this.buttons.map(
+      (button, index) => html`
+        <div class="row" style="align-items: flex-start">
+          <gw-input
+            class="spacer"
+            label="Button ${index + 1} id"
+            name="button-${index}-id"
+            placeholder="snooze"
+            monospace
+            required
+            error=${buttonIdError(this.buttons, index)}
+            ?disabled=${sending}
+            .value=${button.id}
+            @input=${this.#onInput}
+          ></gw-input>
+          <gw-input
+            class="spacer"
+            label="Label"
+            name="button-${index}-label"
+            placeholder="Snooze"
+            required
+            ?disabled=${sending}
+            .value=${button.label}
+            @input=${this.#onInput}
+          ></gw-input>
+          <gw-button
+            variant="neutral"
+            appearance="plain"
+            icon=${mdiClose}
+            data-index=${index}
+            ?disabled=${sending}
+            @click=${this.#removeButton}
+            >Remove</gw-button
+          >
+        </div>
+      `,
+    );
+
+    return html`
+      <gw-setting-row
+        heading="Buttons"
+        description="Up to ${MAX_BUTTONS}, each with an id and a label. The id can't be default. Linux and Windows only."
+      >
+        <gw-button
+          appearance="plain"
+          size="small"
+          icon=${mdiPlus}
+          ?disabled=${sending || this.buttons.length >= MAX_BUTTONS}
+          @click=${this.#addButton}
+          >Add</gw-button
+        >
+      </gw-setting-row>
+      ${rows}
+    `;
+  }
+
   #renderForm() {
     const sending = this.#send.value.waiting;
 
     const ready =
-      this.form.title.trim() !== "" && this.form.message.trim() !== "";
+      this.form.title.trim() !== "" &&
+      this.form.message.trim() !== "" &&
+      this.buttons.every(
+        (button, index) =>
+          button.id.trim() !== "" &&
+          button.label.trim() !== "" &&
+          buttonIdError(this.buttons, index) === "",
+      );
 
     const inputs = fields.map((field) => this.#renderField(field, sending));
 
@@ -184,6 +329,7 @@ export class PageNotifications extends SbPage {
                 @change=${this.#onUrgency}
               ></gw-segmented>
             </gw-setting-row>
+            ${this.#renderButtons(sending)}
           </div>
           <div slot="footer" class="row" style="justify-content: flex-end">
             <gw-button

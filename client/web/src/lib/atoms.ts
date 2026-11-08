@@ -19,6 +19,7 @@ import {
   ModuleDataUpdate,
   type ModulesData,
   type Notification,
+  type NotificationButton,
   type NotificationEvent,
   type OmarchyAction,
   type OpenTarget,
@@ -784,6 +785,7 @@ export interface FollowedNotification {
   readonly id: number;
   readonly title: string;
   readonly message: string;
+  readonly buttons: readonly NotificationButton[];
   /** Oldest first. */
   readonly happened: readonly NotificationHappening[];
   readonly updated: number;
@@ -816,6 +818,7 @@ const followNotification = (
         id: event.id,
         title: event.title ?? "",
         message: event.message ?? "",
+        buttons: event.buttons ?? [],
         happened: [happened],
         updated,
       },
