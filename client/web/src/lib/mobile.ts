@@ -4,13 +4,15 @@ import {
   type MobilePushOptions,
 } from "@timmo001/groundwork-mobile/view";
 import type { Share } from "@timmo001/groundwork-pwa/view";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import { Atom } from "effect/reactivity";
 
 import mobileConfig from "../../mobile.config";
 import pwaConfig from "../../pwa.config";
 import { registry } from "./atoms";
+import { navigate } from "./router";
 import { setAndroidTheme } from "./theme";
+import { generateUUID } from "./utils";
 
 /** A share from another app, waiting for the page to say what to do with it. */
 export const pendingShare = Atom.make<Share | null>(null).pipe(Atom.keepAlive);
@@ -22,6 +24,12 @@ export const pendingShare = Atom.make<Share | null>(null).pipe(Atom.keepAlive);
 export const mobile: Promise<Mobile> = connectMobile(mobileConfig, {
   pwa: pwaConfig,
   onShare: (share) => registry.set(pendingShare, share),
+  // A tapped push or a systembridge:// link, while the app is open. One for
+  // another paired computer opens that computer's page instead
+  onDeepLink: (url) => {
+    if (new URL(url).origin === location.origin) navigate(url);
+    else location.assign(url);
+  },
   onAndroidTheme: (colors) => void setAndroidTheme(colors),
 });
 
@@ -32,23 +40,33 @@ export const mobileConnection = Atom.make(Effect.promise(() => mobile)).pipe(
 
 const CLIENT_ID_KEY = "system-bridge-client-id";
 
-/** This install, kept so it has one push subscription and one name. */
-export const pushClient = (current: Mobile): MobilePushOptions["client"] => {
+/** The app's own client: its install and the phone's model, such as "Pixel 9". */
+const AppClient = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  platform: Schema.Literal("android"),
+});
+
+/**
+ * This install, so it has one push subscription and one name. The Android
+ * app names it, as the page can't read the phone's model; a browser keeps
+ * its own.
+ */
+export const pushClient = async (
+  current: Mobile,
+): Promise<MobilePushOptions["client"]> => {
+  if (current.shell) return current.call("client", AppClient);
+
   let id = localStorage.getItem(CLIENT_ID_KEY);
 
+  // Not crypto.randomUUID, which is only there over HTTPS
   if (id === null) {
-    id = crypto.randomUUID();
+    id = generateUUID();
     localStorage.setItem(CLIENT_ID_KEY, id);
   }
 
-  return current.shell
-    ? { id, name: phoneModel() ?? "Android phone", platform: "android" }
-    : { id, name: browserName(), platform: "web" };
+  return { id, name: browserName(), platform: "web" };
 };
-
-/** The phone's model from the WebView's user agent, such as "Pixel 9". */
-const phoneModel = () =>
-  /Android [\d.]+; ([^;)]+?)(?: Build\/|\))/.exec(navigator.userAgent)?.[1];
 
 /** What the user agent names, first match wins, as [marker, name]. */
 const browsers = [

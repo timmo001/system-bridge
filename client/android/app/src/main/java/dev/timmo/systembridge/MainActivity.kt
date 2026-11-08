@@ -41,6 +41,10 @@ class MainActivity : ShellActivity() {
   override fun onBridgeReady(bridge: Bridge) {
     bridge.handle("servers") { _, reply -> reply.ok(Servers.json(this)) }
 
+    // This install, the same client pairing names, for the push contract: the
+    // page can't read the phone's model, and has an id for each origin
+    bridge.handle("client") { _, reply -> reply.ok(Servers.client(this)) }
+
     bridge.handle("pair") { request, reply ->
       Api.pair(request.paramsObject.getString("link"), Servers.client(this)) { opened(it, reply) }
     }

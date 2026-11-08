@@ -14,6 +14,7 @@ import { Option } from "effect";
 import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing, svg } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { live } from "lit/directives/live.js";
 import { encode } from "uqr";
 
 import { AtomController } from "~/controllers/atom-controller";
@@ -130,11 +131,18 @@ export class PageSettingsPhones extends SbPage {
 
   @state() private pushBusy = false;
 
+  /** Why turning pushes on or off last failed. */
+  @state() private pushError: string | undefined;
+
+  /** This install, as its push subscription names it. */
+  @state() private client: MobilePushOptions["client"] | undefined;
+
   override connectedCallback(): void {
     super.connectedCallback();
     void mobile.then(async (connected) => {
-      this.mobile = connected;
+      this.client = await pushClient(connected);
       this.push = await connected.pushState();
+      this.mobile = connected;
     });
   }
 
@@ -161,32 +169,45 @@ export class PageSettingsPhones extends SbPage {
   };
 
   /** Where this device's pushes are kept, with the token to reach it. */
-  #pushOptions(current: Mobile): MobilePushOptions {
+  #pushOptions(client: MobilePushOptions["client"]): MobilePushOptions {
     const settings = this.#settings.value;
 
     return {
       service: `${baseUrl(settings)}/api/`,
-      client: pushClient(current),
+      client,
       headers: { "X-API-Token": settings.token ?? "" },
     };
   }
 
   #onPushToggle = async (event: Event) => {
     const current = this.mobile;
+    const client = this.client;
 
-    if (current === undefined || !(event.target instanceof HTMLInputElement)) {
+    if (
+      current === undefined ||
+      client === undefined ||
+      !(event.target instanceof HTMLInputElement)
+    ) {
       return;
     }
 
     this.pushBusy = true;
+    this.pushError = undefined;
 
     try {
       if (event.target.checked) {
-        this.push = await current.subscribePush(this.#pushOptions(current));
+        this.push = await current.subscribePush(this.#pushOptions(client));
+
+        if (this.push === "default") {
+          this.pushError = "The computer didn't take the subscription";
+        }
       } else {
-        await current.unsubscribePush(this.#pushOptions(current));
+        await current.unsubscribePush(this.#pushOptions(client));
         this.push = await current.pushState();
       }
+    } catch (error) {
+      this.pushError =
+        error instanceof Error ? error.message : "Something went wrong";
     } finally {
       this.pushBusy = false;
       registry.refresh(pushSubscribers);
@@ -195,11 +216,10 @@ export class PageSettingsPhones extends SbPage {
 
   #onKindToggle = (event: Event) => {
     const target = event.target;
-    const current = this.mobile;
+    const id = this.client?.id;
 
-    if (current === undefined || !(target instanceof HTMLInputElement)) return;
+    if (id === undefined || !(target instanceof HTMLInputElement)) return;
 
-    const id = pushClient(current).id;
     const mine = this.#subscriberList().find((sub) => sub.client.id === id);
     const kind = PushKind.literals.find((known) => known === target.name);
 
@@ -344,7 +364,7 @@ export class PageSettingsPhones extends SbPage {
     }
 
     const mine = this.#subscriberList().find(
-      (sub) => sub.client.id === pushClient(current).id,
+      (sub) => sub.client.id === this.client?.id,
     );
 
     return html`
@@ -363,11 +383,16 @@ export class PageSettingsPhones extends SbPage {
           <gw-switch
             label="Get pushes"
             label-hidden
-            .checked=${this.push === "subscribed"}
+            .checked=${live(this.push === "subscribed")}
             ?disabled=${this.pushBusy || this.push === "denied"}
             @change=${this.#onPushToggle}
           ></gw-switch>
         </gw-setting-row>
+        ${
+          this.pushError === undefined
+            ? nothing
+            : html`<p class="error-text">${this.pushError}</p>`
+        }
         ${
           mine === undefined
             ? nothing
@@ -381,7 +406,7 @@ export class PageSettingsPhones extends SbPage {
                       label=${kindInfo[kind].heading}
                       label-hidden
                       name=${kind}
-                      .checked=${mine.kinds.includes(kind)}
+                      .checked=${live(mine.kinds.includes(kind))}
                       ?disabled=${this.#kinds.value.waiting}
                       @change=${this.#onKindToggle}
                     ></gw-switch>
