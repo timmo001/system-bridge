@@ -550,6 +550,17 @@ export const SECTIONS = {
       ).map((entity) => tile(entity)),
     ]),
 
+  notifications: ({ entities }) =>
+    grid([
+      heading("Notifications", "mdi:bell-outline"),
+      tileOf(entities.single.get("notify")),
+      // The last event, such as clicked or closed, and when it happened
+      ...singles(entities, "notification").map((entity) => ({
+        ...tile(entity),
+        state_content: ["event_type", "last_changed"],
+      })),
+    ]),
+
   power: ({ entities }) =>
     grid([
       heading("Power", "mdi:lightning-bolt"),

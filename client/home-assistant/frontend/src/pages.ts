@@ -153,6 +153,7 @@ export const PAGES: readonly Page[] = [
       { section: "system" },
       { section: "power" },
       { section: "commands" },
+      { section: "notifications" },
     ],
   },
 ];

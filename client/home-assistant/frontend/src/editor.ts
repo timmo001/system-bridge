@@ -227,6 +227,8 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
   desktop: "Whether the session is locked, and how long it's been idle.",
   processes: "The number of processes, with a graph.",
   commands: "Buttons to lock, log out, sleep, hibernate, restart or shut down.",
+  notifications:
+    "The notify entity, and the last notification event, such as clicked or closed.",
   power: "The power profile, and a switch to keep the device awake.",
   system: "Device power usage and whether the camera is in use.",
 };

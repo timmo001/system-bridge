@@ -68,6 +68,8 @@ export const RELEASE_GATES = new Map([
   // Core #189544
   ["keep_awake", "2026.12"],
   ["power_profile", "2026.12"],
+  // Core #191285
+  ["notification", "2026.12"],
 ]);
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */
@@ -150,6 +152,7 @@ export const SECTION_RELEASES = new Map([
     "power_restart",
     "power_shutdown",
   ),
+  gatedSection("notifications", "notification"),
   gatedSection("power", "power_profile", "keep_awake"),
 ]);
 

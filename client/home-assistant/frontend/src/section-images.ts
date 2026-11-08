@@ -144,6 +144,14 @@ const DRAWINGS: Record<SectionName, string> = {
   commands: columns(3, (i) =>
     rect(10 + i * 26, 12, 22, 20, i === 0 ? 0.48 : 0.24, 4),
   ),
+  notifications:
+    area(
+      "M30 10 H60 A4 4 0 0 1 64 14 V28 A4 4 0 0 1 60 32 H40 L33 37 V32 H30 A4 4 0 0 1 26 28 V14 A4 4 0 0 1 30 10 Z",
+      0.24,
+    ) +
+    rect(32, 16, 22, 3, 0.48, 1.5) +
+    rect(32, 23, 14, 3, 0.32, 1.5) +
+    dot(64, 11, 5, 0.48),
   power:
     outline(8, 10, 36, 24) +
     rect(13, 26, 26, 4, 0.48, 2) +
