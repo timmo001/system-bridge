@@ -83,7 +83,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.release-tag != '')
     permissions:
       contents: write
-    uses: timmo001/workflows/.github/workflows/publish-android-release.yml@056c2aa0b36cbd28bfa721b936589a369b1331bd # 20261108.1
+    uses: timmo001/workflows/.github/workflows/publish-android-release.yml@f39552735dd1e0766144bfd674cd5d11af1676c9 # 20261108.2
     with:
       release-tag: ${{ github.event.release.tag_name || inputs.release-tag }}
       working-directory: client/android
