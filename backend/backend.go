@@ -133,8 +133,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 	})
 
-	// Every client hears when a notification System Bridge sent is clicked or
-	// closes, as it may have sent it
+	// Every client hears when a notification System Bridge sent is sent,
+	// clicked or closes, as it may have sent it
 	notification.OnEvent(func(e notification.Event) {
 		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
 	})

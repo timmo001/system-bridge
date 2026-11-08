@@ -58,14 +58,19 @@ type NotificationButton struct {
 const DefaultAction = "default"
 
 // Event is something that happened to a notification System Bridge sent:
-// clicking it or a button on it, or it closing
+// sending it, clicking it or a button on it, or it closing
 type Event struct {
 	ID uint32
+	// Sent is true when the notification was just sent, with its Title and
+	// Message
+	Sent    bool
+	Title   string
+	Message string
 	// Action is the button's id, or DefaultAction for the notification
-	// itself. Empty when it closed.
+	// itself. Empty when it was sent or closed.
 	Action string
 	// Reason is why it closed: expired, dismissed or closed (by
-	// NOTIFICATION_DISMISS). Empty when it was clicked.
+	// NOTIFICATION_DISMISS). Empty when it was sent or clicked.
 	Reason string
 }
 
@@ -77,7 +82,8 @@ var (
 	eventHandlerMu sync.RWMutex
 )
 
-// OnEvent sets the function told when a notification is clicked or closes
+// OnEvent sets the function told when a notification is sent, clicked or
+// closes
 func OnEvent(handler func(Event)) {
 	eventHandlerMu.Lock()
 	eventHandler = handler
@@ -177,8 +183,17 @@ func Send(data NotificationData) error {
 
 // SendWithID sends a notification like Send, returning its id for
 // Dismiss and the events about it. The id is 0 when there's no default
-// notifier to follow it with.
+// notifier to follow it with. Once sent, it emits a sent Event.
 func SendWithID(data NotificationData) (uint32, error) {
+	id, err := sendWithID(data)
+	if err != nil {
+		return 0, err
+	}
+	emit(Event{ID: id, Sent: true, Title: data.Title, Message: data.Message})
+	return id, nil
+}
+
+func sendWithID(data NotificationData) (uint32, error) {
 	// Try to use the default notifier if set
 	defaultNotifierMu.RLock()
 	notifier := defaultNotifier

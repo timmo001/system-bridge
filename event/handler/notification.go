@@ -21,9 +21,12 @@ type NotificationDismissRequestData struct {
 }
 
 // NotificationEventData is sent to every client when a notification
-// System Bridge sent is clicked or closes
+// System Bridge sent is sent, clicked or closes
 type NotificationEventData struct {
 	ID uint32 `json:"id"`
+	// What was sent, when it was sent
+	Title   string `json:"title,omitempty"`
+	Message string `json:"message,omitempty"`
 	// The button's id, or default for the notification itself
 	Action string `json:"action,omitempty"`
 	// expired, dismissed or closed
@@ -107,16 +110,26 @@ func RegisterNotificationHandler(router *event.MessageRouter) {
 }
 
 // NotificationEventResponse is the message sent to clients when a
-// notification is clicked or closes
+// notification is sent, clicked or closes. A sent one has the type
+// NOTIFICATION_SENT, like the sender's reply, but the id system.
 func NotificationEventResponse(e notification.Event) event.MessageResponse {
 	responseType := event.ResponseTypeNotificationAction
-	if e.Action == "" {
+	switch {
+	case e.Sent:
+		responseType = event.ResponseTypeNotificationSent
+	case e.Action == "":
 		responseType = event.ResponseTypeNotificationClosed
 	}
 	return event.MessageResponse{
 		ID:      "system",
 		Type:    responseType,
 		Subtype: event.ResponseSubtypeNone,
-		Data:    NotificationEventData{ID: e.ID, Action: e.Action, Reason: e.Reason},
+		Data: NotificationEventData{
+			ID:      e.ID,
+			Title:   e.Title,
+			Message: e.Message,
+			Action:  e.Action,
+			Reason:  e.Reason,
+		},
 	}
 }
