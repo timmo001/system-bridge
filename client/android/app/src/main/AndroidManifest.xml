@@ -4,9 +4,13 @@
   filters, the Lock and Sleep tiles, the camera for scanning a pairing code,
   and the local network, which Android 17 gates for apps that target it and
   without which neither the computer's page nor the tiles can reach it. The
-  shell's own manifest adds the internet, notifications and the push service.
+  shell's own manifest adds the internet and notifications. The app's push
+  service replaces the shell's, so it can name each push's computer and
+  press its buttons on it.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
@@ -39,6 +43,22 @@
         <data android:scheme="systembridge" />
       </intent-filter>
     </activity>
+
+    <!-- The app's own push service, which names each push's computer and
+         shows its buttons, in place of the shell's -->
+    <service
+      android:name="dev.timmo.groundwork.shell.ShellPushService"
+      tools:node="remove" />
+    <service
+      android:name=".PushService"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="org.unifiedpush.android.connector.PUSH_EVENT" />
+      </intent-filter>
+    </service>
+    <receiver
+      android:name=".PressReceiver"
+      android:exported="false" />
 
     <service
       android:name=".LockTileService"

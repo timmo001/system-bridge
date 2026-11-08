@@ -77,4 +77,7 @@ dependencies {
   implementation("androidx.core:core:1.19.1")
   // Swipe down to refresh
   implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+  // The shell's push service, which the app's own extends, at the shell's
+  // version
+  implementation("org.unifiedpush.android:connector:3.3.5")
 }

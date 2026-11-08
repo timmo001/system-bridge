@@ -66,6 +66,16 @@ object Servers {
     return moved
   }
 
+  /**
+   * The paired computer a push came from, by the service it was subscribed
+   * with, such as http://desk.local:9170/api/: the same address, or failing
+   * that its origin, as a computer can be renamed or moved since.
+   */
+  fun forPush(context: Context, service: String): Server? =
+    all(context).let { servers ->
+      servers.find { it.pushService == service } ?: servers.find { it.origin == originOf(service) }
+    }
+
   /** The paired computer a URL is on, if any. */
   fun at(context: Context, url: String): Server? = all(context).find { it.origin == originOf(url) }
 

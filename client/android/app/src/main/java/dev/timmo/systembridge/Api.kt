@@ -89,10 +89,10 @@ object Api {
     }
 
   /** Runs one event on a computer, such as POWER_LOCK, saying whether it did. */
-  fun event(server: Server, name: String, done: (Boolean) -> Unit) =
+  fun event(server: Server, name: String, data: JSONObject = JSONObject(), done: (Boolean) -> Unit) =
     run<Boolean>({ done(it.getOrDefault(false)) }) {
       val (status, body) =
-        request("POST", "${server.url}api/event", server.token, JSONObject().put("event", name).put("data", JSONObject()))
+        request("POST", "${server.url}api/event", server.token, JSONObject().put("event", name).put("data", data))
 
       status == 200 && JSONObject(body).optString("type") != "ERROR"
     }
