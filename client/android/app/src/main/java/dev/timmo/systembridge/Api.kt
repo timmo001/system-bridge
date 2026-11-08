@@ -21,18 +21,37 @@ object Api {
 
   /**
    * Trades a pairing link's one-time code, from the QR code, for the
-   * computer's API token.
+   * computer's API token. The link names the computer, such as desk.local,
+   * and may carry its address in `ip` for a network where the name doesn't
+   * resolve; the first that answers is kept.
    */
   fun pair(link: String, client: JSONObject, done: (Result<Server>) -> Unit) =
     run(done) {
       val uri = Uri.parse(link)
       val code = uri.getQueryParameter("pair")?.ifBlank { null } ?: error("That isn't a System Bridge pairing code")
-      val url = Servers.baseUrl(link)
-      val (status, body) =
-        request("POST", "${url}api/pair", null, JSONObject().put("code", code).put("client", client))
+      val body = JSONObject().put("code", code).put("client", client)
+      val candidates =
+        listOfNotNull(
+          Servers.baseUrl(link),
+          uri.getQueryParameter("ip")?.ifBlank { null }?.let { ip ->
+            val host = if (ip.contains(':')) "[$ip]" else ip
+            val port = if (uri.port == -1) "" else ":${uri.port}"
+            "${uri.scheme}://$host$port/"
+          },
+        )
+      var unreachable: Exception? = null
+      val (url, status, answer) =
+        candidates.firstNotNullOfOrNull { candidate ->
+          try {
+            request("POST", "${candidate}api/pair", null, body).let { (status, text) -> Triple(candidate, status, text) }
+          } catch (error: java.io.IOException) {
+            unreachable = error
+            null
+          }
+        } ?: throw unreachable ?: error("Couldn't reach the computer")
 
       when (status) {
-        200 -> JSONObject(body).let {
+        200 -> JSONObject(answer).let {
           val service = it.getJSONObject("service")
           Server(service.getString("id"), service.getString("name"), url, it.getString("token"))
         }

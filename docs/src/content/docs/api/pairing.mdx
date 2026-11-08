@@ -19,12 +19,12 @@ X-API-Token: {token}
 ```json title="Response"
 {
   "code": "MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
-  "link": "http://192.168.1.5:9170/?pair=MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
+  "link": "http://desk.local:9170/?ip=192.168.1.5&pair=MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
   "expiresAt": "2026-11-08T18:31:54Z"
 }
 ```
 
-The code works once, for 5 minutes. `link` uses the address the request came to. When that's `localhost` or another loopback address, which a phone can't reach, it uses this computer's IPv4 address on the default route instead.
+The code works once, for 5 minutes. When the request came to a name, such as `desk.lan`, `link` keeps it. When it came to an address, or `localhost`, `link` uses this computer's mDNS name, such as `desk.local`, which still finds it when its address changes. The address rides along in `ip`, or for `localhost` this computer's IPv4 address on the default route, for a phone that can't resolve the name. The Android app tries the name first, then `ip`, and keeps whichever answers.
 
 ## Trade a code for the token
 

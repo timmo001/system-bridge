@@ -7,8 +7,10 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -95,22 +97,40 @@ func ThisService() PairedService {
 	}
 }
 
-// pairLinkHost is the host a pairing link points at: the request's, unless
-// it's this computer's loopback, which is no use to a phone
-func pairLinkHost(requestHost string) string {
-	hostname, port, err := net.SplitHostPort(requestHost)
+// pairLink is the link a pairing code's QR code holds. A name the request
+// came to, such as desk.lan, is kept. An address, or this computer's
+// loopback, becomes its mDNS name, such as desk.local, which still finds it
+// when its address changes; the address, or the one on the default route
+// for loopback, rides along in `ip` for a phone that can't resolve the name.
+func pairLink(scheme, requestHost, code, name string) string {
+	host, port, err := net.SplitHostPort(requestHost)
 	if err != nil {
-		hostname, port = requestHost, strconv.Itoa(utils.GetPort())
+		host, port = requestHost, strconv.Itoa(utils.GetPort())
 	}
-	ip := net.ParseIP(hostname)
-	if hostname != "localhost" && (ip == nil || !ip.IsLoopback()) {
-		return requestHost
+	ip := net.ParseIP(host)
+	loopback := host == "localhost" || (ip != nil && ip.IsLoopback())
+	if ip == nil && !loopback {
+		return scheme + "://" + requestHost + "/?pair=" + code
 	}
-	address := utils.PrimaryIPv4Address()
-	if address == "" {
-		return requestHost
+
+	fallback := host
+	if loopback {
+		fallback = utils.PrimaryIPv4Address()
 	}
-	return net.JoinHostPort(address, port)
+	query := url.Values{"pair": {code}}
+	if fallback != "" {
+		query.Set("ip", fallback)
+	}
+	return scheme + "://" + net.JoinHostPort(name, port) + "/?" + query.Encode()
+}
+
+// localName is this computer's mDNS name, such as desk.local
+func localName() string {
+	hostname, err := os.Hostname()
+	if err != nil || hostname == "" {
+		return "localhost"
+	}
+	return strings.TrimSuffix(hostname, ".local") + ".local"
 }
 
 // PairCodeHandler makes a pairing code and its link, for the QR code. It
@@ -138,7 +158,7 @@ func PairCodeHandler(token string, codes *PairCodes) http.HandlerFunc {
 		}
 		writeJSON(w, http.StatusOK, map[string]string{
 			"code":      code,
-			"link":      scheme + "://" + pairLinkHost(r.Host) + "/?pair=" + code,
+			"link":      pairLink(scheme, r.Host, code, localName()),
 			"expiresAt": expires.UTC().Format(time.RFC3339),
 		})
 	}

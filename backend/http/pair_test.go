@@ -38,8 +38,8 @@ func TestPairing(t *testing.T) {
 	if err := json.NewDecoder(created.Body).Decode(&made); err != nil {
 		t.Fatal(err)
 	}
-	if made.Link != "http://192.0.2.10:9170/?pair="+made.Code {
-		t.Errorf("link: got %q", made.Link)
+	if want := "http://" + localName() + ":9170/?ip=192.0.2.10&pair=" + made.Code; made.Link != want {
+		t.Errorf("link: got %q, want %q", made.Link, want)
 	}
 
 	first := pairWith(codes, made.Code)
@@ -59,6 +59,20 @@ func TestPairing(t *testing.T) {
 
 	if again := pairWith(codes, made.Code); again.Code != http.StatusUnauthorized {
 		t.Errorf("a code works once: got %d the second time", again.Code)
+	}
+}
+
+func TestPairLink(t *testing.T) {
+	for _, test := range []struct{ name, host, want string }{
+		{"a name is kept", "desk.lan:9170", "http://desk.lan:9170/?pair=CODE"},
+		{"an address becomes the mDNS name", "192.0.2.10:9170", "http://desk.local:9170/?ip=192.0.2.10&pair=CODE"},
+		{"an IPv6 address too", "[2001:db8::1]:9170", "http://desk.local:9170/?ip=2001%3Adb8%3A%3A1&pair=CODE"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := pairLink("http", test.host, "CODE", "desk.local"); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
 	}
 }
 
