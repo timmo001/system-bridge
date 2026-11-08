@@ -20,6 +20,7 @@ export default defineConfig(
           items: [
             "/using/desktop",
             "/using/web-client",
+            "/using/android",
             "/using/cli",
             "/using/home-assistant",
             "/using/omarchy",
