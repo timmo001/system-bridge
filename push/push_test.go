@@ -55,7 +55,7 @@ func TestSendDropsGoneSubscriptions(t *testing.T) {
 		}
 	}
 
-	store.Send(context.Background(), KindPower, Payload{Title: "Going to sleep"})
+	store.Send(context.Background(), KindUpdates, Payload{Title: "System Bridge 5.28.0 is out"})
 
 	kept := map[string]bool{}
 	for _, sub := range store.List() {

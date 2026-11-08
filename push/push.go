@@ -30,12 +30,14 @@ const (
 	KindNotifications Kind = "notifications"
 	// KindUpdates says a new System Bridge release is out
 	KindUpdates Kind = "updates"
-	// KindPower says the computer is going to sleep or shutting down
-	KindPower Kind = "power"
 )
 
-// Kinds is every kind, which a new subscription starts with
-var Kinds = []Kind{KindNotifications, KindUpdates, KindPower}
+// Kinds is every kind
+var Kinds = []Kind{KindNotifications, KindUpdates}
+
+// DefaultKinds is what a new subscription starts with: the computer's own
+// notifications are mirrored only once someone turns them on
+var DefaultKinds = []Kind{KindUpdates}
 
 // ErrNotFound is returned for a client with no subscription
 var ErrNotFound = errors.New("no subscription for that client")
@@ -119,6 +121,13 @@ func open(path string) (*Store, error) {
 		return nil, fmt.Errorf("could not read %s: %v", path, err)
 	}
 
+	// Kinds that were dropped, such as power, go from the subscriptions
+	for i := range s.state.Subscriptions {
+		s.state.Subscriptions[i].Kinds = slices.DeleteFunc(s.state.Subscriptions[i].Kinds, func(kind Kind) bool {
+			return !slices.Contains(Kinds, kind)
+		})
+	}
+
 	if s.state.VAPID.Public == "" || s.state.VAPID.Private == "" {
 		private, public, err := webpush.GenerateVAPIDKeys()
 		if err != nil {
@@ -163,7 +172,7 @@ func (s *Store) Subscribe(sub Subscription) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	sub.Kinds = slices.Clone(Kinds)
+	sub.Kinds = slices.Clone(DefaultKinds)
 	sub.Created = time.Now()
 	kept := make([]Subscription, 0, len(s.state.Subscriptions)+1)
 	for _, existing := range s.state.Subscriptions {
@@ -254,13 +263,8 @@ func (s *Store) Send(ctx context.Context, kind Kind, payload Payload) {
 		wg       sync.WaitGroup
 		goneMu   sync.Mutex
 		gone     []string
-		urgency  = webpush.UrgencyNormal
 		httpUsed = s.client
 	)
-	if kind == KindPower {
-		// It has to arrive before the computer goes down
-		urgency = webpush.UrgencyHigh
-	}
 	if httpUsed == nil {
 		httpUsed = http.DefaultClient
 	}
@@ -282,7 +286,7 @@ func (s *Store) Send(ctx context.Context, kind Kind, payload Payload) {
 					HTTPClient:      httpUsed,
 					Subscriber:      subscriber,
 					TTL:             3600,
-					Urgency:         urgency,
+					Urgency:         webpush.UrgencyNormal,
 					VAPIDPublicKey:  keys.Public,
 					VAPIDPrivateKey: keys.Private,
 				})

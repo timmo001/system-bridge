@@ -8,10 +8,8 @@ import (
 	"io/fs"
 	"mime"
 	"net/http"
-	"os"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"log/slog"
@@ -45,28 +43,6 @@ import (
 )
 
 const readHeaderTimeout = 10 * time.Second
-
-// powerPushTimeout is how long the push saying the host is going down may
-// take, while the system goes down around it
-const powerPushTimeout = 4 * time.Second
-
-// powerPushOnce is how long after one push that the host is going down
-// another is skipped, as one going down is announced twice
-const powerPushOnce = 30 * time.Second
-
-// powerPayload is the push saying this host is going to sleep or shutting
-// down
-func powerPayload(state types.PowerState) push.Payload {
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = "This computer"
-	}
-	title := hostname + " is going to sleep"
-	if state == types.PowerStateShuttingDown {
-		title = hostname + " is shutting down"
-	}
-	return push.Payload{Title: title, Level: "passive", Tag: "power", Link: "/"}
-}
 
 type Backend struct {
 	settings         *settings.Settings
@@ -166,38 +142,14 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 	})
 
-	// Phones and browsers subscribed to pushes hear about notifications,
-	// releases and the host going down while they're closed. Without the
-	// store the backend runs as before, with no push routes.
+	// Phones and browsers subscribed to pushes hear about notifications and
+	// releases while they're closed. Without the store the backend runs as
+	// before, with no push routes.
 	pushStore, err := push.Load()
 	if err != nil {
 		slog.Warn("Failed to load push subscriptions, so nothing will be pushed", "error", err)
 	} else {
 		go push.WatchUpdates(ctx, pushStore)
-	}
-
-	// Pushes that the host is going down, once for each time it does: a
-	// sleep System Bridge starts is pushed before it, then the system's own
-	// warning follows
-	var (
-		poweredMu   sync.Mutex
-		poweredLast time.Time
-	)
-	pushPower := func(state types.PowerState) {
-		if pushStore == nil {
-			return
-		}
-		poweredMu.Lock()
-		if time.Since(poweredLast) < powerPushOnce {
-			poweredMu.Unlock()
-			return
-		}
-		poweredLast = time.Now()
-		poweredMu.Unlock()
-
-		sendCtx, cancelSend := context.WithTimeout(ctx, powerPushTimeout)
-		defer cancelSend()
-		pushStore.Send(sendCtx, push.KindPower, powerPayload(state))
 	}
 
 	// Every client hears when a notification System Bridge sent is sent,
@@ -227,17 +179,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 		if state == types.PowerStateResumed {
 			b.discoveryManager.Announce()
-			return
 		}
-		// After the broadcast, as the system only waits a second for this.
-		// The network can go down as soon as the system says, so this one is
-		// a best effort; a sleep System Bridge starts pushes first.
-		pushPower(state)
 	})
-	// When System Bridge sleeps or shuts the system down itself, it pushes
-	// first, while the network is still up
-	event_handler.OnBeforePower(pushPower)
-	defer event_handler.OnBeforePower(nil)
 
 	// These modules follow changes on the system, so they update as soon as
 	// one happens rather than on their next refresh

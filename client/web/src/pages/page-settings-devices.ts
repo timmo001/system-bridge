@@ -43,10 +43,6 @@ const kindInfo: Readonly<
     heading: "Updates",
     description: "When a new System Bridge release is out",
   },
-  power: {
-    heading: "Sleep and shut down",
-    description: "When this computer goes to sleep or shuts down",
-  },
 };
 
 const time = new Intl.DateTimeFormat(undefined, { timeStyle: "short" });

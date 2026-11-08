@@ -9,7 +9,6 @@ import (
 	"log/slog"
 
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -36,7 +35,6 @@ func RegisterPowerSleepHandler(router *event.MessageRouter) {
 
 		go func() {
 			time.Sleep(1 * time.Second)
-			noticeBeforePower(types.PowerStateSleeping)
 
 			// Sleep the system
 			if err := Sleep(); err != nil {

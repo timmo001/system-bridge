@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils/handlers/power"
 )
 
@@ -15,7 +14,6 @@ func RegisterPowerShutdownHandler(router *event.MessageRouter) {
 
 		go func() {
 			time.Sleep(1 * time.Second)
-			noticeBeforePower(types.PowerStateShuttingDown)
 
 			// Shutdown the system
 			if err := power.Shutdown(); err != nil {

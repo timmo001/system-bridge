@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -35,7 +34,6 @@ func RegisterPowerRestartHandler(router *event.MessageRouter) {
 
 		go func() {
 			time.Sleep(1 * time.Second)
-			noticeBeforePower(types.PowerStateShuttingDown)
 
 			// Restart the system
 			if err := Restart(); err != nil {
