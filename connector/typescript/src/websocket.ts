@@ -369,7 +369,7 @@ export interface Interface {
   readonly dismissNotification: (
     request: NotificationDismissRequest,
   ) => Effect.Effect<void, WebSocketError>;
-  /** Clicks on, and closes of, the notifications System Bridge sent, from any client. Linux only. */
+  /** The notifications System Bridge sends, and clicks on and closes of them, from any client. Clicks and closes are Linux only. */
   readonly notificationEvents: Stream.Stream<NotificationEvent>;
   /** Opens, closes or toggles the Omarchy menu at a route. */
   readonly omarchyMenu: (
@@ -588,7 +588,9 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
     if (
       response.type === "NOTIFICATION_ACTION" ||
-      response.type === "NOTIFICATION_CLOSED"
+      response.type === "NOTIFICATION_CLOSED" ||
+      // The sender's own reply has its request's id
+      (response.type === "NOTIFICATION_SENT" && response.id === "system")
     ) {
       yield* PubSub.publish(notificationEventResponses, response);
 

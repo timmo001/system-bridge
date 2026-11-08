@@ -1504,8 +1504,9 @@ class WebSocketClient(Base):
         no_data_callback gets a module's name when the backend answers for it
         with no data. hyprland_event_callback gets each custom event from
         Hyprland, once listening for the desktop module.
-        notification_event_callback gets each click on, or close of, a
-        notification System Bridge sent, from any client. Linux only.
+        notification_event_callback gets each notification System Bridge
+        sends, and each click on, or close of, one, from any client. Clicks
+        and closes are Linux only.
         power_state_callback gets each change just before the host sleeps or
         shuts down, and again when it wakes.
         """
@@ -1639,8 +1640,15 @@ class WebSocketClient(Base):
                     HyprlandEvent(data=message[EventKey.DATA].get("data", ""))
                 )
             elif (
-                message[EventKey.TYPE]
-                in (EventType.NOTIFICATION_ACTION, EventType.NOTIFICATION_CLOSED)
+                (
+                    message[EventKey.TYPE]
+                    in (EventType.NOTIFICATION_ACTION, EventType.NOTIFICATION_CLOSED)
+                    # The sender's own reply has its request's id
+                    or (
+                        message[EventKey.TYPE] == EventType.NOTIFICATION_SENT
+                        and message.get(EventKey.ID) == "system"
+                    )
+                )
                 and notification_event_callback is not None
                 and isinstance(message.get(EventKey.DATA), dict)
             ):
@@ -1651,6 +1659,8 @@ class WebSocketClient(Base):
                         id=data["id"],
                         action=data.get("action"),
                         reason=data.get("reason"),
+                        title=data.get("title"),
+                        message=data.get("message"),
                     )
                 )
             elif (

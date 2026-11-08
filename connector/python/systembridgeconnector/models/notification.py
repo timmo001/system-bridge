@@ -147,13 +147,16 @@ class NotificationDismissRequest:
 
 @dataclass(slots=True)
 class NotificationEvent:
-    """A notification System Bridge sent was clicked, or closed.
+    """A notification System Bridge sent was sent, clicked, or closed.
 
     action is the button's id, or default for the notification itself, and is
-    None when it closed. reason is expired, dismissed or closed, and is None
-    when it was clicked.
+    None when it was sent or closed. reason is expired, dismissed or closed,
+    and is None when it was sent or clicked. A sent one has neither, and has
+    its title and message instead. Its id is 0 where it can't be followed.
     """
 
     id: int
     action: str | None = None
     reason: str | None = None
+    title: str | None = None
+    message: str | None = None

@@ -423,13 +423,17 @@ export interface NotificationDismissRequest extends Schema.Schema.Type<
   typeof NotificationDismissRequest
 > {}
 
-/** A notification System Bridge sent was clicked, or closed. */
+/** A notification System Bridge sent was sent, clicked, or closed. A sent one has neither `action` nor `reason`. */
 export const NotificationEvent = Schema.Struct({
+  /** 0 where it can't be followed. */
   id: Schema.Int,
-  /** The button's `id`, or `default` for the notification itself. Missing when it closed. */
+  /** The button's `id`, or `default` for the notification itself. Missing when it was sent or closed. */
   action: Schema.optionalKey(Schema.String),
-  /** `expired`, `dismissed` or `closed`. Missing when it was clicked. */
+  /** `expired`, `dismissed` or `closed`. Missing when it was sent or clicked. */
   reason: Schema.optionalKey(Schema.String),
+  /** What was sent. Only when it was sent. */
+  title: Schema.optionalKey(Schema.String),
+  message: Schema.optionalKey(Schema.String),
 });
 
 export interface NotificationEvent extends Schema.Schema.Type<

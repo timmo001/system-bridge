@@ -186,6 +186,28 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           },
         },
       ];
+    case "NOTIFICATION":
+      // The sender's reply, then the broadcast to every client
+      return [
+        {
+          id,
+          type: "NOTIFICATION_SENT",
+          subtype: "NONE",
+          data: { id: 7, title: "Title", message: "Message" },
+        },
+        {
+          id: "system",
+          type: "NOTIFICATION_SENT",
+          subtype: "NONE",
+          data: { id: 7, title: "Title", message: "Message" },
+        },
+        {
+          id: "system",
+          type: "NOTIFICATION_CLOSED",
+          subtype: "NONE",
+          data: { id: 7, reason: "dismissed" },
+        },
+      ];
     default:
       return [];
   }
@@ -286,6 +308,35 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(update._tag).toBe("Some");
+  });
+
+  test("follow a sent notification, without the sender's own reply", async () => {
+    const [id, events] = await run(
+      SystemBridgeWebSocket.use((ws) =>
+        Effect.gen(function* () {
+          const collected = yield* ws.notificationEvents.pipe(
+            Stream.take(2),
+            Stream.runCollect,
+            Effect.forkChild,
+          );
+
+          yield* Effect.yieldNow;
+
+          const sent = yield* ws.sendNotification({
+            title: "Title",
+            message: "Message",
+          });
+
+          return [sent, yield* Fiber.join(collected)] as const;
+        }),
+      ),
+    );
+
+    expect(id).toBe(7);
+    expect(events).toEqual([
+      { id: 7, title: "Title", message: "Message" },
+      { id: 7, reason: "dismissed" },
+    ]);
   });
 
   test("wait past interim replies for the command result", async () => {

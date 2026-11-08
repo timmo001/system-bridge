@@ -67,6 +67,7 @@ from systembridgeconnector.models.modules.disks import (
 from systembridgeconnector.models.notification import (
     Notification,
     NotificationDismissRequest,
+    NotificationEvent,
 )
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
@@ -471,6 +472,70 @@ async def test_listen_hyprland_event(
         )
 
     assert received == [HyprlandEvent(data="dock")]
+
+
+@pytest.mark.asyncio
+async def test_listen_notification_events(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a listener follows notifications, but not the sender's own reply."""
+    received: list[NotificationEvent] = []
+
+    async def notification_event_callback(event: NotificationEvent) -> None:
+        received.append(event)
+
+    sent = {"id": 7, "title": "Title", "message": "Message"}
+    future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
+    mock_websocket_client_connected._responses[REQUEST_ID] = (  # noqa: SLF001
+        future,
+        EventType.NOTIFICATION_SENT,
+    )
+
+    with (
+        patch.object(
+            mock_websocket_client_connected,
+            "receive_message",
+            side_effect=[
+                {
+                    "id": REQUEST_ID,
+                    "type": EventType.NOTIFICATION_SENT,
+                    "subtype": EventSubType.NONE,
+                    "data": sent,
+                    "message": "Notification sent",
+                },
+                {
+                    "id": "system",
+                    "type": EventType.NOTIFICATION_SENT,
+                    "subtype": EventSubType.NONE,
+                    "data": sent,
+                },
+                {
+                    "id": "system",
+                    "type": EventType.NOTIFICATION_ACTION,
+                    "subtype": EventSubType.NONE,
+                    "data": {"id": 7, "action": "default"},
+                },
+                {
+                    "id": "system",
+                    "type": EventType.NOTIFICATION_CLOSED,
+                    "subtype": EventSubType.NONE,
+                    "data": {"id": 7, "reason": "dismissed"},
+                },
+                ConnectionClosedException("Connection closed to server"),
+            ],
+        ),
+        pytest.raises(ConnectionClosedException),
+    ):
+        await mock_websocket_client_connected.listen(
+            notification_event_callback=notification_event_callback
+        )
+
+    assert future.result().data == sent
+    assert received == [
+        NotificationEvent(id=7, title="Title", message="Message"),
+        NotificationEvent(id=7, action="default"),
+        NotificationEvent(id=7, reason="dismissed"),
+    ]
 
 
 @pytest.mark.asyncio
