@@ -14,7 +14,7 @@ Every route needs the API token, as `X-API-Token`, the `token` header or `Author
 | `notifications` | System Bridge shows a notification, such as one sent with [`NOTIFICATION`](/api/websocket/control#send-notification). |
 | `updates` | A new System Bridge release is out. Checked every 6 hours, and pushed once for each release. Development builds never push this. |
 
-A notification's push also carries its `notification` id and its buttons as `actions`, each with an `id` and `label`, which the Android app shows and presses with [`NOTIFICATION_PRESS`](/api/websocket/control#press-a-notification-button). When the notification is closed on the computer, by hand or with [`NOTIFICATION_DISMISS`](/api/websocket/control#dismiss-notification), but not when it times out, Android clients are sent `{ "dismiss": "notification-47" }`, with no title, to clear it.
+Each push carries its `kind`, which the Android app files it under. A notification's push also carries its `notification` id and its buttons as `actions`, each with an `id` and `label`, which the Android app shows and presses with [`NOTIFICATION_PRESS`](/api/websocket/control#press-a-notification-button). When the notification is closed on the computer, by hand or with [`NOTIFICATION_DISMISS`](/api/websocket/control#dismiss-notification), but not when it times out, Android clients are sent `{ "dismiss": "notification-47" }`, with no title, to clear it.
 
 A new subscription gets `updates` only; turn on `notifications` with the [preferences](#choose-what-a-client-gets). Each push's `link` opens a page of the web client, on the address the subscription was made from.
 

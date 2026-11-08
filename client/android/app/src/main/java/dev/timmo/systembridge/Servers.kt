@@ -136,6 +136,8 @@ object Servers {
       )
 
     prefs(context).edit().putString(LIST, list.toString()).putString(CURRENT, current).apply()
+    // Each computer's notification categories follow its name, and go with it
+    Channels.sync(context)
   }
 
   private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

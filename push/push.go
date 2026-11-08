@@ -76,6 +76,9 @@ type Payload struct {
 	Tag   string `json:"tag,omitempty"`
 	Level string `json:"level,omitempty"`
 	// The rest is System Bridge's own, which the Android app reads.
+	// Kind is what the push is about, which Send fills in, for the app to
+	// file it under
+	Kind Kind `json:"kind,omitempty"`
 	// Notification is the id of the notification on the computer this
 	// mirrors, for pressing its Actions with NOTIFICATION_PRESS
 	Notification uint32   `json:"notification,omitempty"`
@@ -269,6 +272,7 @@ func (s *Store) MarkUpdate(release string) bool {
 // at once, and returns once each has been tried. A subscription whose
 // endpoint answers 404 or 410 is gone, so it's dropped.
 func (s *Store) Send(ctx context.Context, kind Kind, payload Payload) {
+	payload.Kind = kind
 	s.send(ctx, payload, func(sub Subscription) bool {
 		return slices.Contains(sub.Kinds, kind)
 	})

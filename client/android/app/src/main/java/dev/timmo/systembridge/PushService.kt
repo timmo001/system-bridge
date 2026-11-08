@@ -1,7 +1,8 @@
 /**
  * System Bridge's pushes. The shell shows a push as a plain notification;
  * the app shows a paired computer's own: named for the computer it came
- * from, with its buttons, and cleared when the one on the computer closes.
+ * from, in that computer's category for its kind, with its buttons, and
+ * cleared when the one on the computer closes.
  * Anything else, such as ongoing work, goes to the shell.
  */
 package dev.timmo.systembridge
@@ -53,10 +54,10 @@ class PushService : ShellPushService() {
         return
       }
 
-      notices.createChannels()
+      val channel = Channels.forPush(context, server, payload.optString("kind"))
 
       val builder =
-        NotificationCompat.Builder(context, Notifications.CHANNEL_NOTICES)
+        NotificationCompat.Builder(context, channel)
           .setSmallIcon(dev.timmo.groundwork.shell.R.drawable.gw_notification_icon)
           .setColor(context.getColor(dev.timmo.groundwork.shell.R.color.gw_notification_color))
           .setContentTitle(title)
