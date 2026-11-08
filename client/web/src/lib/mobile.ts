@@ -2,9 +2,10 @@ import {
   connectMobile,
   type Mobile,
   type MobilePushOptions,
+  ShellShare,
 } from "@timmo001/groundwork-mobile/view";
 import type { Share } from "@timmo001/groundwork-pwa/view";
-import { Effect, Schema } from "effect";
+import { Effect, Option, Schema } from "effect";
 import { Atom } from "effect/reactivity";
 
 import mobileConfig from "../../mobile.config";
@@ -14,8 +15,28 @@ import { navigate } from "./router";
 import { setAndroidTheme } from "./theme";
 import { generateUUID } from "./utils";
 
-/** A share from another app, waiting for the page to say what to do with it. */
-export const pendingShare = Atom.make<Share | null>(null).pipe(Atom.keepAlive);
+const SHARE_KEY = "system-bridge-pending-share";
+
+const decodeShare = Schema.decodeUnknownOption(
+  Schema.fromJsonString(ShellShare),
+);
+
+/**
+ * A share from another app, waiting for the page to say what to do with it.
+ * It's kept for the tab's session too, so a reload while it waits, such as
+ * the page updating as the app comes back into view, still asks.
+ */
+export const pendingShare = Atom.make<Share | null>(
+  Option.getOrNull(decodeShare(sessionStorage.getItem(SHARE_KEY))),
+).pipe(Atom.keepAlive);
+
+/** Sets the waiting share, or clears it once it's dealt with. */
+export const setPendingShare = (share: Share | null) => {
+  if (share === null) sessionStorage.removeItem(SHARE_KEY);
+  else sessionStorage.setItem(SHARE_KEY, JSON.stringify(share));
+
+  registry.set(pendingShare, share);
+};
 
 /**
  * The page's connection to the Android app's shell, or to the PWA's pieces
@@ -23,7 +44,7 @@ export const pendingShare = Atom.make<Share | null>(null).pipe(Atom.keepAlive);
  */
 export const mobile: Promise<Mobile> = connectMobile(mobileConfig, {
   pwa: pwaConfig,
-  onShare: (share) => registry.set(pendingShare, share),
+  onShare: setPendingShare,
   // A tapped push or a systembridge:// link, while the app is open. One for
   // another paired computer opens that computer's page instead
   onDeepLink: (url) => {

@@ -8,7 +8,7 @@ import { customElement, state } from "lit/decorators.js";
 
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, open, registry, setClipboard } from "~/lib/atoms";
-import { pendingShare } from "~/lib/mobile";
+import { pendingShare, setPendingShare } from "~/lib/mobile";
 
 /** The link a share carries, in its URL or as its whole text. */
 const sharedUrl = (share: Share): string | undefined => {
@@ -45,7 +45,7 @@ export class SbShareDialog extends LitElement {
 
   #close = () => {
     this.ran = undefined;
-    registry.set(pendingShare, null);
+    setPendingShare(null);
   };
 
   #onOpen = () => {
