@@ -34,14 +34,14 @@
     "lit": "^3.3.2"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.90.0",
+    "@oxlint/plugins": "1.92.0",
     "@timmo001/oxlint-rules": "0.6.4",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
-    "oxlint": "1.90.0",
-    "oxlint-tsgolint": "7.0.2005",
+    "oxlint": "1.92.0",
+    "oxlint-tsgolint": "7.0.2006",
     "prettier": "^3.8.3",
     "typescript": "7.0.2",
     "vite": "^8.0.10",
