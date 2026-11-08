@@ -242,6 +242,10 @@ export class PageSettingsDevices extends SbPage {
   }
 
   #renderPairing() {
+    // In the app, the phone can't scan its own screen: it adds computers
+    // from its own menu instead. Wait to know, so the card doesn't flash
+    if (this.mobile === undefined || this.mobile.shell) return nothing;
+
     const result = this.#code.value;
     const code = Option.getOrUndefined(AsyncResult.value(result));
 
@@ -424,8 +428,9 @@ export class PageSettingsDevices extends SbPage {
       <div class="page narrow">
         ${this.renderHeader({
           heading: "Devices",
-          description:
-            "Pair the Android app, and choose which phones and browsers hear from this computer",
+          description: this.mobile?.shell
+            ? "Choose what this phone hears from this computer, and which other devices do"
+            : "Pair the Android app, and choose which phones and browsers hear from this computer",
           icon: mdiDevices,
         })}
         ${this.gate(
