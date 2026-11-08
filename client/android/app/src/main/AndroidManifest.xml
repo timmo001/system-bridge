@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   System Bridge's manifest: its activity with the share and deep link intent
-  filters, the Lock and Sleep tiles, the camera for scanning a pairing code,
+  filters, the Lock, Sleep, Keep awake, Mute and Play/pause tiles, the camera for scanning a pairing code,
   and the local network, which Android 17 gates for apps that target it and
   without which neither the computer's page nor the tiles can reach it. The
   shell's own manifest adds the internet and notifications. The app's push
@@ -88,6 +88,39 @@
       android:exported="true"
       android:icon="@drawable/ic_tile_sleep"
       android:label="@string/tile_sleep"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+
+    <service
+      android:name=".KeepAwakeTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_keep_awake"
+      android:label="@string/tile_keep_awake"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+
+    <service
+      android:name=".MuteTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_mute"
+      android:label="@string/tile_mute"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+
+    <service
+      android:name=".PlayPauseTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_play_pause"
+      android:label="@string/tile_play_pause"
       android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
       <intent-filter>
         <action android:name="android.service.quicksettings.action.QS_TILE" />

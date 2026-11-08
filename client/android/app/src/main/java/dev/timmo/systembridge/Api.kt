@@ -126,6 +126,14 @@ object Api {
     return if (system.isNull("idle_time")) Long.MAX_VALUE else system.optLong("idle_time")
   }
 
+  /** One of a computer's data modules, such as system, or null when it doesn't answer. */
+  fun module(server: Server, name: String, done: (JSONObject?) -> Unit) =
+    run<JSONObject?>({ done(it.getOrNull()) }) {
+      val (status, body) = request("GET", "${server.url}api/data/$name", server.token, null)
+
+      if (status == 200) JSONObject(body) else null
+    }
+
   /** Runs one event on a computer, such as POWER_LOCK, saying whether it did. */
   fun event(server: Server, name: String, data: JSONObject = JSONObject(), done: (Boolean) -> Unit) =
     run<Boolean>({ done(it.getOrDefault(false)) }) {

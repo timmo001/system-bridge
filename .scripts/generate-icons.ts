@@ -1,7 +1,13 @@
 // Writes every icon from the logo in .resources/system-bridge-logo.svg.
 // Run with: mise run generate:icons
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
-import { mdiLockOutline, mdiPowerSleep } from "@mdi/js";
+import {
+  mdiCoffee,
+  mdiLockOutline,
+  mdiPlayPause,
+  mdiPowerSleep,
+  mdiVolumeOff,
+} from "@mdi/js";
 import sharp from "sharp";
 
 const logoPath = ".resources/system-bridge-logo.svg";
@@ -254,6 +260,9 @@ await write(`${android}/ic_launcher_monochrome.xml`, logoVector(108, 0.5, 22, "#
 await write(`${android}/gw_notification_icon.xml`, logoVector(24, 24 / 124, -48 / 124, "#FFFFFFFF"));
 await write(`${android}/ic_tile_lock.xml`, iconVector(mdiLockOutline));
 await write(`${android}/ic_tile_sleep.xml`, iconVector(mdiPowerSleep));
+await write(`${android}/ic_tile_keep_awake.xml`, iconVector(mdiCoffee));
+await write(`${android}/ic_tile_mute.xml`, iconVector(mdiVolumeOff));
+await write(`${android}/ic_tile_play_pause.xml`, iconVector(mdiPlayPause));
 
 // The docs' header, banner and favicons. Their share cards and other brand
 // images come from `bun run brand` in docs/, which reads the same logo
