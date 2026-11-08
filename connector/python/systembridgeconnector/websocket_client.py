@@ -76,6 +76,7 @@ from .models.notification import (
     Notification,
     NotificationDismissRequest,
     NotificationEvent,
+    NotificationPressRequest,
 )
 from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
@@ -1201,6 +1202,23 @@ class WebSocketClient(Base):
         return await self._action(
             EventType.NOTIFICATION_DISMISS,
             EventType.NOTIFICATION_DISMISSED,
+            model,
+            request_id,
+        )
+
+    async def press_notification(
+        self,
+        model: NotificationPressRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Press a button on a notification System Bridge sent.
+
+        Clients get the same NOTIFICATION_ACTION as pressing it on the
+        computer, and the notification closes. Linux only.
+        """
+        return await self._action(
+            EventType.NOTIFICATION_PRESS,
+            EventType.NOTIFICATION_PRESSED,
             model,
             request_id,
         )

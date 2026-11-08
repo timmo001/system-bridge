@@ -1,0 +1,123 @@
+/* The pairing page: the theme's surface and type, with the cards centred. */
+html {
+  background: var(--gw-color-surface-default);
+  color: var(--gw-color-text-primary);
+  font-family: var(--gw-font-sans);
+}
+
+/* The shell draws edge to edge. The app bar reaches under the status bar
+   and pads itself clear of it and the cutout, so only the content below it
+   keeps clear of the cutout and navigation bar */
+body {
+  margin: 0;
+}
+
+.brand {
+  display: inline-flex;
+  gap: var(--gw-space-2);
+  align-items: center;
+  color: var(--gw-color-text-strong);
+  font-weight: 600;
+}
+
+/* The logo is wider than tall in a square image, so crop above and below */
+.brand img {
+  width: 2.75rem;
+  height: 1.5rem;
+  object-fit: cover;
+}
+
+main {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--gw-space-5);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--gw-space-5)
+    calc(var(--gw-space-4) + env(safe-area-inset-right))
+    calc(var(--gw-space-5) + env(safe-area-inset-bottom))
+    calc(var(--gw-space-4) + env(safe-area-inset-left));
+}
+
+.manual,
+.edit {
+  display: grid;
+  gap: var(--gw-space-3);
+}
+
+/* "Add a computer", over the ways to add one */
+.section {
+  margin: var(--gw-space-3) 0 0;
+  color: var(--gw-color-text-strong);
+  font-size: var(--gw-font-size-l);
+  font-weight: 600;
+}
+
+/* A paired computer: the whole row opens it, with its menu at the end */
+.computer {
+  display: flex;
+  gap: var(--gw-space-1);
+  align-items: center;
+  border-radius: var(--gw-radius-control);
+}
+
+.computer .open {
+  display: grid;
+  flex: 1;
+  gap: var(--gw-space-0-5);
+  min-width: 0;
+  padding: var(--gw-space-2) var(--gw-space-3);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--gw-radius-control);
+}
+
+.computer .open:hover,
+.computer .open:active {
+  background: var(--gw-color-fill-neutral-hovered);
+}
+
+.computer .open:focus-visible {
+  outline: var(--gw-focus-width) solid var(--gw-color-focus);
+}
+
+.computer .name {
+  display: flex;
+  gap: var(--gw-space-2);
+  align-items: center;
+  color: var(--gw-color-text-strong);
+  font-weight: 600;
+}
+
+.computer .url {
+  overflow: hidden;
+  color: var(--gw-color-text-secondary);
+  font-size: var(--gw-font-size-s);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.found:not(:empty),
+.list {
+  display: grid;
+  gap: var(--gw-space-1);
+  margin-top: var(--gw-space-3);
+}
+
+.error {
+  margin: var(--gw-space-2) 0 0;
+  color: var(--gw-color-danger);
+  font-size: var(--gw-font-size-s);
+}
+
+.error:empty {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}

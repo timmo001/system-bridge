@@ -4,6 +4,7 @@ import {
   mdiBattery,
   mdiBluetooth,
   mdiCogOutline,
+  mdiDevices,
   mdiCpu64Bit,
   mdiExpansionCardVariant,
   mdiHarddisk,
@@ -173,6 +174,7 @@ export const navigation: readonly NavSection[] = [
     items: [
       routeItem("settings", "General", mdiCogOutline),
       routeItem("settingsAppearance", "Appearance", mdiPaletteOutline),
+      routeItem("settingsDevices", "Devices", mdiDevices),
     ],
   },
   {

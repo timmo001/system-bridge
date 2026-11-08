@@ -1,0 +1,151 @@
+<!doctype html>
+<!--
+  The computers page, bundled into the app: the paired computers, to open,
+  edit or remove, then three ways to add one: scan a computer's pairing
+  code, pick one found on the network, or enter one by hand. Once one is
+  paired, the app opens its own web client instead.
+-->
+<html lang="en" data-gw-theme="bridge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>System Bridge</title>
+    <!-- theme:boot -->
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <gw-app-bar>
+      <span slot="brand" class="brand">
+        <img src="logo.svg" alt="" width="44" height="24" />
+        System Bridge
+      </span>
+      <gw-theme-picker slot="actions"></gw-theme-picker>
+    </gw-app-bar>
+    <main>
+      <gw-card id="unreachable" hidden heading="Can't reach the computer">
+        <p class="status"></p>
+        <gw-button class="retry" appearance="filled">Try again</gw-button>
+      </gw-card>
+
+      <gw-card
+        id="network"
+        hidden
+        heading="Allow local network access"
+        description="System Bridge talks to your computer on your own network, so Android needs your permission first."
+      >
+        <gw-button class="allow" appearance="filled">Allow</gw-button>
+      </gw-card>
+
+      <gw-card
+        id="paired"
+        hidden
+        heading="Your computers"
+        description="Tap one to open it."
+      >
+        <div class="list" role="list"></div>
+      </gw-card>
+
+      <h2 class="section">Add a computer</h2>
+
+      <gw-card
+        heading="Scan the QR code"
+        description="On the computer, open System Bridge's web client, then Settings, Devices, and make a pairing code."
+      >
+        <gw-button class="scan" appearance="filled">Scan the code</gw-button>
+        <p class="error scan-error" role="alert"></p>
+      </gw-card>
+
+      <gw-card
+        heading="On this network"
+        description="Computers running System Bridge that this phone can see."
+      >
+        <!-- Only without local network access; with it, the page looks itself -->
+        <gw-button class="discover">Look for computers</gw-button>
+        <div class="found"></div>
+        <p class="error discover-error" role="alert"></p>
+      </gw-card>
+
+      <gw-card
+        heading="Enter it yourself"
+        description="The computer's address and its API token, from system-bridge client token."
+      >
+        <form class="manual">
+          <gw-input
+            name="host"
+            label="Host"
+            placeholder="192.168.1.5 or desk.local"
+            autocomplete="off"
+            required
+          ></gw-input>
+          <gw-input
+            name="port"
+            label="Port"
+            value="9170"
+            inputmode="numeric"
+            required
+          ></gw-input>
+          <gw-switch name="https" label="HTTPS"></gw-switch>
+          <gw-input
+            name="token"
+            label="API token"
+            type="password"
+            monospace
+            reveal
+            required
+          ></gw-input>
+          <gw-button type="submit" appearance="filled">Connect</gw-button>
+          <p class="error manual-error" role="alert"></p>
+        </form>
+      </gw-card>
+    </main>
+
+    <gw-dialog id="edit" heading="Edit computer">
+      <form class="edit">
+        <gw-input
+          name="name"
+          label="Name"
+          autocomplete="off"
+          required
+        ></gw-input>
+        <gw-input
+          name="host"
+          label="Host"
+          placeholder="192.168.1.5 or desk.local"
+          autocomplete="off"
+          required
+        ></gw-input>
+        <gw-input
+          name="port"
+          label="Port"
+          inputmode="numeric"
+          required
+        ></gw-input>
+        <gw-switch name="https" label="HTTPS"></gw-switch>
+        <gw-input
+          name="token"
+          label="API token"
+          hint="Leave empty to keep the one it has."
+          optional
+          type="password"
+          monospace
+          reveal
+        ></gw-input>
+        <p class="error edit-error" role="alert"></p>
+      </form>
+      <gw-button slot="actions" value="" appearance="plain">Cancel</gw-button>
+      <gw-button slot="actions" class="save">Save</gw-button>
+    </gw-dialog>
+
+    <gw-dialog id="remove" heading="Remove computer">
+      <p class="remove-text"></p>
+      <gw-button slot="actions" value="" appearance="plain">Cancel</gw-button>
+      <gw-button slot="actions" class="confirm" variant="danger"
+        >Remove</gw-button
+      >
+    </gw-dialog>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

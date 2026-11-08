@@ -1,0 +1,57 @@
+# The Android app's tools, kept out of the root config so the backend's CI and
+# contributors who never build the app don't install a JDK and the SDK. The
+# root's android:* tasks run the app:* tasks here. Groundwork pins the same
+# versions.
+[tools]
+android-sdk = "23.0"
+java = "temurin-25.0.5+8.0.LTS"
+gradle = "9.9.0"
+kotlin = "2.4.21"
+# Builds and signs the F-Droid repository the release publishes, and syncs it
+# with its R2 bucket, which speaks the S3 API
+"pipx:fdroidserver" = "2.4.5"
+"pipx:awscli" = "1.46.3"
+
+[env]
+ANDROID_AVD = "system-bridge"
+ANDROID_API = "android-37.2"
+
+[tasks."app:build"]
+description = "Build the pairing page, then the debug and release APKs"
+run = '''
+bun run --cwd page build
+gradle --no-daemon -q --console=plain :app:assembleDebug :app:assembleRelease
+'''
+
+[tasks."app:install"]
+description = "Build the pairing page and the debug APK, and install and open it on the running emulator or phone"
+run = '''
+bun run --cwd page build
+gradle --no-daemon -q --console=plain :app:installDebug
+adb shell am start -S -n dev.timmo.systembridge/.MainActivity >/dev/null
+'''
+
+[tasks."app:setup"]
+description = "Install the Android SDK packages and create the system-bridge emulator, a medium phone on the latest Android"
+run = '''
+abi=x86_64
+[ "$(uname -m)" = aarch64 ] && abi=arm64-v8a
+image="system-images/$ANDROID_API/google_apis_playstore_ps16k/$abi"
+android --no-metrics sdk install platform-tools emulator "platforms/$ANDROID_API" build-tools/37.0.0 "$image"
+avdmanager list avd -c | grep -qx "$ANDROID_AVD" ||
+  echo no | avdmanager create avd --name "$ANDROID_AVD" --device medium_phone --package "$(echo "$image" | tr / ';')"
+'''
+
+[tasks."app:emulator"]
+description = "Start the system-bridge emulator in the background, in dark mode, waiting until it has booted"
+depends = ["app:setup"]
+run = '''
+# Hyprland leaves Xwayland apps unscaled (force_zero_scaling), so the Qt
+# emulator needs the monitor's scale itself.
+scale=$(hyprctl -j monitors 2>/dev/null | jq -r 'first(.[] | select(.focused)) | .scale' 2>/dev/null)
+QT_SCALE_FACTOR=${scale:-1} emulator -avd "$ANDROID_AVD" -no-snapshot-save -no-boot-anim > /dev/null 2>&1 &
+adb wait-for-device
+until [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; do sleep 2; done
+adb shell cmd uimode night yes >/dev/null
+echo "$ANDROID_AVD is up: $(adb shell getprop ro.build.version.release | tr -d '\r') (API $(adb shell getprop ro.build.version.sdk | tr -d '\r'))"
+'''

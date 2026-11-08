@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by mise run generate:icons from .resources/system-bridge-logo.svg; don't edit it -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="108dp"
+  android:height="108dp"
+  android:viewportWidth="108"
+  android:viewportHeight="108">
+  <group android:scaleX="0.5" android:scaleY="0.5" android:translateX="22" android:translateY="22">
+    <path android:pathData="M43.9 64V84M49.2 68V84M78.8 68V84M84.1 64V84M21.1 70.9V84M14.3 78.8V84M106.9 70.9V84M113.7 78.8V84" android:strokeColor="#5E6F84" android:strokeWidth="3" />
+    <path android:pathData="M35 50C26 66 16 78 8 85M93 50C102 66 112 78 120 85" android:strokeColor="#5E6F84" android:strokeWidth="6" android:strokeLineCap="round" />
+    <path android:pathData="M35 50C26 66 16 78 8 85M93 50C102 66 112 78 120 85" android:strokeColor="#74859A" android:strokeWidth="2" android:strokeLineCap="round" />
+    <path android:pathData="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" android:strokeColor="#5E6F84" android:strokeWidth="6" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" android:strokeColor="#74859A" android:strokeWidth="2.4" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" android:strokeColor="#614590" android:strokeWidth="0.7" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M30 36h10a4 4 0 0 1 4 4v44H26V40a4 4 0 0 1 4-4Z" android:fillColor="#614590" />
+    <path android:pathData="M26 70 44 61v23H26Z" android:fillColor="#5A3F87" />
+    <path android:pathData="M31 43h8M31 48h8" android:strokeColor="#2A1F42" android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M32.7,56a2.3,2.3 0 1,0 4.6,0a2.3,2.3 0 1,0 -4.6,0" android:fillColor="#A78BFA" />
+    <path android:pathData="M88 36h10a4 4 0 0 1 4 4v44H84V40a4 4 0 0 1 4-4Z" android:fillColor="#614590" />
+    <path android:pathData="M84 70 102 61v23H84Z" android:fillColor="#5A3F87" />
+    <path android:pathData="M89 43h8M89 48h8M89 53h8" android:strokeColor="#2A1F42" android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M90.7,61a2.3,2.3 0 1,0 4.6,0a2.3,2.3 0 1,0 -4.6,0" android:fillColor="#A78BFA" />
+    <path android:pathData="M3 84h122v8H3z" android:fillColor="#8A8783" />
+    <path android:pathData="M3 84h122v3H3z" android:fillColor="#A9A6A0" />
+  </group>
+</vector>

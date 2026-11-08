@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  What every shell needs: the internet, notifications, Live Updates, the
+  push service and the QR scanner. The app's own manifest declares its
+  activity with its deep link and share intent filters, any tiles, and the
+  permissions it wants: the camera or microphone for the page and for
+  scanQr, and ACCESS_LOCAL_NETWORK to browse or reach the local network.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+
+  <application>
+    <service
+      android:name="dev.timmo.groundwork.shell.ShellPushService"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="org.unifiedpush.android.connector.PUSH_EVENT" />
+      </intent-filter>
+    </service>
+
+    <activity
+      android:name="dev.timmo.groundwork.shell.ScanActivity"
+      android:exported="false"
+      android:theme="@android:style/Theme.Material.NoActionBar" />
+  </application>
+</manifest>

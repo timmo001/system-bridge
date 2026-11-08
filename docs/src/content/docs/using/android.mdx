@@ -1,0 +1,73 @@
+---
+title: Android app
+description: Install the System Bridge app on Android, pair it with your computers, and get their notifications, tiles and shares on your phone.
+---
+
+The System Bridge app puts each paired computer's [web client](/using/web-client/) on your phone, and adds what a phone does best: notifications while the app is closed, quick settings tiles, and sharing to the computer.
+
+## Installing
+
+The app isn't on Google Play. Install it in one of these ways:
+
+- **F-Droid**: add the repository `https://android.timmo.dev/repo` in F-Droid or a client such as Droid-ify, then install **System Bridge**. It updates with every System Bridge release.
+- **Obtainium**: add `https://github.com/timmo001/system-bridge`, and it installs the APK from each release.
+- **Directly**: download `system-bridge-<version>.apk` from the [latest release](https://github.com/timmo001/system-bridge/releases/latest) and open it.
+
+It needs Android 14 or later.
+
+:::warning
+If you have the old System Bridge app from Google Play, uninstall it first. The new app is signed with a different key, so Android won't install it over the old one.
+:::
+
+## Pairing a computer
+
+Pairing gives the phone the computer's API token, so anyone with the phone can control the computer, as with any client that has the token. To stop a phone connecting, change the token.
+
+On Android 17, the app asks for **local network access** first. It needs it to reach the computer at all. If you refuse, the app explains why and asks again when you tap **Allow**.
+
+Then pair in one of three ways:
+
+<Steps>
+<Step title="Scan the QR code">
+On the computer, open the web client, go to **Settings**, **Devices**, and select **Make a pairing code**. In the app, tap **Scan the code** and point the camera at it. A code works once, for 5 minutes.
+</Step>
+<Step title="Pick it from your network">
+Tap **Look for computers** to list those running System Bridge on your network, then **Use** one to fill in its address. Add its API token, which you can get with `system-bridge client token`.
+</Step>
+<Step title="Enter it yourself">
+Type the computer's address, port (`9170`) and API token.
+</Step>
+</Steps>
+
+Once paired, the app opens the computer's web client.
+
+## Several computers
+
+Pair as many computers as you like. In the app, **Computers** in the header opens the list: tap one to switch to it, or use its **⋮** menu to edit its name, address or token, or remove it. Pair another from the same page. It takes the place of the web client's connection page, which the app doesn't show. The tiles act on the computer that's open.
+
+## Notifications
+
+Open **Settings**, **Devices** in the app and turn on **Get pushes**. The computer then pushes to the phone, even with the app closed, through [UnifiedPush](https://unifiedpush.org/) when you have a distributor app such as ntfy, or Firebase otherwise. Choose which of these you get:
+
+- **Notifications**: the [notifications](/features/notifications/) System Bridge shows on the computer. Off until you turn it on.
+- **Updates**: when a new System Bridge release is out
+
+Each notification names the computer it came from. In the phone's notification settings for the app, each computer has its own group, with **Notifications** and **Updates** in it, so you can silence one computer, or just its updates. A notification's buttons show on the phone too, and pressing one presses it on the computer. When you close the notification on the computer, it goes from the phone as well; one that only times out there stays. Buttons and closing follow the computer's own notifications, which only Linux has.
+
+Each phone chooses for itself. **Devices getting pushes** on the same page lists every phone and browser, with **Remove** to stop pushing to it.
+
+## Tiles
+
+Add the **Lock** and **Sleep** tiles to quick settings to lock the current computer or put it to sleep without opening the app. The tile shows the computer's name, and whether it worked.
+
+## Sharing
+
+Share a link or text from any app to System Bridge. The app asks whether to open the link on the computer or copy the text to its clipboard. Copying to the clipboard works on Linux.
+
+## Theme
+
+The app offers your phone's colours as a theme, under **Phone** in the theme picker, beside System Bridge's own.
+
+## Without the app
+
+The web client also installs as an app from the browser, and gets the same notifications, when you reach it over HTTPS. Browsers only allow both on secure addresses, so over plain HTTP on your network, use the Android app instead.

@@ -20,6 +20,7 @@ export default defineConfig(
           items: [
             "/using/desktop",
             "/using/web-client",
+            "/using/android",
             "/using/cli",
             "/using/home-assistant",
             "/using/omarchy",
@@ -43,7 +44,14 @@ export default defineConfig(
             {
               label: "HTTP",
               root: "/api/http",
-              items: ["/api/status", "/api/data", "/api/media-file-data"],
+              items: [
+                "/api/status",
+                "/api/data",
+                "/api/media-file-data",
+                "/api/event",
+                "/api/pairing",
+                "/api/push",
+              ],
             },
             {
               label: "WebSocket",

@@ -175,6 +175,23 @@ run = [
   "mise generate git-pre-commit --write --hook pre-push --task hooks:pre-push",
 ]
 
+[tasks."android:build"]
+description = "Build the Android app's pairing page and its debug and release APKs"
+depends = ["install:js"]
+dir = "client/android"
+run = "mise run app:build"
+
+[tasks."android:install"]
+description = "Build the Android app and install and open it on the running emulator or phone"
+depends = ["install:js"]
+dir = "client/android"
+run = "mise run app:install"
+
+[tasks."android:emulator"]
+description = "Start the Android emulator, setting up the SDK and its image first"
+dir = "client/android"
+run = "mise run app:emulator"
+
 [tasks.install]
 description = "Install the application with go install"
 depends = ["build:all"]

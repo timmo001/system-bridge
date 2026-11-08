@@ -1,0 +1,24 @@
+---
+# What F-Droid clients show for the app.
+Name: System Bridge
+Summary: Control and follow your computers running System Bridge
+Description: |-
+  The companion app for System Bridge, which bridges your computers to apps
+  like Home Assistant.
+
+  * Pair a computer by scanning the QR code in its web client, picking it
+    from those found on your network, or entering its address and token
+  * Use each computer's own web client, and switch between several
+  * Get its notifications, a note when a System Bridge update is out, and
+    a warning before it sleeps or shuts down, even with the app closed
+  * Lock it or put it to sleep from quick settings tiles
+  * Share a link to open on the computer, or text to its clipboard
+  * Use your phone's colours as a theme
+AuthorName: timmo001
+License: Apache-2.0
+Categories:
+  - Connectivity
+  - System
+WebSite: https://system-bridge.timmo.dev
+SourceCode: https://github.com/timmo001/system-bridge
+IssueTracker: https://github.com/timmo001/system-bridge/issues

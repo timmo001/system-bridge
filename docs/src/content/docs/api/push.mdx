@@ -1,0 +1,89 @@
+---
+title: Push
+description: Subscribe a phone or browser to Web Push from System Bridge, and choose which pushes it gets.
+---
+
+System Bridge pushes to phones and browsers while their app is closed, with Web Push and VAPID. The Android app subscribes through UnifiedPush, and the web client, installed as an app, through the browser's push service. Both use the same routes.
+
+Every route needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+
+## What gets pushed
+
+| Kind | When |
+| --- | --- |
+| `notifications` | System Bridge shows a notification, such as one sent with [`NOTIFICATION`](/api/websocket/control#send-notification). |
+| `updates` | A new System Bridge release is out. Checked every 6 hours, and pushed once for each release. Development builds never push this. |
+
+Each push carries its `kind`, which the Android app files it under. A notification's push also carries its `notification` id and its buttons as `actions`, each with an `id` and `label`, which the Android app shows and presses with [`NOTIFICATION_PRESS`](/api/websocket/control#press-a-notification-button). When the notification is closed on the computer, by hand or with [`NOTIFICATION_DISMISS`](/api/websocket/control#dismiss-notification), but not when it times out, Android clients are sent `{ "dismiss": "notification-47" }`, with no title, to clear it.
+
+A new subscription gets `updates` only; turn on `notifications` with the [preferences](#choose-what-a-client-gets). Each push's `link` opens a page of the web client, on the address the subscription was made from.
+
+## Get the VAPID key
+
+```http
+GET /api/push/vapid-key
+```
+
+```json title="Response"
+{ "publicKey": "BNc…" }
+```
+
+Pass `publicKey` as `applicationServerKey` to `pushManager.subscribe`. System Bridge makes the key pair the first time it starts, and keeps it with the subscriptions in `push.json` in its [config directory](/running#file-locations).
+
+## Subscribe
+
+```http
+POST /api/push/subscriptions
+Content-Type: application/json
+
+{
+  "endpoint": "https://push.example.com/…",
+  "keys": { "p256dh": "BOr…", "auth": "q3c…" },
+  "client": { "id": "4c1f…", "name": "Pixel 9", "platform": "android" }
+}
+```
+
+`endpoint` and `keys` are what `PushSubscription.toJSON()` gives. `client.id` should stay the same for each install: subscribing again replaces that client's last subscription and keeps the kinds it chose. Answers `204`.
+
+## Unsubscribe
+
+```http
+DELETE /api/push/subscriptions
+Content-Type: application/json
+
+{ "endpoint": "https://push.example.com/…" }
+```
+
+To remove another client, such as one in the [list](#list-subscriptions), which never shows endpoints, send `{ "clientId": "4c1f…" }` instead.
+
+Answers `204`. A subscription whose push service answers `404` or `410` is dropped too.
+
+## List subscriptions
+
+```http
+GET /api/push/subscriptions
+```
+
+```json title="Response"
+[
+  {
+    "client": { "id": "4c1f…", "name": "Pixel 9", "platform": "android" },
+    "kinds": ["notifications", "updates"],
+    "created": "2026-11-08T18:20:00Z",
+    "endpointHost": "push.example.com"
+  }
+]
+```
+
+The endpoint URLs and keys are never sent back.
+
+## Choose what a client gets
+
+```http
+POST /api/push/preferences
+Content-Type: application/json
+
+{ "clientId": "4c1f…", "kinds": ["notifications"] }
+```
+
+Sets the kinds that client gets; an empty list turns them all off. Answers `204`, or `404` when that client has no subscription.

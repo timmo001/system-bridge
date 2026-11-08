@@ -18,6 +18,9 @@ A bridge for your systems.
   with a [dashboard](https://system-bridge.timmo.dev/using/home-assistant/#dashboard)
   you can install from the Marketplace
 - Optional [Omarchy bar plugin](https://system-bridge.timmo.dev/using/omarchy/)
+- An [Android app](https://system-bridge.timmo.dev/using/android/),
+  from F-Droid or each release, with notifications, quick settings tiles and
+  sharing
 
 ## Installation
 

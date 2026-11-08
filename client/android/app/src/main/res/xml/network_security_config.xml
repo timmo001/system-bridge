@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  System Bridge serves plain HTTP on the local network, at any hostname or
+  address, and a network security config can't name private address ranges.
+  The WebView only keeps the paired computers' origins and the app's own, and
+  the app only calls paired computers, so plain HTTP reaches nothing else.
+-->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

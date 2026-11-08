@@ -92,6 +92,7 @@ import {
   Notification,
   NotificationDismissRequest,
   NotificationEvent,
+  NotificationPressRequest,
   NotificationSent,
   OmarchyMenuRequest,
   OmarchyPanelRequest,
@@ -368,6 +369,10 @@ export interface Interface {
   /** Closes a notification System Bridge sent. Linux only. */
   readonly dismissNotification: (
     request: NotificationDismissRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Presses a button on a notification System Bridge sent, as if pressed on the computer, and closes it. Linux only. */
+  readonly pressNotification: (
+    request: NotificationPressRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** The notifications System Bridge sends, and clicks on and closes of them, from any client. Clicks are Linux and Windows only, and closes Linux only. */
   readonly notificationEvents: Stream.Stream<NotificationEvent>;
@@ -1565,6 +1570,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const pressNotification = Effect.fn(
+    "SystemBridgeWebSocket.pressNotification",
+  )(function* (request: NotificationPressRequest) {
+    yield* call(
+      "NOTIFICATION_PRESS",
+      "NOTIFICATION_PRESSED",
+      NotificationPressRequest,
+      request,
+      ignoreReply,
+    );
+  });
+
   const omarchyMenu = Effect.fn("SystemBridgeWebSocket.omarchyMenu")(function* (
     menu: OmarchyMenuRequest,
   ) {
@@ -1688,6 +1705,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     mediaControl,
     sendNotification,
     dismissNotification,
+    pressNotification,
     omarchyMenu,
     omarchyPanel,
     open,

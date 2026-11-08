@@ -64,6 +64,7 @@ export const EventType = Schema.Literals([
   "MEDIA_CONTROL",
   "NOTIFICATION",
   "NOTIFICATION_DISMISS",
+  "NOTIFICATION_PRESS",
   "OMARCHY_MENU",
   "OMARCHY_PANEL",
   "OPEN",
@@ -149,6 +150,7 @@ export const ResponseType = Schema.Literals([
   "NOTIFICATION_ACTION",
   "NOTIFICATION_CLOSED",
   "NOTIFICATION_DISMISSED",
+  "NOTIFICATION_PRESSED",
   "NOTIFICATION_SENT",
   "OMARCHY_MENU_CHANGED",
   "OMARCHY_PANEL_CHANGED",
@@ -421,6 +423,21 @@ export const NotificationDismissRequest = Schema.Struct({ id: Schema.Int });
 
 export interface NotificationDismissRequest extends Schema.Schema.Type<
   typeof NotificationDismissRequest
+> {}
+
+/**
+ * Presses a button on a notification System Bridge sent, from somewhere
+ * else, such as a phone: clients get the same `NOTIFICATION_ACTION`, and it
+ * closes. Linux only.
+ */
+export const NotificationPressRequest = Schema.Struct({
+  id: Schema.Int,
+  /** The button's id. */
+  action: Schema.String,
+});
+
+export interface NotificationPressRequest extends Schema.Schema.Type<
+  typeof NotificationPressRequest
 > {}
 
 /** A notification System Bridge sent was sent, clicked, or closed. A sent one has neither `action` nor `reason`. */

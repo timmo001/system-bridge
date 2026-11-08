@@ -1,0 +1,29 @@
+{
+  "name": "@system-bridge/android-page",
+  "private": true,
+  "description": "The pairing page bundled into the System Bridge Android app",
+  "type": "module",
+  "scripts": {
+    "build": "bun run src/build.ts",
+    "lint": "oxlint .",
+    "typecheck": "tsc",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@timmo001/groundwork-mobile": "0.13.0",
+    "@timmo001/groundwork-pwa": "0.13.0",
+    "@timmo001/groundwork-tokens": "0.13.0",
+    "@timmo001/groundwork-ui": "0.13.0",
+    "effect": "4.1.2"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.90.0",
+    "@timmo001/oxlint-rules": "0.6.4",
+    "@types/bun": "1.4.4",
+    "oxlint": "1.90.0",
+    "oxlint-tsgolint": "7.0.2005",
+    "prettier": "3.9.10",
+    "typescript": "7.0.2"
+  }
+}

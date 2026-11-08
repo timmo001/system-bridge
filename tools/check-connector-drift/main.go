@@ -108,6 +108,7 @@ var handlerPairs = map[string]pairing{
 	"KeyboardTextRequestData":            {[]string{"KeyboardText"}, []string{"KeyboardText"}},
 	"MediaControlRequestData":            {[]string{"MediaControl"}, []string{"MediaControl"}},
 	"NotificationDismissRequestData":     {[]string{"NotificationDismissRequest"}, []string{"NotificationDismissRequest"}},
+	"NotificationPressRequestData":       {[]string{"NotificationPressRequest"}, []string{"NotificationPressRequest"}},
 	"NotificationEventData":              {[]string{"NotificationEvent"}, []string{"NotificationEvent"}},
 	"OmarchyRequestData":                 {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},
 	"ProcessKillRequestData":             {[]string{"ProcessKillRequest"}, []string{"ProcessKillRequest"}},

@@ -20,6 +20,13 @@ type NotificationDismissRequestData struct {
 	ID uint32 `json:"id" mapstructure:"id"`
 }
 
+type NotificationPressRequestData struct {
+	// The id NOTIFICATION_SENT replied with
+	ID uint32 `json:"id" mapstructure:"id"`
+	// The id of the button to press
+	Action string `json:"action" mapstructure:"action"`
+}
+
 // NotificationEventData is sent to every client when a notification
 // System Bridge sent is sent, clicked or closes
 type NotificationEventData struct {
@@ -107,6 +114,23 @@ func RegisterNotificationHandler(router *event.MessageRouter) {
 		},
 		func(_ context.Context, request NotificationDismissRequestData) error {
 			return notification.Dismiss(request.ID)
+		})
+
+	// A button pressed somewhere else, such as on a phone the notification
+	// was pushed to
+	registerAction(router, nil, "", notificationTimeout, event.EventNotificationPress, event.ResponseTypeNotificationPressed, "Notification button pressed",
+		func(request NotificationPressRequestData) string {
+			if request.ID == 0 {
+				return "No notification id provided"
+			}
+			if request.Action == "" || request.Action == notification.DefaultAction {
+				return "No button id provided"
+			}
+			return ""
+		},
+		func(_ context.Context, request NotificationPressRequestData) error {
+			notification.Press(request.ID, request.Action)
+			return nil
 		})
 }
 

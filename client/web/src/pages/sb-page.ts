@@ -19,6 +19,7 @@ import {
   connectionStatus,
   retryConnection,
 } from "~/lib/atoms";
+import { inApp, openComputers } from "~/lib/mobile";
 import { documentTitle } from "~/lib/navigation";
 import { href } from "~/lib/router";
 
@@ -120,9 +121,13 @@ export abstract class SbPage extends LitElement {
         >
           <p>${error}</p>
           <div slot="actions" class="row wrap" style="justify-content: center">
-            <gw-button href=${href("connection")}
-              >Connection settings</gw-button
-            >
+            ${
+              inApp
+                ? html`<gw-button @click=${openComputers}>Computers</gw-button>`
+                : html`<gw-button href=${href("connection")}
+                    >Connection settings</gw-button
+                  >`
+            }
             <gw-button
               appearance="filled"
               icon=${mdiRefresh}

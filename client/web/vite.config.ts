@@ -1,8 +1,12 @@
+import { headTags, writePwa } from "@timmo001/groundwork-pwa/build";
 import { themeBootScript } from "@timmo001/groundwork-tokens/page";
-import { defineConfig } from "vite";
+import { build, defineConfig } from "vite";
 import { resolve } from "path";
 
+import pwaConfig from "./pwa.config";
 import { themeOptions } from "./src/lib/theme-options";
+
+const outDir = resolve(import.meta.dirname, "dist");
 
 export default defineConfig({
   plugins: [
@@ -18,9 +22,44 @@ export default defineConfig({
         },
       ],
     },
+    {
+      // The manifest link and the browser bar's colours for each mode
+      name: "pwa-head",
+      transformIndexHtml: (html) =>
+        html.replace(
+          "</head>",
+          `  ${headTags(pwaConfig, "/manifest.webmanifest")}\n  </head>`,
+        ),
+    },
+    {
+      // The manifest, and the service worker as one classic script, as it's
+      // registered without `type: "module"` and can't import chunks
+      name: "pwa-build",
+      apply: "build",
+      closeBundle: async () => {
+        await writePwa(pwaConfig, { outDir });
+        await build({
+          configFile: false,
+          logLevel: "warn",
+          define: { SW_VERSION: JSON.stringify(Date.now().toString(36)) },
+          build: {
+            outDir,
+            emptyOutDir: false,
+            copyPublicDir: false,
+            sourcemap: true,
+            lib: {
+              entry: resolve(import.meta.dirname, "src/sw.ts"),
+              formats: ["iife"],
+              name: "systemBridgeWorker",
+              fileName: () => "sw.js",
+            },
+          },
+        });
+      },
+    },
   ],
   build: {
-    outDir: "dist",
+    outDir,
     emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {

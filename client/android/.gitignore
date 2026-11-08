@@ -1,0 +1,6 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+# Built from page/ by `bun run build` there
+app/src/main/assets/

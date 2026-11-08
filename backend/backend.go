@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"mime"
 	"net/http"
 	"path"
 	"strings"
@@ -31,6 +32,7 @@ import (
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
+	"github.com/timmo001/system-bridge/push"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -71,6 +73,13 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
 		token:            token,
+	}
+}
+
+// The web client's PWA manifest, which Go's table doesn't know
+func init() {
+	if err := mime.AddExtensionType(".webmanifest", "application/manifest+json"); err != nil {
+		slog.Warn("Failed to register the web manifest type", "error", err)
 	}
 }
 
@@ -133,10 +142,44 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 	})
 
+	// Phones and browsers subscribed to pushes hear about notifications and
+	// releases while they're closed. Without the store the backend runs as
+	// before, with no push routes.
+	pushStore, err := push.Load()
+	if err != nil {
+		slog.Warn("Failed to load push subscriptions, so nothing will be pushed", "error", err)
+	} else {
+		go push.WatchUpdates(ctx, pushStore)
+	}
+
 	// Every client hears when a notification System Bridge sent is sent,
 	// clicked or closes, as it may have sent it
 	notification.OnEvent(func(e notification.Event) {
 		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
+		if pushStore == nil {
+			return
+		}
+		tag := fmt.Sprintf("notification-%d", e.ID)
+		switch {
+		case e.Sent:
+			actions := make([]push.Action, 0, len(e.Buttons))
+			for _, button := range e.Buttons {
+				actions = append(actions, push.Action{ID: button.ID, Label: button.Label})
+			}
+			go pushStore.Send(ctx, push.KindNotifications, push.Payload{
+				Title:        e.Title,
+				Body:         e.Message,
+				Tag:          tag,
+				Link:         "/system#notifications",
+				Notification: e.ID,
+				Actions:      actions,
+			})
+		case e.Reason == "dismissed" || e.Reason == "closed":
+			// Closed on the computer, by someone or NOTIFICATION_DISMISS, so
+			// it goes from the phones too. One that timed out on the screen
+			// stays, as it was never seen there.
+			go pushStore.Dismiss(ctx, tag)
+		}
 	})
 	defer notification.OnEvent(nil)
 
@@ -184,6 +227,20 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
+
+	// Pairing hands a phone the API token for a one-time code from a QR code
+	pairCodes := api_http.NewPairCodes()
+	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.token, pairCodes)))
+	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.token, pairCodes, api_http.ThisService())))
+
+	// One event over HTTP, for what has no WebSocket, such as a phone's tiles
+	mux.HandleFunc("/api/event", api_http.AllowOrigins(api_http.EventHandler(b.token, b.eventRouter)))
+
+	if pushStore != nil {
+		mux.HandleFunc("/api/push/vapid-key", api_http.AllowOrigins(api_http.PushVAPIDKeyHandler(b.token, pushStore)))
+		mux.HandleFunc("/api/push/subscriptions", api_http.AllowOrigins(api_http.PushSubscriptionsHandler(b.token, pushStore)))
+		mux.HandleFunc("/api/push/preferences", api_http.AllowOrigins(api_http.PushPreferencesHandler(b.token, pushStore)))
+	}
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,52 @@
+---
+title: Pairing
+description: Hand a phone the API token through a one-time code from a QR code, over the HTTP API.
+---
+
+Pairing connects a phone without typing an address or the API token. A client that already has the token, such as the web client, makes a one-time code and shows its link as a QR code. The phone scans it and trades the code for the token.
+
+Pairing hands over the same API token every client uses. There's no token for each phone, so to stop a phone connecting, change the token.
+
+## Make a code
+
+Needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+
+```http
+POST /api/pair/code
+X-API-Token: {token}
+```
+
+```json title="Response"
+{
+  "code": "MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
+  "link": "http://desk.local:9170/?ip=192.168.1.5&pair=MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
+  "expiresAt": "2026-11-08T18:31:54Z"
+}
+```
+
+The code works once, for 5 minutes. When the request came to a name, such as `desk.lan`, `link` keeps it. When it came to an address, or `localhost`, `link` uses this computer's mDNS name, such as `desk.local`, which still finds it when its address changes. The address rides along in `ip`, or for `localhost` this computer's IPv4 address on the default route, for a phone that can't resolve the name. The Android app tries the name first, then `ip`, and keeps whichever answers.
+
+## Trade a code for the token
+
+Takes no token, as the code is the credential.
+
+```http
+POST /api/pair
+Content-Type: application/json
+
+{
+  "code": "MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR",
+  "client": { "id": "4c1f…", "name": "Pixel 9", "platform": "android" }
+}
+```
+
+```json title="Response"
+{
+  "token": "{token}",
+  "service": { "id": "460a64ce-6fcd-4f32-b7a5-a6f0d3546c87", "name": "desk" }
+}
+```
+
+`service.id` is the same `uuid` System Bridge advertises over mDNS, so a computer found that way matches the one paired. `service.name` is its hostname.
+
+An unknown, used or expired code gets `401`. Codes are 160 random bits, so they can't practically be guessed.
