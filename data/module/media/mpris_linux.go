@@ -40,13 +40,16 @@ func (p mprisPlayer) status() string {
 }
 
 // state is the player's status as clients expect it: PLAYING, PAUSED or
-// STOPPED
+// STOPPED. A paused player with no track, such as KDE Connect's bridge with
+// nothing playing, has nothing to resume, so it's STOPPED.
 func (p mprisPlayer) state() string {
 	switch p.status() {
 	case "Playing":
 		return "PLAYING"
 	case "Paused":
-		return "PAUSED"
+		if p.title() != "" {
+			return "PAUSED"
+		}
 	}
 	return "STOPPED"
 }

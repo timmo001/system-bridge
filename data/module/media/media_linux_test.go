@@ -59,6 +59,21 @@ func TestDescribePlayer(t *testing.T) {
 	}
 }
 
+func TestDescribePlayerPausedWithoutTrack(t *testing.T) {
+	player := mprisPlayer{
+		instance: "kdeconnect.mpris_000001",
+		properties: map[string]dbus.Variant{
+			"PlaybackStatus": dbus.MakeVariant("Paused"),
+			"CanControl":     dbus.MakeVariant(true),
+			"CanPlay":        dbus.MakeVariant(true),
+		},
+	}
+
+	if described := describePlayer(player); described.Status != "STOPPED" {
+		t.Errorf("status = %q, want STOPPED", described.Status)
+	}
+}
+
 func TestDescribeTopLevel(t *testing.T) {
 	duration := 180.0
 	player := types.MediaPlayer{

@@ -148,6 +148,10 @@ func getMediaData(_ context.Context, mediaData types.MediaData) (types.MediaData
 				s = "STOPPED"
 			}
 		}
+		// A paused session with no track has nothing to resume
+		if s == "PAUSED" && metadata.Title == "" {
+			s = "STOPPED"
+		}
 		mediaData.Status = &s
 	}
 	mediaData.Type = &metadata.PlayerName
