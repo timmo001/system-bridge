@@ -190,6 +190,18 @@ func (s *Store) Unsubscribe(endpoint string) error {
 	return s.save()
 }
 
+// UnsubscribeClient drops a client's subscription, for removing it from a
+// list that never shows endpoints
+func (s *Store) UnsubscribeClient(clientID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.state.Subscriptions = slices.DeleteFunc(s.state.Subscriptions, func(sub Subscription) bool {
+		return sub.Client.ID == clientID
+	})
+	return s.save()
+}
+
 // SetKinds sets which kinds a client gets
 func (s *Store) SetKinds(clientID string, kinds []Kind) error {
 	s.mu.Lock()

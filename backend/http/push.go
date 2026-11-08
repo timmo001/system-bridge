@@ -94,14 +94,23 @@ func PushSubscriptionsHandler(token string, store *push.Store) http.HandlerFunc 
 			w.WriteHeader(http.StatusNoContent)
 
 		case http.MethodDelete:
+			// The client unsubscribing knows its endpoint; the phones list
+			// only knows the client
 			var body struct {
 				Endpoint string `json:"endpoint"`
+				ClientID string `json:"clientId"`
 			}
-			if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes)).Decode(&body); err != nil || body.Endpoint == "" {
+			if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes)).Decode(&body); err != nil || (body.Endpoint == "" && body.ClientID == "") {
 				writeError(w, http.StatusBadRequest, "Invalid request")
 				return
 			}
-			if err := store.Unsubscribe(body.Endpoint); err != nil {
+			var err error
+			if body.Endpoint != "" {
+				err = store.Unsubscribe(body.Endpoint)
+			} else {
+				err = store.UnsubscribeClient(body.ClientID)
+			}
+			if err != nil {
 				slog.Error("Failed to drop a push subscription", "error", err)
 				writeError(w, http.StatusInternalServerError, "Failed to drop the subscription")
 				return

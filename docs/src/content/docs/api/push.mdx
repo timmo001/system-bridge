@@ -53,6 +53,8 @@ Content-Type: application/json
 { "endpoint": "https://push.example.com/…" }
 ```
 
+To remove another client, such as one in the [list](#list-subscriptions), which never shows endpoints, send `{ "clientId": "4c1f…" }` instead.
+
 Answers `204`. A subscription whose push service answers `404` or `410` is dropped too.
 
 ## List subscriptions
