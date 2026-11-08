@@ -246,10 +246,27 @@ const computerRow = (computer: Computer) => {
   return item;
 };
 
+const phone = find("#phone", HTMLElement);
+const mediaSwitch = fieldOf(find("form.phone", HTMLFormElement), "media");
+
+// Off until turned on, as it keeps a connection to the computer while
+// something plays
+mediaSwitch.addEventListener("change", () => {
+  void mobile.call("setMediaControls", Schema.Boolean, {
+    enabled: mediaSwitch.checked,
+  });
+});
+
 const renderPaired = async () => {
   const computers = mobile.shell ? await mobile.call("servers", Computers) : [];
 
   paired.hidden = computers.length === 0;
+  phone.hidden = computers.length === 0;
+
+  if (computers.length > 0) {
+    mediaSwitch.checked = await mobile.call("mediaControls", Schema.Boolean);
+  }
+
   find("#paired .list", HTMLElement).replaceChildren(
     ...computers.map(computerRow),
   );

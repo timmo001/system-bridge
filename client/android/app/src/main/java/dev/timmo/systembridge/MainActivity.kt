@@ -202,6 +202,12 @@ class MainActivity : ShellActivity() {
     frame.addView(refresh, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
   }
 
+  /** Media controls start with the app, as a service can't start from the background. */
+  override fun onResume() {
+    super.onResume()
+    MediaControls.start(this)
+  }
+
   /**
    * When a paired computer's page can't load, such as with the computer
    * asleep, gone from the network or at a new address, the bundled page
@@ -215,6 +221,8 @@ class MainActivity : ShellActivity() {
           override fun onPageFinished(view: WebView, url: String?) {
             super.onPageFinished(view, url)
             refresh?.isRefreshing = false
+            // Media controls follow the computer whose page opened
+            MediaControls.start(this@MainActivity)
 
             // The bridge holds the share until the page connects
             val (id, share) = heldShare ?: return
@@ -327,6 +335,15 @@ class MainActivity : ShellActivity() {
         AppShortcuts.visit(this, server, request.paramsObject.getJSONObject("page"), request.paramsObject.getJSONArray("defaults"))
       }
       reply.ok(server != null)
+    }
+
+    bridge.handle("mediaControls") { _, reply -> reply.ok(MediaControls.enabled(this)) }
+
+    bridge.handle("setMediaControls") { request, reply ->
+      val enabled = request.paramsObject.getBoolean("enabled")
+
+      MediaControls.set(this, enabled)
+      reply.ok(enabled)
     }
 
     // The share dialog sending its share to another paired computer

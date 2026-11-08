@@ -1,7 +1,8 @@
 <!doctype html>
 <!--
   The computers page, bundled into the app: the paired computers, to open,
-  edit or remove, then three ways to add one: scan a computer's pairing
+  edit or remove, this phone's media controls, then three ways to add one:
+  scan a computer's pairing
   code, pick one found on the network, or enter one by hand. Once one is
   paired, the app opens its own web client instead.
 -->
@@ -46,6 +47,16 @@
         description="Tap one to open it."
       >
         <div class="list" role="list"></div>
+      </gw-card>
+
+      <gw-card id="phone" hidden heading="This phone">
+        <form class="phone">
+          <gw-switch
+            name="media"
+            label="Media controls"
+            hint="Show what's playing on the current computer in the notifications and on the lock screen. The app stays connected to it while something plays."
+          ></gw-switch>
+        </form>
       </gw-card>
 
       <h2 class="section">Add a computer</h2>

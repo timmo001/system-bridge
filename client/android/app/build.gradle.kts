@@ -80,4 +80,8 @@ dependencies {
   // The shell's push service, which the app's own extends, at the shell's
   // version
   implementation("org.unifiedpush.android:connector:3.3.5")
+  // Media controls: the system's media session for the computer's player,
+  // and the WebSocket that keeps it current
+  implementation("androidx.media3:media3-session:1.11.1")
+  implementation("com.squareup.okhttp3:okhttp:5.5.1")
 }

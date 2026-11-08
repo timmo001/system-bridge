@@ -6,13 +6,15 @@
   without which neither the computer's page nor the tiles can reach it. The
   shell's own manifest adds the internet and notifications. The app's push
   service replaces the shell's, so it can name each push's computer and
-  press its buttons on it.
+  press its buttons on it. Media controls run as a media playback service.
 -->
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
   <application
     android:icon="@mipmap/ic_launcher"
@@ -59,6 +61,16 @@
     <receiver
       android:name=".PressReceiver"
       android:exported="false" />
+
+    <!-- Media controls for the computer's player, which the system binds to -->
+    <service
+      android:name=".MediaControlService"
+      android:exported="true"
+      android:foregroundServiceType="mediaPlayback">
+      <intent-filter>
+        <action android:name="androidx.media3.session.MediaSessionService" />
+      </intent-filter>
+    </service>
 
     <service
       android:name=".LockTileService"
