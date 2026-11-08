@@ -22,6 +22,7 @@ import { currentLocation, href, type Location, navigate } from "./lib/router";
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
 import { mobileConnection } from "./lib/mobile";
+import { watchForUpdates } from "./lib/update";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
@@ -48,6 +49,8 @@ const jumpOptions: readonly OptionItem[] = jumpItems.map((item) => ({
 }));
 
 registerPageTools();
+
+watchForUpdates();
 
 const renderPage = (location: Location) => {
   switch (location.name) {
