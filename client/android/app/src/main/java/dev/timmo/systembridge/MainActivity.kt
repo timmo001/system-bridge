@@ -78,6 +78,44 @@ class MainActivity : ShellActivity() {
 
   private var refresh: SwipeRefreshLayout? = null
 
+  /** A share for a computer whose page is loading, by its id, given to it once loaded. */
+  private var heldShare: Pair<String, JSONObject>? = null
+
+  /**
+   * Sends each share to the right computer's page. One sent to a computer's
+   * sharing shortcut goes to that computer. Otherwise, with more than one
+   * paired, it goes to the one in use, by idle time, or the current one when
+   * none answers; with one, straight to it.
+   */
+  override fun shareOf(intent: Intent?): JSONObject? {
+    val share = super.shareOf(intent) ?: return null
+    val servers = Servers.all(this)
+    val target = servers.find { server -> share.optString("shortcutId") == AppShortcuts.SHARE_PREFIX + server.id }
+
+    when {
+      target != null -> shareWith(target, share)
+      servers.size > 1 -> Api.inUse(servers) { inUse -> (inUse ?: Servers.current(this))?.let { server -> shareWith(server, share) } }
+      else -> return share
+    }
+
+    return null
+  }
+
+  /**
+   * Gives a share to a computer's page: now when it's open, otherwise once
+   * that computer, made the current one, has loaded.
+   */
+  private fun shareWith(server: Server, share: JSONObject) {
+    if (webView.url?.let(Servers::originOf) == server.origin) {
+      bridge.send("share", share)
+      return
+    }
+
+    Servers.select(this, server.id)
+    heldShare = server.id to share
+    webView.loadUrl(startUrl)
+  }
+
   /**
    * Whether the page under the current touch is at its top, so a pull may
    * refresh, or `null` while the page is asked. The layout only follows a
@@ -177,6 +215,14 @@ class MainActivity : ShellActivity() {
           override fun onPageFinished(view: WebView, url: String?) {
             super.onPageFinished(view, url)
             refresh?.isRefreshing = false
+
+            // The bridge holds the share until the page connects
+            val (id, share) = heldShare ?: return
+
+            if (url != null && Servers.at(this@MainActivity, url)?.id == id) {
+              heldShare = null
+              bridge.send("share", share)
+            }
           }
 
           override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceErrorCompat) {
@@ -249,7 +295,7 @@ class MainActivity : ShellActivity() {
       if (url == server.url && token == server.token) {
         Servers.update(this, server.copy(name = name))
         // Shortcuts name their computer when there's more than one
-        PageShortcuts.publish(this)
+        AppShortcuts.publish(this)
         reply.ok(true)
         return@handle
       }
@@ -261,7 +307,7 @@ class MainActivity : ShellActivity() {
               reply.error("A different computer answered at $url")
             } else {
               Servers.update(this, server.copy(name = name, url = url, token = token))
-              PageShortcuts.publish(this)
+              AppShortcuts.publish(this)
               reply.ok(true)
               // Stays on the computers page, with the new origin allowed
               refreshOrigins(webView.url ?: pairingUrl)
@@ -278,22 +324,36 @@ class MainActivity : ShellActivity() {
       val server = webView.url?.let { url -> Servers.at(this, url) }
 
       if (server != null) {
-        PageShortcuts.visit(this, server, request.paramsObject.getJSONObject("page"), request.paramsObject.getJSONArray("defaults"))
+        AppShortcuts.visit(this, server, request.paramsObject.getJSONObject("page"), request.paramsObject.getJSONArray("defaults"))
       }
       reply.ok(server != null)
+    }
+
+    // The share dialog sending its share to another paired computer
+    bridge.handle("shareTo") { request, reply ->
+      val params = request.paramsObject
+      val server = Servers.all(this).find { server -> server.id == params.getString("id") }
+
+      if (server == null) {
+        reply.error("That computer isn't paired")
+        return@handle
+      }
+
+      reply.ok(true)
+      shareWith(server, params.getJSONObject("share"))
     }
 
     bridge.handle("pinPage") { request, reply ->
       val server = webView.url?.let { url -> Servers.at(this, url) }
 
-      reply.ok(server != null && PageShortcuts.pin(this, server, request.paramsObject))
+      reply.ok(server != null && AppShortcuts.pin(this, server, request.paramsObject))
     }
 
     bridge.handle("removeServer") { request, reply ->
       val id = request.paramsObject.getString("id")
 
       Servers.remove(this, id)
-      PageShortcuts.forget(this, id)
+      AppShortcuts.forget(this, id)
       reply.ok(true)
       // Stays on the page it's on, with the forgotten origin dropped
       refreshOrigins(webView.url ?: pairingUrl)

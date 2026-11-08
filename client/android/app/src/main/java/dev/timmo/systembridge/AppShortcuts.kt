@@ -1,10 +1,11 @@
 /**
- * Launcher shortcuts to the computers' pages: the pages used most, learned
- * from the visits the web client passes on, with a starting set until there
- * are enough, and any page pinned to the home screen. Each opens
- * `systembridge://computer/<uuid>/<path>`, which `MainActivity.deepLinkUrl`
- * maps to the computer's address at the time, so a computer that moved still
- * opens.
+ * The app's shortcuts. Launcher shortcuts to the computers' pages: the pages
+ * used most, learned from the visits the web client passes on, with a
+ * starting set until there are enough, and any page pinned to the home
+ * screen. Then a sharing shortcut for each computer, in the share sheet's
+ * direct row. Each opens `systembridge://computer/<uuid>/<path>`, which
+ * `MainActivity.deepLinkUrl` maps to the computer's address at the time, so
+ * a computer that moved still opens.
  */
 package dev.timmo.systembridge
 
@@ -13,7 +14,14 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.pow
 
-object PageShortcuts {
+object AppShortcuts {
+  /** A sharing shortcut's id: `share:` and its computer's uuid. */
+  const val SHARE_PREFIX = "share:"
+
+  /** Material Design Icons' monitor-share, for the sharing shortcuts. */
+  private const val SHARE_ICON =
+    "M23 4V16C23 17.11 22.11 18 21 18H15V16H21V4H3V16H9V18H3C1.9 18 1 17.11 1 16V4C1 2.89 1.89 2 3 2H21C22.1 2 23 2.89 23 4M13 13H16L12 9L8 13H11V20H8V22H16V20H13V13Z"
+
   private const val PREFS = "systembridge.shortcuts"
   private const val VISITS = "visits"
   private const val DEFAULTS = "defaults"
@@ -91,11 +99,12 @@ object PageShortcuts {
   }
 
   /**
-   * Forgets a removed computer's pages: its long-press shortcuts go, and any
-   * pinned ones are greyed out.
+   * Forgets a removed computer's shortcuts: its long-press and sharing ones
+   * go, and any pinned ones are greyed out.
    */
   fun forget(activity: MainActivity, serverId: String) {
-    val ids = activity.shortcuts.ids().filter { id -> id.startsWith("page:$serverId:") }
+    val ids =
+      activity.shortcuts.ids().filter { id -> id.startsWith("page:$serverId:") || id == "$SHARE_PREFIX$serverId" }
 
     if (ids.isNotEmpty()) activity.shortcuts.disable(ids, activity.getString(R.string.shortcut_removed))
     prefs(activity)
@@ -107,8 +116,10 @@ object PageShortcuts {
 
   /**
    * Publishes the pages used most across the paired computers, filled up
-   * with the starting set on the current one, when they changed. With more
-   * than one computer, each names its computer.
+   * with the starting set on the current one, then a sharing shortcut for
+   * each computer, when they changed. With more than one computer, each page
+   * names its computer. The sharing shortcuts come last, as Android shows
+   * them on a long press too, and the first few there are the pages.
    */
   fun publish(activity: MainActivity) {
     val servers = Servers.all(activity)
@@ -125,7 +136,17 @@ object PageShortcuts {
         Visit(current.id, page.getString("path"), page.getString("label"), page.optString("icon"), 0.0, 0)
       }
     val pages = (ranked + starting).distinctBy { visit -> visit.server to visit.path }.take(SHOWN)
-    val list = JSONArray(pages.map { visit -> shortcut(visit, names[visit.server].orEmpty(), servers.size > 1) })
+    val sharing =
+      servers.map { server ->
+        JSONObject()
+          .put("id", "$SHARE_PREFIX${server.id}")
+          .put("label", server.name)
+          .put("longLabel", activity.getString(R.string.shortcut_share, server.name))
+          .put("url", link(server.id, "/"))
+          .put("icon", SHARE_ICON)
+          .put("share", true)
+      }
+    val list = JSONArray(pages.map { visit -> shortcut(visit, names[visit.server].orEmpty(), servers.size > 1) } + sharing)
     val text = list.toString()
 
     if (prefs(activity).getString(PUBLISHED, null) == text) return

@@ -68,6 +68,39 @@ export const inApp = globalThis.groundworkShell !== undefined;
 export const openComputers = () =>
   void mobile.then((current) => current.call("showPairing", Schema.Boolean));
 
+/** A computer paired with the app, as it lists them, never with its token. */
+const Computer = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  url: Schema.String,
+  /** The one the app has open, which is this page's. */
+  current: Schema.Boolean,
+});
+
+export interface Computer extends Schema.Schema.Type<typeof Computer> {}
+
+/** The computers paired with the app. */
+export const pairedComputers = async (): Promise<readonly Computer[]> =>
+  (await mobile).call("servers", Schema.Array(Computer));
+
+const shareJson = Schema.encodeSync(Schema.toCodecJson(ShellShare));
+
+/**
+ * Sends a share on to another paired computer: the app opens it, and its
+ * page asks what to do with the share.
+ */
+export const shareToComputer = async (
+  id: string,
+  share: Share,
+): Promise<void> => {
+  await (
+    await mobile
+  ).call("shareTo", Schema.Boolean, {
+    id,
+    share: shareJson(share),
+  });
+};
+
 /** The connection, for components to read once it's made. */
 export const mobileConnection = Atom.make(Effect.promise(() => mobile)).pipe(
   Atom.keepAlive,

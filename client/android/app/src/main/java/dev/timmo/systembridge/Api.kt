@@ -1,6 +1,7 @@
 /**
  * The few calls the app makes to a computer itself, rather than through its
- * page: pairing, checking a computer added by hand, and the tiles' events.
+ * page: pairing, checking a computer added by hand, finding the one in use
+ * for a share, and the tiles' events.
  * The pairing page can't make them, as it's served over HTTPS and can't
  * fetch a computer's plain HTTP address. Each runs off the main thread and
  * answers on it.
@@ -12,10 +13,14 @@ import android.os.Handler
 import android.os.Looper
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import org.json.JSONObject
 
 object Api {
+  /** How long a share waits on each computer to say whether it's in use. */
+  private const val IN_USE_TIMEOUT_MS = 3_000
+
   private val io = Executors.newSingleThreadExecutor()
   private val main = Handler(Looper.getMainLooper())
 
@@ -88,6 +93,39 @@ object Api {
       }
     }
 
+  /**
+   * The paired computer in use: of those that answer within a few seconds,
+   * the one whose person was idle the least, from its system data. One that
+   * answers without an idle time comes after those with one. Null when none
+   * answers.
+   */
+  fun inUse(servers: List<Server>, done: (Server?) -> Unit) =
+    run<Server?>({ done(it.getOrNull()) }) {
+      val pool = Executors.newFixedThreadPool(servers.size.coerceAtLeast(1))
+
+      try {
+        pool
+          .invokeAll(servers.map { server -> Callable { server to idleTime(server) } })
+          .mapNotNull { future -> runCatching { future.get() }.getOrNull() }
+          .filter { (_, idle) -> idle != null }
+          .minByOrNull { (_, idle) -> idle ?: Long.MAX_VALUE }
+          ?.first
+      } finally {
+        pool.shutdown()
+      }
+    }
+
+  /** Seconds since a computer's person last did anything, or null when it doesn't answer. */
+  private fun idleTime(server: Server): Long? {
+    val (status, body) = request("GET", "${server.url}api/data/system", server.token, null, IN_USE_TIMEOUT_MS)
+
+    if (status != 200) return null
+
+    val system = JSONObject(body)
+
+    return if (system.isNull("idle_time")) Long.MAX_VALUE else system.optLong("idle_time")
+  }
+
   /** Runs one event on a computer, such as POWER_LOCK, saying whether it did. */
   fun event(server: Server, name: String, data: JSONObject = JSONObject(), done: (Boolean) -> Unit) =
     run<Boolean>({ done(it.getOrDefault(false)) }) {
@@ -105,13 +143,19 @@ object Api {
     }
   }
 
-  private fun request(method: String, url: String, token: String?, body: JSONObject?): Pair<Int, String> {
+  private fun request(
+    method: String,
+    url: String,
+    token: String?,
+    body: JSONObject?,
+    timeoutMs: Int = 15_000,
+  ): Pair<Int, String> {
     val connection = URL(url).openConnection() as HttpURLConnection
 
     try {
       connection.requestMethod = method
-      connection.connectTimeout = 15_000
-      connection.readTimeout = 15_000
+      connection.connectTimeout = timeoutMs
+      connection.readTimeout = timeoutMs
       token?.let { connection.setRequestProperty("X-API-Token", it) }
 
       if (body != null) {

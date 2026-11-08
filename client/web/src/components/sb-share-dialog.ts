@@ -2,13 +2,22 @@ import { mdiContentCopy, mdiOpenInNew } from "@mdi/js";
 import "@timmo001/groundwork-ui/define/gw-alert.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-dialog.ts";
+import "@timmo001/groundwork-ui/define/gw-select.ts";
 import type { Share } from "@timmo001/groundwork-pwa/view";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, open, registry, setClipboard } from "~/lib/atoms";
-import { pendingShare, setPendingShare } from "~/lib/mobile";
+import {
+  type Computer,
+  inApp,
+  pairedComputers,
+  pendingShare,
+  setPendingShare,
+  shareToComputer,
+} from "~/lib/mobile";
+import { selectValue } from "~/lib/select";
 
 /** The link a share carries, in its URL or as its whole text. */
 const sharedUrl = (share: Share): string | undefined => {
@@ -23,7 +32,9 @@ const sharedUrl = (share: Share): string | undefined => {
 
 /**
  * What to do with something shared from another app: open a link on the
- * computer, or put text on its clipboard. It opens while a share waits.
+ * computer, or put text on its clipboard. It opens while a share waits. In
+ * the app, with more than one computer paired, it says which one the share
+ * is for, and sends it on to another when picked.
  */
 @customElement("sb-share-dialog")
 export class SbShareDialog extends LitElement {
@@ -43,10 +54,57 @@ export class SbShareDialog extends LitElement {
   /** Which action this share ran, so only its result shows. */
   @state() private ran: "open" | "copy" | undefined;
 
+  /** In the app, the paired computers, read when a share arrives. */
+  @state() private computers: readonly Computer[] | undefined;
+
+  protected override updated(): void {
+    if (!inApp || this.#share.value === null || this.computers !== undefined) {
+      return;
+    }
+
+    this.computers = [];
+    void pairedComputers().then((computers) => {
+      this.computers = computers;
+    });
+  }
+
   #close = () => {
     this.ran = undefined;
+    this.computers = undefined;
     setPendingShare(null);
   };
+
+  /** Another computer picked: the app opens it, and the share goes with it. */
+  #onComputer = (event: Event) => {
+    const share = this.#share.value;
+    const id = selectValue(event);
+
+    if (share === null || this.computers?.find((c) => c.id === id)?.current) {
+      return;
+    }
+
+    void shareToComputer(id, share);
+    this.#close();
+  };
+
+  /** Which computer the share goes to, and a choice of the others. */
+  #renderComputers() {
+    const computers = this.computers ?? [];
+
+    if (computers.length < 2) return nothing;
+
+    const options = computers.map((computer) => ({
+      value: computer.id,
+      label: computer.name,
+    }));
+
+    return html`<gw-select
+      label="Send to"
+      .options=${options}
+      .value=${computers.find((computer) => computer.current)?.id ?? ""}
+      @change=${this.#onComputer}
+    ></gw-select>`;
+  }
 
   #onOpen = () => {
     const share = this.#share.value;
@@ -93,6 +151,7 @@ export class SbShareDialog extends LitElement {
     return html`
       <gw-dialog heading="Send to the computer" open @close=${this.#close}>
         <p>${share.title === undefined ? text : `${share.title}: ${text}`}</p>
+        ${this.#renderComputers()}
         ${
           result === null
             ? nothing

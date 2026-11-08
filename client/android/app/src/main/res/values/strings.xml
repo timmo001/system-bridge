@@ -9,4 +9,5 @@
   <string name="tile_asleep">Asleep</string>
   <string name="tile_unreachable">Couldn\'t reach %1$s</string>
   <string name="shortcut_removed">That computer was removed from the app</string>
+  <string name="shortcut_share">Send to %1$s</string>
 </resources>
