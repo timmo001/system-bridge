@@ -9,8 +9,6 @@ import {
   mdiPaletteOutline,
   mdiServerNetwork,
 } from "@mdi/js";
-import { Option, Schema } from "effect";
-import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
@@ -25,7 +23,7 @@ import { currentLocation, href, type Location, navigate } from "./lib/router";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
-import { mobileConnection } from "./lib/mobile";
+import { inApp, openComputers } from "./lib/mobile";
 import { watchForUpdates } from "./lib/update";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
@@ -38,11 +36,14 @@ import "./pages/page-settings-devices";
 
 /**
  * Every page, for the command menu in the header, which is the app's
- * navigation, grouped by area.
+ * navigation, grouped by area. The Android app keeps its computers' addresses
+ * and tokens itself, so it has no connection page.
  */
 const jumpItems: readonly (NavItem & { readonly group: string })[] =
   navigation.flatMap((section) =>
-    section.items.map((item) => ({ ...item, group: section.label || "Pages" })),
+    section.items
+      .filter((item) => !(inApp && item.href === href("connection")))
+      .map((item) => ({ ...item, group: section.label || "Pages" })),
   );
 
 const jumpOptions: readonly OptionItem[] = jumpItems.map((item) => ({
@@ -63,6 +64,13 @@ const renderPage = (location: Location) => {
     case "module":
       return html`<page-module .location=${location}></page-module>`;
     case "connection":
+      // In the app, its computers page stands in for it
+      if (inApp) {
+        openComputers();
+
+        return nothing;
+      }
+
       return html`<page-connection></page-connection>`;
     case "settings":
       return html`<page-settings></page-settings>`;
@@ -184,8 +192,6 @@ export class SbApp extends LitElement {
 
   readonly #settings = new AtomController(this, () => connectionSettings);
 
-  readonly #mobile = new AtomController(this, () => mobileConnection);
-
   @query(".commands") private commands?: GwCommandMenu;
 
   #openCommands = () => {
@@ -196,24 +202,12 @@ export class SbApp extends LitElement {
     navigate(event.detail.value);
   };
 
-  #openComputers = () => {
-    const current = Option.getOrUndefined(
-      AsyncResult.value(this.#mobile.value),
-    );
-
-    void current?.call("showPairing", Schema.Boolean);
-  };
-
   /**
    * In the Android app, a button that opens the app's own computers page,
    * where they're opened, edited, removed and added.
    */
   #renderComputers() {
-    const current = Option.getOrUndefined(
-      AsyncResult.value(this.#mobile.value),
-    );
-
-    if (current?.shell !== true) return nothing;
+    if (!inApp) return nothing;
 
     return html`<gw-button
       slot="actions"
@@ -221,12 +215,19 @@ export class SbApp extends LitElement {
       appearance="plain"
       labels="hide"
       icon=${mdiServerNetwork}
-      @click=${this.#openComputers}
+      @click=${openComputers}
       >Computers</gw-button
     >`;
   }
 
+  /**
+   * The connection's status, opening the connection page. Not in the app,
+   * where its computers page does that, and a computer it can't reach gets
+   * the app's offline page.
+   */
   #renderStatus() {
+    if (inApp) return nothing;
+
     const { isConnected, error } = this.#status.value;
     const { host, port } = this.#settings.value;
 

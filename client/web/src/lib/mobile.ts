@@ -33,6 +33,20 @@ export const mobile: Promise<Mobile> = connectMobile(mobileConfig, {
   onAndroidTheme: (colors) => void setAndroidTheme(colors),
 });
 
+/**
+ * Whether the page is inside the Android app, known at once: the shell puts
+ * its bridge on the page before it loads.
+ */
+export const inApp = globalThis.groundworkShell !== undefined;
+
+/**
+ * Opens the app's computers page, where its computers are opened, edited,
+ * removed and added. The app keeps their addresses and tokens, so in the
+ * app it stands in for the connection page.
+ */
+export const openComputers = () =>
+  void mobile.then((current) => current.call("showPairing", Schema.Boolean));
+
 /** The connection, for components to read once it's made. */
 export const mobileConnection = Atom.make(Effect.promise(() => mobile)).pipe(
   Atom.keepAlive,
