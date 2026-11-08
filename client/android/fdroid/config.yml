@@ -1,0 +1,16 @@
+---
+# The F-Droid repository the release updates on R2, served at
+# android.timmo.dev and signed with the same key as the APK. It's shared with
+# Groundwork's apps, so each app's release adds to it. Every secret comes from
+# the environment, so this file holds none.
+repo_url: https://android.timmo.dev/repo
+repo_name: timmo.dev
+repo_description: Android apps by Aidan Timson, signed by their author.
+repo_keyalias:
+  env: ANDROID_KEY_ALIAS
+keystore:
+  env: ANDROID_KEYSTORE_FILE
+keystorepass:
+  env: ANDROID_KEYSTORE_PASSWORD
+keypass:
+  env: ANDROID_KEY_PASSWORD
