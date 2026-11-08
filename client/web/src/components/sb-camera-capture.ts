@@ -17,6 +17,7 @@ import {
   registry,
   settings,
 } from "~/lib/atoms";
+import { mobile } from "~/lib/mobile";
 import { href } from "~/lib/router";
 
 const sizeLabel = (size: CameraSize) => `${size.width} × ${size.height}`;
@@ -72,6 +73,24 @@ export class SbCameraCapture extends LitElement {
       cameraCaptureSize(camera.id),
       camera.sizes.find((size) => sizeLabel(size) === value) ?? null,
     );
+  };
+
+  /**
+   * Saves the picture: to the phone's Downloads in the Android app, whose
+   * WebView ignores a download link to it, and as a download elsewhere.
+   */
+  #onDownload = async () => {
+    const camera = this.camera;
+    const picture = this.#picture.value;
+
+    if (!camera || !AsyncResult.isSuccess(picture)) return;
+
+    const { content_type: type, image } = picture.value;
+    const blob = await (await fetch(`data:${type};base64,${image}`)).blob();
+
+    await (
+      await mobile
+    ).saveFile({ name: `${camera.id}.jpg`, type, contents: blob });
   };
 
   #renderSize(camera: Camera) {
@@ -140,9 +159,8 @@ export class SbCameraCapture extends LitElement {
                 appearance="plain"
                 size="small"
                 icon=${mdiDownload}
-                ><a href=${source} download="${camera.id}.jpg"
-                  >Download</a
-                ></gw-button
+                @click=${this.#onDownload}
+                >Download</gw-button
               >`
         }
       </div>

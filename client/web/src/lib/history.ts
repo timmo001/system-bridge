@@ -9,6 +9,7 @@ import { Effect, Option } from "effect";
 import { AsyncResult, Atom } from "effect/reactivity";
 
 import { type BridgeError, fnSocket, latestModuleData, socket } from "./atoms";
+import { mobile } from "./mobile";
 
 /** How far back the backend keeps readings, in milliseconds. */
 export const historyWindow = 24 * 60 * 60 * 1000;
@@ -298,21 +299,11 @@ export interface HistoryExport {
   readonly modules?: readonly ModuleName[];
 }
 
-/** Saves a file through the browser's download. */
-const download = (name: string, type: string, contents: string) => {
-  const url = URL.createObjectURL(new Blob([contents], { type }));
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = name;
-  link.click();
-  URL.revokeObjectURL(url);
-};
-
 /**
  * Downloads the backend's history, or some modules', as CSV with a row per
  * reading or as JSON in the shape `GET_HISTORY` returns, named for the host,
- * modules and time.
+ * modules and time. The Android app saves it to the phone's Downloads, as
+ * its WebView ignores a download link the page makes.
  */
 export const exportHistory = Atom.fn(
   ({ format, modules }: HistoryExport, get) => {
@@ -326,29 +317,28 @@ export const exportHistory = Atom.fn(
       Effect.flatMap((bridge) =>
         bridge.getHistory(some === undefined ? {} : { modules: some }),
       ),
-      Effect.tap((history) =>
-        Effect.sync(() => {
-          const host = get(latestModuleData).system?.hostname ?? "system";
-          const stamp = new Date().toISOString().slice(0, 16).replace(":", "-");
+      Effect.tap((history) => {
+        const host = get(latestModuleData).system?.hostname ?? "system";
+        const stamp = new Date().toISOString().slice(0, 16).replace(":", "-");
 
-          const name = [
-            "system-bridge-history",
-            host,
-            ...(some ?? []),
-            `${stamp}.${format}`,
-          ].join("-");
+        const name = [
+          "system-bridge-history",
+          host,
+          ...(some ?? []),
+          `${stamp}.${format}`,
+        ].join("-");
 
-          if (format === "csv") {
-            download(name, "text/csv", historyToCsv(history));
-          } else {
-            download(
-              name,
-              "application/json",
-              `${JSON.stringify(history, null, 2)}\n`,
-            );
-          }
-        }),
-      ),
+        const file =
+          format === "csv"
+            ? { name, type: "text/csv", contents: historyToCsv(history) }
+            : {
+                name,
+                type: "application/json",
+                contents: `${JSON.stringify(history, null, 2)}\n`,
+              };
+
+        return Effect.promise(async () => (await mobile).saveFile(file));
+      }),
     );
   },
 );
