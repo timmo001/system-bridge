@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -40,6 +41,7 @@ func RegisterPowerHibernateHandler(router *event.MessageRouter) {
 
 		go func() {
 			time.Sleep(1 * time.Second)
+			noticeBeforePower(types.PowerStateSleeping)
 
 			// Hibernate the system
 			if err := Hibernate(); err != nil {
