@@ -35,6 +35,10 @@ The integration can send notifications to your machine, so an automation can tel
 - Send [`NOTIFICATION`](/api/websocket/control/#send-notification) over the WebSocket. It also takes a `duration` in milliseconds, an `actionPath` to open a file or folder when clicked, an `urgency`, and up to 3 `buttons`.
 - Agents can use the [MCP server](/api/mcp/)'s `system_bridge_send_notification` tool.
 
+## Following a notification
+
+Every connected client gets a [`NOTIFICATION_SENT`](/api/websocket/control/#notification-events) event when System Bridge sends a notification, with its `id`, title and message, whoever sent it. The events below carry the same `id`, so a notification can be followed from being sent to being clicked or closed, even one sent from Home Assistant, which gets no `id` back. The web client lists the recent ones this way, under **Notifications** on the **System** page.
+
 ## Buttons, clicks and dismissing
 
 On Linux, a notification can have up to 3 buttons, such as **Snooze** and **Done**. When one is pressed, or the notification itself is clicked, every connected client gets a [`NOTIFICATION_ACTION`](/api/websocket/control/#notification-events) event with the notification's `id` and which button it was. So an automation can react to the answer. A `NOTIFICATION_CLOSED` event follows when it closes, saying whether it expired or was dismissed.
@@ -54,6 +58,7 @@ Set `urgency` to `critical` for a notification that stays until it's dismissed, 
 | Sound | Played with `paplay` or `aplay` | Windows plays its own notification sound |
 | Urgency | Yes | No |
 | Buttons, and events when clicked or closed | Yes | No |
+| Event when sent | Yes | Yes |
 | Dismissing | Yes | No |
 
 On Linux, notifications need a notification daemon, which most desktops include.

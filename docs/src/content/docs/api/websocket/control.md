@@ -489,14 +489,15 @@ The response type is `NOTIFICATION_SENT`, and its data is what was sent with the
 
 ### Notification events
 
-On Linux, every connected client is sent an event when a notification System Bridge sent is clicked or closes, whichever client sent it:
+Every connected client is sent an event when a notification System Bridge sent is sent, clicked or closes, whichever client, or the CLI or MCP server, sent it. So a notification can be followed by its `id` from start to finish, even one sent by a client that gets no `id` back.
 
 | Type | Data |
 | --- | --- |
-| `NOTIFICATION_ACTION` | `id`, and `action`: the button's `id`, or `default` when the notification itself was clicked |
-| `NOTIFICATION_CLOSED` | `id`, and `reason`: `expired`, `dismissed` (by you) or `closed` (with `NOTIFICATION_DISMISS`) |
+| `NOTIFICATION_SENT` | `id`, `title` and `message`. The `id` is `0` where the notification can't be followed |
+| `NOTIFICATION_ACTION` | `id`, and `action`: the button's `id`, or `default` when the notification itself was clicked. Linux only |
+| `NOTIFICATION_CLOSED` | `id`, and `reason`: `expired`, `dismissed` (by you) or `closed` (with `NOTIFICATION_DISMISS`). Linux only |
 
-These come with the `id` `system`, as they don't answer a request.
+These come with the `id` `system`, as they don't answer a request. That tells the sent event apart from the `NOTIFICATION_SENT` reply to your own `NOTIFICATION` request, which has your request's `id`. The sender gets both.
 
 ### Dismiss notification
 
