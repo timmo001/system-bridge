@@ -1506,7 +1506,7 @@ class WebSocketClient(Base):
         Hyprland, once listening for the desktop module.
         notification_event_callback gets each notification System Bridge
         sends, and each click on, or close of, one, from any client. Clicks
-        and closes are Linux only.
+        are Linux and Windows only, and closes Linux only.
         power_state_callback gets each change just before the host sleeps or
         shuts down, and again when it wakes.
         """

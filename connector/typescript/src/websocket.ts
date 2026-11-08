@@ -369,7 +369,7 @@ export interface Interface {
   readonly dismissNotification: (
     request: NotificationDismissRequest,
   ) => Effect.Effect<void, WebSocketError>;
-  /** The notifications System Bridge sends, and clicks on and closes of them, from any client. Clicks and closes are Linux only. */
+  /** The notifications System Bridge sends, and clicks on and closes of them, from any client. Clicks are Linux and Windows only, and closes Linux only. */
   readonly notificationEvents: Stream.Stream<NotificationEvent>;
   /** Opens, closes or toggles the Omarchy menu at a route. */
   readonly omarchyMenu: (
