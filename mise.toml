@@ -155,7 +155,7 @@ run = "echo 'Downloading the NowPlaying helper is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/download-now-playing.ps1"
 
 [tasks."nix:hashes"]
-description = "Refresh the Nix package's dependency hashes, running Nix in Docker when it isn't installed"
+description = "Refresh the Nix package's dependency hashes, running Nix rootless through nix-portable when it isn't installed"
 run = "./.scripts/linux/update-nix-hashes.sh"
 
 [tasks."nix:post-commit"]

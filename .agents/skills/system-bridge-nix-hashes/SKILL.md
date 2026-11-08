@@ -12,7 +12,7 @@ description: Keep the System Bridge Nix package's dependency hashes current. Use
 A `post-commit` hook handles it: after a commit that touches `go.mod`, `go.sum`, `bun.lock` or a `package.json`, it refreshes the hashes and commits `nix/package.nix` as "Update Nix dependency hashes". Commit as usual with `dot git commit`, then check that commit is there before pushing.
 
 - The hook needs installing once per checkout: `mise run install:hooks`, which has mise generate it to run the hidden `nix:post-commit` task.
-- Without Nix installed, the script runs Nix in Docker. When the user can't reach the Docker socket, it runs Docker through `pkexec`, so expect an authorisation prompt for each build attempt (up to three). Don't suggest adding the user to the `docker` group. The first run fetches a few hundred MB into the `system-bridge-nix` volume; later runs are quicker.
+- Without Nix installed, the script has mise fetch [nix-portable](https://github.com/DavHau/nix-portable), which runs Nix rootless (through bwrap or proot), so it needs no Docker, root or authorisation prompt. The first run fetches a few hundred MB into `~/.nix-portable`; later runs are quicker.
 - When the hook can't refresh the hashes it says so and leaves the commit alone. Run `mise run nix:hashes`, then commit `nix/package.nix` on its own.
 - It skips commits replayed by a rebase, and leaves `nix/package.nix` alone when it already has uncommitted edits.
 
