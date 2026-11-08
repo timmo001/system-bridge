@@ -97,12 +97,18 @@ const page = pageTheme({
 
 const modes: readonly ThemeMode[] = ["auto", "light", "dark", "darker"];
 
-const choices = (custom: string | null) => [
+/** Offers the phone's dynamic colour, inside the Android app. */
+export const setAndroidTheme = page.setAndroidTheme;
+
+const choices = (custom: string | null, android: ThemeChoice | null) => [
   ...themeChoices.map(({ id, name, group }) => ({
     value: id,
     label: name,
     group,
   })),
+  ...(android === null
+    ? []
+    : [{ value: android.id, label: android.name, group: "Phone" }]),
   ...(custom === null ? [] : [{ value: "custom", label: custom }]),
 ];
 
@@ -112,7 +118,7 @@ export const bindThemePicker = (picker: GwThemePicker) => {
     const state = page.state();
     picker.mode = state.mode;
     picker.theme = state.theme;
-    picker.themes = choices(state.custom);
+    picker.themes = choices(state.custom, state.android);
   };
 
   sync();

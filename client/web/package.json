@@ -28,10 +28,13 @@
     "@tanstack/charts": "1.1.0",
     "@tanstack/lit-table": "9.3.1",
     "@timmo001/effect-system-bridge": "workspace:*",
+    "@timmo001/groundwork-mobile": "0.13.0",
+    "@timmo001/groundwork-pwa": "0.13.0",
     "@timmo001/groundwork-tokens": "0.13.0",
     "@timmo001/groundwork-ui": "0.13.0",
     "effect": "4.1.2",
-    "lit": "^3.3.2"
+    "lit": "^3.3.2",
+    "uqr": "0.1.3"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.90.0",
