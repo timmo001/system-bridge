@@ -16,6 +16,7 @@ System Bridge shows notifications through your desktop's own notifications, so t
    - **Link**: a URL to open when the notification is clicked.
    - **Sound**: the path to a sound file on that machine.
    - **Urgency**: low, normal or critical. Critical notifications stay until they're dismissed. Linux only.
+   - **Buttons**: up to 3, each with an id and a label. Linux and Windows only.
 4. Select **Send**. **Clear** empties the form.
 
 ### From the terminal
@@ -37,7 +38,7 @@ The integration can send notifications to your machine, so an automation can tel
 
 ## Following a notification
 
-Every connected client gets a [`NOTIFICATION_SENT`](/api/websocket/control/#notification-events) event when System Bridge sends a notification, with its `id`, title and message, whoever sent it. The events below carry the same `id`, so a notification can be followed from being sent to being clicked or closed, even one sent from Home Assistant, which gets no `id` back. The web client lists the recent ones this way, under **Notifications** on the **System** page.
+Every connected client gets a [`NOTIFICATION_SENT`](/api/websocket/control/#notification-events) event when System Bridge sends a notification, with its `id`, title, message and buttons, whoever sent it. The events below carry the same `id`, so a notification can be followed from being sent to being clicked or closed, even one sent from Home Assistant, which gets no `id` back. The web client lists the recent ones this way, under **Notifications** on the **System** page.
 
 ## Buttons, clicks and dismissing
 

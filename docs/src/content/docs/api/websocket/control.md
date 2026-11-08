@@ -493,7 +493,7 @@ Every connected client is sent an event when a notification System Bridge sent i
 
 | Type | Data |
 | --- | --- |
-| `NOTIFICATION_SENT` | `id`, `title` and `message`. The `id` is `0` where the notification can't be followed |
+| `NOTIFICATION_SENT` | `id`, `title` and `message`, and `buttons` when it has any, each with its `id` and `label`, so a `NOTIFICATION_ACTION` can be matched to the button's label. The `id` is `0` where the notification can't be followed |
 | `NOTIFICATION_ACTION` | `id`, and `action`: the button's `id`, or `default` when the notification itself was clicked. Linux only |
 | `NOTIFICATION_CLOSED` | `id`, and `reason`: `expired`, `dismissed` (by you) or `closed` (with `NOTIFICATION_DISMISS`). Linux only |
 
