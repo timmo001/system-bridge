@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -31,6 +32,7 @@ import (
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
+	"github.com/timmo001/system-bridge/push"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -41,6 +43,24 @@ import (
 )
 
 const readHeaderTimeout = 10 * time.Second
+
+// powerPushTimeout is how long the push saying the host is going down may
+// take, while the system goes down around it
+const powerPushTimeout = 4 * time.Second
+
+// powerPayload is the push saying this host is going to sleep or shutting
+// down
+func powerPayload(state types.PowerState) push.Payload {
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = "This computer"
+	}
+	title := hostname + " is going to sleep"
+	if state == types.PowerStateShuttingDown {
+		title = hostname + " is shutting down"
+	}
+	return push.Payload{Title: title, Level: "passive", Tag: "power", Link: "/"}
+}
 
 type Backend struct {
 	settings         *settings.Settings
@@ -133,10 +153,28 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 	})
 
+	// Phones and browsers subscribed to pushes hear about notifications,
+	// releases and the host going down while they're closed. Without the
+	// store the backend runs as before, with no push routes.
+	pushStore, err := push.Load()
+	if err != nil {
+		slog.Warn("Failed to load push subscriptions, so nothing will be pushed", "error", err)
+	} else {
+		go push.WatchUpdates(ctx, pushStore)
+	}
+
 	// Every client hears when a notification System Bridge sent is sent,
 	// clicked or closes, as it may have sent it
 	notification.OnEvent(func(e notification.Event) {
 		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
+		if e.Sent && pushStore != nil {
+			go pushStore.Send(ctx, push.KindNotifications, push.Payload{
+				Title: e.Title,
+				Body:  e.Message,
+				Tag:   fmt.Sprintf("notification-%d", e.ID),
+				Link:  "/system#notifications",
+			})
+		}
 	})
 	defer notification.OnEvent(nil)
 
@@ -152,6 +190,15 @@ func (b *Backend) Run(ctx context.Context) error {
 		})
 		if state == types.PowerStateResumed {
 			b.discoveryManager.Announce()
+			return
+		}
+		// After the broadcast, as the system only waits a second for this.
+		// It carries on past that while the system goes down, so a push
+		// that's quick enough still leaves.
+		if pushStore != nil {
+			sendCtx, cancelSend := context.WithTimeout(ctx, powerPushTimeout)
+			pushStore.Send(sendCtx, push.KindPower, powerPayload(state))
+			cancelSend()
 		}
 	})
 
@@ -184,6 +231,20 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
+
+	// Pairing hands a phone the API token for a one-time code from a QR code
+	pairCodes := api_http.NewPairCodes()
+	mux.HandleFunc("/api/pair/code", api_http.PairCodeHandler(b.token, pairCodes))
+	mux.HandleFunc("/api/pair", api_http.PairHandler(b.token, pairCodes, api_http.ThisService()))
+
+	// One event over HTTP, for what has no WebSocket, such as a phone's tiles
+	mux.HandleFunc("/api/event", api_http.EventHandler(b.token, b.eventRouter))
+
+	if pushStore != nil {
+		mux.HandleFunc("/api/push/vapid-key", api_http.PushVAPIDKeyHandler(b.token, pushStore))
+		mux.HandleFunc("/api/push/subscriptions", api_http.PushSubscriptionsHandler(b.token, pushStore))
+		mux.HandleFunc("/api/push/preferences", api_http.PushPreferencesHandler(b.token, pushStore))
+	}
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
