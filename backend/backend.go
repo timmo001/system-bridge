@@ -234,16 +234,16 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Pairing hands a phone the API token for a one-time code from a QR code
 	pairCodes := api_http.NewPairCodes()
-	mux.HandleFunc("/api/pair/code", api_http.PairCodeHandler(b.token, pairCodes))
-	mux.HandleFunc("/api/pair", api_http.PairHandler(b.token, pairCodes, api_http.ThisService()))
+	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.token, pairCodes)))
+	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.token, pairCodes, api_http.ThisService())))
 
 	// One event over HTTP, for what has no WebSocket, such as a phone's tiles
-	mux.HandleFunc("/api/event", api_http.EventHandler(b.token, b.eventRouter))
+	mux.HandleFunc("/api/event", api_http.AllowOrigins(api_http.EventHandler(b.token, b.eventRouter)))
 
 	if pushStore != nil {
-		mux.HandleFunc("/api/push/vapid-key", api_http.PushVAPIDKeyHandler(b.token, pushStore))
-		mux.HandleFunc("/api/push/subscriptions", api_http.PushSubscriptionsHandler(b.token, pushStore))
-		mux.HandleFunc("/api/push/preferences", api_http.PushPreferencesHandler(b.token, pushStore))
+		mux.HandleFunc("/api/push/vapid-key", api_http.AllowOrigins(api_http.PushVAPIDKeyHandler(b.token, pushStore)))
+		mux.HandleFunc("/api/push/subscriptions", api_http.AllowOrigins(api_http.PushSubscriptionsHandler(b.token, pushStore)))
+		mux.HandleFunc("/api/push/preferences", api_http.AllowOrigins(api_http.PushPreferencesHandler(b.token, pushStore)))
 	}
 
 	// Set up WebSocket endpoint
