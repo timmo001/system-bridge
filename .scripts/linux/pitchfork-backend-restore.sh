@@ -20,6 +20,10 @@ service)
   ;;
 process)
   mapfile -d '' -t restore_cmd <"$restore_dir/cmdline"
+  exe="$(cat "$restore_dir/exe" 2>/dev/null || true)"
+  if [ -x "$exe" ]; then
+    restore_cmd[0]="$exe"
+  fi
   cwd="$(cat "$restore_dir/cwd")"
   rm -rf "$restore_dir"
   cd "$cwd"

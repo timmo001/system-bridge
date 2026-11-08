@@ -40,6 +40,9 @@ else
     system-bridge | system-bridge-linux)
       record process
       cp "/proc/$pid/cmdline" "$restore_dir/cmdline"
+      # The command line may name the binary through PATH, which can find a
+      # different build when the hook reruns it
+      owner_exe "$pid" >"$restore_dir/exe"
       readlink -f "/proc/$pid/cwd" >"$restore_dir/cwd" 2>/dev/null || pwd >"$restore_dir/cwd"
       break
       ;;
