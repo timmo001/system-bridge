@@ -1,0 +1,423 @@
+import {
+  mdiCellphoneLink,
+  mdiContentCopy,
+  mdiDeleteOutline,
+  mdiQrcode,
+  mdiRefresh,
+} from "@mdi/js";
+import type {
+  Mobile,
+  MobilePushOptions,
+  ShellPushState,
+} from "@timmo001/groundwork-mobile/view";
+import { Option } from "effect";
+import { AsyncResult } from "effect/reactivity";
+import { css, html, nothing, svg } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { encode } from "uqr";
+
+import { AtomController } from "~/controllers/atom-controller";
+import { connectionSettings, registry } from "~/lib/atoms";
+import { mobile, pushClient } from "~/lib/mobile";
+import {
+  baseUrl,
+  pairingCode,
+  PushKind,
+  type PushSubscriber,
+  pushSubscribers,
+  removePushSubscriber,
+  setPushKinds,
+} from "~/lib/phones";
+
+import { SbPage } from "./sb-page";
+
+const kindInfo: Readonly<
+  Record<PushKind, { readonly heading: string; readonly description: string }>
+> = {
+  notifications: {
+    heading: "Notifications",
+    description: "The notifications System Bridge shows on this computer",
+  },
+  updates: {
+    heading: "Updates",
+    description: "When a new System Bridge release is out",
+  },
+  power: {
+    heading: "Sleep and shut down",
+    description: "When this computer goes to sleep or shuts down",
+  },
+};
+
+const time = new Intl.DateTimeFormat(undefined, { timeStyle: "short" });
+
+const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+
+/** A QR code drawn from its modules, so it needs no markup from a string. */
+const qrCode = (text: string) => {
+  const { size, data } = encode(text, { border: 2, ecc: "M" });
+
+  const path = data
+    .flatMap((row, y) =>
+      row.flatMap((dark, x) => (dark ? [`M${x} ${y}h1v1h-1z`] : [])),
+    )
+    .join("");
+
+  return html`<svg
+    class="qr"
+    viewBox="0 0 ${size} ${size}"
+    shape-rendering="crispEdges"
+    role="img"
+    aria-label="QR code for the pairing link"
+  >
+    ${svg`<rect width=${size} height=${size} fill="#fff"></rect><path d=${path} fill="#000"></path>`}
+  </svg>`;
+};
+
+/** The kinds a subscriber gets, as words, such as "Notifications, Updates". */
+const kindsText = (kinds: readonly PushKind[]) =>
+  kinds.length === 0
+    ? "Nothing"
+    : kinds.map((kind) => kindInfo[kind].heading).join(", ");
+
+/**
+ * Pairing phones with this computer through a QR code, the phones and
+ * browsers it pushes to, and this device's own pushes.
+ */
+@customElement("page-settings-phones")
+export class PageSettingsPhones extends SbPage {
+  static override styles = [
+    ...SbPage.styles,
+    css`
+      .pairing {
+        display: grid;
+        grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+        gap: var(--gw-space-4);
+        align-items: start;
+      }
+
+      @media (width < 40rem) {
+        .pairing {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .qr {
+        width: 100%;
+        max-width: 14rem;
+        aspect-ratio: 1;
+        border-radius: var(--gw-radius-m);
+      }
+    `,
+  ];
+
+  protected readonly pageTitle = "Phones";
+
+  readonly #settings = new AtomController(this, () => connectionSettings);
+
+  readonly #code = new AtomController(this, () => pairingCode);
+
+  readonly #subscribers = new AtomController(this, () => pushSubscribers);
+
+  readonly #remove = new AtomController(this, () => removePushSubscriber);
+
+  readonly #kinds = new AtomController(this, () => setPushKinds);
+
+  /** The shell or the PWA's pieces, once connected. */
+  @state() private mobile: Mobile | undefined;
+
+  /** Whether this device gets pushes, or `undefined` while it's checked. */
+  @state() private push: ShellPushState | undefined;
+
+  @state() private pushBusy = false;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    void mobile.then(async (connected) => {
+      this.mobile = connected;
+      this.push = await connected.pushState();
+    });
+  }
+
+  #makeCode = () => {
+    registry.set(pairingCode, undefined);
+  };
+
+  #copyLink = (event: Event) => {
+    const link =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget.dataset.link
+        : undefined;
+
+    if (link !== undefined) void navigator.clipboard.writeText(link);
+  };
+
+  #onRemove = (event: Event) => {
+    const id =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget.dataset.client
+        : undefined;
+
+    if (id !== undefined) registry.set(removePushSubscriber, id);
+  };
+
+  /** Where this device's pushes are kept, with the token to reach it. */
+  #pushOptions(current: Mobile): MobilePushOptions {
+    const settings = this.#settings.value;
+
+    return {
+      service: `${baseUrl(settings)}/api/`,
+      client: pushClient(current),
+      headers: { "X-API-Token": settings.token ?? "" },
+    };
+  }
+
+  #onPushToggle = async (event: Event) => {
+    const current = this.mobile;
+
+    if (current === undefined || !(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.pushBusy = true;
+
+    try {
+      if (event.target.checked) {
+        this.push = await current.subscribePush(this.#pushOptions(current));
+      } else {
+        await current.unsubscribePush(this.#pushOptions(current));
+        this.push = await current.pushState();
+      }
+    } finally {
+      this.pushBusy = false;
+      registry.refresh(pushSubscribers);
+    }
+  };
+
+  #onKindToggle = (event: Event) => {
+    const target = event.target;
+    const current = this.mobile;
+
+    if (current === undefined || !(target instanceof HTMLInputElement)) return;
+
+    const id = pushClient(current).id;
+    const mine = this.#subscriberList().find((sub) => sub.client.id === id);
+    const kind = PushKind.literals.find((known) => known === target.name);
+
+    if (mine === undefined || kind === undefined) return;
+
+    registry.set(setPushKinds, {
+      clientId: id,
+      kinds: target.checked
+        ? [...mine.kinds.filter((known) => known !== kind), kind]
+        : mine.kinds.filter((known) => known !== kind),
+    });
+  };
+
+  #subscriberList(): readonly PushSubscriber[] {
+    return Option.getOrElse(
+      AsyncResult.value(this.#subscribers.value),
+      () => [],
+    );
+  }
+
+  #renderPairing() {
+    const result = this.#code.value;
+    const code = Option.getOrUndefined(AsyncResult.value(result));
+
+    return html`
+      <gw-card
+        heading="Pair a phone"
+        description="Scan this with the System Bridge app on your phone. Pairing gives the phone this computer's API token."
+        icon=${mdiQrcode}
+        level=${this.cardLevel}
+      >
+        ${
+          code === undefined
+            ? html`<gw-button
+                appearance="filled"
+                icon=${mdiQrcode}
+                ?loading=${result.waiting}
+                @click=${this.#makeCode}
+                >Make a pairing code</gw-button
+              >`
+            : html`<div class="pairing">
+                ${qrCode(code.link)}
+                <div class="stack">
+                  <p class="mono small break">${code.link}</p>
+                  <p class="muted small">
+                    Works once, until ${time.format(new Date(code.expiresAt))}
+                  </p>
+                  <div class="row wrap">
+                    ${
+                      navigator.clipboard === undefined
+                        ? nothing
+                        : html`<gw-button
+                            icon=${mdiContentCopy}
+                            data-link=${code.link}
+                            @click=${this.#copyLink}
+                            >Copy the link</gw-button
+                          >`
+                    }
+                    <gw-button
+                      icon=${mdiRefresh}
+                      ?loading=${result.waiting}
+                      @click=${this.#makeCode}
+                      >New code</gw-button
+                    >
+                  </div>
+                </div>
+              </div>`
+        }
+        ${
+          AsyncResult.isFailure(result)
+            ? html`<p class="error-text">
+                ${Option.match(AsyncResult.error(result), {
+                  onNone: () => "Couldn't make a pairing code",
+                  onSome: (error) => error.message,
+                })}
+              </p>`
+            : nothing
+        }
+      </gw-card>
+    `;
+  }
+
+  #renderSubscribers() {
+    const result = this.#subscribers.value;
+    const list = this.#subscriberList();
+
+    return html`
+      <gw-card
+        heading="Phones and browsers getting pushes"
+        description="Each chooses what it gets, on the device itself"
+        icon=${mdiCellphoneLink}
+        level=${this.cardLevel}
+      >
+        ${
+          AsyncResult.isFailure(result)
+            ? html`<p class="error-text">
+                ${Option.match(AsyncResult.error(result), {
+                  onNone: () => "Couldn't load the list",
+                  onSome: (error) => error.message,
+                })}
+              </p>`
+            : list.length === 0
+              ? html`<p class="muted small">
+                  ${result.waiting ? "Loading…" : "Nothing is subscribed yet."}
+                </p>`
+              : list.map(
+                  (sub) => html`
+                    <gw-setting-row
+                      heading=${sub.client.name}
+                      description="${sub.client.platform === "android" ? "Android app" : "Browser"} · ${kindsText(sub.kinds)} · Added ${date.format(new Date(sub.created))}"
+                    >
+                      <gw-button
+                        variant="danger"
+                        appearance="plain"
+                        icon=${mdiDeleteOutline}
+                        data-client=${sub.client.id}
+                        ?loading=${this.#remove.value.waiting}
+                        @click=${this.#onRemove}
+                        >Remove</gw-button
+                      >
+                    </gw-setting-row>
+                  `,
+                )
+        }
+      </gw-card>
+    `;
+  }
+
+  #renderThisDevice() {
+    const current = this.mobile;
+
+    if (current === undefined || this.push === undefined) return nothing;
+
+    if (!current.shell && this.push === "unsupported") {
+      return html`
+        <gw-card heading="This browser" level=${this.cardLevel}>
+          <p class="muted small">
+            Pushes need the System Bridge app, or this page over HTTPS.
+          </p>
+        </gw-card>
+      `;
+    }
+
+    const mine = this.#subscriberList().find(
+      (sub) => sub.client.id === pushClient(current).id,
+    );
+
+    return html`
+      <gw-card
+        heading=${current.shell ? "This phone" : "This browser"}
+        level=${this.cardLevel}
+      >
+        <gw-setting-row
+          heading="Get pushes"
+          description=${
+            this.push === "denied"
+              ? "Notifications are blocked. Allow them in the system's settings."
+              : "Hear from this computer while the app is closed"
+          }
+        >
+          <gw-switch
+            label="Get pushes"
+            label-hidden
+            .checked=${this.push === "subscribed"}
+            ?disabled=${this.pushBusy || this.push === "denied"}
+            @change=${this.#onPushToggle}
+          ></gw-switch>
+        </gw-setting-row>
+        ${
+          mine === undefined
+            ? nothing
+            : PushKind.literals.map(
+                (kind) => html`
+                  <gw-setting-row
+                    heading=${kindInfo[kind].heading}
+                    description=${kindInfo[kind].description}
+                  >
+                    <gw-switch
+                      label=${kindInfo[kind].heading}
+                      label-hidden
+                      name=${kind}
+                      .checked=${mine.kinds.includes(kind)}
+                      ?disabled=${this.#kinds.value.waiting}
+                      @change=${this.#onKindToggle}
+                    ></gw-switch>
+                  </gw-setting-row>
+                `,
+              )
+        }
+      </gw-card>
+    `;
+  }
+
+  override render() {
+    return html`
+      <div class="page narrow">
+        ${this.renderHeader({
+          heading: "Phones",
+          description:
+            "Pair the System Bridge app, and choose who hears from this computer",
+          icon: mdiCellphoneLink,
+        })}
+        ${this.gate(
+          () => html`
+            ${this.#renderPairing()} ${this.#renderThisDevice()}
+            ${this.#renderSubscribers()}
+          `,
+          html`<gw-skeleton
+            style="min-height: 18rem; border-radius: var(--gw-radius-l)"
+          ></gw-skeleton>`,
+        )}
+      </div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "page-settings-phones": PageSettingsPhones;
+  }
+}

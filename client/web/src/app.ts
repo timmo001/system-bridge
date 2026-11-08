@@ -26,6 +26,7 @@ import "./pages/page-not-found";
 import "./pages/page-overview";
 import "./pages/page-settings";
 import "./pages/page-settings-appearance";
+import "./pages/page-settings-phones";
 
 /**
  * Every page, for the command menu in the header, which is the app's
@@ -57,6 +58,8 @@ const renderPage = (location: Location) => {
       return html`<page-settings></page-settings>`;
     case "settingsAppearance":
       return html`<page-settings-appearance></page-settings-appearance>`;
+    case "settingsPhones":
+      return html`<page-settings-phones></page-settings-phones>`;
     case "notFound":
       return html`<page-not-found .path=${location.path}></page-not-found>`;
   }
