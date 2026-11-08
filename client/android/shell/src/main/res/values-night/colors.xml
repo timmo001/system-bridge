@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The notifications' accent in dark mode. -->
+<!-- The notifications' accent and the shortcut icons' colors in dark mode. -->
 <resources>
   <color name="gw_notification_color">#3A404A</color>
+  <color name="gw_shortcut_foreground">#E5E8EC</color>
+  <color name="gw_shortcut_background">#1B1E23</color>
 </resources>

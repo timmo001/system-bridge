@@ -53,6 +53,9 @@ open class ShellActivity : ComponentActivity() {
   lateinit var notifications: Notifications
     private set
 
+  /** The launcher's shortcuts, for the app's own handlers too. */
+  val shortcuts by lazy { Shortcuts(this) }
+
   private lateinit var assetLoader: WebViewAssetLoader
   private var lastTheme: String? = null
   private var pendingFiles: ValueCallback<Array<Uri>>? = null
@@ -210,6 +213,17 @@ open class ShellActivity : ComponentActivity() {
         result.fold({ reply.ok(it) }, { reply.error(it.message ?: "Scanning failed") })
       }
     }
+    bridge.handle("setShortcuts") { request, reply ->
+      reply.ok(shortcuts.set(request.paramsObject.getJSONArray("shortcuts")))
+    }
+    bridge.handle("pinShortcut") { request, reply -> reply.ok(shortcuts.pin(request.paramsObject)) }
+    bridge.handle("disableShortcuts") { request, reply ->
+      val params = request.paramsObject
+      val ids = params.getJSONArray("ids").let { list -> (0 until list.length()).map(list::getString) }
+
+      shortcuts.disable(ids, params.optString("message").ifBlank { null })
+      reply.ok(true)
+    }
 
     if (!config.push) {
       bridge.handle("pushState") { _, reply -> reply.ok("unsupported") }
@@ -310,7 +324,8 @@ open class ShellActivity : ComponentActivity() {
 
   /**
    * A share from another app (`ACTION_SEND` with text or a link), as the
-   * view's `ShellShare`. Null when the intent isn't one or `shares` is off.
+   * view's `ShellShare`, with the id of the sharing shortcut it was sent to.
+   * Null when the intent isn't one or `shares` is off.
    */
   protected open fun shareOf(intent: Intent?): JSONObject? {
     if (!config.shares || intent?.action != Intent.ACTION_SEND) return null
@@ -320,6 +335,7 @@ open class ShellActivity : ComponentActivity() {
     val share = JSONObject()
 
     title?.let { share.put("title", it) }
+    intent.getStringExtra(Intent.EXTRA_SHORTCUT_ID)?.let { share.put("shortcutId", it) }
 
     if (URLUtil.isNetworkUrl(text.trim())) share.put("url", text.trim()) else share.put("text", text)
 
@@ -386,7 +402,8 @@ open class ShellActivity : ComponentActivity() {
 
     if (isAllowed(data)) return data.toString()
 
-    val path = listOfNotNull(data.host, data.path?.trimStart('/')).joinToString("/")
+    // `my-app://#page` has an empty host and path, which mustn't leave a `//`
+    val path = listOfNotNull(data.host, data.path?.trimStart('/')).filter { part -> part.isNotEmpty() }.joinToString("/")
     val query = data.encodedQuery?.let { "?$it" } ?: ""
     val fragment = data.encodedFragment?.let { "#$it" } ?: ""
 
@@ -498,7 +515,7 @@ open class ShellActivity : ComponentActivity() {
     const val APP_ORIGIN = "https://${WebViewAssetLoader.DEFAULT_DOMAIN}"
 
     /** The shell's version, reported to the view by `info`. */
-    const val VERSION = "0.2.0"
+    const val VERSION = "0.3.0"
 
     /** Android 17's local network permission, by name so older SDKs compile. */
     const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"

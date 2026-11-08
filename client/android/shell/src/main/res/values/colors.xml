@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The notifications' accent in light mode, behind the small icon. An app
-  replaces it with a color of the same name, here and in values-night.
+  The notifications' accent in light mode, behind the small icon, and the
+  shortcut icons' glyph and background. An app replaces any of them with a
+  color of the same name, here and in values-night.
 -->
 <resources>
   <color name="gw_notification_color">#1B1E23</color>
+  <color name="gw_shortcut_foreground">#1B1E23</color>
+  <color name="gw_shortcut_background">#E5E8EC</color>
 </resources>
