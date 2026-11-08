@@ -323,30 +323,65 @@ find("gw-button.scan", HTMLElement).addEventListener("click", () =>
   }),
 );
 
-find("gw-button.discover", HTMLElement).addEventListener("click", () =>
+const discoverButton = find("gw-button.discover", HTMLElement);
+
+/** Lists the computers found on the network, each to fill the form with. */
+const discover = (mode: "browse" | "picker") =>
   attempt(errors.discover, async () => {
-    // Without local network access, the system's picker grants the one
-    // computer chosen
+    const found = find(".found", HTMLElement);
+
+    if (mode === "browse") found.textContent = "Looking for computers…";
+
     const services = await mobile.discoverServices({
       type: "_system-bridge._tcp",
-      mode: (await allowNetwork()) ? "browse" : "picker",
+      mode,
     });
 
-    find(".found", HTMLElement).replaceChildren(
-      ...services.map((service) =>
-        row(
+    // One already paired, by the uuid it advertises, can't be added again
+    const pairedIds = new Set(
+      (mobile.shell ? await mobile.call("servers", Computers) : []).map(
+        (computer) => computer.id,
+      ),
+    );
+
+    found.replaceChildren(
+      ...services.map((service) => {
+        const added = pairedIds.has(service.txt["uuid"] ?? "");
+
+        const use = button(added ? "Added" : "Use", () => {
+          if (!added) fill(service);
+        });
+
+        if (added) use.setAttribute("disabled", "");
+
+        return row(
           service.name,
           `${service.txt["ip"] ?? service.host ?? service.hostname ?? ""}:${service.port}`,
-          [button("Use", () => fill(service))],
-        ),
-      ),
+          [use],
+        );
+      }),
     );
 
     if (services.length === 0) {
       throw new Error("No computers found. Check System Bridge is running.");
     }
-  }),
+  });
+
+// Without local network access, the system's picker grants the one
+// computer chosen
+discoverButton.addEventListener(
+  "click",
+  () =>
+    void allowNetwork().then((allowed) =>
+      discover(allowed ? "browse" : "picker"),
+    ),
 );
+
+// With it, the page looks as it opens, and the button isn't needed
+if (mobile.shell && (await mobile.localNetwork()) === "granted") {
+  discoverButton.hidden = true;
+  void discover("browse");
+}
 
 manual.addEventListener("submit", (event) => {
   event.preventDefault();
