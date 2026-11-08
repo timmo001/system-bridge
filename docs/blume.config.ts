@@ -43,7 +43,14 @@ export default defineConfig(
             {
               label: "HTTP",
               root: "/api/http",
-              items: ["/api/status", "/api/data", "/api/media-file-data"],
+              items: [
+                "/api/status",
+                "/api/data",
+                "/api/media-file-data",
+                "/api/event",
+                "/api/pairing",
+                "/api/push",
+              ],
             },
             {
               label: "WebSocket",

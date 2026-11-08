@@ -1,0 +1,30 @@
+---
+title: Events
+description: Send one WebSocket event over the HTTP API, for clients that only speak HTTP.
+---
+
+Send one event and get its response, without opening a WebSocket. The Android app's quick settings tiles use it to lock the computer or put it to sleep. It takes the same events, through the same handlers, as the [WebSocket API](/api/websocket/).
+
+Needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+
+## Request
+
+```http
+POST /api/event
+X-API-Token: {token}
+Content-Type: application/json
+
+{ "event": "POWER_LOCK", "data": {} }
+```
+
+`event` is any WebSocket event, such as those under [power control](/api/websocket/control#power-control). `data` is that event's data, and can be left out when it takes none. `REGISTER_DATA_LISTENER` and `UNREGISTER_DATA_LISTENER` get `400`, as they need a WebSocket to send the data down.
+
+## Response
+
+The event's response, as the WebSocket would send it:
+
+```json title="Response"
+{ "id": "6f1c…", "type": "POWER_LOCKING", "subtype": "NONE", "data": {} }
+```
+
+The status is `200` even when the response's `type` is `ERROR`, as it is for an unknown event.
