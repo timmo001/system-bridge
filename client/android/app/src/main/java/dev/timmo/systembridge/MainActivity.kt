@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -49,8 +50,45 @@ class MainActivity : ShellActivity() {
   private var refresh: SwipeRefreshLayout? = null
 
   /**
-   * Swipe down at the top of a page to reload it. On the offline page it
-   * tries the computer again instead.
+   * Whether the page under the current touch is at its top, so a pull may
+   * refresh, or `null` while the page is asked. The layout only follows a
+   * pull it may start when the finger goes down, before the page answers,
+   * so it may until then; it checks again on each move, so a "no" still
+   * stops it long before the pull reaches a refresh.
+   */
+  private var pageAtTop: Boolean? = null
+
+  /** Counts touches, so a late answer for an earlier one is ignored. */
+  private var touches = 0
+
+  /**
+   * Whether a pull at a point may refresh the page: nothing under it is
+   * scrolled down, and it's not in an open popover or dialog, such as the
+   * page search. The web client scrolls inside its own elements, so the
+   * WebView alone can't tell.
+   */
+  private val pageAtTopScript =
+    """
+    (x, y) => {
+      let element = document.elementFromPoint(x, y);
+      while (element?.shadowRoot?.elementFromPoint(x, y)) {
+        const inner = element.shadowRoot.elementFromPoint(x, y);
+        if (inner === element) break;
+        element = inner;
+      }
+      for (let node = element; node; node = node.parentElement ?? node.getRootNode().host) {
+        if (node.scrollTop > 0) return false;
+        try {
+          if (node.matches(":popover-open, dialog[open], [aria-modal=true]")) return false;
+        } catch {}
+      }
+      return true;
+    }
+    """.trimIndent()
+
+  /**
+   * Swipe down at the top of a page to reload it, skipping the cache. On the
+   * offline page it tries the computer again instead.
    */
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -59,12 +97,30 @@ class MainActivity : ShellActivity() {
 
     frame.removeView(webView)
     refresh =
-      SwipeRefreshLayout(this).apply {
+      object : SwipeRefreshLayout(this) {
+        // Each touch asks the page whether a pull there may refresh
+        override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+          if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            val density = resources.displayMetrics.density
+            val touch = ++touches
+
+            pageAtTop = null
+            webView.evaluateJavascript("($pageAtTopScript)(${event.x / density}, ${event.y / density})") {
+              if (touch == touches) pageAtTop = it == "true"
+            }
+          }
+
+          return super.onInterceptTouchEvent(event)
+        }
+      }.apply {
         addView(webView)
-        setOnChildScrollUpCallback { _, _ -> webView.canScrollVertically(-1) }
+        setOnChildScrollUpCallback { _, _ -> pageAtTop == false || webView.canScrollVertically(-1) }
         setOnRefreshListener {
           val unreachable = webView.url?.let { Uri.parse(it).getQueryParameter("unreachable") }
 
+          // A forced reload: whatever the WebView cached goes first, so
+          // the page always comes fresh from the computer
+          webView.clearCache(true)
           if (unreachable != null) webView.loadUrl(startUrl) else webView.reload()
         }
         // The page draws under the status bar, so the spinner starts below it
