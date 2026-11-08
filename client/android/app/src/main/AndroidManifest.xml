@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  System Bridge's manifest: its activity with the share and deep link intent
+  filters, the Lock and Sleep tiles, the camera for scanning a pairing code,
+  and the local network, which Android 17 gates for apps that target it and
+  without which neither the computer's page nor the tiles can reach it. The
+  shell's own manifest adds the internet, notifications and the push service.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+  <application
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:networkSecurityConfig="@xml/network_security_config"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.Groundwork.Shell">
+    <meta-data android:name="groundwork.devUrl" android:value="${devUrl}" />
+
+    <activity
+      android:name=".MainActivity"
+      android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|density"
+      android:exported="true"
+      android:launchMode="singleTask">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="systembridge" />
+      </intent-filter>
+    </activity>
+
+    <service
+      android:name=".LockTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_lock"
+      android:label="@string/tile_lock"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+
+    <service
+      android:name=".SleepTileService"
+      android:exported="true"
+      android:icon="@drawable/ic_tile_sleep"
+      android:label="@string/tile_sleep"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>

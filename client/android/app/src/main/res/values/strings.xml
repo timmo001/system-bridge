@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">System Bridge</string>
+  <string name="tile_lock">Lock</string>
+  <string name="tile_sleep">Sleep</string>
+  <string name="tile_locking">Locking…</string>
+  <string name="tile_locked">Locked</string>
+  <string name="tile_sleeping">Going to sleep…</string>
+  <string name="tile_asleep">Asleep</string>
+  <string name="tile_unreachable">Couldn\'t reach %1$s</string>
+</resources>

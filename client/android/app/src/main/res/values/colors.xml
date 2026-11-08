@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The launcher icon's background, the same dark one the web client's
+  maskable icon has, in light and dark mode alike, and the notifications'
+  accent, Bridge's purple.
+-->
+<resources>
+  <color name="ic_launcher_background">#18181B</color>
+  <color name="gw_notification_color">#7C5BBF</color>
+</resources>
