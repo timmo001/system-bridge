@@ -66,6 +66,21 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
   }
 }
 
+/**
+ * Takes the connection parameters off the address once they're saved, so the
+ * token isn't kept in the history or in a link someone copies. The Android
+ * app opens the client with them.
+ */
+function removeConnectionParams(): void {
+  const url = new URL(window.location.href);
+
+  for (const param of ["host", "port", "ssl", "token", "apiKey"]) {
+    url.searchParams.delete(param);
+  }
+
+  history.replaceState(history.state, "", url);
+}
+
 export function loadConnectionSettings(): ConnectionSettings {
   // Priority 1: Check URL query parameters
   const urlSettings = loadConnectionSettingsFromURL();
@@ -74,6 +89,7 @@ export function loadConnectionSettings(): ConnectionSettings {
     // Merge URL params with defaults, then save to localStorage
     const mergedSettings = { ...defaultConnectionSettings, ...urlSettings };
     saveConnectionSettings(mergedSettings);
+    removeConnectionParams();
 
     return mergedSettings;
   }
