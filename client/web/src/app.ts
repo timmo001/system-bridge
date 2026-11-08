@@ -3,14 +3,18 @@ import "@timmo001/groundwork-ui/define/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
-import { mdiBookOpenVariant, mdiMagnify, mdiPaletteOutline } from "@mdi/js";
-import { Option } from "effect";
+import {
+  mdiBookOpenVariant,
+  mdiMagnify,
+  mdiPaletteOutline,
+  mdiServerNetwork,
+} from "@mdi/js";
+import { Option, Schema } from "effect";
 import { AsyncResult } from "effect/reactivity";
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
 import "./styles/tokens.css";
-import "./components/sb-computer-menu";
 import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
@@ -192,6 +196,36 @@ export class SbApp extends LitElement {
     navigate(event.detail.value);
   };
 
+  #openComputers = () => {
+    const current = Option.getOrUndefined(
+      AsyncResult.value(this.#mobile.value),
+    );
+
+    void current?.call("showPairing", Schema.Boolean);
+  };
+
+  /**
+   * In the Android app, a button that opens the app's own computers page,
+   * where they're opened, edited, removed and added.
+   */
+  #renderComputers() {
+    const current = Option.getOrUndefined(
+      AsyncResult.value(this.#mobile.value),
+    );
+
+    if (current?.shell !== true) return nothing;
+
+    return html`<gw-button
+      slot="actions"
+      variant="neutral"
+      appearance="plain"
+      labels="hide"
+      icon=${mdiServerNetwork}
+      @click=${this.#openComputers}
+      >Computers</gw-button
+    >`;
+  }
+
   #renderStatus() {
     const { isConnected, error } = this.#status.value;
     const { host, port } = this.#settings.value;
@@ -201,18 +235,6 @@ export class SbApp extends LitElement {
       : error === null
         ? ["warning", "Connecting"]
         : ["danger", "Disconnected"];
-
-    // In the Android app, the chip switches between the paired computers
-    const current = Option.getOrUndefined(
-      AsyncResult.value(this.#mobile.value),
-    );
-
-    if (current?.shell === true) {
-      return html`<sb-computer-menu
-        .mobile=${current}
-        label=${label}
-      ></sb-computer-menu>`;
-    }
 
     return html`
       <a
@@ -266,6 +288,7 @@ export class SbApp extends LitElement {
           @pick=${this.#onJump}
         ></gw-command-menu>
         <span slot="actions">${this.#renderStatus()}</span>
+        ${this.#renderComputers()}
         <gw-button
           slot="actions"
           variant="neutral"
