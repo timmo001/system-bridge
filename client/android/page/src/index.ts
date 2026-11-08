@@ -254,8 +254,82 @@ manual.addEventListener("submit", (event) => {
   });
 });
 
-// Back here with computers paired means local network access is missing,
-// or the person chose to add another
-const computers = await renderPaired();
+/**
+ * A computer's base URLs from what it advertises over mDNS: its .local
+ * name first, as that survives its next new address, then its address.
+ */
+const advertisedUrls = (service: DiscoveredService, scheme: string) => {
+  const port = service.txt["port"] ?? String(service.port);
+  const name = service.hostname?.replace(/\.$/, "").replace(/\.local$/, "");
 
-if (computers.length > 0) void allowNetwork();
+  const hosts = [
+    name === undefined || name === "" ? undefined : `${name}.local`,
+    service.txt["ip"] ?? service.host ?? undefined,
+  ].filter((host): host is string => host !== undefined && host !== "");
+
+  return [...new Set(hosts)].map(
+    (host) => `${scheme}//${host.includes(":") ? `[${host}]` : host}:${port}/`,
+  );
+};
+
+/**
+ * The app couldn't load a paired computer's page: say so, and look for it on
+ * the network by the uuid it advertises, in case it has moved. Found at a
+ * new address, the app keeps that and opens it.
+ */
+const showUnreachable = async (computer: (typeof Computers.Type)[number]) => {
+  const card = find("#unreachable", HTMLElement);
+  const status = find("#unreachable .status", HTMLElement);
+
+  card.setAttribute("heading", `Can't reach ${computer.name}`);
+  card.hidden = false;
+  status.textContent = `System Bridge isn't answering at ${computer.url}. Looking for it on your network…`;
+
+  find("#unreachable gw-button.retry", HTMLElement).addEventListener(
+    "click",
+    () => void open(computer.id),
+  );
+
+  if ((await mobile.localNetwork()) !== "granted") {
+    status.textContent = `System Bridge isn't answering at ${computer.url}. Allow local network access to look for it.`;
+
+    return;
+  }
+
+  const found = await mobile
+    .discoverServices({ type: "_system-bridge._tcp", mode: "browse" })
+    .then((services) =>
+      services.find((service) => service.txt["uuid"] === computer.id),
+    )
+    .catch(() => undefined);
+
+  if (found === undefined) {
+    status.textContent = `System Bridge isn't answering at ${computer.url}, and it isn't on this network. Is the computer on, with System Bridge running?`;
+
+    return;
+  }
+
+  status.textContent = `Found ${computer.name} on your network. Opening it…`;
+
+  const moved = await mobile.call(
+    "updateServer",
+    Schema.NullOr(Schema.String),
+    {
+      id: computer.id,
+      urls: advertisedUrls(found, new URL(computer.url).protocol),
+    },
+  );
+
+  if (moved === null) {
+    status.textContent = `${computer.name} is on this network, but System Bridge didn't answer. Try again.`;
+  }
+};
+
+// Back here with computers paired means local network access is missing,
+// a computer couldn't be reached, or the person chose to add another
+const computers = await renderPaired();
+const unreachable = new URLSearchParams(location.search).get("unreachable");
+const lost = computers.find((computer) => computer.id === unreachable);
+
+if (lost !== undefined) void showUnreachable(lost);
+else if (computers.length > 0) void allowNetwork();

@@ -80,6 +80,14 @@ object Api {
       }
     }
 
+  /** The first of a computer's URLs whose System Bridge answers, if any. */
+  fun firstReachable(urls: List<String>, done: (String?) -> Unit) =
+    run<String?>({ done(it.getOrNull()) }) {
+      urls.firstOrNull { url ->
+        runCatching { request("GET", "${Servers.baseUrl(url)}api/health", null, null).first == 200 }.getOrDefault(false)
+      }
+    }
+
   /** Runs one event on a computer, such as POWER_LOCK, saying whether it did. */
   fun event(server: Server, name: String, done: (Boolean) -> Unit) =
     run<Boolean>({ done(it.getOrDefault(false)) }) {

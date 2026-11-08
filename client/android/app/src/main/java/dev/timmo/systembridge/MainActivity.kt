@@ -9,6 +9,9 @@ package dev.timmo.systembridge
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import androidx.webkit.WebResourceErrorCompat
 import dev.timmo.groundwork.shell.Bridge
 import dev.timmo.groundwork.shell.BridgeReply
 import dev.timmo.groundwork.shell.ShellActivity
@@ -38,6 +41,28 @@ class MainActivity : ShellActivity() {
   override fun allowedOrigins(): Set<String> =
     super.allowedOrigins() + Servers.originOf(pairingUrl) + Servers.all(this).map { it.origin }
 
+  /**
+   * When a paired computer's page can't load, such as with the computer
+   * asleep, gone from the network or at a new address, the bundled page
+   * opens instead and says so, rather than the WebView's error page. It
+   * looks for the computer on the network and offers the others.
+   */
+  override fun createWebView(): WebView =
+    super.createWebView().apply {
+      webViewClient =
+        object : ShellWebViewClient() {
+          override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceErrorCompat) {
+            super.onReceivedError(view, request, error)
+
+            if (!request.isForMainFrame) return
+
+            val server = Servers.at(this@MainActivity, request.url.toString()) ?: return
+
+            view.post { view.loadUrl("$pairingUrl?unreachable=${Uri.encode(server.id)}") }
+          }
+        }
+    }
+
   override fun onBridgeReady(bridge: Bridge) {
     bridge.handle("servers") { _, reply -> reply.ok(Servers.json(this)) }
 
@@ -60,6 +85,21 @@ class MainActivity : ShellActivity() {
 
       reply.ok(selected)
       if (selected) refreshOrigins()
+    }
+
+    // A paired computer found at a new address, by the uuid it advertises.
+    // Its name comes first, as that survives the next move; the first that
+    // answers is kept
+    bridge.handle("updateServer") { request, reply ->
+      val params = request.paramsObject
+      val urls = params.optJSONArray("urls")?.let { list -> List(list.length()) { list.getString(it) } }.orEmpty()
+
+      Api.firstReachable(urls) { url ->
+        val moved = url?.let { Servers.move(this, params.getString("id"), it) }
+
+        reply.ok(moved?.url)
+        if (moved != null) refreshOrigins()
+      }
     }
 
     bridge.handle("removeServer") { request, reply ->

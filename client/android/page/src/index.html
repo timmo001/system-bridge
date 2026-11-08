@@ -24,6 +24,11 @@
       <gw-theme-picker slot="actions"></gw-theme-picker>
     </gw-app-bar>
     <main>
+      <gw-card id="unreachable" hidden heading="Can't reach the computer">
+        <p class="status"></p>
+        <gw-button class="retry" appearance="filled">Try again</gw-button>
+      </gw-card>
+
       <gw-card
         id="network"
         hidden

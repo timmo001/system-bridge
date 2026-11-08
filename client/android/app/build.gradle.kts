@@ -69,4 +69,8 @@ android {
   }
 }
 
-dependencies { implementation(project(":shell")) }
+dependencies {
+  implementation(project(":shell"))
+  // The shell's WebView client, which MainActivity extends for its offline page
+  implementation("androidx.webkit:webkit:1.18.0")
+}
