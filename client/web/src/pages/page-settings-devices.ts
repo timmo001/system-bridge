@@ -166,7 +166,12 @@ export class PageSettingsDevices extends SbPage {
         ? event.currentTarget.dataset.client
         : undefined;
 
-    if (id !== undefined) registry.set(removePushSubscriber, id);
+    if (id === undefined) return;
+
+    // This device's own entry: turn its pushes off here too, as its switch
+    // does, so the switch doesn't stay on for a subscription that's gone
+    if (id === this.client?.id) void this.#setPush(false);
+    else registry.set(removePushSubscriber, id);
   };
 
   /** Where this device's pushes are kept, with the token to reach it. */
@@ -180,23 +185,23 @@ export class PageSettingsDevices extends SbPage {
     };
   }
 
-  #onPushToggle = async (event: Event) => {
+  #onPushToggle = (event: Event) => {
+    if (event.target instanceof HTMLInputElement)
+      void this.#setPush(event.target.checked);
+  };
+
+  /** Subscribes this device to pushes, or unsubscribes it. */
+  #setPush = async (on: boolean) => {
     const current = this.mobile;
     const client = this.client;
 
-    if (
-      current === undefined ||
-      client === undefined ||
-      !(event.target instanceof HTMLInputElement)
-    ) {
-      return;
-    }
+    if (current === undefined || client === undefined) return;
 
     this.pushBusy = true;
     this.pushError = undefined;
 
     try {
-      if (event.target.checked) {
+      if (on) {
         this.push = await current.subscribePush(this.#pushOptions(client));
 
         if (this.push === "default") {
@@ -372,6 +377,11 @@ export class PageSettingsDevices extends SbPage {
       (sub) => sub.client.id === this.client?.id,
     );
 
+    // On only while the computer has this device too: another device may
+    // have removed it. Until the list loads, the device's own state shows
+    const listed =
+      mine !== undefined || !AsyncResult.isSuccess(this.#subscribers.value);
+
     return html`
       <gw-card
         heading=${current.shell ? "This phone" : "This browser"}
@@ -388,7 +398,7 @@ export class PageSettingsDevices extends SbPage {
           <gw-switch
             label="Get pushes"
             label-hidden
-            .checked=${live(this.push === "subscribed")}
+            .checked=${live(this.push === "subscribed" && listed)}
             ?disabled=${this.pushBusy || this.push === "denied"}
             @change=${this.#onPushToggle}
           ></gw-switch>
