@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -91,6 +92,13 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
 		token:            token,
+	}
+}
+
+// The web client's PWA manifest, which Go's table doesn't know
+func init() {
+	if err := mime.AddExtensionType(".webmanifest", "application/manifest+json"); err != nil {
+		slog.Warn("Failed to register the web manifest type", "error", err)
 	}
 }
 
