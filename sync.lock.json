@@ -19,6 +19,91 @@
       "item": "section-heading",
       "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
       "hash": "fa6fb931c984103787a31f4ba18b69d354dd54500f8eaa2c96b8480846cf4b7a"
+    },
+    "client/android/shell/build.gradle.kts": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "85b6ee2adcf558f4f047c8f95345893ff8443f04922ae79ce2018e5a66e91316"
+    },
+    "client/android/shell/consumer-rules.pro": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "d09a755455197c3f8fa1abca38239e990b0a1f4f4398610a2bc6fd9d29f9cade"
+    },
+    "client/android/shell/src/main/AndroidManifest.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "b28f4086b309ae41d53a2eeb44906951b9c6de1fc0cdb3538a824aa86652ccf3"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/AndroidTheme.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "811d32fa38c7bfb25425075d88ff163cb532a4a15465fa721032cd41bf469b69"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Bridge.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "8a2fa13394f123b07b44b43cdba5023d7d7b95ab5865a7e2d1e7e9a46ad91470"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Notifications.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "25f7aaec05e882a7a165b112a9dc4b9575230671007a84f40e016a55f99e9176"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Push.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "ea2c4dd77a46cbc3639f5a0c017c2337cbf25ee0638ba9978c8c523bcb422fa9"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ScanActivity.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "40e486835e26ba52819fda2c01a3e783cf3f2d52f687e282b0d051bbebcfa529"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ServiceDiscovery.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "c0c4c1b29f0c248ad883273abf5b7438973e4b971de99eca7594defb4a342f08"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellActivity.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "f23409e97269be9720b61cce784d8b359dc38164fb4583564ccd50b23dd44709"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellConfig.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "b254997ebb94fe0b6afc109af46d8fe1a1daa1c078d7c876d4da0a8adf699dba"
+    },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellTileService.kt": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "03a8a7b60320d958abf1b611284e3f385e50c9da0fff52a2e4d75cd3d8512e9f"
+    },
+    "client/android/shell/src/main/res/drawable/gw_notification_icon.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "9d1adbd50e3deaf9e026d3228b6215b3d3a22a8ad83cc671081d5cb9e5b493a1"
+    },
+    "client/android/shell/src/main/res/values/colors.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "f764bebc46f9f4b6a6115f040e83c46e1dc3fbd9d0ca9eb93925c415a699e871"
+    },
+    "client/android/shell/src/main/res/values/themes.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "822b5c4fc880f23c764dddf0d0d11f8daea7cf520898bf8a7ede95218397df92"
+    },
+    "client/android/shell/src/main/res/values-night/colors.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "699f370b0b87d5d97e959a47c328b95de7f3d48a577579432b0d1499c08d56c6"
+    },
+    "client/android/shell/src/main/res/values-night/themes.xml": {
+      "item": "android-shell",
+      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
+      "hash": "5b88489e1ec02b22d4b4251d4be3a2875e48b8eaff9429d18470a1633ca33036"
     }
   }
 }

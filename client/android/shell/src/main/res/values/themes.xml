@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The shell's light theme. isLightTheme is what the WebView reads for
+  prefers-color-scheme, so the page follows the phone's dark mode.
+-->
+<resources>
+  <style name="Theme.Groundwork.Shell" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:isLightTheme">true</item>
+    <item name="android:windowBackground">?android:colorBackground</item>
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar">true</item>
+  </style>
+</resources>
