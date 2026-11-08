@@ -219,6 +219,18 @@ func sendWithID(data NotificationData) (uint32, error) {
 	return 0, err
 }
 
+// Press presses a button on a notification System Bridge sent from
+// somewhere else, such as a phone it was pushed to: clients hear the same
+// action as pressing it here, and the notification closes if it's still
+// open. A phone keeps it after it times out here, so the action is sent
+// either way.
+func Press(id uint32, action string) {
+	if err := Dismiss(id); err != nil {
+		slog.Debug("The pressed notification wasn't open to close", "id", id, "error", err)
+	}
+	emit(Event{ID: id, Action: action})
+}
+
 // Dismiss closes a notification System Bridge sent, by its id
 func Dismiss(id uint32) error {
 	defaultNotifierMu.RLock()

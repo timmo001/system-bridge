@@ -514,6 +514,22 @@ Send the `NOTIFICATION_DISMISS` event with a notification's `id` to close it. Th
 }
 ```
 
+### Press a notification button
+
+Send the `NOTIFICATION_PRESS` event with a notification's `id` and a button's `action` to press it from somewhere else, as the [Android app](/using/android/) does for a pushed notification. Every client gets the same `NOTIFICATION_ACTION` as pressing it on the computer, even once it has timed out there, and it closes if it's still open. The response type is `NOTIFICATION_PRESSED`. Linux only, and only for notifications System Bridge sent.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "NOTIFICATION_PRESS",
+    "data": {
+        "id": 47,
+        "action": "unlock"
+    }
+}
+```
+
 ## Open a path
 
 Send the `OPEN` event with a `path` to open a file or folder with the default application.

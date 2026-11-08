@@ -69,6 +69,7 @@ from systembridgeconnector.models.notification import (
     NotificationButton,
     NotificationDismissRequest,
     NotificationEvent,
+    NotificationPressRequest,
 )
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
@@ -768,6 +769,19 @@ async def test_dismiss_notification(
     )
     assert response.type == EventType.NOTIFICATION_DISMISSED
     assert response.data == {"id": 42}
+
+
+@pytest.mark.asyncio
+async def test_press_notification(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.press_notification(
+        NotificationPressRequest(id=42, action="open"),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.NOTIFICATION_PRESSED
+    assert response.data == {"id": 42, "action": "open"}
 
 
 @pytest.mark.asyncio

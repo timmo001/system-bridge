@@ -75,7 +75,24 @@ type Payload struct {
 	Link  string `json:"link,omitempty"`
 	Tag   string `json:"tag,omitempty"`
 	Level string `json:"level,omitempty"`
+	// The rest is System Bridge's own, which the Android app reads.
+	// Notification is the id of the notification on the computer this
+	// mirrors, for pressing its Actions with NOTIFICATION_PRESS
+	Notification uint32   `json:"notification,omitempty"`
+	Actions      []Action `json:"actions,omitempty"`
+	// Dismiss is the tag of a pushed notification to clear, as the one on
+	// the computer closed. A push with it has no title.
+	Dismiss string `json:"dismiss,omitempty"`
 }
+
+// Action is a button on a pushed notification
+type Action struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+}
+
+// platformAndroid is the Android app's client platform
+const platformAndroid = "android"
 
 type vapidKeys struct {
 	Public  string `json:"public"`
@@ -252,10 +269,26 @@ func (s *Store) MarkUpdate(release string) bool {
 // at once, and returns once each has been tried. A subscription whose
 // endpoint answers 404 or 410 is gone, so it's dropped.
 func (s *Store) Send(ctx context.Context, kind Kind, payload Payload) {
+	s.send(ctx, payload, func(sub Subscription) bool {
+		return slices.Contains(sub.Kinds, kind)
+	})
+}
+
+// Dismiss clears a pushed notification on the phones that got it, by its
+// tag, once the one on the computer closes. Only the Android app reads
+// this: a browser has to show something for each push.
+func (s *Store) Dismiss(ctx context.Context, tag string) {
+	s.send(ctx, Payload{Dismiss: tag}, func(sub Subscription) bool {
+		return sub.Client.Platform == platformAndroid && slices.Contains(sub.Kinds, KindNotifications)
+	})
+}
+
+// send pushes the payload to each subscription that wants it
+func (s *Store) send(ctx context.Context, payload Payload, wants func(Subscription) bool) {
 	s.mu.Lock()
 	keys := s.state.VAPID
 	targets := slices.DeleteFunc(slices.Clone(s.state.Subscriptions), func(sub Subscription) bool {
-		return !slices.Contains(sub.Kinds, kind)
+		return !wants(sub)
 	})
 	s.mu.Unlock()
 

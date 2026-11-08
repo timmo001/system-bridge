@@ -67,6 +67,7 @@ const (
 	ResponseTypeNotificationAction        ResponseType = "NOTIFICATION_ACTION"
 	ResponseTypeNotificationClosed        ResponseType = "NOTIFICATION_CLOSED"
 	ResponseTypeNotificationDismissed     ResponseType = "NOTIFICATION_DISMISSED"
+	ResponseTypeNotificationPressed       ResponseType = "NOTIFICATION_PRESSED"
 	ResponseTypeNotificationSent          ResponseType = "NOTIFICATION_SENT"
 	ResponseTypeOmarchyMenuChanged        ResponseType = "OMARCHY_MENU_CHANGED"
 	ResponseTypeOmarchyPanelChanged       ResponseType = "OMARCHY_PANEL_CHANGED"

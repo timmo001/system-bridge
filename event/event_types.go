@@ -60,6 +60,7 @@ const (
 	EventMediaControl              EventType = "MEDIA_CONTROL"
 	EventNotification              EventType = "NOTIFICATION"
 	EventNotificationDismiss       EventType = "NOTIFICATION_DISMISS"
+	EventNotificationPress         EventType = "NOTIFICATION_PRESS"
 	EventOmarchyMenu               EventType = "OMARCHY_MENU"
 	EventOmarchyPanel              EventType = "OMARCHY_PANEL"
 	EventOpen                      EventType = "OPEN"

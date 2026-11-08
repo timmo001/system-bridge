@@ -146,6 +146,17 @@ class NotificationDismissRequest:
 
 
 @dataclass(slots=True)
+class NotificationPressRequest:
+    """A button to press on a notification System Bridge sent.
+
+    id is what send_notification returned, and action the button's id.
+    """
+
+    id: int
+    action: str
+
+
+@dataclass(slots=True)
 class NotificationEvent:
     """A notification System Bridge sent was sent, clicked, or closed.
 

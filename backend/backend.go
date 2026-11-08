@@ -156,13 +156,29 @@ func (b *Backend) Run(ctx context.Context) error {
 	// clicked or closes, as it may have sent it
 	notification.OnEvent(func(e notification.Event) {
 		b.wsServer.BroadcastMessage(event_handler.NotificationEventResponse(e))
-		if e.Sent && pushStore != nil {
+		if pushStore == nil {
+			return
+		}
+		tag := fmt.Sprintf("notification-%d", e.ID)
+		switch {
+		case e.Sent:
+			actions := make([]push.Action, 0, len(e.Buttons))
+			for _, button := range e.Buttons {
+				actions = append(actions, push.Action{ID: button.ID, Label: button.Label})
+			}
 			go pushStore.Send(ctx, push.KindNotifications, push.Payload{
-				Title: e.Title,
-				Body:  e.Message,
-				Tag:   fmt.Sprintf("notification-%d", e.ID),
-				Link:  "/system#notifications",
+				Title:        e.Title,
+				Body:         e.Message,
+				Tag:          tag,
+				Link:         "/system#notifications",
+				Notification: e.ID,
+				Actions:      actions,
 			})
+		case e.Reason == "dismissed" || e.Reason == "closed":
+			// Closed on the computer, by someone or NOTIFICATION_DISMISS, so
+			// it goes from the phones too. One that timed out on the screen
+			// stays, as it was never seen there.
+			go pushStore.Dismiss(ctx, tag)
 		}
 	})
 	defer notification.OnEvent(nil)
