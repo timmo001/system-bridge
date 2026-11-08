@@ -45,6 +45,11 @@
       "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
       "hash": "8a2fa13394f123b07b44b43cdba5023d7d7b95ab5865a7e2d1e7e9a46ad91470"
     },
+    "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Downloads.kt": {
+      "item": "android-shell",
+      "sha": "104ae8f06a151058d907b6fa4b92a19d43c9c7e1",
+      "hash": "a1894a4edc93cdfb98532e79511f64938ccf99e42cafdd996a4fd486dcc71014"
+    },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Notifications.kt": {
       "item": "android-shell",
       "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
@@ -67,13 +72,13 @@
     },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellActivity.kt": {
       "item": "android-shell",
-      "sha": "163cda19b002b5f4014d8db65958eae92af5b112",
-      "hash": "4c23348937feea795e23a120f2691f1cfe670d0741f510f86ffc1db516e4d764"
+      "sha": "104ae8f06a151058d907b6fa4b92a19d43c9c7e1",
+      "hash": "23162c310590f525082f4122f4070900e8319b549ee3311513037aa8f81e6547"
     },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellConfig.kt": {
       "item": "android-shell",
-      "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
-      "hash": "b254997ebb94fe0b6afc109af46d8fe1a1daa1c078d7c876d4da0a8adf699dba"
+      "sha": "104ae8f06a151058d907b6fa4b92a19d43c9c7e1",
+      "hash": "31d1a13d22412e0b7a0f6b176652e524828c78b0866ed54341bfdd212033dfd2"
     },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/ShellTileService.kt": {
       "item": "android-shell",

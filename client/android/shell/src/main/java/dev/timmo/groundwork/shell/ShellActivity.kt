@@ -56,6 +56,9 @@ open class ShellActivity : ComponentActivity() {
   /** The launcher's shortcuts, for the app's own handlers too. */
   val shortcuts by lazy { Shortcuts(this) }
 
+  /** Saves files the page makes itself to Downloads, for the app's own handlers too. */
+  val downloads by lazy { Downloads(this) }
+
   private lateinit var assetLoader: WebViewAssetLoader
   private var lastTheme: String? = null
   private var pendingFiles: ValueCallback<Array<Uri>>? = null
@@ -217,6 +220,10 @@ open class ShellActivity : ComponentActivity() {
       reply.ok(shortcuts.set(request.paramsObject.getJSONArray("shortcuts")))
     }
     bridge.handle("pinShortcut") { request, reply -> reply.ok(shortcuts.pin(request.paramsObject)) }
+    bridge.handle("saveFile") { request, reply ->
+      downloads.save(request.paramsObject)
+      reply.ok(true)
+    }
     bridge.handle("disableShortcuts") { request, reply ->
       val params = request.paramsObject
       val ids = params.getJSONArray("ids").let { list -> (0 until list.length()).map(list::getString) }
@@ -515,7 +522,7 @@ open class ShellActivity : ComponentActivity() {
     const val APP_ORIGIN = "https://${WebViewAssetLoader.DEFAULT_DOMAIN}"
 
     /** The shell's version, reported to the view by `info`. */
-    const val VERSION = "0.3.0"
+    const val VERSION = "0.4.0"
 
     /** Android 17's local network permission, by name so older SDKs compile. */
     const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"

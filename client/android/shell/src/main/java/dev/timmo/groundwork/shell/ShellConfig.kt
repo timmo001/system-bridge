@@ -12,6 +12,7 @@ data class ShellLabels(
   val notifications: String = "Notifications",
   val ongoing: String = "Ongoing",
   val downloadFinished: String = "Download finished",
+  val fileSaved: String = "Saved to Downloads",
 )
 
 data class ShellConfig(
@@ -72,6 +73,7 @@ data class ShellConfig(
             ongoing = labels.optString("ongoing", defaults.labels.ongoing),
             downloadFinished =
               labels.optString("downloadFinished", defaults.labels.downloadFinished),
+            fileSaved = labels.optString("fileSaved", defaults.labels.fileSaved),
           ),
       )
     }
