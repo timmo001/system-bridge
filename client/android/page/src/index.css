@@ -5,16 +5,11 @@ html {
   font-family: var(--gw-font-sans);
 }
 
+/* The shell draws edge to edge. The app bar reaches under the status bar
+   and pads itself clear of it and the cutout, so only the content below it
+   keeps clear of the cutout and navigation bar */
 body {
   margin: 0;
-  /* The shell draws edge to edge: the app bar reaches under the status bar,
-     and the page keeps clear of the cutout and navigation bar */
-  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
-}
-
-gw-app-bar {
-  padding-top: env(safe-area-inset-top);
 }
 
 .brand {
@@ -38,7 +33,10 @@ main {
   gap: var(--gw-space-5);
   max-width: 40rem;
   margin: 0 auto;
-  padding: var(--gw-space-5) var(--gw-space-4);
+  padding: var(--gw-space-5)
+    calc(var(--gw-space-4) + env(safe-area-inset-right))
+    calc(var(--gw-space-5) + env(safe-area-inset-bottom))
+    calc(var(--gw-space-4) + env(safe-area-inset-left));
 }
 
 .manual {
