@@ -1,6 +1,7 @@
 package event_handler
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/timmo001/system-bridge/event"
@@ -13,7 +14,7 @@ func TestNotificationEventResponse(t *testing.T) {
 		event notification.Event
 		want  event.ResponseType
 	}{
-		{"sent", notification.Event{ID: 1, Sent: true, Title: "Title", Message: "Message"}, event.ResponseTypeNotificationSent},
+		{"sent", notification.Event{ID: 1, Sent: true, Title: "Title", Message: "Message", Buttons: []notification.NotificationButton{{ID: "snooze", Label: "Snooze"}}}, event.ResponseTypeNotificationSent},
 		{"sent without an id", notification.Event{Sent: true, Title: "Title", Message: "Message"}, event.ResponseTypeNotificationSent},
 		{"clicked", notification.Event{ID: 1, Action: notification.DefaultAction}, event.ResponseTypeNotificationAction},
 		{"closed", notification.Event{ID: 1, Reason: "expired"}, event.ResponseTypeNotificationClosed},
@@ -35,10 +36,11 @@ func TestNotificationEventResponse(t *testing.T) {
 				ID:      tt.event.ID,
 				Title:   tt.event.Title,
 				Message: tt.event.Message,
+				Buttons: tt.event.Buttons,
 				Action:  tt.event.Action,
 				Reason:  tt.event.Reason,
 			}
-			if data != want {
+			if !reflect.DeepEqual(data, want) {
 				t.Errorf("Data = %+v, want %+v", data, want)
 			}
 		})

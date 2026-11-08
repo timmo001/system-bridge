@@ -61,11 +61,12 @@ const DefaultAction = "default"
 // sending it, clicking it or a button on it, or it closing
 type Event struct {
 	ID uint32
-	// Sent is true when the notification was just sent, with its Title and
-	// Message
+	// Sent is true when the notification was just sent, with its Title,
+	// Message and Buttons
 	Sent    bool
 	Title   string
 	Message string
+	Buttons []NotificationButton
 	// Action is the button's id, or DefaultAction for the notification
 	// itself. Empty when it was sent or closed.
 	Action string
@@ -189,7 +190,7 @@ func SendWithID(data NotificationData) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	emit(Event{ID: id, Sent: true, Title: data.Title, Message: data.Message})
+	emit(Event{ID: id, Sent: true, Title: data.Title, Message: data.Message, Buttons: data.Buttons})
 	return id, nil
 }
 

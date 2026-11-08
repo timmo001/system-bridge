@@ -25,8 +25,9 @@ type NotificationDismissRequestData struct {
 type NotificationEventData struct {
 	ID uint32 `json:"id"`
 	// What was sent, when it was sent
-	Title   string `json:"title,omitempty"`
-	Message string `json:"message,omitempty"`
+	Title   string                            `json:"title,omitempty"`
+	Message string                            `json:"message,omitempty"`
+	Buttons []notification.NotificationButton `json:"buttons,omitempty"`
 	// The button's id, or default for the notification itself
 	Action string `json:"action,omitempty"`
 	// expired, dismissed or closed
@@ -128,6 +129,7 @@ func NotificationEventResponse(e notification.Event) event.MessageResponse {
 			ID:      e.ID,
 			Title:   e.Title,
 			Message: e.Message,
+			Buttons: e.Buttons,
 			Action:  e.Action,
 			Reason:  e.Reason,
 		},
