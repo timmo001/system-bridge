@@ -124,7 +124,7 @@ jobs:
       - name: Attest dashboard
         id: attest
         if: env.RELEASE_TAG != ''
-        uses: timmo001/workflows/.github/actions/attest-release-assets@8093949b6c3d684adde3812ddcfd96c6ef77f4b6 # 20261108.0
+        uses: timmo001/workflows/.github/actions/attest-release-assets@f39552735dd1e0766144bfd674cd5d11af1676c9 # 20261108.2
         with:
           subject-patterns: client/home-assistant/frontend/dist/system-bridge-dashboard.js
           bundle-path: dist/system-bridge-dashboard-${{ env.RELEASE_TAG }}.sigstore.json
