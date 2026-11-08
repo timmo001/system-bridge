@@ -9,8 +9,13 @@ package dev.timmo.systembridge
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.webkit.WebResourceErrorCompat
 import dev.timmo.groundwork.shell.Bridge
 import dev.timmo.groundwork.shell.BridgeReply
@@ -41,6 +46,39 @@ class MainActivity : ShellActivity() {
   override fun allowedOrigins(): Set<String> =
     super.allowedOrigins() + Servers.originOf(pairingUrl) + Servers.all(this).map { it.origin }
 
+  private var refresh: SwipeRefreshLayout? = null
+
+  /**
+   * Swipe down at the top of a page to reload it. On the offline page it
+   * tries the computer again instead.
+   */
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    val frame = webView.parent as ViewGroup
+
+    frame.removeView(webView)
+    refresh =
+      SwipeRefreshLayout(this).apply {
+        addView(webView)
+        setOnChildScrollUpCallback { _, _ -> webView.canScrollVertically(-1) }
+        setOnRefreshListener {
+          val unreachable = webView.url?.let { Uri.parse(it).getQueryParameter("unreachable") }
+
+          if (unreachable != null) webView.loadUrl(startUrl) else webView.reload()
+        }
+        // The page draws under the status bar, so the spinner starts below it
+        ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+          val top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
+          val reach = (64 * resources.displayMetrics.density).toInt()
+
+          setProgressViewOffset(false, top, top + reach)
+          insets
+        }
+      }
+    frame.addView(refresh, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+  }
+
   /**
    * When a paired computer's page can't load, such as with the computer
    * asleep, gone from the network or at a new address, the bundled page
@@ -51,6 +89,11 @@ class MainActivity : ShellActivity() {
     super.createWebView().apply {
       webViewClient =
         object : ShellWebViewClient() {
+          override fun onPageFinished(view: WebView, url: String?) {
+            super.onPageFinished(view, url)
+            refresh?.isRefreshing = false
+          }
+
           override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceErrorCompat) {
             super.onReceivedError(view, request, error)
 

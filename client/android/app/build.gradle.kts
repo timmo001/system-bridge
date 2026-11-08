@@ -73,4 +73,8 @@ dependencies {
   implementation(project(":shell"))
   // The shell's WebView client, which MainActivity extends for its offline page
   implementation("androidx.webkit:webkit:1.18.0")
+  // Insets for the refresh spinner, at the shell's version
+  implementation("androidx.core:core:1.19.1")
+  // Swipe down to refresh
+  implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }
