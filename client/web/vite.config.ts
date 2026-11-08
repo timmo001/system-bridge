@@ -30,6 +30,9 @@ export default defineConfig({
     },
   },
   resolve: {
+    // The connector is built from source, so its Effect imports resolve to its
+    // own install. Bundle one copy: the connection hangs with two
+    dedupe: ["effect", "@effect/platform-browser"],
     alias: {
       "~": resolve(import.meta.dirname, "./src"),
       // Build the workspace connector from source, so it needs no build first
