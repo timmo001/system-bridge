@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  The pairing page, bundled into the app: scan a computer's pairing code,
+  pick one found on the network, or enter one by hand. Once one is paired,
+  the app opens its own web client instead.
+-->
+<html lang="en" data-gw-theme="bridge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>System Bridge</title>
+    <!-- theme:boot -->
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <gw-app-bar>
+      <span slot="brand" class="brand">
+        <img src="logo.svg" alt="" width="44" height="24" />
+        System Bridge
+      </span>
+      <gw-theme-picker slot="actions"></gw-theme-picker>
+    </gw-app-bar>
+    <main>
+      <gw-card
+        id="network"
+        hidden
+        heading="Allow local network access"
+        description="System Bridge talks to your computer on your own network, so Android needs your permission first."
+      >
+        <gw-button class="allow" appearance="filled">Allow</gw-button>
+      </gw-card>
+
+      <gw-card
+        heading="Scan the QR code"
+        description="On the computer, open System Bridge's web client, then Settings, Phones, and make a pairing code."
+      >
+        <gw-button class="scan" appearance="filled">Scan the code</gw-button>
+        <p class="error scan-error" role="alert"></p>
+      </gw-card>
+
+      <gw-card
+        heading="On this network"
+        description="Computers running System Bridge that this phone can see."
+      >
+        <gw-button class="discover">Look for computers</gw-button>
+        <div class="found"></div>
+        <p class="error discover-error" role="alert"></p>
+      </gw-card>
+
+      <gw-card
+        heading="Enter it yourself"
+        description="The computer's address and its API token, from system-bridge client token."
+      >
+        <form class="manual">
+          <gw-input
+            name="host"
+            label="Host"
+            placeholder="192.168.1.5 or desk.local"
+            autocomplete="off"
+            required
+          ></gw-input>
+          <gw-input
+            name="port"
+            label="Port"
+            value="9170"
+            inputmode="numeric"
+            required
+          ></gw-input>
+          <gw-switch name="https" label="HTTPS"></gw-switch>
+          <gw-input
+            name="token"
+            label="API token"
+            type="password"
+            monospace
+            reveal
+            required
+          ></gw-input>
+          <gw-button type="submit" appearance="filled">Connect</gw-button>
+          <p class="error manual-error" role="alert"></p>
+        </form>
+      </gw-card>
+
+      <gw-card id="paired" hidden heading="Paired computers">
+        <div class="list"></div>
+      </gw-card>
+    </main>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

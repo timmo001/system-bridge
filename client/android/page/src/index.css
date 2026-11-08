@@ -1,0 +1,68 @@
+/* The pairing page: the theme's surface and type, with the cards centred. */
+html {
+  background: var(--gw-color-surface-default);
+  color: var(--gw-color-text-primary);
+  font-family: var(--gw-font-sans);
+}
+
+body {
+  margin: 0;
+  /* The shell draws edge to edge: the app bar reaches under the status bar,
+     and the page keeps clear of the cutout and navigation bar */
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+gw-app-bar {
+  padding-top: env(safe-area-inset-top);
+}
+
+.brand {
+  display: inline-flex;
+  gap: var(--gw-space-2);
+  align-items: center;
+  color: var(--gw-color-text-strong);
+  font-weight: 600;
+}
+
+/* The logo is wider than tall in a square image, so crop above and below */
+.brand img {
+  width: 2.75rem;
+  height: 1.5rem;
+  object-fit: cover;
+}
+
+main {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--gw-space-5);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--gw-space-5) var(--gw-space-4);
+}
+
+.manual {
+  display: grid;
+  gap: var(--gw-space-3);
+}
+
+.found:not(:empty),
+.list {
+  display: grid;
+  gap: var(--gw-space-1);
+  margin-top: var(--gw-space-3);
+}
+
+.error {
+  margin: var(--gw-space-2) 0 0;
+  color: var(--gw-color-danger);
+  font-size: var(--gw-font-size-s);
+}
+
+.error:empty {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
