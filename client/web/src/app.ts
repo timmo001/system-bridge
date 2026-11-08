@@ -4,10 +4,13 @@ import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { mdiBookOpenVariant, mdiMagnify, mdiPaletteOutline } from "@mdi/js";
+import { Option } from "effect";
+import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
 import "./styles/tokens.css";
+import "./components/sb-computer-menu";
 import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
@@ -18,7 +21,7 @@ import { currentLocation, href, type Location, navigate } from "./lib/router";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
-import "./lib/mobile";
+import { mobileConnection } from "./lib/mobile";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
@@ -174,6 +177,8 @@ export class SbApp extends LitElement {
 
   readonly #settings = new AtomController(this, () => connectionSettings);
 
+  readonly #mobile = new AtomController(this, () => mobileConnection);
+
   @query(".commands") private commands?: GwCommandMenu;
 
   #openCommands = () => {
@@ -193,6 +198,18 @@ export class SbApp extends LitElement {
       : error === null
         ? ["warning", "Connecting"]
         : ["danger", "Disconnected"];
+
+    // In the Android app, the chip switches between the paired computers
+    const current = Option.getOrUndefined(
+      AsyncResult.value(this.#mobile.value),
+    );
+
+    if (current?.shell === true) {
+      return html`<sb-computer-menu
+        .mobile=${current}
+        label=${label}
+      ></sb-computer-menu>`;
+    }
 
     return html`
       <a
