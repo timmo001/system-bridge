@@ -2,9 +2,12 @@
 <!--
   The launcher icon's background, the same dark one the web client's
   maskable icon has, in light and dark mode alike, and the notifications'
-  accent, Bridge's purple.
+  accent, Bridge's purple. Shortcut icons match the launcher icon, with
+  the lighter purple of dark mode on the same background in both.
 -->
 <resources>
   <color name="ic_launcher_background">#18181B</color>
   <color name="gw_notification_color">#7C5BBF</color>
+  <color name="gw_shortcut_background">#18181B</color>
+  <color name="gw_shortcut_foreground">#A78BFA</color>
 </resources>

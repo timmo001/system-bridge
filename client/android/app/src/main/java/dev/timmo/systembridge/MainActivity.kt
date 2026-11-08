@@ -6,6 +6,7 @@
  */
 package dev.timmo.systembridge
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -46,6 +47,34 @@ class MainActivity : ShellActivity() {
 
   override fun allowedOrigins(): Set<String> =
     super.allowedOrigins() + Servers.originOf(pairingUrl) + Servers.all(this).map { it.origin }
+
+  /**
+   * A page shortcut's `systembridge://computer/<uuid>/<path>` opens that page
+   * on the computer at its current address, and makes it the current one.
+   * The token only goes along when the page isn't on that computer already.
+   * Other links go to the shell, onto the bundled page.
+   */
+  override fun deepLinkUrl(intent: Intent?): String? {
+    val data = intent?.data
+
+    if (intent?.action != Intent.ACTION_VIEW || data?.scheme != "systembridge" || data.host != "computer") {
+      return super.deepLinkUrl(intent)
+    }
+
+    val segments = data.pathSegments
+    val server = Servers.all(this).find { server -> server.id == segments.firstOrNull() }
+
+    if (server == null || !localNetworkAllowed()) return pairingUrl
+
+    Servers.select(this, server.id)
+
+    val onComputer = webView.url?.let(Servers::originOf) == server.origin
+    val query = listOfNotNull(data.encodedQuery, "token=${Uri.encode(server.token)}".takeUnless { onComputer })
+
+    return server.url + segments.drop(1).joinToString("/") + query.joinToString("&").let { text ->
+      if (text.isEmpty()) "" else "?$text"
+    }
+  }
 
   private var refresh: SwipeRefreshLayout? = null
 
@@ -219,6 +248,8 @@ class MainActivity : ShellActivity() {
 
       if (url == server.url && token == server.token) {
         Servers.update(this, server.copy(name = name))
+        // Shortcuts name their computer when there's more than one
+        PageShortcuts.publish(this)
         reply.ok(true)
         return@handle
       }
@@ -230,6 +261,7 @@ class MainActivity : ShellActivity() {
               reply.error("A different computer answered at $url")
             } else {
               Servers.update(this, server.copy(name = name, url = url, token = token))
+              PageShortcuts.publish(this)
               reply.ok(true)
               // Stays on the computers page, with the new origin allowed
               refreshOrigins(webView.url ?: pairingUrl)
@@ -240,8 +272,28 @@ class MainActivity : ShellActivity() {
       }
     }
 
+    // A page the web client showed, counted towards the long-press
+    // shortcuts, with the starting set it suggests
+    bridge.handle("visitPage") { request, reply ->
+      val server = webView.url?.let { url -> Servers.at(this, url) }
+
+      if (server != null) {
+        PageShortcuts.visit(this, server, request.paramsObject.getJSONObject("page"), request.paramsObject.getJSONArray("defaults"))
+      }
+      reply.ok(server != null)
+    }
+
+    bridge.handle("pinPage") { request, reply ->
+      val server = webView.url?.let { url -> Servers.at(this, url) }
+
+      reply.ok(server != null && PageShortcuts.pin(this, server, request.paramsObject))
+    }
+
     bridge.handle("removeServer") { request, reply ->
-      Servers.remove(this, request.paramsObject.getString("id"))
+      val id = request.paramsObject.getString("id")
+
+      Servers.remove(this, id)
+      PageShortcuts.forget(this, id)
       reply.ok(true)
       // Stays on the page it's on, with the forgotten origin dropped
       refreshOrigins(webView.url ?: pairingUrl)

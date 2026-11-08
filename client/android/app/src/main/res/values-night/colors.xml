@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The notifications' accent in dark mode, a lighter Bridge purple. -->
+<!--
+  The notifications' accent in dark mode, a lighter Bridge purple. Shortcut
+  icons stay as in light mode, here too so the shell's own night colors
+  don't win.
+-->
 <resources>
   <color name="gw_notification_color">#A78BFA</color>
+  <color name="gw_shortcut_background">#18181B</color>
+  <color name="gw_shortcut_foreground">#A78BFA</color>
 </resources>

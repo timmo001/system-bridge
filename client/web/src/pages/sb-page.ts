@@ -1,4 +1,4 @@
-import { mdiLanDisconnect, mdiRefresh } from "@mdi/js";
+import { mdiHomePlusOutline, mdiLanDisconnect, mdiRefresh } from "@mdi/js";
 import "@timmo001/groundwork-ui/define/gw-alert.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-card.ts";
@@ -22,6 +22,7 @@ import {
 import { inApp, openComputers } from "~/lib/mobile";
 import { documentTitle } from "~/lib/navigation";
 import { href } from "~/lib/router";
+import { pinPage } from "~/lib/shortcuts";
 
 export interface PageHeader {
   readonly heading: string;
@@ -63,6 +64,8 @@ export abstract class SbPage extends LitElement {
   }
 
   protected renderHeader(header: PageHeader): TemplateResult {
+    const pin = inApp && !this.embedded;
+
     return html`
       <gw-page-header
         level=${this.embedded ? 2 : 1}
@@ -71,12 +74,34 @@ export abstract class SbPage extends LitElement {
         icon=${header.icon ?? ""}
       >
         ${
-          header.actions === undefined
+          header.actions === undefined && !pin
             ? nothing
-            : html`<div slot="actions" class="actions">${header.actions}</div>`
+            : html`<div slot="actions" class="actions">
+                ${header.actions ?? nothing}
+                ${pin ? this.#renderPin(header) : nothing}
+              </div>`
         }
       </gw-page-header>
     `;
+  }
+
+  /** In the Android app, pins this page on this computer to the home screen. */
+  #renderPin(header: PageHeader): TemplateResult {
+    const onPin = () =>
+      void pinPage({
+        path: location.pathname,
+        label: header.heading,
+        icon: header.icon ?? "",
+      });
+
+    return html`<gw-button
+      variant="neutral"
+      appearance="plain"
+      labels="hide"
+      icon=${mdiHomePlusOutline}
+      @click=${onPin}
+      >Add to home screen</gw-button
+    >`;
   }
 
   /** The outcome of an action, from `actionResult`. */

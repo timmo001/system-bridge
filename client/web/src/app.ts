@@ -21,6 +21,7 @@ import { connectionSettings, connectionStatus } from "./lib/atoms";
 import { DOCS_URL } from "./lib/links";
 import { type NavItem, navigation } from "./lib/navigation";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
+import { visitPage } from "./lib/shortcuts";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
@@ -209,6 +210,9 @@ export class SbApp extends LitElement {
 
   @query(".commands") private commands?: GwCommandMenu;
 
+  /** The last page counted towards the app's shortcuts, so each visit counts once. */
+  #visited: string | undefined;
+
   #openCommands = () => {
     this.commands?.show();
   };
@@ -262,6 +266,15 @@ export class SbApp extends LitElement {
         <gw-dot tone=${kind}></gw-dot>
       </a>
     `;
+  }
+
+  protected override updated(): void {
+    const active = jumpItems.find((item) => item.matches(this.#location.value));
+
+    if (active === undefined || active.href === this.#visited) return;
+
+    this.#visited = active.href;
+    visitPage(active);
   }
 
   override render() {
