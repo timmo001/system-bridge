@@ -1,6 +1,7 @@
 // Writes every icon from the logo in .resources/system-bridge-logo.svg.
 // Run with: mise run generate:icons
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mdiLockOutline, mdiPowerSleep } from "@mdi/js";
 import sharp from "sharp";
 
 const logoPath = ".resources/system-bridge-logo.svg";
@@ -63,6 +64,65 @@ const banner = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="400"
     </g>
   </g>
 </svg>
+`;
+
+/** An element's attributes, by name. */
+const attributesOf = (text: string) =>
+  new Map([...text.matchAll(/([\w-]+)="([^"]*)"/g)].map(([, name = "", value = ""]) => [name, value]));
+
+/** The logo's shapes as Android vector paths, in `colour` when given. */
+const vectorPaths = (colour?: string) =>
+  [...drawing.matchAll(/<(path|circle)\b([^>]*)\/>/g)].map(([, tag, text = ""]) => {
+    const a = attributesOf(text);
+    const pathData =
+      tag === "circle"
+        ? (() => {
+            const [cx, cy, r] = ["cx", "cy", "r"].map((name) => Number(a.get(name)));
+            return `M${cx - r},${cy}a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${-r * 2},0`;
+          })()
+        : (a.get("d") ?? "");
+    const fill = a.get("fill");
+    const stroke = a.get("stroke");
+    const attributes = [`android:pathData="${pathData}"`];
+
+    if (fill !== undefined && fill !== "none") attributes.push(`android:fillColor="${colour ?? fill}"`);
+    if (stroke !== undefined) {
+      attributes.push(`android:strokeColor="${colour ?? stroke}"`);
+      attributes.push(`android:strokeWidth="${a.get("stroke-width") ?? "1"}"`);
+    }
+    if (a.has("stroke-linecap")) attributes.push(`android:strokeLineCap="${a.get("stroke-linecap")}"`);
+    if (a.has("stroke-linejoin")) attributes.push(`android:strokeLineJoin="${a.get("stroke-linejoin")}"`);
+
+    return `    <path ${attributes.join(" ")} />`;
+  });
+
+/**
+ * The logo as a vector drawable `size` dp square, each point scaled by
+ * `scale` and moved by `offset`, such as into an adaptive icon's safe zone.
+ */
+const logoVector = (size: number, scale: number, offset: number, colour?: string) => `<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by mise run generate:icons from ${logoPath}; don't edit it -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="${size}dp"
+  android:height="${size}dp"
+  android:viewportWidth="${size}"
+  android:viewportHeight="${size}">
+  <group android:scaleX="${scale}" android:scaleY="${scale}" android:translateX="${offset}" android:translateY="${offset}">
+${vectorPaths(colour).join("\n")}
+  </group>
+</vector>
+`;
+
+/** A Material Design icon as a 24dp white vector drawable, for a tile. */
+const iconVector = (path: string) => `<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by mise run generate:icons from @mdi/js; don't edit it -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="24dp"
+  android:height="24dp"
+  android:viewportWidth="24"
+  android:viewportHeight="24">
+  <path android:fillColor="#FFFFFFFF" android:pathData="${path}" />
+</vector>
 `;
 
 const png = (svg: string, width: number, height = width) =>
@@ -183,6 +243,17 @@ await mkdir("client/web/public/icons", { recursive: true });
 await write("client/web/public/icons/icon-192.png", await png(square, 192));
 await write("client/web/public/icons/icon-512.png", await png(square, 512));
 await write("client/web/public/icons/maskable-512.png", await png(maskable, 512));
+
+// The Android app's launcher icon, its themed (monochrome) layer, the
+// notification icon and the quick settings tiles, as vector drawables
+const android = "client/android/app/src/main/res/drawable";
+
+await mkdir(android, { recursive: true });
+await write(`${android}/ic_launcher_foreground.xml`, logoVector(108, 0.5, 22));
+await write(`${android}/ic_launcher_monochrome.xml`, logoVector(108, 0.5, 22, "#FFFFFFFF"));
+await write(`${android}/gw_notification_icon.xml`, logoVector(24, 24 / 124, -48 / 124, "#FFFFFFFF"));
+await write(`${android}/ic_tile_lock.xml`, iconVector(mdiLockOutline));
+await write(`${android}/ic_tile_sleep.xml`, iconVector(mdiPowerSleep));
 
 // The docs' header, banner and favicons. Their share cards and other brand
 // images come from `bun run brand` in docs/, which reads the same logo
