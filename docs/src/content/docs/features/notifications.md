@@ -42,7 +42,7 @@ Every connected client gets a [`NOTIFICATION_SENT`](/api/websocket/control/#noti
 
 ## Buttons, clicks and dismissing
 
-On Linux, a notification can have up to 3 buttons, such as **Snooze** and **Done**. When one is pressed, or the notification itself is clicked, every connected client gets a [`NOTIFICATION_ACTION`](/api/websocket/control/#notification-events) event with the notification's `id` and which button it was. So an automation can react to the answer. A `NOTIFICATION_CLOSED` event follows when it closes, saying whether it expired or was dismissed.
+On Linux and Windows, a notification can have up to 3 buttons, such as **Snooze** and **Done**. When one is pressed, or the notification itself is clicked, every connected client gets a [`NOTIFICATION_ACTION`](/api/websocket/control/#notification-events) event with the notification's `id` and which button it was. So an automation can react to the answer. On Linux, a `NOTIFICATION_CLOSED` event follows when it closes, saying whether it expired or was dismissed. Windows sends no event when a notification closes.
 
 Clients can also close a notification they sent with [`NOTIFICATION_DISMISS`](/api/websocket/control/#dismiss-notification), such as once the door it was about has closed again.
 
@@ -58,7 +58,8 @@ Set `urgency` to `critical` for a notification that stays until it's dismissed, 
 | Open a link or path when clicked | Yes | No |
 | Sound | Played with `paplay` or `aplay` | Windows plays its own notification sound |
 | Urgency | Yes | No |
-| Buttons, and events when clicked or closed | Yes | No |
+| Buttons, and events when clicked | Yes | Yes |
+| Event when closed | Yes | No |
 | Event when sent | Yes | Yes |
 | Dismissing | Yes | No |
 
