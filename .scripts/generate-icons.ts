@@ -176,10 +176,13 @@ await write(".github/assets/banner.png", await png(banner, 960, 400));
 await write("tray/icon.png", await png(logo, 512));
 await write("tray/icon.ico", await ico(logo, icoSizes));
 
-// The web client's favicon, header logo and installable app icons
+// The web client's favicon, header logo and installable app icons, where
+// the PWA manifest's defaults look for them
 await write("client/web/public/icon.svg", `${logo}\n`);
-await write("client/web/public/icon-192.png", await png(maskable, 192));
-await write("client/web/public/icon-512.png", await png(maskable, 512));
+await mkdir("client/web/public/icons", { recursive: true });
+await write("client/web/public/icons/icon-192.png", await png(square, 192));
+await write("client/web/public/icons/icon-512.png", await png(square, 512));
+await write("client/web/public/icons/maskable-512.png", await png(maskable, 512));
 
 // The docs' header, banner and favicons. Their share cards and other brand
 // images come from `bun run brand` in docs/, which reads the same logo
