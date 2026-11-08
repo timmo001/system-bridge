@@ -65,7 +65,7 @@ export const routes = {
   connection: route("/connection", NoParams, NoSearch),
   settings: route("/settings", NoParams, NoSearch),
   settingsAppearance: route("/settings/appearance", NoParams, NoSearch),
-  settingsPhones: route("/settings/phones", NoParams, NoSearch),
+  settingsDevices: route("/settings/devices", NoParams, NoSearch),
 } as const;
 
 /**

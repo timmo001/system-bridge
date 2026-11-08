@@ -85,7 +85,7 @@ const systems = [
   ["Linux", "Linux"],
 ] as const;
 
-/** A name for this browser in the phones list, such as "Firefox on Linux". */
+/** A name for this browser in the devices list, such as "Firefox on Linux". */
 const browserName = () => {
   const named = (list: readonly (readonly [string, string])[]) =>
     list.find(([marker]) => navigator.userAgent.includes(marker))?.[1];

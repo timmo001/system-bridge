@@ -10,9 +10,9 @@ import { Atom } from "effect/reactivity";
 import { connectionSettings } from "./atoms";
 import type { ConnectionSettings } from "./connection-settings";
 
-/** Why a request to the phones routes failed, for the page. */
-export class PhonesError extends Schema.TaggedError<PhonesError>()(
-  "PhonesError",
+/** Why a request to the pairing or push routes failed, for the page. */
+export class DevicesError extends Schema.TaggedError<DevicesError>()(
+  "DevicesError",
   { message: Schema.String },
 ) {}
 
@@ -69,7 +69,7 @@ const send = Effect.fnUntraced(
         Schema.Struct({ error: Schema.String }),
       )(response).pipe(Effect.orElseSucceed(() => undefined));
 
-      return yield* new PhonesError({
+      return yield* new DevicesError({
         message: body?.error ?? `System Bridge answered ${response.status}`,
       });
     }
@@ -79,7 +79,7 @@ const send = Effect.fnUntraced(
   Effect.provide(FetchHttpClient.layer),
   Effect.catchTags({
     HttpClientError: (error) =>
-      Effect.fail(new PhonesError({ message: error.message })),
+      Effect.fail(new DevicesError({ message: error.message })),
   }),
 );
 
@@ -89,7 +89,7 @@ const decodeBody =
     HttpClientResponse.schemaBodyJson(schema)(response).pipe(
       Effect.mapError(
         () =>
-          new PhonesError({
+          new DevicesError({
             message: "System Bridge answered in a way this page doesn't know",
           }),
       ),
@@ -102,7 +102,7 @@ export const pairingCode = Atom.fn((_: undefined, get) =>
   ),
 );
 
-/** The phones and browsers getting pushes from this computer. */
+/** The devices, phones and browsers, getting pushes from this computer. */
 export const pushSubscribers = Atom.make((get) =>
   send(
     get(connectionSettings),

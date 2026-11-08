@@ -201,7 +201,7 @@ find("gw-button.scan", HTMLElement).addEventListener("click", () =>
     if (!(await allowNetwork())) return;
 
     const text = await mobile.scanQr({
-      hint: "Open Settings, Phones on the computer",
+      hint: "Open Settings, Devices on the computer",
     });
 
     if (text === undefined) return;

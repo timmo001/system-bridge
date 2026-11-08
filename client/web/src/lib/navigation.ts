@@ -3,8 +3,8 @@ import {
   mdiApplicationOutline,
   mdiBattery,
   mdiBluetooth,
-  mdiCellphoneLink,
   mdiCogOutline,
+  mdiDevices,
   mdiCpu64Bit,
   mdiExpansionCardVariant,
   mdiHarddisk,
@@ -174,7 +174,7 @@ export const navigation: readonly NavSection[] = [
     items: [
       routeItem("settings", "General", mdiCogOutline),
       routeItem("settingsAppearance", "Appearance", mdiPaletteOutline),
-      routeItem("settingsPhones", "Phones", mdiCellphoneLink),
+      routeItem("settingsDevices", "Devices", mdiDevices),
     ],
   },
   {

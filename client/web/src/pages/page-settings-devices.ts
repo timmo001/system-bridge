@@ -1,5 +1,5 @@
 import {
-  mdiCellphoneLink,
+  mdiDevices,
   mdiContentCopy,
   mdiDeleteOutline,
   mdiQrcode,
@@ -28,7 +28,7 @@ import {
   pushSubscribers,
   removePushSubscriber,
   setPushKinds,
-} from "~/lib/phones";
+} from "~/lib/devices";
 
 import { SbPage } from "./sb-page";
 
@@ -81,11 +81,12 @@ const kindsText = (kinds: readonly PushKind[]) =>
     : kinds.map((kind) => kindInfo[kind].heading).join(", ");
 
 /**
- * Pairing phones with this computer through a QR code, the phones and
- * browsers it pushes to, and this device's own pushes.
+ * The devices that connect to this computer: pairing the Android app
+ * through a QR code, this phone or browser's own pushes, and every device
+ * it pushes to.
  */
-@customElement("page-settings-phones")
-export class PageSettingsPhones extends SbPage {
+@customElement("page-settings-devices")
+export class PageSettingsDevices extends SbPage {
   static override styles = [
     ...SbPage.styles,
     css`
@@ -111,7 +112,7 @@ export class PageSettingsPhones extends SbPage {
     `,
   ];
 
-  protected readonly pageTitle = "Phones";
+  protected readonly pageTitle = "Devices";
 
   readonly #settings = new AtomController(this, () => connectionSettings);
 
@@ -246,7 +247,7 @@ export class PageSettingsPhones extends SbPage {
 
     return html`
       <gw-card
-        heading="Pair a phone"
+        heading="Pair the Android app"
         description="Scan this with the System Bridge app on your phone. Pairing gives the phone this computer's API token."
         icon=${mdiQrcode}
         level=${this.cardLevel}
@@ -308,9 +309,9 @@ export class PageSettingsPhones extends SbPage {
 
     return html`
       <gw-card
-        heading="Phones and browsers getting pushes"
+        heading="Devices getting pushes"
         description="Each chooses what it gets, on the device itself"
-        icon=${mdiCellphoneLink}
+        icon=${mdiDevices}
         level=${this.cardLevel}
       >
         ${
@@ -422,10 +423,10 @@ export class PageSettingsPhones extends SbPage {
     return html`
       <div class="page narrow">
         ${this.renderHeader({
-          heading: "Phones",
+          heading: "Devices",
           description:
-            "Pair the System Bridge app, and choose who hears from this computer",
-          icon: mdiCellphoneLink,
+            "Pair the Android app, and choose which phones and browsers hear from this computer",
+          icon: mdiDevices,
         })}
         ${this.gate(
           () => html`
@@ -443,6 +444,6 @@ export class PageSettingsPhones extends SbPage {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "page-settings-phones": PageSettingsPhones;
+    "page-settings-devices": PageSettingsDevices;
   }
 }
