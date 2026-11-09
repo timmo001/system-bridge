@@ -74,10 +74,8 @@ func getMediaData(_ context.Context, mediaData types.MediaData) (types.MediaData
 			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
 			mediaData.IsStopEnabled = &[]bool{true}[0]
 
-			// Get additional metadata based on media type
 			switch mediaInfo.Type {
 			case "music":
-				// Get Music app metadata
 				cmd = exec.Command("osascript", "-e", `
 					tell application "Music"
 						if player state is playing then

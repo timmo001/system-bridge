@@ -11,7 +11,6 @@ import (
 
 // GatherInterfaces collects information about network interfaces
 func GatherInterfaces(networksData *types.NetworksData) error {
-	// Get network interfaces using standard library
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return fmt.Errorf("error getting network interfaces: %w", err)

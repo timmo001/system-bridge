@@ -31,10 +31,8 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 		return nil, fmt.Errorf("failed to set WebSocket authentication deadline: %w", err)
 	}
 
-	// Add the connection to our map
 	ws.AddConnection(conn)
 
-	// Start a goroutine to handle messages from this connection
 	go ws.handleMessages(conn)
 
 	return conn, nil

@@ -52,7 +52,6 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	// Initialize arrays
 	cpuData.PerCPU = make([]types.PerCPU, 0)
 
-	// Get CPU count
 	count, err := cpu.CountsWithContext(ctx, true)
 	if err != nil {
 		return cpuData, fmt.Errorf("error getting CPU count: %v", err)

@@ -14,19 +14,15 @@ import (
 
 // UpdateTaskProcessor handles async task processing with rate limiting
 type UpdateTaskProcessor struct {
-	// Data store to update
 	DataStore *DataStore
 
 	// Rate limiter to control CPU usage
 	limiter *rate.Limiter
 
-	// Channel for queuing tasks
 	taskQueue chan types.Updater
 
-	// WaitGroup to track running tasks
 	wg sync.WaitGroup
 
-	// Context for cancellation
 	ctx    context.Context
 	cancel context.CancelFunc
 }

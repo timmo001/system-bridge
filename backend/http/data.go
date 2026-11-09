@@ -39,10 +39,8 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 			return
 		}
 
-		// Get module name from URL path
 		module := types.ModuleName(r.URL.Path[len("/api/data/"):])
 
-		// Validate module name
 		if module == "" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)

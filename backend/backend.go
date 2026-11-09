@@ -55,14 +55,12 @@ type Backend struct {
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
-	// Initialize the EventBus
 	_ = bus.GetInstance()
 	slog.Info("EventBus initialized")
 
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
 
-	// Initialize discovery manager
 	discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
 
 	return &Backend{
@@ -121,15 +119,13 @@ func spaFileServer(staticFS fs.FS, indexFile string) http.HandlerFunc {
 func (b *Backend) Run(ctx context.Context) error {
 	slog.Info("Starting backend server...")
 
-	// Create a context that can be canceled
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// Set the server context for command execution
-	// This ensures all commands are killed when the server shuts down
+	// Commands run under the server context, so they're killed when it shuts
+	// down
 	command.SetServerContext(ctx)
 
-	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
 
 	desktop.OnHyprlandEvent(func(hyprlandEvent types.HyprlandEvent) {
@@ -224,7 +220,6 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
 
@@ -242,7 +237,6 @@ func (b *Backend) Run(ctx context.Context) error {
 		mux.HandleFunc("/api/push/preferences", api_http.AllowOrigins(api_http.PushPreferencesHandler(b.token, pushStore)))
 	}
 
-	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		_, err := b.wsServer.HandleConnection(w, r)
 		if err != nil {
@@ -256,18 +250,14 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	// Set up MCP endpoint
 	mcpServer := mcp.NewMCPServer(b.token, b.eventRouter, b.dataStore)
 	mux.Handle("/api/mcp", mcpServer)
 
-	// Set up API endpoint
 	mux.HandleFunc("/api", api_http.HandleAPI)
-	// Set up module data endpoint
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
 		b.dataStore,
 	))
 
-	// Set up health check endpoint
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -299,10 +289,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
 	}
 
-	// Get port from environment variable with default
 	port := utils.GetPort()
 
-	// Create HTTP server
 	server := &http.Server{
 		Addr:              fmt.Sprintf("0.0.0.0:%d", port),
 		Handler:           mux,
@@ -315,10 +303,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Create an error channel to capture server errors
 	errChan := make(chan error, 1)
 
-	// Start server in a goroutine
 	go func() {
 		slog.Info("Backend server is running on", "address", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -327,7 +313,6 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Start service discovery
 	if err := b.discoveryManager.Start(); err != nil {
 		slog.Warn("Failed to start discovery manager", "err", err)
 	} else {
@@ -340,11 +325,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Discovery over mDNS is managed by the discovery manager
-
-	// Run data update task processor in a separate goroutine
 	go func() {
-		// Run continuously - the processor will handle its own lifecycle
 		data.RunUpdateTaskProcessor(b.dataStore)
 		slog.Info("Data update task processor completed")
 	}()
@@ -359,7 +340,6 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Wait for either context cancellation or server error
 	select {
 	case <-ctx.Done():
 		slog.Info("Backend server is shutting down...")

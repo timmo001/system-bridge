@@ -34,7 +34,6 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get query parameters
 	query := r.URL.Query()
 	base := query.Get("base")
 	path := query.Get("path")

@@ -19,7 +19,6 @@ func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 
 	processesData := make([]types.Process, 0)
 
-	// Get process list
 	processes, err := process.ProcessesWithContext(ctx)
 	if err != nil {
 		slog.Error("Failed to get processes", "error", err)

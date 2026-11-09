@@ -14,7 +14,6 @@ import (
 func getGPUs() ([]types.GPU, error) {
 	gpuList := make([]types.GPU, 0)
 
-	// Get GPU information using system_profiler
 	cmd := exec.Command("system_profiler", "SPDisplaysDataType", "-json")
 	output, err := cmd.Output()
 	if err != nil {

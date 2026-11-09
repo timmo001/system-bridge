@@ -142,10 +142,8 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 
 // Execute validates and executes a command asynchronously
 func Execute(req ExecuteRequest, cfg *settings.Settings) error {
-	// Validate command
 	commandDef, err := ValidateCommand(req.CommandID, cfg)
 	if err != nil {
-		// Log unauthorized attempts at higher severity
 		slog.Warn(
 			"Command execution denied",
 			"commandID", req.CommandID,
@@ -156,7 +154,7 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 		return err
 	}
 
-	// Comprehensive audit logging with connection ID, request ID, timestamp, and full arguments
+	// Audit log: who asked, and exactly what runs
 	slog.Info(
 		"Executing command",
 		"commandID", commandDef.ID,
@@ -191,7 +189,6 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 		return errors.New("connection no longer exists")
 	}
 
-	// Execute asynchronously
 	go executeAsync(req, commandDef)
 
 	return nil
@@ -243,11 +240,9 @@ func Run(ctx context.Context, req ExecuteRequest, cfg *settings.Settings) (Execu
 
 // executeAsync runs the command and sends the result via WebSocket
 func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefinition) {
-	// Create a context with timeout for command execution
-	// Use server context as parent so commands are killed when server shuts down
+	// The server context is the parent, so commands are killed when the server
+	// shuts down
 	ctx, cancel := context.WithTimeout(getServerContext(), DefaultCommandTimeout)
-
-	// Ensure cleanup on completion
 	defer cancel()
 
 	// Early check: verify connection still exists before executing command
@@ -269,19 +264,15 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 		return
 	}
 
-	// Execute the command with context
 	result := execute(ctx, commandDef)
 	result.CommandID = commandDef.ID
 
-	// Get WebSocket instance again to send callback
-	// (re-getting instance is safe even though we got it above)
 	ws = websocket.GetInstance()
 	if ws == nil {
 		slog.Error("WebSocket instance not available for command callback")
 		return
 	}
 
-	// Prepare response message
 	responseType := event.ResponseTypeCommandCompleted
 	responseSubtype := event.ResponseSubtypeNone
 	message := "Command executed successfully"
@@ -292,7 +283,6 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 		message = fmt.Sprintf("Command exited with code %d", result.ExitCode)
 	}
 
-	// Send callback via WebSocket
 	response := event.MessageResponse{
 		ID:      req.RequestID,
 		Type:    responseType,
@@ -301,13 +291,11 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 		Message: message,
 	}
 
-	// Send message to the connection that initiated the request
 	if !ws.SendMessageToAddress(req.Connection, response) {
 		slog.Error("Failed to send command completion callback", "connection", req.Connection)
 		return
 	}
 
-	// Log result with comprehensive audit information
 	if result.Error != "" {
 		slog.Error(
 			"Command execution failed",

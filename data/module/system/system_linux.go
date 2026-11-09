@@ -50,7 +50,6 @@ func GetMicrophoneUsage() []string {
 		}
 		content := string(data)
 
-		// Check if the capture stream is actively running
 		if !strings.Contains(content, "state: RUNNING") {
 			continue
 		}

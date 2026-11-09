@@ -62,7 +62,6 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		partitions = append(partitions, p)
 	}
 
-	// Get IO counters for all devices
 	ioCounters, err := disk.IOCounters()
 	var ioRates map[string]diskRates
 	if err != nil {

@@ -52,7 +52,6 @@ func NewDataStore() (*DataStore, error) {
 		history:  NewHistory(),
 	}
 
-	// Register all modules with validation
 	modules := []types.Updater{
 		data_module.AudioModule{},
 		data_module.BatteryModule{},

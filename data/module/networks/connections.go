@@ -11,7 +11,6 @@ import (
 
 // gatherConnections collects information about network connections
 func GatherConnections(networksData *types.NetworksData) {
-	// Get network connections
 	connections, err := psnet.Connections("all")
 	if err != nil {
 		slog.Warn("Error getting network connections", "error", err)

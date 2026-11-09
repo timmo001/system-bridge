@@ -26,7 +26,6 @@ func getGPUs() ([]types.GPU, error) {
 	utils.SetHideWindow(cmd)
 	output, err := cmd.Output()
 	if err == nil {
-		// Parse nvidia-smi output
 		lines := strings.Split(string(output), "\n")
 		for _, line := range lines {
 			line = strings.TrimSpace(line)

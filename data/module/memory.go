@@ -17,7 +17,6 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 	slog.Debug("Getting memory data")
 
 	var memoryData types.MemoryData
-	// Get virtual memory stats
 	virtualMem, err := mem.VirtualMemory()
 	if err != nil {
 		slog.Error("Failed to get virtual memory", "error", err)

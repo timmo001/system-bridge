@@ -70,7 +70,6 @@ func x11Displays() ([]types.Display, error) {
 	}
 	defer X.Close()
 
-	// Initialize RandR
 	err = randr.Init(X)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize RandR: %v", err)
