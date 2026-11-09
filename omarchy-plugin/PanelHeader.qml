@@ -19,6 +19,8 @@ Item {
   property real iconOpacity: 1.0
   property string backText: ""
   property bool backHasCursor: false
+  // The back button's glyph, for a panel on another icon font.
+  property string backIcon: "󰁍"
 
   signal backActivated()
   signal backHovered()
@@ -31,7 +33,7 @@ Item {
     visible: root.backText !== ""
     anchors.left: parent.left
     anchors.verticalCenter: parent.verticalCenter
-    iconText: "󰁍"
+    iconText: root.backIcon
     foreground: root.foreground
     fontFamily: root.fontFamily
     hasCursor: root.backHasCursor

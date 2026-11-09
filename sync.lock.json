@@ -12,13 +12,13 @@
     },
     "omarchy-plugin/PanelHeader.qml": {
       "item": "panel-header",
-      "sha": "27599413a0cbda0676bb86c793adf965288c3ff7",
-      "hash": "09675301a055437ef96054076e4e80ecb3f43aaffca114eb2cde31c5b54ca997"
+      "sha": "06e32ffc8b94f097a550e3ea450b505fe1603b31",
+      "hash": "ac62ff9ca8844277b0120399abf0c0c25de43d69fb56d54c2bb26f8a1f55afd1"
     },
     "omarchy-plugin/SectionHeading.qml": {
       "item": "section-heading",
-      "sha": "1784973937be9a3aa98eef3b4d91e1aad66e6ce1",
-      "hash": "2954c61208c1f911b9c0e5d67cac8f69da3838e190af37eacd376b16ba6d493e"
+      "sha": "06e32ffc8b94f097a550e3ea450b505fe1603b31",
+      "hash": "8a83dfe4a3af2ee082bad15cc639975f5c3b4d623e42a074bafbc08aa3d1aa81"
     },
     "client/android/shell/build.gradle.kts": {
       "item": "android-shell",
