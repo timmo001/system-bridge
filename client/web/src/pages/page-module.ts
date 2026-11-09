@@ -211,12 +211,21 @@ export class PageModule extends SbPage {
         scroll-margin-top: calc(var(--sb-header-height) + var(--gw-space-4));
       }
 
-      /* The JSON view loads when first shown; hold its space until then */
-      sb-json-view:not(:defined) {
+      /* The JSON view fills the window below the sticky header */
+      gw-code {
+        --gw-code-height: max(
+          20rem,
+          calc(100dvh - var(--sb-header-height) - var(--gw-space-8))
+        );
+        --gw-code-max-height: none;
+      }
+
+      /* It loads when first shown; hold its space until then */
+      gw-code:not(:defined) {
         display: block;
-        height: var(--sb-json-height, 36rem);
-        border: 1px solid var(--gw-color-border-normal);
-        border-radius: var(--gw-radius-l);
+        height: var(--gw-code-height);
+        border: 1px solid var(--gw-color-border-quiet);
+        border-radius: var(--gw-radius-control);
       }
     `,
   ];
@@ -259,14 +268,19 @@ export class PageModule extends SbPage {
     // Wait for this module only, so a slow one elsewhere doesn't hold it up
     if (!settled.has(module)) return placeholder;
 
-    // The editor behind the JSON view is large, so it loads only when needed
-    if (view === "json") void import("~/components/sb-json-view");
-
     if (view === "json") {
-      return html`<sb-json-view
+      // The editor behind the JSON view is large, so it loads only when needed
+      void import("@timmo001/groundwork-ui/define/gw-code.ts");
+
+      return html`<gw-code
+        language="json"
+        line-numbers
+        wrap
+        find-shortcut
+        storage-key="system-bridge-json-wrap"
         label="${moduleInfo[module].label} data as JSON"
-        .data=${data[module] ?? null}
-      ></sb-json-view>`;
+        .content=${JSON.stringify(data[module] ?? null, null, 2)}
+      ></gw-code>`;
     }
 
     const extra = sections[module];
