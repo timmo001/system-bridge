@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@oxlint/plugins": "1.90.0",
-    "@timmo001/oxlint-rules": "0.6.4",
+    "@timmo001/oxlint-rules": "0.6.5",
     "@types/bun": "1.4.4",
     "oxlint": "1.90.0",
     "oxlint-tsgolint": "7.0.2005",
