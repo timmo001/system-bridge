@@ -11,7 +11,7 @@ import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
-  type HyprlandTool,
+  HyprlandTool,
   hyprlandTool,
   registry,
 } from "~/lib/atoms";
@@ -114,29 +114,33 @@ const toolRequest = (
 
   switch (tag) {
     case "getOption":
-      return { _tag: tag, name: text("name") };
+      return HyprlandTool.getOption({ name: text("name") });
     case "setOption":
-      return { _tag: tag, name: text("name"), value: text("value") };
+      return HyprlandTool.setOption({
+        name: text("name"),
+        value: text("value"),
+      });
     case "cursor":
+      return HyprlandTool.cursor();
     case "log":
-      return { _tag: tag };
+      return HyprlandTool.log();
     case "moveCursor": {
       const x = Number(text("x"));
       const y = Number(text("y"));
 
       return Number.isInteger(x) && Number.isInteger(y)
-        ? { _tag: tag, x, y }
+        ? HyprlandTool.moveCursor({ x, y })
         : null;
     }
 
     case "event":
-      return { _tag: tag, name: text("name") };
+      return HyprlandTool.event({ name: text("name") });
     case "exec":
-      return { _tag: tag, command: text("command") };
+      return HyprlandTool.exec({ command: text("command") });
     case "raw":
-      return { _tag: tag, dispatch: text("dispatch") };
+      return HyprlandTool.raw({ dispatch: text("dispatch") });
     case "eval":
-      return { _tag: tag, code: text("code") };
+      return HyprlandTool.eval({ code: text("code") });
   }
 };
 

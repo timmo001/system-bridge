@@ -45,6 +45,7 @@ import type {
   Process,
   SystemFailedUnit,
 } from "@timmo001/effect-system-bridge";
+import { Match } from "effect";
 import { html, nothing, type TemplateResult } from "lit";
 
 import "~/components/sb-action-alert";
@@ -192,11 +193,11 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
           ${stat("Session", system.locked === null ? "" : system.locked ? "Locked" : "Unlocked")}
           ${stat(
             "Package updates",
-            system.package_updates === null
-              ? ""
-              : system.package_updates === 0
-                ? "Up to date"
-                : `${system.package_updates} waiting`,
+            Match.value(system.package_updates).pipe(
+              Match.when(Match.null, () => ""),
+              Match.when(0, () => "Up to date"),
+              Match.orElse((count) => `${count} waiting`),
+            ),
           )}
         </div>
       </gw-card>

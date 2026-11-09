@@ -16,6 +16,7 @@ import {
   actionResult,
   focusWorkspace,
   registry,
+  WorkspaceAction,
   workspaceAction,
 } from "~/lib/atoms";
 import { menuValue } from "~/lib/select";
@@ -77,10 +78,10 @@ export class SbWorkspaceActions extends LitElement {
     } else if (value === "rename") {
       this.renaming = true;
     } else {
-      registry.set(workspaceAction(this.workspace.id), {
-        _tag: "move",
-        display: value.replace(/^display:/, ""),
-      });
+      registry.set(
+        workspaceAction(this.workspace.id),
+        WorkspaceAction.move({ display: value.replace(/^display:/, "") }),
+      );
     }
   };
 
@@ -95,10 +96,10 @@ export class SbWorkspaceActions extends LitElement {
 
     if (!(input instanceof HTMLInputElement)) return;
 
-    registry.set(workspaceAction(this.workspace.id), {
-      _tag: "rename",
-      name: input.value.trim(),
-    });
+    registry.set(
+      workspaceAction(this.workspace.id),
+      WorkspaceAction.rename({ name: input.value.trim() }),
+    );
     this.renaming = false;
   };
 

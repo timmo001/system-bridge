@@ -11,6 +11,7 @@ import {
   type ModulesData,
 } from "@timmo001/effect-system-bridge";
 import { Schema } from "effect";
+import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 
@@ -662,7 +663,7 @@ export class PageOverview extends SbPage {
         })}
         ${
           // Only a failed export needs a message; the download is the success
-          this.#export.value._tag === "Failure"
+          AsyncResult.isFailure(this.#export.value)
             ? this.renderResult(actionResult(this.#export.value, ""))
             : nothing
         }

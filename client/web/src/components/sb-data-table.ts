@@ -26,6 +26,7 @@ import {
   TableController,
   tableFeatures,
 } from "@tanstack/lit-table";
+import { Match } from "effect";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
@@ -360,13 +361,11 @@ export class SbDataTable<T extends RowData> extends LitElement {
     return html`
       <th
         class=${className}
-        aria-sort=${
-          sorted === "asc"
-            ? "ascending"
-            : sorted === "desc"
-              ? "descending"
-              : nothing
-        }
+        aria-sort=${Match.value(sorted).pipe(
+          Match.when("asc", () => "ascending"),
+          Match.when("desc", () => "descending"),
+          Match.orElse(() => nothing),
+        )}
       >
         ${
           column.getCanSort()

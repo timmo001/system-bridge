@@ -31,8 +31,10 @@ import {
 import {
   type Cause,
   Context,
+  Data,
   Effect,
   Layer,
+  Match,
   Option,
   Redacted,
   Schedule,
@@ -60,9 +62,15 @@ export type BridgeError =
 
 type Socket = SystemBridgeWebSocket["Service"];
 
-type ConnectionState =
-  | { readonly _tag: "Connected"; readonly socket: Socket }
-  | { readonly _tag: "Disconnected"; readonly error: string };
+/** A tagged enum case that carries nothing but its tag. */
+type NoFields = Record<never, never>;
+
+type ConnectionState = Data.TaggedEnum<{
+  Connected: { readonly socket: Socket };
+  Disconnected: { readonly error: string };
+}>;
+
+const ConnectionState = Data.taggedEnum<ConnectionState>();
 
 export interface ConnectionStatus {
   readonly isConnected: boolean;
@@ -70,17 +78,22 @@ export interface ConnectionStatus {
 }
 
 /** Turns a connector error into a message for the page. */
-export function errorMessage(error: BridgeError): string {
-  switch (error._tag) {
-    case "AuthenticationError":
-      return "Invalid API token. Please check your connection settings and update your token.";
-    case "RequestTimeoutError":
-      return "System Bridge didn't reply in time. Please try again.";
-    default:
-      // The backend's messages are Go errors, which start in lower case
-      return `${error.message.charAt(0).toUpperCase()}${error.message.slice(1)}`;
-  }
-}
+export const errorMessage = (error: BridgeError): string =>
+  Match.value(error).pipe(
+    Match.tag(
+      "AuthenticationError",
+      () =>
+        "Invalid API token. Please check your connection settings and update your token.",
+    ),
+    Match.tag(
+      "RequestTimeoutError",
+      () => "System Bridge didn't reply in time. Please try again.",
+    ),
+    // The backend's messages are Go errors, which start in lower case
+    Match.orElse(
+      ({ message }) => `${message.charAt(0).toUpperCase()}${message.slice(1)}`,
+    ),
+  );
 
 /** The result of an action, shaped for `renderPageResult`. */
 export function actionResult<A>(
@@ -122,10 +135,8 @@ export const connectionSettings = Atom.writable(
   },
 ).pipe(Atom.keepAlive);
 
-const disconnected = (error: string): ConnectionState => ({
-  _tag: "Disconnected",
-  error,
-});
+const disconnected = (error: string): ConnectionState =>
+  ConnectionState.Disconnected({ error });
 
 function settingsError(settings: ConnectionSettings): string | null {
   if (!settings.host || !settings.port) {
@@ -169,10 +180,9 @@ const connect = (settings: ConnectionSettings, token: string) =>
         ),
       );
 
-      return Stream.succeed<ConnectionState>({
-        _tag: "Connected",
-        socket,
-      }).pipe(Stream.concat(closed));
+      return Stream.succeed<ConnectionState>(
+        ConnectionState.Connected({ socket }),
+      ).pipe(Stream.concat(closed));
     }),
   );
 
@@ -210,9 +220,13 @@ export const connectionStatus = Atom.make((get): ConnectionStatus => {
 
   if (state === undefined) return { isConnected: false, error: null };
 
-  return state._tag === "Connected"
-    ? { isConnected: true, error: null }
-    : { isConnected: false, error: state.error };
+  return ConnectionState.$match(state, {
+    Connected: (): ConnectionStatus => ({ isConnected: true, error: null }),
+    Disconnected: ({ error }): ConnectionStatus => ({
+      isConnected: false,
+      error,
+    }),
+  });
 });
 
 /** Reconnects with the current settings. */
@@ -241,9 +255,11 @@ export const testConnection = Atom.fn(
 const connected = (
   state: ConnectionState,
 ): Effect.Effect<Socket, ConnectionError> =>
-  state._tag === "Connected"
-    ? Effect.succeed(state.socket)
-    : Effect.fail(new ConnectionError({ message: state.error }));
+  ConnectionState.$match(state, {
+    Connected: ({ socket }) => Effect.succeed(socket),
+    Disconnected: ({ error }) =>
+      Effect.fail(new ConnectionError({ message: error })),
+  });
 
 /** The connected socket, failing when there isn't one. */
 export const socket = (get: Atom.AtomContext) =>
@@ -264,23 +280,24 @@ export interface ModuleState {
 const noModules: ModuleState = { data: {}, settled: new Set() };
 
 /** One module's data, or that it settled without any. */
-type ModuleEvent =
-  | { readonly _tag: "Data"; readonly update: ModuleDataUpdate }
-  | { readonly _tag: "Missing"; readonly module: ModuleName };
+type ModuleEvent = Data.TaggedEnum<{
+  Data: { readonly update: ModuleDataUpdate };
+  Missing: { readonly module: ModuleName };
+}>;
 
-const applyEvent = (state: ModuleState, event: ModuleEvent): ModuleState => {
-  const module = event._tag === "Data" ? event.update.module : event.module;
-  const settled = new Set(state.settled).add(module);
+const ModuleEvent = Data.taggedEnum<ModuleEvent>();
 
-  return event._tag === "Data"
-    ? {
-        data: Struct.assign(state.data, {
-          [event.update.module]: event.update.data,
-        }),
-        settled,
-      }
-    : { data: state.data, settled };
-};
+const applyEvent = (state: ModuleState, event: ModuleEvent): ModuleState =>
+  ModuleEvent.$match(event, {
+    Data: ({ update }): ModuleState => ({
+      data: Struct.assign(state.data, { [update.module]: update.data }),
+      settled: new Set(state.settled).add(update.module),
+    }),
+    Missing: ({ module }): ModuleState => ({
+      data: state.data,
+      settled: new Set(state.settled).add(module),
+    }),
+  });
 
 /**
  * Every module's data, kept up to date by the backend's data listener. Each
@@ -299,17 +316,17 @@ export const moduleData = Atom.make((get) =>
         Stream.mapEffect(
           (module) =>
             bridge.getData([module]).pipe(
-              Effect.map((data): ModuleEvent => {
-                const update = Option.getOrUndefined(
+              Effect.map((data) =>
+                Option.match(
                   decodeModuleUpdate({ module, data: data[module] }),
-                );
-
-                return update === undefined
-                  ? { _tag: "Missing", module }
-                  : { _tag: "Data", update };
-              }),
+                  {
+                    onNone: () => ModuleEvent.Missing({ module }),
+                    onSome: (update) => ModuleEvent.Data({ update }),
+                  },
+                ),
+              ),
               Effect.catch(() =>
-                Effect.succeed<ModuleEvent>({ _tag: "Missing", module }),
+                Effect.succeed(ModuleEvent.Missing({ module })),
               ),
             ),
           { concurrency: "unbounded" },
@@ -317,7 +334,7 @@ export const moduleData = Atom.make((get) =>
       );
 
       const updates = bridge.updates.pipe(
-        Stream.map((update): ModuleEvent => ({ _tag: "Data", update })),
+        Stream.map((update) => ModuleEvent.Data({ update })),
       );
 
       return Stream.merge(initial, updates).pipe(
@@ -604,43 +621,31 @@ export const mediaControl = Atom.fn((control: MediaControl, get) =>
 );
 
 /** Something to do to a window. */
-export type WindowAction =
-  | { readonly _tag: "close" }
-  | { readonly _tag: "focus" }
-  | { readonly _tag: "kill" }
-  | { readonly _tag: "move"; readonly workspace: string }
-  | {
-      readonly _tag: "set";
-      readonly settings: Omit<HyprlandSetWindowRequest, "id">;
-    }
-  | {
-      readonly _tag: "state";
-      readonly state: Omit<DesktopWindowStateRequest, "id">;
-    };
+export type WindowAction = Data.TaggedEnum<{
+  close: NoFields;
+  focus: NoFields;
+  kill: NoFields;
+  move: { readonly workspace: string };
+  set: { readonly settings: Omit<HyprlandSetWindowRequest, "id"> };
+  state: { readonly state: Omit<DesktopWindowStateRequest, "id"> };
+}>;
+
+export const WindowAction = Data.taggedEnum<WindowAction>();
 
 /** Focuses, closes, moves or changes a window, one atom per window. */
 export const windowAction = Atom.family((id: string) =>
   Atom.fn((action: WindowAction, get) =>
     fnSocket(get).pipe(
-      Effect.flatMap((bridge) => {
-        switch (action._tag) {
-          case "close":
-            return bridge.desktopCloseWindow({ id });
-          case "focus":
-            return bridge.desktopFocusWindow({ id });
-          case "kill":
-            return bridge.hyprlandKillWindow({ id });
-          case "move":
-            return bridge.hyprlandMoveWindow({
-              id,
-              workspace: action.workspace,
-            });
-          case "set":
-            return bridge.hyprlandSetWindow({ ...action.settings, id });
-          case "state":
-            return bridge.desktopSetWindowState({ ...action.state, id });
-        }
-      }),
+      Effect.flatMap((bridge) =>
+        WindowAction.$match(action, {
+          close: () => bridge.desktopCloseWindow({ id }),
+          focus: () => bridge.desktopFocusWindow({ id }),
+          kill: () => bridge.hyprlandKillWindow({ id }),
+          move: ({ workspace }) => bridge.hyprlandMoveWindow({ id, workspace }),
+          set: ({ settings }) => bridge.hyprlandSetWindow({ ...settings, id }),
+          state: ({ state }) => bridge.desktopSetWindowState({ ...state, id }),
+        }),
+      ),
     ),
   ),
 );
@@ -655,18 +660,22 @@ export const focusWorkspace = Atom.family((id: string) =>
 );
 
 /** Something to do to a workspace on Hyprland. */
-export type WorkspaceAction =
-  | { readonly _tag: "rename"; readonly name: string }
-  | { readonly _tag: "move"; readonly display: string };
+export type WorkspaceAction = Data.TaggedEnum<{
+  rename: { readonly name: string };
+  move: { readonly display: string };
+}>;
+
+export const WorkspaceAction = Data.taggedEnum<WorkspaceAction>();
 
 /** Renames a workspace or moves it to a display, one atom per workspace. */
 export const workspaceAction = Atom.family((id: string) =>
   Atom.fn((action: WorkspaceAction, get) =>
     fnSocket(get).pipe(
       Effect.flatMap((bridge) =>
-        action._tag === "rename"
-          ? bridge.hyprlandRenameWorkspace({ id, name: action.name })
-          : bridge.hyprlandMoveWorkspace({ id, display: action.display }),
+        WorkspaceAction.$match(action, {
+          rename: ({ name }) => bridge.hyprlandRenameWorkspace({ id, name }),
+          move: ({ display }) => bridge.hyprlandMoveWorkspace({ id, display }),
+        }),
       ),
     ),
   ),
@@ -691,64 +700,55 @@ export const setHyprlandOption = Atom.family((name: string) =>
 );
 
 /** A Hyprland query or action from the tools card, by what it needs. */
-export type HyprlandTool =
-  | { readonly _tag: "getOption"; readonly name: string }
-  | {
-      readonly _tag: "setOption";
-      readonly name: string;
-      readonly value: string;
-    }
-  | { readonly _tag: "cursor" }
-  | { readonly _tag: "moveCursor"; readonly x: number; readonly y: number }
-  | { readonly _tag: "log" }
-  | { readonly _tag: "event"; readonly name: string }
-  | { readonly _tag: "exec"; readonly command: string }
-  | { readonly _tag: "raw"; readonly dispatch: string }
-  | { readonly _tag: "eval"; readonly code: string };
+export type HyprlandTool = Data.TaggedEnum<{
+  getOption: { readonly name: string };
+  setOption: { readonly name: string; readonly value: string };
+  cursor: NoFields;
+  moveCursor: { readonly x: number; readonly y: number };
+  log: NoFields;
+  event: { readonly name: string };
+  exec: { readonly command: string };
+  raw: { readonly dispatch: string };
+  eval: { readonly code: string };
+}>;
+
+export const HyprlandTool = Data.taggedEnum<HyprlandTool>();
 
 /** Runs a Hyprland tool, with what it read or did as text for the page. */
 export const hyprlandTool = Atom.fn((tool: HyprlandTool, get) =>
   fnSocket(get).pipe(
-    Effect.flatMap((bridge): Effect.Effect<string, BridgeError> => {
-      switch (tool._tag) {
-        case "getOption":
-          return bridge
-            .hyprlandGetOption({ name: tool.name })
-            .pipe(Effect.map((option) => JSON.stringify(option, null, 2)));
-        case "setOption":
-          return bridge
-            .hyprlandSetOption({ name: tool.name, value: tool.value })
-            .pipe(Effect.as(`Set ${tool.name} until the config reloads`));
-        case "cursor":
-          return bridge.hyprlandGetCursorPosition.pipe(
+    Effect.flatMap((bridge): Effect.Effect<string, BridgeError> =>
+      HyprlandTool.$match(tool, {
+        getOption: ({ name }) =>
+          bridge
+            .hyprlandGetOption({ name })
+            .pipe(Effect.map((option) => JSON.stringify(option, null, 2))),
+        setOption: ({ name, value }) =>
+          bridge
+            .hyprlandSetOption({ name, value })
+            .pipe(Effect.as(`Set ${name} until the config reloads`)),
+        cursor: () =>
+          bridge.hyprlandGetCursorPosition.pipe(
             Effect.map((position) => `${position.x}, ${position.y}`),
-          );
-        case "moveCursor":
-          return bridge
-            .hyprlandMoveCursor({ x: tool.x, y: tool.y })
-            .pipe(Effect.as(`Moved the pointer to ${tool.x}, ${tool.y}`));
-        case "log":
-          return bridge.hyprlandGetLog.pipe(
-            Effect.map((log) => log.lines.join("\n")),
-          );
-        case "event":
-          return bridge
-            .hyprlandSendEvent({ name: tool.name })
-            .pipe(Effect.as(`Sent ${tool.name}`));
-        case "exec":
-          return bridge
-            .hyprlandExec({ command: tool.command })
-            .pipe(Effect.as("Ran the command"));
-        case "raw":
-          return bridge
-            .hyprlandDispatchRaw({ dispatch: tool.dispatch })
-            .pipe(Effect.as("Ran the dispatch"));
-        case "eval":
-          return bridge
-            .hyprlandEval({ code: tool.code })
-            .pipe(Effect.as("Ran the Lua"));
-      }
-    }),
+          ),
+        moveCursor: ({ x, y }) =>
+          bridge
+            .hyprlandMoveCursor({ x, y })
+            .pipe(Effect.as(`Moved the pointer to ${x}, ${y}`)),
+        log: () =>
+          bridge.hyprlandGetLog.pipe(Effect.map((log) => log.lines.join("\n"))),
+        event: ({ name }) =>
+          bridge.hyprlandSendEvent({ name }).pipe(Effect.as(`Sent ${name}`)),
+        exec: ({ command }) =>
+          bridge.hyprlandExec({ command }).pipe(Effect.as("Ran the command")),
+        raw: ({ dispatch }) =>
+          bridge
+            .hyprlandDispatchRaw({ dispatch })
+            .pipe(Effect.as("Ran the dispatch")),
+        eval: ({ code }) =>
+          bridge.hyprlandEval({ code }).pipe(Effect.as("Ran the Lua")),
+      }),
+    ),
   ),
 );
 
@@ -780,10 +780,13 @@ export const hyprlandEvents = Atom.make((get) =>
 ).pipe(Atom.keepAlive);
 
 /** Something that happened to a notification System Bridge sent. */
-export type NotificationHappening =
-  | { readonly _tag: "Sent" }
-  | { readonly _tag: "Clicked"; readonly action: string }
-  | { readonly _tag: "Closed"; readonly reason: string };
+export type NotificationHappening = Data.TaggedEnum<{
+  Sent: NoFields;
+  Clicked: { readonly action: string };
+  Closed: { readonly reason: string };
+}>;
+
+export const NotificationHappening = Data.taggedEnum<NotificationHappening>();
 
 /** A notification sent while the page was open, and what happened to it. */
 export interface FollowedNotification {
@@ -800,14 +803,14 @@ const NOTIFICATIONS_KEPT = 20;
 
 const happening = (event: NotificationEvent): NotificationHappening => {
   if (event.action !== undefined) {
-    return { _tag: "Clicked", action: event.action };
+    return NotificationHappening.Clicked({ action: event.action });
   }
 
   if (event.reason !== undefined) {
-    return { _tag: "Closed", reason: event.reason };
+    return NotificationHappening.Closed({ reason: event.reason });
   }
 
-  return { _tag: "Sent" };
+  return NotificationHappening.Sent();
 };
 
 const followNotification = (
@@ -817,7 +820,7 @@ const followNotification = (
   const happened = happening(event);
   const updated = Date.now();
 
-  if (happened._tag === "Sent") {
+  if (NotificationHappening.$is("Sent")(happened)) {
     return [
       {
         id: event.id,

@@ -10,6 +10,7 @@ import type {
   DesktopWorkspace,
   HyprlandWindow,
 } from "@timmo001/effect-system-bridge";
+import { Match } from "effect";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
@@ -20,7 +21,7 @@ import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
   registry,
-  type WindowAction,
+  WindowAction,
   windowAction,
 } from "~/lib/atoms";
 import { menuCheck, menuValue } from "~/lib/select";
@@ -80,12 +81,12 @@ export class SbWindowActions extends LitElement {
     switch (value) {
       case "floating":
       case "pinned":
-        this.#run({ _tag: "set", settings: { [value]: checked } });
+        this.#run(WindowAction.set({ settings: { [value]: checked } }));
         break;
       case "fullscreen":
       case "maximised":
       case "minimised":
-        this.#run({ _tag: "state", state: { [value]: checked } });
+        this.#run(WindowAction.state({ state: { [value]: checked } }));
         break;
     }
   };
@@ -95,19 +96,18 @@ export class SbWindowActions extends LitElement {
 
     switch (value) {
       case "close":
-        this.#run({ _tag: "close" });
+        this.#run(WindowAction.close());
         break;
       case "focus":
-        this.#run({ _tag: "focus" });
+        this.#run(WindowAction.focus());
         break;
       case "kill":
-        this.#run({ _tag: "kill" });
+        this.#run(WindowAction.kill());
         break;
       default:
-        this.#run({
-          _tag: "move",
-          workspace: value.replace(/^workspace:/, ""),
-        });
+        this.#run(
+          WindowAction.move({ workspace: value.replace(/^workspace:/, "") }),
+        );
     }
   };
 
@@ -127,13 +127,16 @@ export class SbWindowActions extends LitElement {
         value: state,
         label: stateLabels.get(state) ?? state,
         checkbox: true,
-        checked:
-          state === "fullscreen"
-            ? window.fullscreen === true
-            : state === "maximised"
-              ? window.maximised === true ||
-                this.extra?.fullscreen_mode === "maximised"
-              : window.minimised === true,
+        checked: Match.value(state).pipe(
+          Match.when("fullscreen", () => window.fullscreen === true),
+          Match.when(
+            "maximised",
+            () =>
+              window.maximised === true ||
+              this.extra?.fullscreen_mode === "maximised",
+          ),
+          Match.orElse(() => window.minimised === true),
+        ),
       }),
     );
 

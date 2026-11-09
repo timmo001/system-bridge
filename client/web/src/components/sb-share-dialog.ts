@@ -4,6 +4,7 @@ import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-dialog.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import type { Share } from "@timmo001/groundwork-pwa/view";
+import { Match } from "effect";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
@@ -147,15 +148,15 @@ export class SbShareDialog extends LitElement {
     const url = sharedUrl(share);
     const text = share.text ?? share.url ?? "";
 
-    const result =
-      this.ran === "open"
-        ? actionResult(this.#open.value, "Opened on the computer.")
-        : this.ran === "copy"
-          ? actionResult(
-              this.#copy.value,
-              "Copied to the computer's clipboard.",
-            )
-          : null;
+    const result = Match.value(this.ran).pipe(
+      Match.when("open", () =>
+        actionResult(this.#open.value, "Opened on the computer."),
+      ),
+      Match.when("copy", () =>
+        actionResult(this.#copy.value, "Copied to the computer's clipboard."),
+      ),
+      Match.orElse(() => null),
+    );
 
     const busy =
       (this.ran === "open" && this.#open.value.waiting) ||

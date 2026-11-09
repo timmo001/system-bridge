@@ -1,5 +1,6 @@
 import { mdiCodeJson, mdiViewDashboardOutline } from "@mdi/js";
 import type { ModuleName } from "@timmo001/effect-system-bridge";
+import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
@@ -352,7 +353,7 @@ export class PageModule extends SbPage {
         })}
         ${
           // Only a failed export needs a message; the download is the success
-          this.#export.value._tag === "Failure"
+          AsyncResult.isFailure(this.#export.value)
             ? this.renderResult(actionResult(this.#export.value, ""))
             : nothing
         }

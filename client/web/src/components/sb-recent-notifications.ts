@@ -7,7 +7,7 @@ import { AtomController } from "~/controllers/atom-controller";
 import { dashboardStyles } from "~/dashboards/shared";
 import {
   type FollowedNotification,
-  type NotificationHappening,
+  NotificationHappening,
   recentNotifications,
 } from "~/lib/atoms";
 import { formatDateTime } from "~/lib/format";
@@ -22,18 +22,15 @@ const buttonLabel = (
 const describe = (
   notification: FollowedNotification,
   happened: NotificationHappening,
-): string => {
-  switch (happened._tag) {
-    case "Sent":
-      return "sent";
-    case "Clicked":
-      return happened.action === "default"
+): string =>
+  NotificationHappening.$match(happened, {
+    Sent: () => "sent",
+    Clicked: ({ action }) =>
+      action === "default"
         ? "clicked the notification"
-        : `clicked ${buttonLabel(notification, happened.action)}`;
-    case "Closed":
-      return `closed (${happened.reason})`;
-  }
-};
+        : `clicked ${buttonLabel(notification, action)}`,
+    Closed: ({ reason }) => `closed (${reason})`,
+  });
 
 const describeAll = (notification: FollowedNotification): string => {
   const text = notification.happened

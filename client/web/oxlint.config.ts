@@ -1,8 +1,8 @@
-import recommended from "@timmo001/oxlint-rules/configs/recommended";
+import recommendedEffect from "@timmo001/oxlint-rules/configs/recommended-effect";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
-  extends: [recommended],
+  extends: [recommendedEffect],
   plugins: ["typescript"],
   jsPlugins: ["eslint-plugin-lit", "eslint-plugin-wc"],
   categories: {
