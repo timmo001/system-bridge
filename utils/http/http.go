@@ -208,32 +208,10 @@ func (c *Client) checkRateLimit(url string) error {
 		limiter.ResetAt = time.Now().Add(limiter.TimeWindow)
 	}
 
-	// Check if we're over the limit
 	if limiter.RequestCount >= limiter.MaxRequests {
 		return fmt.Errorf("rate limit exceeded for %s, resets at %s", url, limiter.ResetAt)
 	}
 
-	// Increment counter
 	limiter.RequestCount++
 	return nil
-}
-
-// ClearCache removes all entries from the cache
-func (c *Client) ClearCache() {
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
-	c.cache = make(map[string]*CacheEntry)
-}
-
-// SetRateLimit sets custom rate limit for a specific URL
-func (c *Client) SetRateLimit(url string, maxRequests int, timeWindow time.Duration) {
-	c.cacheMutex.Lock()
-	defer c.cacheMutex.Unlock()
-
-	c.rateLimits[url] = &RateLimiter{
-		RequestCount: 0,
-		ResetAt:      time.Now().Add(timeWindow),
-		MaxRequests:  maxRequests,
-		TimeWindow:   timeWindow,
-	}
 }

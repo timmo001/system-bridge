@@ -1,6 +1,13 @@
 package filesystem
 
-import "github.com/adrg/xdg"
+import (
+	"mime"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/adrg/xdg"
+)
 
 // DirectoryInfo represents information about a directory
 type DirectoryInfo struct {
@@ -31,14 +38,27 @@ func GetUserDirectories() []DirectoryInfo {
 	}
 }
 
-// GetDirectoryContents returns the contents of a directory
-func GetDirectoryContents(path string) ([]FileInfo, error) {
-	return getDirectoryContents(path)
-}
-
 // GetFileInfo returns information about a file
 func GetFileInfo(path string) (*FileInfo, error) {
-	return getFileInfo(path)
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	ext := filepath.Ext(path)
+	mimeType := mime.TypeByExtension(ext)
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+
+	return &FileInfo{
+		Name:      info.Name(),
+		Path:      path,
+		Size:      info.Size(),
+		Modified:  info.ModTime().UnixMilli(),
+		Extension: strings.TrimPrefix(ext, "."),
+		MimeType:  mimeType,
+	}, nil
 }
 
 // OpenFile opens a file with the default application

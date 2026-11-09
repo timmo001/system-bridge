@@ -12,11 +12,6 @@ func Load() (*Settings, error) {
 	return settings.Load()
 }
 
-// Save saves the settings to disk
-func Save(settings *Settings) error {
-	return settings.Save()
-}
-
 // Update updates the settings with new values
 func Update(current *Settings, new *Settings) error {
 	current.Autostart = new.Autostart

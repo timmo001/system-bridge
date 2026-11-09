@@ -181,24 +181,12 @@ func (m *MDNSDiscovery) Stop() error {
 	return nil
 }
 
-// GetService returns the mDNS service information
-func (m *MDNSDiscovery) GetService() *mdns.MDNSService {
-	return m.service
-}
-
-// GetServer returns the mDNS server instance
-func (m *MDNSDiscovery) GetServer() *mdns.Server {
-	return m.server
-}
-
 // DiscoverServices attempts to discover mDNS services on the network
 func (m *MDNSDiscovery) DiscoverServices() ([]MDNSService, error) {
 	services := []MDNSService{}
 
-	// Create a channel to receive discovered services
 	entriesCh := make(chan *mdns.ServiceEntry, 10)
 
-	// Start the lookup
 	go func() {
 		defer close(entriesCh)
 		// Look for system-bridge services

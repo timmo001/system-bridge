@@ -22,13 +22,6 @@ func SetDefaultNotifier(n *Notifier) {
 	defaultNotifier = n
 }
 
-// GetDefaultNotifier returns the package-level notifier, or nil if not set.
-func GetDefaultNotifier() *Notifier {
-	defaultNotifierMu.RLock()
-	defer defaultNotifierMu.RUnlock()
-	return defaultNotifier
-}
-
 // NotificationData represents the data needed for a notification
 type NotificationData struct {
 	Title      string `json:"title" mapstructure:"title"`

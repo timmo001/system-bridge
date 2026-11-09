@@ -40,7 +40,6 @@ func (dm *DiscoveryManager) Start() error {
 
 	slog.Info("Starting service discovery manager...")
 
-	// Start mDNS discovery
 	dm.mdnsDisc = NewMDNSDiscovery(dm.port)
 	if err := dm.mdnsDisc.Start(); err != nil {
 		slog.Warn("Failed to start mDNS discovery", "err", err)
@@ -72,13 +71,6 @@ func (dm *DiscoveryManager) Stop() error {
 	dm.running = false
 	slog.Info("Service discovery manager stopped")
 	return nil
-}
-
-// IsRunning returns whether the discovery manager is running
-func (dm *DiscoveryManager) IsRunning() bool {
-	dm.mu.RLock()
-	defer dm.mu.RUnlock()
-	return dm.running
 }
 
 // DiscoverServices attempts to discover all available System Bridge services
@@ -125,11 +117,4 @@ func (dm *DiscoveryManager) Announce() {
 	if dm.running && dm.mdnsDisc != nil {
 		dm.mdnsDisc.Announce()
 	}
-}
-
-// GetMDNSDiscovery returns the mDNS discovery instance
-func (dm *DiscoveryManager) GetMDNSDiscovery() *MDNSDiscovery {
-	dm.mu.RLock()
-	defer dm.mu.RUnlock()
-	return dm.mdnsDisc
 }

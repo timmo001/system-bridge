@@ -65,17 +65,7 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 	return &multiHandler{handlers: newHandlers}
 }
 
-// CaptureFatalError is a helper function to log fatal errors and exit
-func CaptureFatalError(err error, msg string, args ...any) {
-	// Log the fatal error
-	slog.Error(msg, append([]any{"err", err}, args...)...)
-
-	// Exit with error code
-	os.Exit(1)
-}
-
 func setupLogging() {
-
 	// Initialize the dynamic log level from settings, or the default level
 	// when they can't be loaded
 	logLevel := settings.LogLevelWarn
