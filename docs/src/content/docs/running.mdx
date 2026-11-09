@@ -52,6 +52,14 @@ manually to the correct path.
 
 Run System Bridge as a user service so it shares your login session. This gives it access to your display, audio, notifications and media, and it reads its configuration from your home directory without any extra setup.
 
+The Arch packages (`system-bridge` and `system-bridge-git`) ship this service for your desktop session, so you only need to enable it. Each upgrade restarts it while it's running:
+
+```bash
+systemctl --user enable --now system-bridge
+```
+
+On other installs, set it up yourself:
+
 1. Create a user service file at `~/.config/systemd/user/system-bridge.service`:
 
    ```ini title="~/.config/systemd/user/system-bridge.service"
