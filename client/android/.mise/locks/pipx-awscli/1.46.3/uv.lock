@@ -3,7 +3,7 @@ revision = 5
 requires-python = ">=3.10"
 
 [options]
-exclude-newer = "2026-11-07T19:16:32.876771561Z"
+exclude-newer = "2026-11-08T01:53:03.516929436Z"
 
 [[package]]
 name = "awscli"
