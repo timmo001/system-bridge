@@ -56,8 +56,8 @@ Item {
       var aSection = String(a.section || "")
       var bSection = String(b.section || "")
       if (aSection !== bSection) {
-        var aSectionIndex = source.findIndex(function(entry) { return String(entry.section || "") === aSection })
-        var bSectionIndex = source.findIndex(function(entry) { return String(entry.section || "") === bSection })
+        const aSectionIndex = source.findIndex(function(entry) { return String(entry.section || "") === aSection })
+        const bSectionIndex = source.findIndex(function(entry) { return String(entry.section || "") === bSection })
         return aSectionIndex - bSectionIndex
       }
       var aPrimary = String(a.primaryText || "").toLowerCase().indexOf(term) >= 0
@@ -109,7 +109,7 @@ Item {
   }
 
   function indexForKey(key) {
-    for (var i = 0; i < navigationEntries.length; i++) {
+    for (let i = 0; i < navigationEntries.length; i++) {
       if (navigationEntries[i].key === key) return i
     }
     return -1
@@ -118,8 +118,8 @@ Item {
   function deletesLastCharacter(text) {
     var end = text.length - 1
     if (end > 0) {
-      var trailingCode = text.charCodeAt(end)
-      var precedingCode = text.charCodeAt(end - 1)
+      const trailingCode = text.charCodeAt(end)
+      const precedingCode = text.charCodeAt(end - 1)
       if (trailingCode >= 0xDC00 && trailingCode <= 0xDFFF
           && precedingCode >= 0xD800 && precedingCode <= 0xDBFF) end--
     }
@@ -149,12 +149,12 @@ Item {
       root.moveCursor(1)
       event.accepted = true
     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-      var entry = root.selectedEntry()
+      const entry = root.selectedEntry()
       if (entry) root.activateRequested(entry, event.modifiers)
       event.accepted = true
     } else if (event.key === Qt.Key_Menu
         || (event.key === Qt.Key_F10 && event.modifiers === Qt.ShiftModifier)) {
-      var menuEntry = root.selectedEntry()
+      const menuEntry = root.selectedEntry()
       if (menuEntry) root.menuRequested(menuEntry)
       event.accepted = true
     } else if (event.key === Qt.Key_R && event.modifiers === Qt.ControlModifier) {

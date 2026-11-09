@@ -2,8 +2,8 @@
   "copies": {
     "omarchy-plugin/FilterablePanel.qml": {
       "item": "filterable-panel",
-      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
-      "hash": "ea6fba85969975aad30a13049c3430e65a772a2aba17c2e391f8e66f9d5474c2"
+      "sha": "90bbc3ac86833b38f25cefb4c843137b95c5ec9a",
+      "hash": "c96e8fbb4deac69087d448e0c489113681a56d0e17dd9c49785711d2a4b8f1c1"
     },
     "omarchy-plugin/PanelFlickable.qml": {
       "item": "panel-flickable",
