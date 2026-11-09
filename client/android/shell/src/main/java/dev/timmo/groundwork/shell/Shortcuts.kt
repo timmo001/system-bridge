@@ -47,7 +47,7 @@ class Shortcuts internal constructor(private val activity: ShellActivity) {
 
   /**
    * Takes the shortcuts with these ids away: dynamic ones go, and pinned ones
-   * stay greyed out, showing `message` when tapped.
+   * stay grayed out, showing `message` when tapped.
    */
   fun disable(ids: List<String>, message: String?) =
     ShortcutManagerCompat.disableShortcuts(activity, ids, message)
