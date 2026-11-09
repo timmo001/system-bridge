@@ -41,7 +41,7 @@ require (
 	github.com/vcaesar/screenshot v0.40.0
 	github.com/yusufpapurcu/wmi v1.2.4
 	golang.org/x/net v0.62.0
-	golang.org/x/sys v0.49.0
+	golang.org/x/sys v0.50.0
 	golang.org/x/time v0.16.0
 )
 
