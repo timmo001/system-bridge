@@ -20,6 +20,8 @@ on:
       - .scripts/linux/PKGBUILD.dev
       - .scripts/linux/system-bridge.desktop
       - .scripts/linux/60-system-bridge-rapl.rules
+      - .scripts/linux/system-bridge.service
+      - .scripts/linux/system-bridge.install
       - .github/workflows/publish-arch-git.yml
   workflow_dispatch: {}
 

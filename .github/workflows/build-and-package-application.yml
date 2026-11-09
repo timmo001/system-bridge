@@ -397,6 +397,7 @@ jobs:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
       pkgbuild-path: PKGBUILD
+      auxiliary-file-paths: system-bridge.install
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
@@ -513,6 +514,7 @@ jobs:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
       pkgbuild-path: PKGBUILD
+      auxiliary-file-paths: system-bridge.install
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 

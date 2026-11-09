@@ -8,6 +8,9 @@ output_dir="${2:?output directory required}"
 
 mkdir -p "$output_dir"
 
+# Both PKGBUILDs name it with install=, so it ships beside them
+install -m 0644 "$script_dir/system-bridge.install" "$output_dir/system-bridge.install"
+
 case "$mode" in
   development)
     cd "$repo_root"

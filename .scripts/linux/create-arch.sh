@@ -46,6 +46,8 @@ cd build/arch
 cp ../../system-bridge-linux system-bridge
 cp ../../.scripts/linux/system-bridge.desktop .
 cp ../../.scripts/linux/60-system-bridge-rapl.rules .
+cp ../../.scripts/linux/system-bridge.service .
+cp ../../.scripts/linux/system-bridge.install .
 cp ../../LICENSE .
 cp ../../.scripts/linux/PKGBUILD .
 

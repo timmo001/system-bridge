@@ -8,6 +8,7 @@ system-bridge-*
 system-bridge.*
 !system-bridge*.desktop
 !system-bridge*.service
+!system-bridge*.install
 !system-bridge*.spec
 system-bridge.rc
 system-bridge.syso

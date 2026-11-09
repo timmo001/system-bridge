@@ -1,15 +1,17 @@
+# The System Bridge backend as a user service for the desktop session, which
+# gives it the session's display, audio and media. The Arch packages install
+# it to /usr/lib/systemd/user without enabling it, and restart it on upgrade.
 [Unit]
-Description=System Bridge
-After=network.target
+Description=System Bridge backend
+Documentation=https://system-bridge.timmo.dev/running/
+PartOf=graphical-session.target
+After=graphical-session.target
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/system-bridge backend
 Restart=on-failure
 RestartSec=5
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=system-bridge
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
