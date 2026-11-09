@@ -317,6 +317,7 @@ depends = [
   "typecheck:connector:python",
   "lint:connector:typescript",
   "typecheck:connector:typescript",
+  "lint:opencode-plugin",
   "typecheck:opencode-plugin",
 ]
 
@@ -474,6 +475,12 @@ depends = ["install:js"]
 dir = "opencode-plugin"
 run = "bun run typecheck"
 
+[tasks."lint:opencode-plugin"]
+description = "Lint the OpenCode plugin with Oxlint"
+depends = ["install:js"]
+dir = "opencode-plugin"
+run = "bun run lint"
+
 [tasks."build:connector:typescript"]
 description = "Build the TypeScript connector"
 depends = ["install:js"]
@@ -528,9 +535,13 @@ dir = "docs"
 run = "bun run validate"
 
 [tasks."docs:lint"]
-description = "Lint docs markdown with the docs ruleset"
+description = "Lint the docs: Markdown with the docs ruleset, and TypeScript with Oxlint"
+depends = ["install:js"]
 dir = "docs"
-run = "bunx markdownlint-cli --config .markdownlint.json \"**/*.md\""
+run = [
+  "bunx markdownlint-cli --config .markdownlint.json \"**/*.md\"",
+  "bun run lint",
+]
 
 [tasks."omarchy-plugin:test-publisher"]
 description = "Test the Omarchy plugin publisher"

@@ -11,7 +11,8 @@
     "deploy": "wrangler deploy --config dist/server/wrangler.json",
     "deploy:preview": "wrangler versions upload --config dist/server/wrangler.json",
     "preview": "blume preview",
-    "brand": "bun scripts/brand-images.ts"
+    "brand": "bun scripts/brand-images.ts",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
@@ -22,6 +23,10 @@
     "sharp": "0.35.5"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.90.0",
+    "@timmo001/oxlint-rules": "0.6.4",
+    "oxlint": "1.90.0",
+    "oxlint-tsgolint": "7.0.2005",
     "wrangler": "4.158.0"
   }
 }
