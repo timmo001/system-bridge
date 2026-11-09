@@ -169,7 +169,7 @@ url_api = "https://api.github.com/repos/JetBrains/kotlin/releases/assets/6212874
 version = "1.46.3"
 backend = "pipx:awscli"
 specifiers = ["1.46.3"]
-uv = { path = ".mise/locks/pipx-awscli/1.46.3", digest = "sha256:52e6f2c146f32b9eb69808988ed4d01c8704f76c1df61b5f78abe763c21ac81b" }
+uv = { path = ".mise/locks/pipx-awscli/1.46.3", digest = "sha256:e8149fc0b53c2e8554b16bf3452f4446fd3105bd0201931b8188e2b8d036226e" }
 
 [[tools."pipx:fdroidserver"]]
 version = "2.4.5"
