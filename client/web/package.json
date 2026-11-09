@@ -22,7 +22,7 @@
     "@tanstack/charts": "1.1.0",
     "@tanstack/lit-table": "9.3.1",
     "@timmo001/effect-system-bridge": "workspace:*",
-    "@timmo001/groundwork-mobile": "0.17.1",
+    "@timmo001/groundwork-mobile": "0.20.0",
     "@timmo001/groundwork-pwa": "0.17.1",
     "@timmo001/groundwork-tokens": "0.17.1",
     "@timmo001/groundwork-ui": "0.17.1",
