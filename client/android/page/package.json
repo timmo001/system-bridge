@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@timmo001/groundwork-mobile": "0.19.1",
-    "@timmo001/groundwork-pwa": "0.20.2",
+    "@timmo001/groundwork-pwa": "0.20.3",
     "@timmo001/groundwork-tokens": "0.19.1",
     "@timmo001/groundwork-ui": "0.19.1",
     "effect": "4.1.2"
