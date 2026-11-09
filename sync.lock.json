@@ -17,8 +17,8 @@
     },
     "omarchy-plugin/SectionHeading.qml": {
       "item": "section-heading",
-      "sha": "96eb81714921aeb02c7e17736f14351b1d068ab2",
-      "hash": "fa6fb931c984103787a31f4ba18b69d354dd54500f8eaa2c96b8480846cf4b7a"
+      "sha": "1784973937be9a3aa98eef3b4d91e1aad66e6ce1",
+      "hash": "2954c61208c1f911b9c0e5d67cac8f69da3838e190af37eacd376b16ba6d493e"
     },
     "client/android/shell/build.gradle.kts": {
       "item": "android-shell",

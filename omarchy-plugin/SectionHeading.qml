@@ -21,6 +21,9 @@ Rectangle {
   property bool collapsible: false
   property bool expanded: true
   property bool toggleHasCursor: false
+  // The refresh button's tooltip, for a panel in another language.
+  property string refreshLabel: "Refresh " + title.toLowerCase()
+  property string refreshingLabel: "Refreshing " + title.toLowerCase()
 
   signal refreshRequested()
   signal refreshHovered()
@@ -78,7 +81,7 @@ Rectangle {
     visible: root.refreshable
     enabled: !root.refreshing
     iconText: "󰑐"
-    tooltipText: root.refreshing ? "Refreshing " + root.title.toLowerCase() : "Refresh " + root.title.toLowerCase()
+    tooltipText: root.refreshing ? root.refreshingLabel : root.refreshLabel
     foreground: Qt.darker(root.foreground, 1.15)
     fontFamily: root.fontFamily
     hasCursor: root.hasCursor
