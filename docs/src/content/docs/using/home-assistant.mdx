@@ -119,49 +119,60 @@ Taking control of the dashboard turns it into ordinary cards. It then stops foll
 
 ### Add a section to another dashboard
 
-Any page's sections can go on another sections dashboard, such as one GPU or the storage of one machine. Add a section in YAML:
+Any page's sections can go on another sections dashboard, such as one GPU or a machine's command buttons. Each module is a page of the web client, and you can show one or more of its sections together. Add a section in YAML:
 
 ```yaml
 strategy:
   type: custom:system-bridge
   device_id: <device ID>
-  section: gpu
-  item: card0
+  module: system
+  sections:
+    - power-commands
+    - saved-commands
 ```
 
-After that, edit the section to change it in the section editor. It shows a picture of each section to choose from, and only the options that section uses:
+After that, edit the section to change it in the section editor. Choose the **Module** from its pictures, and the editor shows that module's sections, each with its own picture. Select one or more of them: several go together in one section, in the page's order. Use the arrow at the top to change module. The editor shows only the options those sections use:
 
 - **Item** for sections about one thing: choose the mount, GPU, display or network interface from the device's own.
 - **History** for sections with a graph.
 - **Percentage tiles** for sections with percentage tiles.
 
-| Section | Shows |
-| --- | --- |
-| `storage` | Space used on every mount. |
-| `audio` | The default audio output, with its output picker and volume. |
-| `now-playing` | The media playing, with source and playback controls. |
-| `overview-load` | CPU and memory load in one graph. |
-| `overview-power` | Power draw, with a graph. |
-| `overview-temperatures` | CPU and GPU temperatures, with a graph. |
-| `battery` | Battery level, state, time remaining, AC power, power draw and voltage. |
-| `device-batteries` | Battery level and state of connected devices, such as a wireless mouse. |
-| `cpu` | CPU usage, speed, power, load average, temperature and voltage. |
-| `cpu-history` | Graphs of CPU usage, speed, power, load average and temperature. |
-| `cpu-cores` | Load and power of each CPU core. |
-| `memory` | Memory in use, free and used. |
-| `memory-history` | Graph of memory usage. |
-| `mount` | One mount point: space used. |
-| `disk-activity` | Disk read and write rates, in total and per disk. |
-| `display` | One display: resolution and refresh rate. |
-| `gpu` | One GPU: load, memory, power, temperature, clocks and fan. |
-| `network` | Download and upload rates, with a graph. |
-| `network-activity` | Download and upload rates, with a graph of each. |
-| `interface` | One network interface: rates, Wi-Fi details and graphs. |
-| `processes` | The number of processes, with a graph. |
-| `notifications` | The notify entity, and the last notification event, such as clicked or closed. Needs Home Assistant 2026.12 or later. |
-| `system` | Device power usage and whether the camera is in use. |
+| Module | Section | Shows |
+| --- | --- | --- |
+| `overview` | `storage` | Space used on every mount. |
+| `overview` | `audio` | The default audio output, with its output picker and volume. |
+| `overview` | `now-playing` | The media playing, with source and playback controls. |
+| `overview` | `overview-load` | CPU and memory load in one graph. |
+| `overview` | `network` | Download and upload rates, with a graph. |
+| `overview` | `overview-power` | Power draw, with a graph. |
+| `overview` | `overview-temperatures` | CPU and GPU temperatures, with a graph. |
+| `audio` | `audio-outputs` | Volume of each audio output, such as speakers. |
+| `audio` | `audio-inputs` | Volume of each audio input, such as a microphone. |
+| `battery` | `battery` | Battery level, state, time remaining, AC power, power draw and voltage. |
+| `battery` | `device-batteries` | Battery level and state of connected devices, such as a wireless mouse. |
+| `cpu` | `cpu` | CPU usage, speed, power, load average, temperature and voltage. |
+| `cpu` | `cpu-history` | Graphs of CPU usage, speed, power, load average and temperature. |
+| `cpu` | `cpu-cores` | Load and power of each CPU core. |
+| `desktop` | `desktop` | Whether the session is locked, and how long it's been idle. |
+| `disks` | `mount` | One mount point: space used. |
+| `disks` | `disk-activity` | Disk read and write rates, in total and per disk. |
+| `displays` | `display` | One display: power, brightness, resolution and refresh rate. |
+| `gpus` | `gpu` | One GPU: load, memory, power, temperature, clocks and fan. |
+| `media` | `now-playing` | The media playing, with source and playback controls. |
+| `memory` | `memory` | Memory and swap in use, free and used. |
+| `memory` | `memory-history` | Graph of memory and swap usage. |
+| `networks` | `network-activity` | Download and upload rates, with a graph of each. |
+| `networks` | `interface` | One network interface: rates, Wi-Fi details and graphs. |
+| `processes` | `processes` | The number of processes, with a graph. |
+| `system` | `system` | Device power usage and whether the camera is in use. |
+| `system` | `power` | The power profile, and a switch to keep the device awake. |
+| `system` | `power-commands` | Buttons to lock, log out, sleep, hibernate, restart or shut down. |
+| `system` | `saved-commands` | A button for each saved command. Needs Home Assistant 2026.12 or later. |
+| `system` | `notifications` | The notify entity, and the last notification event, such as clicked or closed. Needs Home Assistant 2026.12 or later. |
 
 `hours_to_show` and `tile_feature` (`none`, `bar` or `trend`) set History and Percentage tiles in YAML.
+
+A section saved with one `section`, such as `section: gpu`, still works. The editor turns it into `module` and `sections` when you next change it, and `section: commands` becomes both command sections.
 
 ## Next steps
 
