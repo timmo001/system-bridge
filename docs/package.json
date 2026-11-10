@@ -23,10 +23,10 @@
     "sharp": "0.35.5"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.90.0",
+    "@oxlint/plugins": "1.93.0",
     "@timmo001/oxlint-rules": "0.6.5",
-    "oxlint": "1.90.0",
-    "oxlint-tsgolint": "7.0.2005",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2006",
     "wrangler": "4.158.0"
   }
 }
