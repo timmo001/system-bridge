@@ -162,15 +162,15 @@ export const SECTION_RELEASES = new Map([
   ),
   gatedSection("desktop", "locked", "idle_time"),
   gatedSection(
-    "commands",
+    "power-commands",
     "power_lock",
     "power_logout",
     "power_sleep",
     "power_hibernate",
     "power_restart",
     "power_shutdown",
-    COMMAND_KEY_PREFIX,
   ),
+  gatedSection("saved-commands", COMMAND_KEY_PREFIX),
   gatedSection("notifications", "notification"),
   gatedSection("power", "power_profile", "keep_awake"),
 ]);

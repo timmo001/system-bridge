@@ -141,9 +141,13 @@ const DRAWINGS: Record<SectionName, string> = {
       rect(8, 9 + i * 8, 6, 5, 0.4, 1) +
       rect(18, 9 + i * 8, [60, 44, 52, 30][i] ?? 40, 5, 0.24),
   ),
-  commands: columns(3, (i) =>
+  "power-commands": columns(3, (i) =>
     rect(10 + i * 26, 12, 22, 20, i === 0 ? 0.48 : 0.24, 4),
   ),
+  // A short heading bar over a row of buttons
+  "saved-commands":
+    rect(10, 8, 30, 4, 0.48, 2) +
+    columns(3, (i) => rect(10 + i * 26, 18, 22, 18, 0.24, 4)),
   notifications:
     area(
       "M30 10 H60 A4 4 0 0 1 64 14 V28 A4 4 0 0 1 60 32 H40 L33 37 V32 H30 A4 4 0 0 1 26 28 V14 A4 4 0 0 1 30 10 Z",

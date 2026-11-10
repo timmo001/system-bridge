@@ -35,18 +35,23 @@ export const pageSections = (
   views: ReadonlySet<string> = new Set(),
 ): LovelaceStrategySectionConfig[] =>
   page
-    .sections(entities)
+    .layout(entities)
     .flatMap((ref) => {
       const section = buildSection(entities, ref, options);
 
       return section ? [{ ref, columnSpan: section.column_span }] : [];
     })
-    .map(({ ref: { link, ...ref }, columnSpan }) => {
+    .map(({ ref: { link, sections, item }, columnSpan }) => {
       const strategy: SectionStrategyConfig = {
         type: STRATEGY_TYPE,
         device_id: entities.device.id,
-        ...ref,
+        module: page.page,
+        sections,
       };
+
+      if (item !== undefined) {
+        strategy.item = item;
+      }
 
       if (link !== undefined && views.has(link)) {
         strategy.link = link;

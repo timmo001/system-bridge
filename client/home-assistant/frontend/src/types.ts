@@ -1,6 +1,8 @@
 /** The parts of Home Assistant's `hass` object the strategies read. */
 export interface HomeAssistant {
   config: { version: string };
+  /** Whether the dark theme is in use, for the editor's pictures. */
+  themes?: { darkMode?: boolean };
   states: Record<string, HassEntity | undefined>;
   /** Compared by identity to tell when the registry changed, and counted per device. */
   entities: Record<
@@ -212,7 +214,12 @@ export interface ViewStrategyConfig extends ViewOptions {
 }
 
 export interface SectionStrategyConfig extends StrategyOptions {
-  section: string;
+  /** The web client module the sections come from, such as `system`. */
+  module?: string;
+  /** The module's sections to show together, in one Home Assistant section. */
+  sections?: string[];
+  /** One section, as configs from before modules have it. */
+  section?: string;
   /** Which disk, mount, GPU, display or network interface, for per-item sections. */
   item?: string;
   /** The dashboard view the heading opens, such as `disks`. */

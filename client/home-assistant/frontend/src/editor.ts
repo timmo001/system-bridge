@@ -1,7 +1,13 @@
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { DEFAULT_HOURS_TO_SHOW, DEFAULT_TILE_FEATURE } from "./cards";
-import { PAGES } from "./pages";
+import {
+  configModule,
+  configSections,
+  inModuleOrder,
+  isStubSection,
+  PAGES,
+} from "./pages";
 import {
   getSystemBridgeEntities,
   type ItemKind,
@@ -32,7 +38,6 @@ const LABELS = new Map([
   ["hours_to_show", "History"],
   ["tile_feature", "Percentage tiles"],
   ["page", "Page"],
-  ["section", "Section"],
   ["item", "Item"],
   ["show_icon_and_title", "Icon and title"],
   ["show_top_links", "Web client link"],
@@ -226,13 +231,84 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
     "One network interface: rates, Wi-Fi details and a graph. Set the item to the interface name.",
   desktop: "Whether the session is locked, and how long it's been idle.",
   processes: "The number of processes, with a graph.",
-  commands:
-    "Buttons to lock, log out, sleep, hibernate, restart or shut down, and one for each saved command.",
+  "power-commands":
+    "Buttons to lock, log out, sleep, hibernate, restart or shut down.",
+  "saved-commands": "A button for each saved command.",
   notifications:
     "The notify entity, and the last notification event, such as clicked or closed.",
   power: "The power profile, and a switch to keep the device awake.",
   system: "Device power usage and whether the camera is in use.",
 };
+
+/** A picture box in the section editor's module and section views. */
+interface BoxOption {
+  value: string;
+  label: string;
+  description: string;
+  image: { src: string; src_dark: string };
+}
+
+/** The modules Home Assistant has the entities for, and the saved one. */
+const moduleOptions = (
+  config: SectionStrategyConfig,
+  version: string | undefined,
+): BoxOption[] =>
+  PAGES.filter(
+    ({ page }) =>
+      page === configModule(config)?.page ||
+      isReleased(version, PAGE_RELEASES.get(page)),
+  ).flatMap(({ page, title, description, sections: [first] }) =>
+    first
+      ? [
+          {
+            value: page,
+            label: title,
+            description,
+            image: {
+              src: sectionImage(first, false),
+              src_dark: sectionImage(first, true),
+            },
+          },
+        ]
+      : [],
+  );
+
+/** The module's sections Home Assistant has, and any already ticked. */
+const sectionOptions = (
+  config: SectionStrategyConfig,
+  version: string | undefined,
+): BoxOption[] =>
+  (configModule(config)?.sections ?? [])
+    .filter(
+      (section) =>
+        selectedSections(config).includes(section) ||
+        isReleased(version, SECTION_RELEASES.get(section)),
+    )
+    .map((section) => ({
+      value: section,
+      label: sectionLabel(section),
+      description: SECTION_DESCRIPTIONS[section],
+      image: {
+        src: sectionImage(section, false),
+        src_dark: sectionImage(section, true),
+      },
+    }));
+
+/** The value of the picture box that was clicked. */
+const boxValue = (ev: Event) =>
+  ev.currentTarget instanceof HTMLElement
+    ? ev.currentTarget.dataset.value
+    : undefined;
+
+/**
+ * `mdiChevronLeft` and `mdiChevronRight`, the back button of Home Assistant's
+ * own sub-editors, as the dashboard has no icon package.
+ */
+const CHEVRON_LEFT =
+  "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z";
+
+const CHEVRON_RIGHT =
+  "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z";
 
 const HELPERS = new Map([
   ["device_id", "The System Bridge device to show."],
@@ -333,9 +409,22 @@ const MEDIA_GROUPS: readonly {
   { name: "audio_options", options: ["audio_features", "show_input_source"] },
 ];
 
+const isSectionConfig = (
+  config: StrategyConfig,
+): config is SectionStrategyConfig =>
+  "module" in config || "sections" in config || "section" in config;
+
+/** The sections ticked in a section config. */
+const selectedSections = (config: StrategyConfig): readonly SectionName[] =>
+  isSectionConfig(config) ? configSections(config).sections : [];
+
 const mediaOptions = (config: StrategyConfig): readonly MediaOption[] => {
-  if ("section" in config) {
-    return SECTION_MEDIA_OPTIONS.get(config.section) ?? [];
+  if (isSectionConfig(config)) {
+    const options = selectedSections(config).flatMap(
+      (section) => SECTION_MEDIA_OPTIONS.get(section) ?? [],
+    );
+
+    return MEDIA_OPTIONS.filter((option) => options.includes(option));
   }
 
   if ("page" in config) {
@@ -371,7 +460,7 @@ const mediaSchema = (config: StrategyConfig, version: string | undefined) => {
             type: "expandable",
             flatten: true,
             // A section has nothing else to edit, so its options start open
-            expanded: "section" in config,
+            expanded: isSectionConfig(config),
             schema: shown.map((option) => ({
               name: option,
               selector: mediaOptionSelector(option),
@@ -396,16 +485,18 @@ const mediaOptionSelector = (name: MediaOption) => {
 const sameList = (a: readonly string[], b: readonly string[]) =>
   a.length === b.length && a.every((value, index) => value === b[index]);
 
+const DEVICE_FIELD = {
+  name: "device_id",
+  selector: { device: { integration: "system_bridge" } },
+};
+
 /** The options every strategy has, then those of the strategy the config is for. */
 const generalSchema = (
   config: StrategyConfig,
   itemOptions: readonly SelectOption[],
   version: string | undefined,
 ) => [
-  {
-    name: "device_id",
-    selector: { device: { integration: "system_bridge" } },
-  },
+  DEVICE_FIELD,
   ...("page" in config
     ? [
         {
@@ -442,7 +533,7 @@ const generalSchema = (
         },
       ]
     : []),
-  ...(!("section" in config)
+  ...(!isSectionConfig(config)
     ? [
         {
           name: "max_columns",
@@ -452,38 +543,9 @@ const generalSchema = (
         },
       ]
     : []),
-  ...("section" in config
+  ...(isSectionConfig(config)
     ? [
-        {
-          name: "section",
-          required: true,
-          selector: {
-            select: {
-              mode: "box",
-              box_max_columns: 2,
-              sort: true,
-              options: Object.entries(SECTION_DESCRIPTIONS).flatMap(
-                ([value, description]) =>
-                  isSectionName(value) &&
-                  (value === config.section ||
-                    isReleased(version, SECTION_RELEASES.get(value)))
-                    ? [
-                        {
-                          value,
-                          label: sectionLabel(value),
-                          description,
-                          image: {
-                            src: sectionImage(value, false),
-                            src_dark: sectionImage(value, true),
-                          },
-                        },
-                      ]
-                    : [],
-              ),
-            },
-          },
-        },
-        ...(ITEM_KINDS.has(config.section)
+        ...(selectedSections(config).some((section) => ITEM_KINDS.has(section))
           ? [
               {
                 name: "item",
@@ -500,7 +562,8 @@ const generalSchema = (
           : []),
       ]
     : []),
-  ...(!("section" in config) || HISTORY_SECTIONS.has(config.section)
+  ...(!isSectionConfig(config) ||
+  selectedSections(config).some((section) => HISTORY_SECTIONS.has(section))
     ? [
         {
           name: "hours_to_show",
@@ -516,7 +579,8 @@ const generalSchema = (
         },
       ]
     : []),
-  ...(!("section" in config) || PERCENTAGE_SECTIONS.has(config.section)
+  ...(!isSectionConfig(config) ||
+  selectedSections(config).some((section) => PERCENTAGE_SECTIONS.has(section))
     ? [
         {
           name: "tile_feature",
@@ -544,7 +608,7 @@ const generalSchema = (
 const isDashboardConfig = (
   config: StrategyConfig,
 ): config is DashboardStrategyConfig =>
-  !("page" in config) && !("section" in config);
+  !("page" in config) && !isSectionConfig(config);
 
 @customElement("system-bridge-strategy-editor")
 export class SystemBridgeStrategyEditor extends LitElement {
@@ -554,9 +618,17 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
   @state() private _entities?: SystemBridgeEntities;
 
+  /** Whether a section's editor is showing the modules, to change module. */
+  @state() private _pickingModule = false;
+
   private _entitiesFor?: string;
 
   public setConfig(config: StrategyConfig) {
+    // A section just added from the picker opens on the modules, to pick one
+    if (!this._config && isSectionConfig(config) && isStubSection(config)) {
+      this._pickingModule = true;
+    }
+
     this._config = config;
   }
 
@@ -564,7 +636,7 @@ export class SystemBridgeStrategyEditor extends LitElement {
     const hass = this.hass;
     const config = this._config;
 
-    if (!hass || !config || !("section" in config)) {
+    if (!hass || !config || !isSectionConfig(config)) {
       return;
     }
 
@@ -592,13 +664,16 @@ export class SystemBridgeStrategyEditor extends LitElement {
     });
   }
 
-  /** The device's mounts, GPUs, displays or interfaces, for the section. */
+  /** The device's mounts, GPUs, displays or interfaces, for the sections. */
   private _itemOptions(config: StrategyConfig): SelectOption[] {
-    if (!("section" in config)) {
+    if (!isSectionConfig(config)) {
       return [];
     }
 
-    const kind = ITEM_KINDS.get(config.section);
+    // A module's sections about one thing are all about the same kind of thing
+    const kind = selectedSections(config)
+      .map((section) => ITEM_KINDS.get(section))
+      .find((itemKind) => itemKind !== undefined);
 
     const options = kind
       ? [...(this._entities?.items[kind] ?? [])].map(([value, item]) => ({
@@ -622,6 +697,53 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
     const config = this._config;
     const version = this.hass?.config.version;
+
+    if (isSectionConfig(config)) {
+      const module = configModule(config);
+
+      return this._pickingModule || !module
+        ? html`
+            <ha-form
+              .hass=${this.hass}
+              .data=${{ device_id: config.device_id }}
+              .schema=${[DEVICE_FIELD]}
+              .computeLabel=${this._computeLabel}
+              .computeHelper=${this._computeHelper}
+              @value-changed=${this._generalChanged}
+            ></ha-form>
+            ${this._renderBoxes(
+              moduleOptions(config, version),
+              (value) => value === module?.page,
+              this._moduleClicked,
+            )}
+          `
+        : html`
+            <div class="back-title">
+              <ha-icon-button
+                .label=${"Change module"}
+                .path=${document.dir === "rtl" ? CHEVRON_RIGHT : CHEVRON_LEFT}
+                @click=${this._changeModule}
+              ></ha-icon-button>
+              <span>${module.title}</span>
+            </div>
+            ${this._renderBoxes(
+              sectionOptions(config, version),
+              (value) =>
+                selectedSections(config).some((name) => name === value),
+              this._sectionClicked,
+              true,
+            )}
+            <ha-form
+              .hass=${this.hass}
+              .data=${{ ...DEFAULTS, ...config }}
+              .schema=${generalSchema(config, this._itemOptions(config), version)}
+              .computeLabel=${this._computeLabel}
+              .computeHelper=${this._computeHelper}
+              @value-changed=${this._generalChanged}
+            ></ha-form>
+          `;
+    }
+
     const hidden = hiddenPages(version);
 
     const shown = (list: readonly string[]) =>
@@ -657,6 +779,88 @@ export class SystemBridgeStrategyEditor extends LitElement {
     `;
   }
 
+  /**
+   * Picture boxes in the style of Home Assistant's select boxes. Those only
+   * take one choice, and clicking the chosen one does nothing, so the editor
+   * draws its own: sections toggle, and a module can be picked again.
+   */
+  private _renderBoxes(
+    options: readonly BoxOption[],
+    isSelected: (value: string) => boolean,
+    onClick: (ev: Event) => void,
+    checkboxes = false,
+  ) {
+    const dark = this.hass?.themes?.darkMode ?? false;
+
+    const boxes = options.map((option) => {
+      const selected = isSelected(option.value);
+
+      return html`
+        <button
+          type="button"
+          class="option ${selected ? "selected" : ""}"
+          aria-pressed=${selected}
+          data-value=${option.value}
+          @click=${onClick}
+        >
+          <div class="content">
+            ${
+              checkboxes
+                ? html`<ha-checkbox
+                    .checked=${selected}
+                    tabindex="-1"
+                  ></ha-checkbox>`
+                : nothing
+            }
+            <div class="text">
+              <span class="label">${option.label}</span>
+              <span class="description">${option.description}</span>
+            </div>
+          </div>
+          <img alt="" src=${dark ? option.image.src_dark : option.image.src} />
+        </button>
+      `;
+    });
+
+    return html`<div class="boxes">${boxes}</div>`;
+  }
+
+  private _changeModule = () => {
+    this._pickingModule = true;
+  };
+
+  private _moduleClicked = (ev: Event) => {
+    const module = boxValue(ev);
+
+    if (module === undefined) {
+      return;
+    }
+
+    this._pickingModule = false;
+    this._changeConfig({ module });
+  };
+
+  private _sectionClicked = (ev: Event) => {
+    const section = boxValue(ev);
+
+    if (
+      !this._config ||
+      !isSectionConfig(this._config) ||
+      section === undefined ||
+      !isSectionName(section)
+    ) {
+      return;
+    }
+
+    const ticked = selectedSections(this._config);
+
+    this._changeConfig({
+      sections: ticked.includes(section)
+        ? ticked.filter((name) => name !== section)
+        : [...ticked, section],
+    });
+  };
+
   private _computeLabel = (schema: { name: string }) =>
     LABELS.get(schema.name) ?? schema.name;
 
@@ -665,12 +869,18 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
   private _generalChanged = (ev: CustomEvent<{ value: StrategyConfig }>) => {
     ev.stopPropagation();
+    this._changeConfig(ev.detail.value);
+  };
 
+  /** Merge a change from a form or a box, tidy the config, then emit it. */
+  private _changeConfig(
+    value: Partial<SectionStrategyConfig> | StrategyConfig,
+  ) {
     if (!this._config) {
       return;
     }
 
-    const config: StrategyConfig = { ...this._config, ...ev.detail.value };
+    const config: StrategyConfig = { ...this._config, ...value };
 
     // Leave defaults out of the saved config, as the built-in editors do
     if (config.hours_to_show === DEFAULT_HOURS_TO_SHOW) {
@@ -709,6 +919,33 @@ export class SystemBridgeStrategyEditor extends LitElement {
 
     if (config.show_input_source) {
       delete config.show_input_source;
+    }
+
+    if (isSectionConfig(config) && isSectionConfig(this._config)) {
+      const previous = configModule(this._config)?.page;
+
+      // Configs from before modules keep their module and sections
+      config.module ??= previous;
+      config.sections ??= [...selectedSections(this._config)];
+
+      if (config.module !== previous) {
+        // Another module starts with nothing ticked, to pick its sections
+        config.sections = [];
+        delete config.item;
+      } else {
+        config.sections = inModuleOrder(
+          config.module,
+          config.sections.filter(isSectionName),
+        );
+      }
+
+      delete config.section;
+
+      if (
+        !selectedSections(config).some((section) => ITEM_KINDS.has(section))
+      ) {
+        delete config.item;
+      }
     }
 
     if (isDashboardConfig(config)) {
@@ -753,7 +990,7 @@ export class SystemBridgeStrategyEditor extends LitElement {
     }
 
     this._emit(config);
-  };
+  }
 
   private _emit(config: StrategyConfig) {
     this.dispatchEvent(
@@ -765,11 +1002,103 @@ export class SystemBridgeStrategyEditor extends LitElement {
     );
   }
 
+  // The boxes copy Home Assistant's ha-select-box, so they match its others
   static styles = css`
     :host {
       display: flex;
       flex-direction: column;
       gap: 24px;
+    }
+
+    /* The heading of Home Assistant's own sub-editors, as for a tile feature */
+    .back-title {
+      display: flex;
+      align-items: center;
+      font-size: var(--ha-font-size-l);
+    }
+
+    .boxes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--ha-space-3, 12px);
+    }
+
+    .option {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ha-space-2, 8px);
+      padding: 12px;
+      overflow: hidden;
+      border: 1px solid var(--divider-color);
+      border-radius: var(--ha-card-border-radius, var(--ha-border-radius-lg));
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .option:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-color: transparent;
+      pointer-events: none;
+      opacity: 0.2;
+      transition:
+        background-color 180ms ease-in-out,
+        opacity 180ms ease-in-out;
+    }
+
+    .option:hover:before {
+      background-color: var(--divider-color);
+    }
+
+    .option.selected:before {
+      background-color: var(--primary-color);
+    }
+
+    .content {
+      display: flex;
+      gap: var(--ha-space-2, 8px);
+      width: 100%;
+      min-width: 0;
+    }
+
+    ha-checkbox {
+      flex: none;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    .text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--ha-space-1, 4px);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .label {
+      color: var(--primary-text-color);
+      font-size: var(--ha-font-size-m);
+      line-height: var(--ha-line-height-condensed);
+    }
+
+    .description {
+      color: var(--secondary-text-color);
+      font-size: var(--ha-font-size-s);
+      line-height: var(--ha-line-height-condensed);
+    }
+
+    img {
+      max-width: var(--ha-select-box-image-size, 96px);
+      max-height: var(--ha-select-box-image-size, 96px);
+      margin: auto;
     }
   `;
 }

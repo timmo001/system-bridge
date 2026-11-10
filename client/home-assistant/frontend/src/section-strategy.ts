@@ -6,7 +6,7 @@ import {
   percentageFeatures,
 } from "./cards";
 import "./editor";
-import type { SectionRef } from "./pages";
+import { configSections, STUB_SECTION, type SectionRef } from "./pages";
 import {
   type DeviceResult,
   findDevices,
@@ -15,7 +15,7 @@ import {
   type SystemBridgeEntities,
 } from "./registry";
 import { isAtLeast, MINIMUM_RELEASE } from "./release";
-import { isSectionName, SECTIONS } from "./sections";
+import { joinSections, SECTIONS } from "./sections";
 import {
   DEFAULT_AUDIO_FEATURES,
   DEFAULT_MEDIA_FEATURES,
@@ -45,10 +45,10 @@ export const deviceError = (result: Extract<DeviceResult, { error: string }>) =>
 
 export const buildSection = (
   entities: SystemBridgeEntities,
-  { section, item, link }: SectionRef,
+  { sections, item, link }: SectionRef,
   options: SectionOptions,
-) =>
-  SECTIONS[section]({
+) => {
+  const context = {
     entities,
     item,
     link,
@@ -59,7 +59,10 @@ export const buildSection = (
     mediaFeatures: options.media_features ?? DEFAULT_MEDIA_FEATURES,
     audioFeatures: options.audio_features ?? DEFAULT_AUDIO_FEATURES,
     inputSource: options.show_input_source ?? true,
-  });
+  };
+
+  return joinSections(sections.map((section) => SECTIONS[section](context)));
+};
 
 const message = (content: string): LovelaceSectionConfig => ({
   type: "grid",
@@ -75,8 +78,16 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
     config: SectionStrategyConfig,
     hass: HomeAssistant,
   ): Promise<LovelaceSectionConfig> {
-    if (!isSectionName(config.section)) {
-      return message(`Unknown System Bridge section "${config.section}".`);
+    const { sections, unknown } = configSections(config);
+
+    if (unknown.length > 0) {
+      return message(
+        `Unknown System Bridge section ${unknown.map((name) => `"${name}"`).join(", ")}.`,
+      );
+    }
+
+    if (sections.length === 0) {
+      return message("Choose a System Bridge section in the settings.");
     }
 
     const result = resolveDevice(hass, config.device_id);
@@ -90,7 +101,7 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
     return (
       buildSection(
         entities,
-        { section: config.section, item: config.item, link: config.link },
+        { sections, item: config.item, link: config.link },
         config,
       ) ?? message("No System Bridge entities for this section.")
     );
@@ -101,7 +112,8 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
   }
 
   // The new section and its preview when it's added from the section picker,
-  // on the device with the most entities, as a leftover device may have none
+  // on the device with the most entities, as a leftover device may have none.
+  // The editor then opens on the modules, to pick what it should show.
   static getStubConfig(hass: HomeAssistant): SectionStrategyConfig | undefined {
     if (!isAtLeast(hass.config.version, MINIMUM_RELEASE)) {
       return undefined;
@@ -120,7 +132,12 @@ export class SystemBridgeSectionStrategy extends ReactiveElement {
     );
 
     return device
-      ? { type: STRATEGY_TYPE, device_id: device.id, section: "overview-load" }
+      ? {
+          type: STRATEGY_TYPE,
+          device_id: device.id,
+          module: STUB_SECTION.module,
+          sections: [...STUB_SECTION.sections],
+        }
       : undefined;
   }
 }

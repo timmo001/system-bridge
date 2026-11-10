@@ -25,9 +25,18 @@ export interface SectionContext {
   link: string | undefined;
 }
 
-type SectionBuilder = (
-  context: SectionContext,
-) => LovelaceSectionConfig | undefined;
+/** A section's cards, before they're laid out in a Home Assistant section. */
+export interface SectionPart {
+  cards: (LovelaceCardConfig | undefined)[];
+  columnSpan?: number;
+}
+
+type SectionBuilder = (context: SectionContext) => SectionPart;
+
+const part = (
+  cards: (LovelaceCardConfig | undefined)[],
+  columnSpan?: number,
+): SectionPart => ({ cards, columnSpan });
 
 /**
  * A grid section, or nothing when no card besides the headings has an entity.
@@ -89,6 +98,34 @@ const grid = (
             ];
       }),
     ];
+  }
+
+  return section;
+};
+
+/**
+ * Several sections in one, in the order given, as wide as the widest. Each is
+ * laid out on its own, so its graphs stay with its tiles, and one with nothing
+ * to show leaves no heading behind.
+ */
+export const joinSections = (
+  parts: readonly SectionPart[],
+): LovelaceSectionConfig | undefined => {
+  const columnSpan =
+    Math.max(0, ...parts.map(({ columnSpan: span }) => span ?? 0)) || undefined;
+
+  const cards = parts.flatMap(
+    ({ cards: partCards }) => grid(partCards, columnSpan)?.cards ?? [],
+  );
+
+  if (cards.length === 0) {
+    return undefined;
+  }
+
+  const section: LovelaceSectionConfig = { type: "grid", cards };
+
+  if (columnSpan) {
+    section.column_span = columnSpan;
   }
 
   return section;
@@ -179,7 +216,7 @@ const itemTiles = (
 
 export const SECTIONS = {
   storage: ({ entities, link }) =>
-    grid([
+    part([
       heading("Storage", "mdi:harddisk", link),
       ...fromItems(entities, "mount", "space_used").map((entity) =>
         tile(entity),
@@ -187,19 +224,19 @@ export const SECTIONS = {
     ]),
 
   audio: ({ entities, audioFeatures: audio, link }) =>
-    grid([
+    part([
       heading("Audio", "mdi:volume-high", link),
       ...singles(entities, "audio").map((entity) => playerTile(entity, audio)),
     ]),
 
   "now-playing": ({ entities, mediaFeatures: media, link }) =>
-    grid([
+    part([
       heading("Now playing", "mdi:play-circle-outline", link),
       ...singles(entities, "media").map((entity) => playerTile(entity, media)),
     ]),
 
   "audio-outputs": ({ entities, audioFeatures: audio }) =>
-    grid([
+    part([
       heading("Outputs", "mdi:speaker"),
       ...singles(entities, "audio").map((entity) => playerTile(entity, audio)),
       // Each output has no source of its own
@@ -212,7 +249,7 @@ export const SECTIONS = {
     ]),
 
   "audio-inputs": ({ entities, inputSource }) =>
-    grid([
+    part([
       heading("Inputs", "mdi:microphone"),
       ...singles(entities, "audio_input").map((entity) =>
         tile(entity, inputSource ? [{ type: "select-options" }] : []),
@@ -226,7 +263,7 @@ export const SECTIONS = {
     ]),
 
   "overview-load": ({ entities, hours, link }) =>
-    grid([
+    part([
       heading("CPU and memory", "mdi:cpu-64-bit", link),
       graph(
         singles(entities, "processes_load", "memory_used_percentage"),
@@ -237,7 +274,7 @@ export const SECTIONS = {
   "overview-power": ({ entities, hours, link }) => {
     const power = singles(entities, "power_usage", "cpu_power_package");
 
-    return grid([
+    return part([
       heading("Power", "mdi:flash", link),
       ...power.map((entity) => tile(entity)),
       graph(power, hours),
@@ -252,7 +289,7 @@ export const SECTIONS = {
       ...fromItems(entities, "gpu", "temperature"),
     ];
 
-    return grid([
+    return part([
       heading("Temperatures", "mdi:thermometer", link),
       ...temperatures.map((entity) => tile(entity)),
       graph(temperatures, hours),
@@ -260,7 +297,7 @@ export const SECTIONS = {
   },
 
   battery: ({ entities, percentage }) =>
-    grid([
+    part([
       heading("Battery", "mdi:battery"),
       percentageOf(entities.single.get("battery"), percentage),
       ...singles(
@@ -275,7 +312,7 @@ export const SECTIONS = {
     ]),
 
   "device-batteries": ({ entities, percentage }) =>
-    grid([
+    part([
       heading("Devices", "mdi:battery-bluetooth"),
       ...[...entities.items.battery.values()].flatMap((battery) => [
         ...fields(battery, "battery_info").map((entity) =>
@@ -286,7 +323,7 @@ export const SECTIONS = {
     ]),
 
   cpu: ({ entities, percentage }) =>
-    grid([
+    part([
       heading("Usage", "mdi:cpu-64-bit"),
       percentageOf(entities.single.get("processes_load"), percentage),
       ...singles(
@@ -300,7 +337,7 @@ export const SECTIONS = {
     ]),
 
   "cpu-history": ({ entities, hours }) =>
-    grid(
+    part(
       [
         heading("Usage over time"),
         graph(singles(entities, "processes_load"), hours, "Usage"),
@@ -322,7 +359,7 @@ export const SECTIONS = {
     ),
 
   "cpu-cores": ({ entities }) =>
-    grid([
+    part([
       heading("Cores"),
       ...fromItems(entities, "core", "processes_load_cpu").map((entity) =>
         tile(entity),
@@ -333,7 +370,7 @@ export const SECTIONS = {
     ]),
 
   memory: ({ entities, percentage }) =>
-    grid([
+    part([
       heading("In use", "mdi:memory"),
       percentageOf(entities.single.get("memory_used_percentage"), percentage),
       ...singles(entities, "memory_free", "memory_used").map((entity) =>
@@ -344,7 +381,7 @@ export const SECTIONS = {
     ]),
 
   "memory-history": ({ entities, hours }) =>
-    grid(
+    part(
       [
         heading("Usage over time"),
         graph(
@@ -363,7 +400,7 @@ export const SECTIONS = {
 
     const name = mount?.name ?? "";
 
-    return grid([
+    return part([
       heading(name, "mdi:harddisk"),
       ...itemTiles(mount, name, ["space_used"], percentage),
     ]);
@@ -372,7 +409,7 @@ export const SECTIONS = {
   "disk-activity": ({ entities, hours }) => {
     const totals = singles(entities, "disk_read_rate", "disk_write_rate");
 
-    return grid(
+    return part(
       [
         heading("Activity", "mdi:swap-vertical"),
         ...totals.map((entity) => tile(entity)),
@@ -395,7 +432,7 @@ export const SECTIONS = {
 
     const name = `Display ${display?.name ?? ""}`;
 
-    return grid([
+    return part([
       heading(name, "mdi:monitor"),
       ...itemTiles(display, name, ["power"], [{ type: "toggle" }]),
       ...itemTiles(
@@ -417,7 +454,7 @@ export const SECTIONS = {
 
     const name = gpu?.name ?? "";
 
-    return grid(
+    return part(
       [
         heading(name, "mdi:expansion-card-variant"),
         ...itemTiles(
@@ -469,7 +506,7 @@ export const SECTIONS = {
       "network_upload_rate",
     );
 
-    return grid([
+    return part([
       heading("Network", "mdi:lan", link),
       ...rates.map((entity) => tile(entity)),
       graph(rates, hours),
@@ -480,7 +517,7 @@ export const SECTIONS = {
     const download = singles(entities, "network_download_rate");
     const upload = singles(entities, "network_upload_rate");
 
-    return grid(
+    return part(
       [
         heading("Network", "mdi:lan"),
         ...[...download, ...upload].map((entity) => tile(entity)),
@@ -497,7 +534,7 @@ export const SECTIONS = {
 
     const name = networkInterface?.name ?? "";
 
-    return grid(
+    return part(
       [
         heading(name, "mdi:ethernet"),
         ...itemTiles(networkInterface, name, [
@@ -515,7 +552,7 @@ export const SECTIONS = {
   },
 
   desktop: ({ entities, hours }) =>
-    grid(
+    part(
       [
         heading("Session", "mdi:account-clock-outline"),
         ...singles(entities, "locked", "idle_time").map((entity) =>
@@ -527,7 +564,7 @@ export const SECTIONS = {
     ),
 
   processes: ({ entities, hours }) =>
-    grid(
+    part(
       [
         heading("Processes", "mdi:application-cog-outline"),
         tileOf(entities.single.get("processes_count")),
@@ -536,12 +573,8 @@ export const SECTIONS = {
       2,
     ),
 
-  commands: ({ entities }) => {
-    const saved = [...entities.single].flatMap(([key, entity]) =>
-      key.startsWith(COMMAND_KEY_PREFIX) ? [tile(entity)] : [],
-    );
-
-    return grid([
+  "power-commands": ({ entities }) =>
+    part([
       heading("Commands", "mdi:power"),
       ...singles(
         entities,
@@ -552,14 +585,18 @@ export const SECTIONS = {
         "power_restart",
         "power_shutdown",
       ).map((entity) => tile(entity)),
-      ...(saved.length > 0
-        ? [heading("Saved commands", "mdi:console"), ...saved]
-        : []),
-    ]);
-  },
+    ]),
+
+  "saved-commands": ({ entities }) =>
+    part([
+      heading("Saved commands", "mdi:console"),
+      ...[...entities.single].flatMap(([key, entity]) =>
+        key.startsWith(COMMAND_KEY_PREFIX) ? [tile(entity)] : [],
+      ),
+    ]),
 
   notifications: ({ entities }) =>
-    grid([
+    part([
       heading("Notifications", "mdi:bell-outline"),
       tileOf(entities.single.get("notify")),
       // The last event, such as clicked or closed, and when it happened
@@ -570,7 +607,7 @@ export const SECTIONS = {
     ]),
 
   power: ({ entities }) =>
-    grid([
+    part([
       heading("Power", "mdi:lightning-bolt"),
       ...singles(entities, "power_profile").map((entity) =>
         tile(entity, [{ type: "select-options" }]),
@@ -583,7 +620,7 @@ export const SECTIONS = {
   // TODO(Core): add a "Health" section for failed units and pending packages
   // with roadmap item 8
   system: ({ entities }) =>
-    grid([
+    part([
       heading("Device", "mdi:information-outline"),
       ...singles(entities, "power_usage", "camera_in_use").map((entity) =>
         tile(entity),
