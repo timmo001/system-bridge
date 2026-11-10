@@ -12,8 +12,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@opencode/plugin": "2.2.6",
-    "@opencode/schema": "2.2.6",
+    "@opencode/plugin": "2.2.7",
+    "@opencode/schema": "2.2.7",
     "effect": "4.1.0"
   },
   "devDependencies": {

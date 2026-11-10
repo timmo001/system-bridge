@@ -8,7 +8,13 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun"]
+    "types": ["bun"],
+    // Bun leaves @opencode/client on the workspace's hoisted Effect, not the
+    // 4.1.0 the plugin pins, so type-check every import against the plugin's copy.
+    "paths": {
+      "effect": ["./node_modules/effect/dist/index.d.ts"],
+      "effect/*": ["./node_modules/effect/dist/*"]
+    }
   },
   "include": ["src"]
 }
