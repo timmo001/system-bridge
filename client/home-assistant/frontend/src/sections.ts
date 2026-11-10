@@ -1,5 +1,6 @@
 import { heading, history, tile } from "./cards";
 import type { Item, ItemKind, SystemBridgeEntities } from "./registry";
+import { COMMAND_KEY_PREFIX } from "./release";
 import type {
   AudioFeature,
   LovelaceCardConfig,
@@ -535,9 +536,12 @@ export const SECTIONS = {
       2,
     ),
 
-  // TODO(Core): add the saved command buttons with roadmap item 7b
-  commands: ({ entities }) =>
-    grid([
+  commands: ({ entities }) => {
+    const saved = [...entities.single].flatMap(([key, entity]) =>
+      key.startsWith(COMMAND_KEY_PREFIX) ? [tile(entity)] : [],
+    );
+
+    return grid([
       heading("Commands", "mdi:power"),
       ...singles(
         entities,
@@ -548,7 +552,11 @@ export const SECTIONS = {
         "power_restart",
         "power_shutdown",
       ).map((entity) => tile(entity)),
-    ]),
+      ...(saved.length > 0
+        ? [heading("Saved commands", "mdi:console"), ...saved]
+        : []),
+    ]);
+  },
 
   notifications: ({ entities }) =>
     grid([

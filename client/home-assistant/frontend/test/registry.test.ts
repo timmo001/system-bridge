@@ -151,6 +151,36 @@ test("gates an entity with no translation key by its unique ID key", () => {
   expect(restartButton("2026.12.0b0")).toBe("button.host_restart");
 });
 
+test("gates saved command buttons by their key prefix", () => {
+  const command: EntityRegistryEntry = {
+    entity_id: "button.host_back_up",
+    device_id: device.id,
+    platform: "system_bridge",
+    unique_id: `${UUID}_command_9ef69bc3-62f8-4d86-952d-5f498bbddf0f`,
+    translation_key: null,
+    original_name: "Back up",
+    hidden_by: null,
+  };
+
+  const commandButton = (version: string) =>
+    groupEntities(
+      {
+        config: { version },
+        states: {
+          [command.entity_id]: {
+            entity_id: command.entity_id,
+            state: "unknown",
+          },
+        },
+      },
+      device,
+      [command],
+    ).single.get("command_9ef69bc3-62f8-4d86-952d-5f498bbddf0f");
+
+  expect(commandButton("2026.11.3")).toBeUndefined();
+  expect(commandButton("2026.12.0b0")).toBe("button.host_back_up");
+});
+
 test("adds display controls from 2026.12", () => {
   const brightness = (version: string) =>
     groupEntities({ config: { version }, states }, device, entries)

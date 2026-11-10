@@ -1,4 +1,4 @@
-import { isAtLeast, MINIMUM_RELEASE, RELEASE_GATES } from "./release";
+import { entityRelease, isAtLeast, MINIMUM_RELEASE } from "./release";
 import type {
   DeviceRegistryEntry,
   EntityRegistryEntry,
@@ -196,7 +196,7 @@ export const groupEntities = (
 
   for (const entry of entries) {
     const key = entry.unique_id.slice(uuid.length + 1);
-    const release = RELEASE_GATES.get(entry.translation_key ?? key);
+    const release = entityRelease(entry.translation_key, key);
 
     if (
       (release !== undefined && !isAtLeast(hass.config.version, release)) ||

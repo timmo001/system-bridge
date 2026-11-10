@@ -6,6 +6,12 @@
 export const MINIMUM_RELEASE = "2026.10";
 
 /**
+ * The start of the key of each saved command's button, which Core adds for
+ * each command in the System Bridge allowlist.
+ */
+export const COMMAND_KEY_PREFIX = "command_";
+
+/**
  * Entities, by translation key, that Core adds after the minimum release, with
  * the release that adds them. They're only used once Home Assistant is at that
  * release. Entities named by their device class have no translation key, so
@@ -70,7 +76,19 @@ export const RELEASE_GATES = new Map([
   ["power_profile", "2026.12"],
   // Core #191285
   ["notification", "2026.12"],
+  // Saved command buttons, keyed `command_<id>`, so gated by this prefix
+  [COMMAND_KEY_PREFIX, "2026.12"],
 ]);
+
+/**
+ * The release that adds an entity, by its translation key, or by the key in
+ * its unique ID when it has none.
+ */
+export const entityRelease = (translationKey: string | null, key: string) =>
+  RELEASE_GATES.get(
+    translationKey ??
+      (key.startsWith(COMMAND_KEY_PREFIX) ? COMMAND_KEY_PREFIX : key),
+  );
 
 /** The year and month of a version, such as `2026.11.0b2` or `2026.11.0.dev0`. */
 const yearMonth = (version: string) => {
@@ -151,6 +169,7 @@ export const SECTION_RELEASES = new Map([
     "power_hibernate",
     "power_restart",
     "power_shutdown",
+    COMMAND_KEY_PREFIX,
   ),
   gatedSection("notifications", "notification"),
   gatedSection("power", "power_profile", "keep_awake"),

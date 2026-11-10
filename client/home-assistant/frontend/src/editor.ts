@@ -226,7 +226,8 @@ const SECTION_DESCRIPTIONS: Record<SectionName, string> = {
     "One network interface: rates, Wi-Fi details and a graph. Set the item to the interface name.",
   desktop: "Whether the session is locked, and how long it's been idle.",
   processes: "The number of processes, with a graph.",
-  commands: "Buttons to lock, log out, sleep, hibernate, restart or shut down.",
+  commands:
+    "Buttons to lock, log out, sleep, hibernate, restart or shut down, and one for each saved command.",
   notifications:
     "The notify entity, and the last notification event, such as clicked or closed.",
   power: "The power profile, and a switch to keep the device awake.",
