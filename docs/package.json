@@ -27,6 +27,6 @@
     "@timmo001/oxlint-rules": "0.6.5",
     "oxlint": "1.93.0",
     "oxlint-tsgolint": "7.0.2006",
-    "wrangler": "4.159.0"
+    "wrangler": "4.160.0"
   }
 }
