@@ -20,6 +20,29 @@ from .processes import Process
 from .sensors import Sensors
 from .system import System
 
+__all__ = [
+    "CPU",
+    "GPU",
+    "Audio",
+    "Battery",
+    "Bluetooth",
+    "Cameras",
+    "Desktop",
+    "Discord",
+    "Disks",
+    "Display",
+    "GetData",
+    "Media",
+    "Memory",
+    "Module",
+    "ModulesData",
+    "Networks",
+    "Process",
+    "RegisterDataListener",
+    "Sensors",
+    "System",
+]
+
 
 class Module(StrEnum):
     """Module Enum."""
