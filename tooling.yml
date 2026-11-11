@@ -44,7 +44,7 @@ tools:
     reviewed: "5.88"
     review: Check the Bluetooth module's D-Bus use in data/module/bluetooth (bluetooth_linux.go reads org.bluez Adapter1 and Device1 through ObjectManager.GetManagedObjects; watch_linux.go follows PropertiesChanged, InterfacesAdded and InterfacesRemoved; actions_linux.go calls Device1.Connect and Disconnect, Adapter1.RemoveDevice and sets Adapter1.Powered) against changed interfaces, methods, properties and errors.
   - repo: rpm-software-management/dnf5
-    reviewed: 5.4.7.0
+    reviewed: 5.4.8.0
     review: Check the Fedora package checks. data/module/system/updates_linux.go runs dnf --quiet check-update with LC_ALL=C, takes exit code 100 as updates waiting, counts its three-field lines and stops at the Obsoleting section. data/module/system/system_linux.go runs dnf --disablerepo=* needs-restarting --reboothint and reads exit code 1 with "Reboot is required". Check both against changed commands, flags, output and exit codes.
   - repo: flatpak/xdg-desktop-portal
     reviewed: 1.22.1
