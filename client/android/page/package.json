@@ -11,7 +11,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@timmo001/groundwork-mobile": "0.26.0",
+    "@timmo001/groundwork-mobile": "0.26.1",
     "@timmo001/groundwork-pwa": "0.26.0",
     "@timmo001/groundwork-tokens": "0.26.0",
     "@timmo001/groundwork-ui": "0.26.0",
