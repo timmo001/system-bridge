@@ -23,7 +23,7 @@
         "@types/bun": "1.4.4",
         "oxlint": "1.93.0",
         "oxlint-tsgolint": "7.0.2006",
-        "prettier": "3.9.10",
+        "prettier": "3.10.0",
         "typescript": "7.0.2",
       },
     },
@@ -41,7 +41,7 @@
         "eslint-plugin-wc": "3.1.0",
         "oxlint": "1.93.0",
         "oxlint-tsgolint": "7.0.2006",
-        "prettier": "3.9.10",
+        "prettier": "3.10.0",
         "typescript": "7.0.2",
         "vite": "8.3.8",
       },
@@ -90,7 +90,7 @@
         "effect": "4.1.4",
         "oxlint": "1.93.0",
         "oxlint-tsgolint": "7.0.2006",
-        "prettier": "3.9.10",
+        "prettier": "3.10.0",
         "typescript": "7.0.2",
       },
       "peerDependencies": {
@@ -2139,7 +2139,7 @@
 
     "prelude-ls": ["prelude-ls@1.2.1", "", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
 
-    "prettier": ["prettier@3.9.10", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA=="],
+    "prettier": ["prettier@3.10.0", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-mBi4765LgjO1PFjlEs7pUeK0nb1bw71c+N4/ItfeUWNdY5cV2pRKaFpbbFRYmDJMO+5ZwzGxHRqHxFZna7iv5w=="],
 
     "prismjs": ["prismjs@1.30.0", "", {}, "sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw=="],
 
