@@ -67,7 +67,7 @@ jobs:
           ref: ${{ github.head_ref || github.ref }}
 
       - name: Install Nix
-        uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+        uses: cachix/install-nix-action@91f6a0f59e94dfb2cfed0f4000f36a68ead1d20c # v31.11.4
 
       - name: Refresh dependency hashes
         if: env.REFRESH == 'true'
