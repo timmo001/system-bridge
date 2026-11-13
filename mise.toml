@@ -7,7 +7,7 @@ golangci-lint = "2.15.0"
 node = "26.13.1"
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
-uv = "0.13.7"
+uv = "0.13.8"
 
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
