@@ -76,6 +76,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 				break
 			}
 			authenticated = true
+			ws.markAuthenticated(conn)
 		}
 
 		// Handle different event types
@@ -99,6 +100,18 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		} else {
 			slog.Error("Connection not found in connections map during message handling", "addr", addr)
 		}
+	}
+}
+
+// markAuthenticated records that this connection sent the API token, so
+// broadcasts may include it. A connection that was replaced is left alone.
+func (ws *WebsocketServer) markAuthenticated(conn *websocket.Conn) {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
+
+	addr := conn.RemoteAddr().String()
+	if connInfo, ok := ws.connections[addr]; ok && connInfo.conn == conn {
+		connInfo.authenticated = true
 	}
 }
 

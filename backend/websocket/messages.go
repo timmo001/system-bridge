@@ -77,6 +77,11 @@ func (ws *WebsocketServer) BroadcastMessage(message event.MessageResponse) {
 	ws.mutex.RLock()
 	connections := make([]*connectionInfo, 0, len(ws.connections))
 	for _, connInfo := range ws.connections {
+		// A socket is added before its first message, which is what carries
+		// the token. Until then it must not hear broadcasts.
+		if !connInfo.authenticated {
+			continue
+		}
 		connections = append(connections, connInfo)
 	}
 	ws.mutex.RUnlock()

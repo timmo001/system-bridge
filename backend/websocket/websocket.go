@@ -28,10 +28,14 @@ type WebSocketRequest struct {
 	Token string `json:"token" mapstructure:"token"`
 }
 
-// connectionInfo holds connection data with write synchronization
+// connectionInfo holds connection data with write synchronization.
+// authenticated is set once the connection has sent the API token.
+// Broadcasts skip connections that haven't, so opening a socket isn't
+// enough to hear notifications, settings or power changes.
 type connectionInfo struct {
-	conn     *websocket.Conn
-	writeMux sync.Mutex
+	conn          *websocket.Conn
+	writeMux      sync.Mutex
+	authenticated bool
 }
 
 type WebsocketServer struct {
@@ -76,7 +80,8 @@ func (ws *WebsocketServer) AddTestConnection(address string) {
 	// Add a connectionInfo with nil conn - we only need it to pass ConnectionExists checks
 	// The nil conn will be handled gracefully in SendMessage for testing
 	ws.connections[address] = &connectionInfo{
-		conn: nil,
+		conn:          nil,
+		authenticated: true,
 	}
 }
 

@@ -87,6 +87,41 @@ func TestAuthenticatedConnectionOutlivesAuthenticationTimeout(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestBroadcastSkipsUnauthenticatedConnections(t *testing.T) {
+	ws, url := newTestWebsocketServer(t)
+	// Longer than the reads below, so an idle socket stays open for the check
+	ws.authTimeout = time.Second
+	pending := dialTestWebsocket(t, url)
+	authed := dialTestWebsocket(t, url)
+
+	require.Eventually(t, func() bool {
+		ws.mutex.RLock()
+		defer ws.mutex.RUnlock()
+		return len(ws.connections) == 2
+	}, time.Second, 10*time.Millisecond)
+
+	require.NoError(t, authed.WriteMessage(gorillawebsocket.TextMessage, []byte(`{"id":"test","event":"UNKNOWN","token":"test-token"}`)))
+	require.NoError(t, authed.SetReadDeadline(time.Now().Add(time.Second)))
+	_, _, err := authed.ReadMessage()
+	require.NoError(t, err)
+
+	ws.BroadcastMessage(event.MessageResponse{
+		ID:      "system",
+		Type:    event.ResponseTypeNotificationSent,
+		Message: "secret notification",
+	})
+
+	require.NoError(t, pending.SetReadDeadline(time.Now().Add(200*time.Millisecond)))
+	_, leaked, err := pending.ReadMessage()
+	if err == nil {
+		t.Fatalf("unauthenticated connection received %s", leaked)
+	}
+
+	_, payload, err := authed.ReadMessage()
+	require.NoError(t, err)
+	require.Contains(t, string(payload), "secret notification")
+}
+
 func TestConnectionClosesWhenMessageExceedsLimit(t *testing.T) {
 	ws, url := newTestWebsocketServer(t)
 	conn := dialTestWebsocket(t, url)
