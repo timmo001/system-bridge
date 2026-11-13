@@ -352,7 +352,8 @@ run = "go fmt ./..."
 
 [tasks."lint:client:web"]
 description = "Run web client linters (Oxlint, typecheck)"
-depends = ["install:js"]
+# The typecheck reads the connector's generated schemas, so it waits for them
+depends = ["generate:schemas"]
 dir = "client/web"
 run = "bun run --parallel --no-exit-on-error lint typecheck"
 
