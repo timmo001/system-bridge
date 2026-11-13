@@ -26,7 +26,7 @@
     "@oxlint/plugins": "1.93.0",
     "@timmo001/oxlint-rules": "0.6.5",
     "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "oxlint-tsgolint": "7.0.2007",
     "wrangler": "4.160.1"
   }
 }
