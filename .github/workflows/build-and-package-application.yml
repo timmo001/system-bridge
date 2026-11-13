@@ -392,7 +392,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -479,7 +479,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -496,7 +496,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       artifact-name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
       release-tag: ${{ github.event.release.tag_name }}
@@ -509,7 +509,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -612,7 +612,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: timmo001/workflows/.github/workflows/publish-npm-package.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/publish-npm-package.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       package-path: connector/typescript
       # Skip format:check: the release rewrites the version in the manifests
@@ -625,7 +625,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: timmo001/workflows/.github/workflows/publish-jsr-package.yml@ec70016a91999259142a156104978174490a0831 # 20261110.0
+    uses: timmo001/workflows/.github/workflows/publish-jsr-package.yml@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
     with:
       package-path: connector/typescript
       # Skip format:check as above. JSR publishes the compiled dist, which the
@@ -677,7 +677,7 @@ jobs:
           path: dist/windows
 
       - name: Publish release assets
-        uses: timmo001/workflows/.github/actions/publish-release-assets@ec70016a91999259142a156104978174490a0831 # 20261110.0
+        uses: timmo001/workflows/.github/actions/publish-release-assets@9bb6ae3c2a1542cec4195b63f9516c83001e578e # 20261113.0
         with:
           release-tag: ${{ github.event.release.tag_name }}
           subject-patterns: |
