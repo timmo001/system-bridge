@@ -19,9 +19,9 @@ import { encode } from "uqr";
 
 import { AtomController } from "~/controllers/atom-controller";
 import { connectionSettings, registry } from "~/lib/atoms";
+import { baseUrl } from "~/lib/backend";
 import { mobile, pushClient } from "~/lib/mobile";
 import {
-  baseUrl,
   pairingCode,
   PushKind,
   type PushSubscriber,
