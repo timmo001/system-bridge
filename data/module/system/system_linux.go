@@ -375,7 +375,7 @@ func readDeviceInfo() *types.DeviceInfo {
 			return nil
 		}
 		switch strings.ToLower(value) {
-		case "to be filled by o.e.m.", "default string", "none", "not specified", "system manufacturer", "system product name", "unknown":
+		case "to be filled by o.e.m.", "default string", "none", "not specified", "system manufacturer", "system product name", "system version", "unknown":
 			return nil
 		}
 		return &value
