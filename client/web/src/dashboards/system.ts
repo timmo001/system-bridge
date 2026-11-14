@@ -139,15 +139,17 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
           ? html`<gw-alert tone="warning" heading="An update is available">
               Version ${system.version_latest} is out; this is
               ${system.version}.
+              <a href=${href("whatsNew")}>See what's new</a>
               ${
                 system.version_latest_url === null
                   ? nothing
-                  : html`<a
-                      href=${system.version_latest_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >See what's new</a
-                    >`
+                  : html`·
+                      <a
+                        href=${system.version_latest_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Changes on GitHub</a
+                      >`
               }
             </gw-alert>`
           : nothing

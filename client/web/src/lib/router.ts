@@ -63,6 +63,7 @@ export const routes = {
     ModuleSearch,
   ),
   connection: route("/connection", NoParams, NoSearch),
+  whatsNew: route("/whats-new", NoParams, NoSearch),
   settings: route("/settings", NoParams, NoSearch),
   settingsAppearance: route("/settings/appearance", NoParams, NoSearch),
   settingsDevices: route("/settings/devices", NoParams, NoSearch),

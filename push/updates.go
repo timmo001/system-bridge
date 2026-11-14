@@ -42,7 +42,7 @@ func WatchUpdates(ctx context.Context, store *Store) {
 		store.Send(ctx, KindUpdates, Payload{
 			Title: "System Bridge " + latest + " is out",
 			Body:  "This computer has " + version.Version,
-			Link:  "/",
+			Link:  "/whats-new",
 			Tag:   "update",
 		})
 	}

@@ -35,6 +35,7 @@ import "./pages/page-overview";
 import "./pages/page-settings";
 import "./pages/page-settings-appearance";
 import "./pages/page-settings-devices";
+import "./pages/page-whats-new";
 
 /**
  * Every page, for the command menu in the header, which is the app's
@@ -80,6 +81,8 @@ const renderPage = (location: Location) => {
       return html`<page-settings-appearance></page-settings-appearance>`;
     case "settingsDevices":
       return html`<page-settings-devices></page-settings-devices>`;
+    case "whatsNew":
+      return html`<page-whats-new></page-whats-new>`;
     case "notFound":
       return html`<page-not-found .path=${location.path}></page-not-found>`;
   }

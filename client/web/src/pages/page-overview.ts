@@ -551,6 +551,7 @@ export class PageOverview extends SbPage {
                 heading="System Bridge ${data.system.version_latest} is available"
               >
                 This system has ${data.system.version}.
+                <a href=${href("whatsNew")}>See what's new</a>
               </gw-alert>`
             : nothing
         }

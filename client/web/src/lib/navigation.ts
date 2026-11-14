@@ -14,6 +14,7 @@ import {
   mdiLanConnect,
   mdiMemory,
   mdiMonitor,
+  mdiNewBox,
   mdiPaletteOutline,
   mdiPlayCircleOutline,
   mdiThermometer,
@@ -180,6 +181,10 @@ export const navigation: readonly NavSection[] = [
   {
     label: "Connection",
     items: [routeItem("connection", "Connection", mdiLanConnect)],
+  },
+  {
+    label: "System Bridge",
+    items: [routeItem("whatsNew", "What's new", mdiNewBox)],
   },
 ];
 
