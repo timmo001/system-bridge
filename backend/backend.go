@@ -231,6 +231,9 @@ func (b *Backend) Run(ctx context.Context) error {
 	// One event over HTTP, for what has no WebSocket, such as a phone's tiles
 	mux.HandleFunc("/api/event", api_http.AllowOrigins(api_http.EventHandler(b.token, b.eventRouter)))
 
+	// The newest releases and their notes, for the web client's What's new page
+	mux.HandleFunc("/api/releases", api_http.AllowOrigins(api_http.ReleasesHandler(b.token)))
+
 	if pushStore != nil {
 		mux.HandleFunc("/api/push/vapid-key", api_http.AllowOrigins(api_http.PushVAPIDKeyHandler(b.token, pushStore)))
 		mux.HandleFunc("/api/push/subscriptions", api_http.AllowOrigins(api_http.PushSubscriptionsHandler(b.token, pushStore)))
