@@ -51,6 +51,7 @@ export default defineConfig(
                 "/api/event",
                 "/api/pairing",
                 "/api/push",
+                "/api/releases",
               ],
             },
             {

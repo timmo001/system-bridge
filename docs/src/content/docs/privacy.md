@@ -85,6 +85,14 @@ https://api.github.com/repos/timmo001/system-bridge/releases/latest
 - GitHub sees your public IP address, as with any web request.
 - The request uses the proxy in your `HTTPS_PROXY` environment variable, if set.
 
+When you open **What's new** in the web client, System Bridge also requests the newest release notes from:
+
+```text
+https://api.github.com/repos/timmo001/system-bridge/releases?per_page=10
+```
+
+This request is the same kind of plain `GET`, through the same proxy. Its result is cached for 6 hours, and it only runs when a client asks for the notes.
+
 ## DNS lookups
 
 When it updates the `system` module, System Bridge looks up your machine's full domain name: it looks up your hostname, then does a reverse lookup on the addresses it gets back. These lookups go to the DNS server your system uses.

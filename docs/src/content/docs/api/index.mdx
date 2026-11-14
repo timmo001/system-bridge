@@ -27,7 +27,7 @@ system-bridge client token
 
 See the [CLI reference](/using/cli/#token) for more ways to find it. How you pass the token depends on the protocol:
 
-- **HTTP**: send the `X-API-Token` or `token` header. The [event](/api/event), [pairing](/api/pairing) and [push](/api/push) endpoints take `Authorization: Bearer {token}` too, and answer pages on any origin, so a web client hosted elsewhere can call them. The media file endpoint takes a `token` query parameter instead.
+- **HTTP**: send the `X-API-Token` or `token` header. The [event](/api/event), [pairing](/api/pairing), [push](/api/push) and [releases](/api/releases) endpoints take `Authorization: Bearer {token}` too, and answer pages on any origin, so a web client hosted elsewhere can call them. The media file endpoint takes a `token` query parameter instead.
 - **WebSocket**: include `token` in every message you send.
 - **MCP**: authenticated with the same token.
 
