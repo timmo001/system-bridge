@@ -617,8 +617,6 @@ export const SECTIONS = {
       ),
     ]),
 
-  // TODO(Core): add a "Health" section for failed units and pending packages
-  // with roadmap item 8
   system: ({ entities }) =>
     part([
       heading("Device", "mdi:information-outline"),
