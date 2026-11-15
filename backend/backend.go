@@ -1,10 +1,12 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -110,9 +112,21 @@ func spaFileServer(staticFS fs.FS, indexFile string) http.HandlerFunc {
 		}
 
 		// Serve the index without changing the URL. Rewriting the path to
-		// /index.html would make the file server redirect to the root.
+		// /index.html would make the file server redirect to the root. It
+		// carries the backend's version, which the page sends back with each
+		// API call, so the backend can tell a page it kept from before an update.
 		w.Header().Set("Cache-Control", "no-cache")
-		http.ServeFileFS(w, r, staticFS, indexFile)
+		index, err := fs.ReadFile(staticFS, indexFile)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		meta := fmt.Sprintf(`<meta name="system-bridge-version" content="%s">`, html.EscapeString(version.Version))
+		index = bytes.Replace(index, []byte("</head>"), []byte(meta+"</head>"), 1)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if _, err := w.Write(index); err != nil {
+			slog.Debug("Failed to write the index", "error", err)
+		}
 	}
 }
 
@@ -296,7 +310,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf("0.0.0.0:%d", port),
-		Handler:           mux,
+		Handler:           api_http.RequireVersion(version.Version, mux),
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 	defer func() {
