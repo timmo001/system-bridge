@@ -29,11 +29,11 @@ const validate = (form: ConnectionForm): FormErrors => {
     ...(!(Number.isInteger(port) && port >= 1 && port <= 65535) && {
       port: "Enter a port from 1 to 65535",
     }),
-    ...(form.token === "" && { token: "Enter the API token" }),
+    ...(form.token === "" && { token: "Enter the API key" }),
   };
 };
 
-/** Where to find System Bridge, and the token to use. */
+/** Where to find System Bridge, and the key to use. */
 @customElement("page-connection")
 export class PageConnection extends SbPage {
   readonly #test = new AtomController(this, () => testConnection);
@@ -126,7 +126,7 @@ export class PageConnection extends SbPage {
         ${this.renderHeader({
           heading: "Connection",
           description:
-            "Where to find System Bridge, and the API token to use. The settings are kept in this browser.",
+            "Where to find System Bridge, and the API key to use. The settings are kept in this browser.",
           icon: mdiLanConnect,
         })}
         ${this.renderResult(
@@ -161,13 +161,13 @@ export class PageConnection extends SbPage {
                 ></gw-switch>
               </gw-setting-row>
               <gw-input
-                label="API token"
+                label="API key"
                 name="token"
                 type="password"
                 autocomplete="off"
                 monospace
                 reveal
-                hint="Find it in System Bridge's settings, or run system-bridge client token."
+                hint="Run system-bridge client key create on the computer, or make one under Devices where you're already connected."
                 error=${this.errors.token ?? ""}
                 .value=${this.form.token}
                 @input=${this.#onTextInput}

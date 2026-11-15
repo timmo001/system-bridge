@@ -56,6 +56,7 @@
         "@tanstack/charts": "1.5.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
+        "@timmo001/groundwork-auth": "0.47.0",
         "@timmo001/groundwork-mobile": "0.47.0",
         "@timmo001/groundwork-pwa": "0.47.0",
         "@timmo001/groundwork-tokens": "0.47.0",
@@ -961,6 +962,8 @@
     "@timmo001/docs-kit": ["@timmo001/docs-kit@0.47.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.47.0", "@timmo001/groundwork-ui": "0.47.0", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-40FCSGcspgwnMxL2K8T1BPjwPKG6Tdru7RPbhw9RjFZa2FzqiDc8BxgZGzs39TXzbHNTRySWxzsLHE1lf3986w=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
+
+    "@timmo001/groundwork-auth": ["@timmo001/groundwork-auth@0.47.0", "", { "dependencies": { "effect": "4.1.4" } }, "sha512-AUV5fsjyzi5mcuvB29NNsX2ftBavv4Qcbe9rNlr++hbm6ZEQLysECQqstpdN2Zxt2N3UJ4xvHq8MthqM7/VNaA=="],
 
     "@timmo001/groundwork-mobile": ["@timmo001/groundwork-mobile@0.47.0", "", { "dependencies": { "@timmo001/groundwork-pwa": "0.47.0", "@timmo001/groundwork-tokens": "0.47.0", "effect": "4.1.4" } }, "sha512-afDecgesHeje2v3jIasgZMu55HvjoiLyjJZRJwyVf9olKaNxprCghhsD5qcdrliYl2R5YNEdJt3YL4p75gbpcQ=="],
 

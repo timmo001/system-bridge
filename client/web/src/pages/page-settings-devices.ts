@@ -1,4 +1,12 @@
-import { mdiDevices, mdiDeleteOutline, mdiDownload, mdiQrcode } from "@mdi/js";
+import {
+  mdiDevices,
+  mdiDeleteOutline,
+  mdiDownload,
+  mdiKeyPlus,
+  mdiKeyVariant,
+  mdiQrcode,
+} from "@mdi/js";
+import "@timmo001/groundwork-ui/define/gw-copy.ts";
 import "@timmo001/groundwork-ui/define/gw-pairing.ts";
 import type {
   Mobile,
@@ -17,10 +25,14 @@ import { baseUrl } from "~/lib/backend";
 import { canInstall, install } from "~/lib/install";
 import { mobile, pushClient } from "~/lib/mobile";
 import {
+  createKey,
+  type KeyedClient,
+  keyedClients,
   makePairingOffer,
   PushKind,
   type PushSubscriber,
   pushSubscribers,
+  removeKey,
   removePushSubscriber,
   setPushKinds,
 } from "~/lib/devices";
@@ -48,6 +60,29 @@ const kindsText = (kinds: readonly PushKind[]) =>
     ? "Nothing"
     : kinds.map((kind) => kindInfo[kind].heading).join(", ");
 
+/** How each kind of client got its key, as the keys list names it. */
+const clientKinds = new Map([
+  ["android", "Android app"],
+  ["web", "Browser"],
+  ["home-assistant", "Home Assistant"],
+  ["key", "Made here"],
+  ["cli", "Made on the computer"],
+  ["owner", "Owner key"],
+]);
+
+/** A key's line in the list, such as "Browser · Made 3 Nov 2026 · Last used 5 Nov 2026". */
+const keyDescription = (client: KeyedClient, thisClient?: string) =>
+  [
+    client.id === thisClient ? "This device" : undefined,
+    clientKinds.get(client.kind) ?? client.kind,
+    `Made ${date.format(new Date(client.created))}`,
+    client.lastUsed === undefined
+      ? "Never used"
+      : `Last used ${date.format(new Date(client.lastUsed))}`,
+  ]
+    .filter((part) => part !== undefined)
+    .join(" · ");
+
 /**
  * The devices that connect to this computer: pairing the Android app
  * through a QR code, this phone or browser's own pushes, and every device
@@ -67,6 +102,18 @@ export class PageSettingsDevices extends SbPage {
   readonly #remove = new AtomController(this, () => removePushSubscriber);
 
   readonly #kinds = new AtomController(this, () => setPushKinds);
+
+  readonly #keys = new AtomController(this, () => keyedClients);
+
+  readonly #createKey = new AtomController(this, () => createKey);
+
+  readonly #removeKey = new AtomController(this, () => removeKey);
+
+  /** The name for the next key made by hand. */
+  @state() private keyName = "";
+
+  /** Whether the key just made is still shown, until it's dismissed. */
+  @state() private keyShown = false;
 
   /** The shell or the PWA's pieces, once connected. */
   @state() private mobile: Mobile | undefined;
@@ -114,14 +161,14 @@ export class PageSettingsDevices extends SbPage {
     else registry.set(removePushSubscriber, id);
   };
 
-  /** Where this device's pushes are kept, with the token to reach it. */
+  /** Where this device's pushes are kept, with the key to reach it. */
   #pushOptions(client: MobilePushOptions["client"]): MobilePushOptions {
     const settings = this.#settings.value;
 
     return {
       service: `${baseUrl(settings)}/api/`,
       client,
-      headers: { "X-API-Token": settings.token ?? "" },
+      headers: { Authorization: `Bearer ${settings.token ?? ""}` },
     };
   }
 
@@ -194,7 +241,7 @@ export class PageSettingsDevices extends SbPage {
     return html`
       <gw-card
         heading="Pair the Android app"
-        description="Scan this with the System Bridge app on your phone. Pairing gives the phone this computer's API token."
+        description="Scan this with the System Bridge app on your phone. Pairing gives the phone its own key to this computer."
         icon=${mdiQrcode}
         level=${this.cardLevel}
       >
@@ -254,6 +301,137 @@ export class PageSettingsDevices extends SbPage {
                   `,
                 )
         }
+      </gw-card>
+    `;
+  }
+
+  #onKeyName = (event: InputEvent) => {
+    if (event.target instanceof HTMLInputElement) {
+      this.keyName = event.target.value;
+    }
+  };
+
+  #onCreateKey = (event: SubmitEvent) => {
+    event.preventDefault();
+    const name = this.keyName.trim();
+
+    if (name === "") return;
+
+    this.keyShown = true;
+    registry.set(createKey, name);
+  };
+
+  #onKeyCopied = () => {
+    this.keyShown = false;
+    this.keyName = "";
+  };
+
+  #onRemoveKey = (event: Event) => {
+    const id =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget.dataset.key
+        : undefined;
+
+    if (id !== undefined) registry.set(removeKey, id);
+  };
+
+  /** The key just made, shown until it's dismissed and never again. */
+  #renderNewKey() {
+    const result = this.#createKey.value;
+
+    if (AsyncResult.isFailure(result)) {
+      return html`<p class="error-text">
+        ${Option.match(AsyncResult.error(result), {
+          onNone: () => "Couldn't make the key",
+          onSome: (error) => error.message,
+        })}
+      </p>`;
+    }
+
+    const made = Option.getOrUndefined(AsyncResult.value(result));
+
+    if (!this.keyShown || made === undefined) return nothing;
+
+    return html`
+      <div class="stack">
+        <p class="small">
+          Copy the key for ${made.client.name} now: it isn't shown again.
+        </p>
+        <gw-copy
+          value=${made.key}
+          label="Key for ${made.client.name}"
+        ></gw-copy>
+        <div class="row" style="justify-content: flex-end">
+          <gw-button appearance="plain" @click=${this.#onKeyCopied}
+            >Done</gw-button
+          >
+        </div>
+      </div>
+    `;
+  }
+
+  #renderKeys() {
+    const result = this.#keys.value;
+    const list = Option.getOrElse(AsyncResult.value(result), () => []);
+
+    return html`
+      <gw-card
+        heading="Keys"
+        description="Every app and device with its own key to this computer. Removing one signs it out."
+        icon=${mdiKeyVariant}
+        level=${this.cardLevel}
+      >
+        ${
+          AsyncResult.isFailure(result)
+            ? html`<p class="error-text">
+                ${Option.match(AsyncResult.error(result), {
+                  onNone: () => "Couldn't load the keys",
+                  onSome: (error) => error.message,
+                })}
+              </p>`
+            : list.length === 0
+              ? html`<p class="muted small">
+                  ${result.waiting ? "Loading…" : "Nothing has a key yet."}
+                </p>`
+              : list.map(
+                  (client) => html`
+                    <gw-setting-row
+                      heading=${client.name}
+                      description=${keyDescription(client, this.client?.id)}
+                    >
+                      <gw-button
+                        variant="danger"
+                        appearance="plain"
+                        icon=${mdiDeleteOutline}
+                        data-key=${client.id}
+                        ?loading=${this.#removeKey.value.waiting}
+                        @click=${this.#onRemoveKey}
+                        >Remove</gw-button
+                      >
+                    </gw-setting-row>
+                  `,
+                )
+        }
+        <form class="stack" @submit=${this.#onCreateKey} novalidate>
+          <gw-input
+            label="Name"
+            name="key-name"
+            autocomplete="off"
+            hint="What the key is for, such as a script or another app."
+            .value=${this.keyName}
+            @input=${this.#onKeyName}
+          ></gw-input>
+          <div class="row" style="justify-content: flex-end">
+            <gw-button
+              type="submit"
+              icon=${mdiKeyPlus}
+              ?disabled=${this.keyName.trim() === ""}
+              ?loading=${this.#createKey.value.waiting}
+              >New key</gw-button
+            >
+          </div>
+        </form>
+        ${this.#renderNewKey()}
       </gw-card>
     `;
   }
@@ -364,6 +542,7 @@ export class PageSettingsDevices extends SbPage {
           () => html`
             ${this.#renderPairing()} ${this.#renderInstall()}
             ${this.#renderThisDevice()} ${this.#renderSubscribers()}
+            ${this.#renderKeys()}
           `,
           html`<gw-skeleton
             style="min-height: 18rem; border-radius: var(--gw-radius-l)"

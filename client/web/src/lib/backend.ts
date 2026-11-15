@@ -6,10 +6,16 @@ import {
   HttpClientResponse,
 } from "effect/http";
 
+import {
+  type KeyExchangeRequest,
+  keyRoutes,
+  NewKey,
+} from "@timmo001/groundwork-auth/client";
 import { versionMismatchStatus } from "@timmo001/groundwork-pwa/update";
 
 import type { ConnectionSettings } from "./connection-settings";
 import { update } from "./update";
+import { browserClientId, browserName } from "./utils";
 
 /** Why a request to one of the backend's HTTP routes failed, for the page. */
 export class BackendError extends Schema.TaggedError<BackendError>()(
@@ -21,7 +27,7 @@ export class BackendError extends Schema.TaggedError<BackendError>()(
 export const baseUrl = (settings: ConnectionSettings) =>
   `${settings.ssl ? "https" : "http"}://${settings.host}:${settings.port}`;
 
-/** Sends a request to the backend with the token, failing on an error status. */
+/** Sends a request to the backend with the key, failing on an error status. */
 export const send = Effect.fnUntraced(
   function* (
     settings: ConnectionSettings,
@@ -36,7 +42,7 @@ export const send = Effect.fnUntraced(
     const response = yield* client.execute(
       request.pipe(
         HttpClientRequest.prependUrl(baseUrl(settings)),
-        HttpClientRequest.setHeader("X-API-Token", settings.token ?? ""),
+        HttpClientRequest.bearerToken(settings.token ?? ""),
         sameBackend ? HttpClientRequest.setHeaders(update.headers) : identity,
       ),
     );
@@ -84,3 +90,26 @@ export const decodeBody =
           }),
       ),
     );
+
+/** Whether a token is already a client's own key, not the old shared token. */
+export const isClientKey = (token: string) =>
+  token.startsWith("system-bridge_");
+
+/**
+ * Trades the old shared token for this browser's own key, which the page
+ * keeps instead. A key is returned as it is.
+ */
+export const ownKey = (settings: ConnectionSettings, token: string) =>
+  isClientKey(token)
+    ? Effect.succeed(token)
+    : send(
+        { ...settings, token },
+        HttpClientRequest.post(`/api/${keyRoutes.exchange}`).pipe(
+          HttpClientRequest.bodyJsonUnsafe({
+            client: { id: browserClientId(), name: browserName(), kind: "web" },
+          } satisfies KeyExchangeRequest),
+        ),
+      ).pipe(
+        Effect.flatMap(decodeBody(NewKey)),
+        Effect.map(({ key }) => key),
+      );

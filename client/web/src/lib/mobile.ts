@@ -13,7 +13,7 @@ import pwaConfig from "../../pwa.config";
 import { registry } from "./atoms";
 import { navigate } from "./router";
 import { setAndroidTheme } from "./theme";
-import { generateUUID } from "./utils";
+import { browserClientId, browserName } from "./utils";
 
 const SHARE_KEY = "system-bridge-pending-share";
 
@@ -106,8 +106,6 @@ export const mobileConnection = Atom.make(Effect.promise(() => mobile)).pipe(
   Atom.keepAlive,
 );
 
-const CLIENT_ID_KEY = "system-bridge-client-id";
-
 /** The app's own client: its install and the phone's model, such as "Pixel 9". */
 const AppClient = Schema.Struct({
   id: Schema.String,
@@ -125,41 +123,5 @@ export const pushClient = async (
 ): Promise<MobilePushOptions["client"]> => {
   if (current.shell) return current.call("client", AppClient);
 
-  let id = localStorage.getItem(CLIENT_ID_KEY);
-
-  // Not crypto.randomUUID, which is only there over HTTPS
-  if (id === null) {
-    id = generateUUID();
-    localStorage.setItem(CLIENT_ID_KEY, id);
-  }
-
-  return { id, name: browserName(), platform: "web" };
-};
-
-/** What the user agent names, first match wins, as [marker, name]. */
-const browsers = [
-  ["Firefox/", "Firefox"],
-  ["Edg/", "Edge"],
-  ["Chrome/", "Chrome"],
-  ["Safari/", "Safari"],
-] as const;
-
-const systems = [
-  ["Android", "Android"],
-  ["iPhone", "iOS"],
-  ["iPad", "iOS"],
-  ["Windows", "Windows"],
-  ["Mac OS", "macOS"],
-  ["Linux", "Linux"],
-] as const;
-
-/** A name for this browser in the devices list, such as "Firefox on Linux". */
-const browserName = () => {
-  const named = (list: readonly (readonly [string, string])[]) =>
-    list.find(([marker]) => navigator.userAgent.includes(marker))?.[1];
-
-  const browser = named(browsers) ?? "A browser";
-  const system = named(systems);
-
-  return system === undefined ? browser : `${browser} on ${system}`;
+  return { id: browserClientId(), name: browserName(), platform: "web" };
 };

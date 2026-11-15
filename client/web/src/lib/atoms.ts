@@ -44,6 +44,7 @@ import {
 } from "effect";
 import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
 
+import { isClientKey, ownKey } from "./backend";
 import {
   type ConnectionSettings,
   loadConnectionSettings,
@@ -83,7 +84,7 @@ export const errorMessage = (error: BridgeError): string =>
     Match.tag(
       "AuthenticationError",
       () =>
-        "Invalid API token. Please check your connection settings and update your token.",
+        "Invalid API key. Please check your connection settings and update your key.",
     ),
     Match.tag(
       "RequestTimeoutError",
@@ -171,7 +172,7 @@ function settingsError(settings: ConnectionSettings): string | null {
   }
 
   if (!settings.token) {
-    return "API token is required. Please configure your token in connection settings.";
+    return "API key is required. Please configure your key in connection settings.";
   }
 
   return null;
@@ -213,13 +214,38 @@ const connect = (settings: ConnectionSettings, token: string) =>
     }),
   );
 
+/**
+ * This browser's own key for the token, trading the old shared token in for
+ * one first. Failing to means the token isn't right.
+ */
+const keyFor = (settings: ConnectionSettings, token: string) =>
+  ownKey(settings, token).pipe(
+    Effect.mapError((error) => new ConnectionError({ message: error.message })),
+  );
+
 /** The live connection, retried a few times before giving up. */
 export const connection = Atom.make((get): Stream.Stream<ConnectionState> => {
   const settings = get(connectionSettings);
   const invalid = settingsError(settings);
 
   if (invalid !== null || !settings.token) {
-    return Stream.make(disconnected(invalid ?? "API token is required."));
+    return Stream.make(disconnected(invalid ?? "API key is required."));
+  }
+
+  // Saved before keys: trade it for this browser's own key and keep that,
+  // which connects again with it
+  if (!isClientKey(settings.token)) {
+    return Stream.fromEffect(
+      keyFor(settings, settings.token).pipe(
+        Effect.tap((key) =>
+          Effect.sync(() =>
+            get.set(connectionSettings, { ...settings, token: key }),
+          ),
+        ),
+        Effect.andThen(Effect.never),
+        Effect.catch((error) => Effect.succeed(disconnected(error.message))),
+      ),
+    );
   }
 
   return connect(settings, settings.token).pipe(
@@ -262,21 +288,23 @@ export function retryConnection(): void {
 }
 
 /**
- * Checks the settings can reach System Bridge and the token works, then
- * saves them, which reconnects.
+ * Checks the settings can reach System Bridge and the key works, then saves
+ * them, which reconnects. An old shared token is traded for this browser's
+ * own key first, and the key is saved instead.
  */
 export const testConnection = Atom.fn(
   (input: { settings: ConnectionSettings; token: string }, get) =>
     Effect.gen(function* () {
-      const bridge = yield* SystemBridgeWebSocket;
+      const key = yield* keyFor(input.settings, input.token);
 
-      yield* bridge.getSettings;
-    }).pipe(
-      Effect.provide(bridgeLayer(input.settings, input.token)),
-      Effect.tap(() =>
-        Effect.sync(() => get.set(connectionSettings, input.settings)),
-      ),
-    ),
+      yield* Effect.gen(function* () {
+        const bridge = yield* SystemBridgeWebSocket;
+
+        yield* bridge.getSettings;
+      }).pipe(Effect.provide(bridgeLayer(input.settings, key)));
+
+      get.set(connectionSettings, { ...input.settings, token: key });
+    }),
 );
 
 const connected = (
