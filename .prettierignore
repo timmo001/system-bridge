@@ -1,0 +1,9 @@
+node_modules/
+dist/
+bun.lock
+mise.lock
+.mise/locks/
+LICENSE
+AGENTS.md
+.agents/skills/
+connector/typescript/src/generated/
