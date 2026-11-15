@@ -1,6 +1,6 @@
 ---
 title: Download and install
-description: Install System Bridge on Linux or Windows from the AUR, a package, the installer, mise, aqua or an archive.
+description: Install System Bridge on Linux or Windows from the pacman repository, the AUR, a package, the installer, mise, aqua or an archive.
 ---
 
 Download the package for your platform from the [releases page](https://github.com/timmo001/system-bridge/releases).
@@ -29,21 +29,46 @@ Install the package that matches your distribution's package manager, or use mis
 <Tabs syncKey="distro">
 <Tab title="Arch Linux">
 
-Install from the AUR with an AUR helper such as [yay](https://github.com/Jguer/yay).
+Install from the `timmo` pacman repository, which has ready-built, signed packages, or build from the AUR.
 
-For the latest stable release, use the [system-bridge](https://aur.archlinux.org/packages/system-bridge) package:
+**From the pacman repository**
+
+Add its signing key, check the fingerprint is `F94469C08E3B717014E2815FA026A3671E9151DA`, then trust it:
+
+```bash
+curl -fsSLO https://packages.timmo.dev/timmo-arch-repo.asc
+sudo pacman-key --add timmo-arch-repo.asc
+sudo pacman-key --finger F94469C08E3B717014E2815FA026A3671E9151DA
+sudo pacman-key --lsign-key F94469C08E3B717014E2815FA026A3671E9151DA
+```
+
+Add the repository to `/etc/pacman.conf`, above the other repositories:
+
+```ini title="/etc/pacman.conf"
+[timmo]
+SigLevel = PackageRequired DatabaseOptional TrustedOnly
+Server = https://packages.timmo.dev/$arch
+```
+
+Then install the latest stable release, or `system-bridge-git` for the latest `dev` branch, which is rebuilt on every commit:
+
+```bash
+sudo pacman -Syu system-bridge
+```
+
+`pacman -Syu` keeps it up to date with the rest of your system. These are unofficial packages, not supported by Arch Linux.
+
+**From the AUR**
+
+The same packages build from source with an AUR helper such as [yay](https://github.com/Jguer/yay): [system-bridge](https://aur.archlinux.org/packages/system-bridge) for the latest stable release, or [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) for the `dev` branch.
 
 ```bash
 yay -S system-bridge
 ```
 
-For the development branch, use the [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) package. This builds and installs the application from the latest `dev` branch, which is updated automatically every commit:
+**From a release**
 
-```bash
-yay -S system-bridge-git
-```
-
-Alternatively, install the `.pkg.tar.zst` from the releases page or downloaded workflow asset directly:
+Install the `.pkg.tar.zst` from the releases page or downloaded workflow asset directly:
 
 ```bash
 sudo pacman -U system-bridge-*-x86_64.pkg.tar.zst
