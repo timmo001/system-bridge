@@ -68,6 +68,8 @@ Open the web client in your browser, already connected to this system:
 system-bridge client open
 ```
 
+It asks the running backend for a one-time [pairing code](/api/pairing), signed in with the owner key, and opens the web client with it. The page trades the code for a key of its own, listed under **Settings > Devices**, so opening it again in the same browser replaces that key rather than adding another.
+
 Add `--settings` to open General Settings, or `--path` to open any page, including a section of one:
 
 ```bash

@@ -125,7 +125,7 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 | `discord.json` | Your Discord application's credentials, if you set up Discord. Readable only by your user when saved from the web client or the API |
 | `discord-token.json` | Your Discord access token, readable only by your user |
 
-The web client stores the host, port and its key in your browser's local storage, along with the graphs' time range. When you open the web client from the system tray, the host, port and old API token are passed in the URL, and the page trades the token for its own key.
+The web client stores the host, port and its key in your browser's local storage, along with the graphs' time range. When System Bridge opens the web client for you, the host, port and a one-time pairing code are passed in the URL, and the page trades the code for its own key, then takes them off the address. The code works once, for 5 minutes.
 
 ### Logs
 
@@ -133,14 +133,13 @@ System Bridge writes one log file a day to the [logs directory](/running/#file-l
 
 The default `WARN` level only logs warnings and errors. If you raise it to `INFO`, logs also include:
 
-- The web client URL, including the old API token, when you open it from the system tray.
 - The contents of notification, open, command, power and settings requests.
 
 At `DEBUG`, logs also include the contents of other requests, such as the text in keyboard text requests.
 
 Discord setup requests are never logged with their contents, so your Discord client secret stays out of the logs at every level. The backend never sends the secret back to clients either, and the Python connector hides it in its own logs.
 
-Logs stay on your machine. Before you share them in a bug report, check them and remove the API token.
+Logs stay on your machine, and never hold a key, a pairing code or the API token. Before you share them in a bug report, check them for anything else you'd rather keep private.
 
 ## Optional: Discord
 

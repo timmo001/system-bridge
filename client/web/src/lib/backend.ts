@@ -42,7 +42,9 @@ export const send = Effect.fnUntraced(
     const response = yield* client.execute(
       request.pipe(
         HttpClientRequest.prependUrl(baseUrl(settings)),
-        HttpClientRequest.bearerToken(settings.token ?? ""),
+        settings.token
+          ? HttpClientRequest.bearerToken(settings.token)
+          : identity,
         sameBackend ? HttpClientRequest.setHeaders(update.headers) : identity,
       ),
     );
@@ -90,6 +92,28 @@ export const decodeBody =
           }),
       ),
     );
+
+/** What `POST /api/pair` answers: `token` is the client's own key. */
+const Paired = Schema.Struct({ token: Schema.String });
+
+/**
+ * Trades a one-time pairing code for this browser's own key, as pairing a
+ * phone does. The computer opens the web client with one, and so does a
+ * pairing QR code opened in a browser.
+ */
+export const pairWithCode = (settings: ConnectionSettings, code: string) =>
+  send(
+    { ...settings, token: null },
+    HttpClientRequest.post("/api/pair").pipe(
+      HttpClientRequest.bodyJsonUnsafe({
+        code,
+        client: { id: browserClientId(), name: browserName(), platform: "web" },
+      }),
+    ),
+  ).pipe(
+    Effect.flatMap(decodeBody(Paired)),
+    Effect.map(({ token }) => token),
+  );
 
 /** Whether a token is already a client's own key, not the old shared token. */
 export const isClientKey = (token: string) =>

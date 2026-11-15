@@ -68,22 +68,52 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
 
 /**
  * Takes the connection parameters off the address once they're saved, so the
- * token isn't kept in the history or in a link someone copies. The Android
- * app opens the client with them.
+ * token or pairing code isn't kept in the history or in a link someone
+ * copies. The Android app and the computer open the client with them.
  */
 function removeConnectionParams(): void {
   const url = new URL(window.location.href);
 
-  for (const param of ["host", "port", "ssl", "token", "apiKey"]) {
+  for (const param of [
+    "host",
+    "port",
+    "ssl",
+    "token",
+    "apiKey",
+    "pair",
+    "ip",
+  ]) {
     url.searchParams.delete(param);
   }
 
   history.replaceState(history.state, "", url);
 }
 
+/**
+ * A one-time pairing code in the address, from the computer opening the web
+ * client or a pairing QR code, for the page to trade for its own key. In the
+ * Android app the app pairs, so the page leaves it.
+ */
+let pairCode: string | null =
+  globalThis.groundworkShell === undefined
+    ? new URLSearchParams(window.location.search).get("pair") || null
+    : null;
+
+/** The pairing code from the address, given once. */
+export function takePairCode(): string | null {
+  const code = pairCode;
+
+  pairCode = null;
+
+  return code;
+}
+
 export function loadConnectionSettings(): ConnectionSettings {
   // Priority 1: Check URL query parameters
   const urlSettings = loadConnectionSettingsFromURL();
+
+  // A pairing link may carry no other parameters
+  if (urlSettings === null && pairCode !== null) removeConnectionParams();
 
   if (urlSettings) {
     // Merge URL params with defaults, then save to localStorage

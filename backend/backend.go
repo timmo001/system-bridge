@@ -55,6 +55,7 @@ type Backend struct {
 	webClientContent *embed.FS
 	discoveryManager *discovery.DiscoveryManager
 	auth             *keys.Auth
+	pairCodes        *api_http.PairCodes
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, auth *keys.Auth, webClientContent *embed.FS) *Backend {
@@ -74,7 +75,15 @@ func New(settings *settings.Settings, dataStore *data.DataStore, auth *keys.Auth
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
 		auth:             auth,
+		pairCodes:        api_http.NewPairCodes(),
 	}
+}
+
+// NewPairCode makes a one-time pairing code, which the web client opened
+// from this computer trades for a key of its own
+func (b *Backend) NewPairCode() (string, error) {
+	code, _, err := b.pairCodes.Create()
+	return code, err
 }
 
 // The web client's PWA manifest, which Go's table doesn't know
@@ -239,9 +248,8 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.auth, cancel))
 
 	// Pairing hands a phone a key of its own for a one-time code from a QR code
-	pairCodes := api_http.NewPairCodes()
-	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.auth, pairCodes)))
-	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.auth, pairCodes, api_http.ThisService())))
+	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.auth, b.pairCodes)))
+	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.auth, b.pairCodes, api_http.ThisService())))
 
 	// Each client's key: listing, making and removing them, and the one-off
 	// trade of the old shared token for a client's own

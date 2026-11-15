@@ -103,7 +103,7 @@ func TestPairingRefused(t *testing.T) {
 
 	t.Run("an expired code", func(t *testing.T) {
 		codes := NewPairCodes()
-		code, _, err := codes.create()
+		code, _, err := codes.Create()
 		if err != nil {
 			t.Fatal(err)
 		}

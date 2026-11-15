@@ -27,7 +27,8 @@ const pairCodeLifetime = 5 * time.Minute
 // maxBodyBytes caps what the small JSON routes read
 const maxBodyBytes = 64 << 10
 
-// PairCodes are the one-time codes a phone trades for the API token
+// PairCodes are the one-time codes a phone, or a browser opened from this
+// computer, trades for a key of its own
 type PairCodes struct {
 	mu    sync.Mutex
 	codes map[string]time.Time // code -> when it expires
@@ -39,8 +40,8 @@ func NewPairCodes() *PairCodes {
 	return &PairCodes{codes: map[string]time.Time{}, now: time.Now}
 }
 
-// create makes a code, forgetting any that have expired
-func (p *PairCodes) create() (string, time.Time, error) {
+// Create makes a code, forgetting any that have expired
+func (p *PairCodes) Create() (string, time.Time, error) {
 	// 160 random bits, so guessing one isn't practical
 	random := make([]byte, 20)
 	if _, err := rand.Read(random); err != nil {
@@ -145,10 +146,10 @@ func PairCodeHandler(auth *keys.Auth, codes *PairCodes) http.HandlerFunc {
 			return
 		}
 		if !auth.ValidOrShared(r) {
-			writeError(w, http.StatusUnauthorized, "Invalid API token")
+			writeError(w, http.StatusUnauthorized, "Invalid key")
 			return
 		}
-		code, expires, err := codes.create()
+		code, expires, err := codes.Create()
 		if err != nil {
 			slog.Error("Failed to make a pairing code", "error", err)
 			writeError(w, http.StatusInternalServerError, "Failed to make a pairing code")

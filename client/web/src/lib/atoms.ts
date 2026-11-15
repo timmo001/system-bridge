@@ -44,11 +44,12 @@ import {
 } from "effect";
 import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
 
-import { needsExchange, ownKey } from "./backend";
+import { needsExchange, ownKey, pairWithCode } from "./backend";
 import {
   type ConnectionSettings,
   loadConnectionSettings,
   saveConnectionSettings,
+  takePairCode,
 } from "./connection-settings";
 
 /** The registry every component reads its atoms from. */
@@ -84,7 +85,7 @@ export const errorMessage = (error: BridgeError): string =>
     Match.tag(
       "AuthenticationError",
       () =>
-        "Invalid API key. Please check your connection settings and update your key.",
+        "Invalid key. Please check your connection settings and update your key.",
     ),
     Match.tag(
       "RequestTimeoutError",
@@ -172,7 +173,7 @@ function settingsError(settings: ConnectionSettings): string | null {
   }
 
   if (!settings.token) {
-    return "API key is required. Please configure your key in connection settings.";
+    return "A key is required. Please configure your key in connection settings.";
   }
 
   return null;
@@ -226,26 +227,39 @@ const keyFor = (settings: ConnectionSettings, token: string) =>
 /** The live connection, retried a few times before giving up. */
 export const connection = Atom.make((get): Stream.Stream<ConnectionState> => {
   const settings = get(connectionSettings);
-  const invalid = settingsError(settings);
 
-  if (invalid !== null || !settings.token) {
-    return Stream.make(disconnected(invalid ?? "API key is required."));
-  }
-
-  // Saved before keys: trade it for this browser's own key and keep that,
-  // which connects again with it
-  if (needsExchange(settings.token)) {
-    return Stream.fromEffect(
-      keyFor(settings, settings.token).pipe(
-        Effect.tap((key) =>
+  // Gets this browser's own key and keeps it, which connects again with it
+  const keepKey = <E extends { readonly message: string }>(
+    key: Effect.Effect<string, E>,
+  ): Stream.Stream<ConnectionState> =>
+    Stream.fromEffect(
+      key.pipe(
+        Effect.tap((token) =>
           Effect.sync(() =>
-            get.set(connectionSettings, { ...settings, token: key }),
+            get.set(connectionSettings, { ...settings, token }),
           ),
         ),
         Effect.andThen(Effect.never),
         Effect.catch((error) => Effect.succeed(disconnected(error.message))),
       ),
     );
+
+  // Opened with a one-time pairing code: trade it for this browser's own key
+  const code = takePairCode();
+
+  if (code !== null && settings.host && settings.port) {
+    return keepKey(pairWithCode(settings, code));
+  }
+
+  const invalid = settingsError(settings);
+
+  if (invalid !== null || !settings.token) {
+    return Stream.make(disconnected(invalid ?? "A key is required."));
+  }
+
+  // Saved before keys: trade it for this browser's own key
+  if (needsExchange(settings.token)) {
+    return keepKey(keyFor(settings, settings.token));
   }
 
   return connect(settings, settings.token).pipe(

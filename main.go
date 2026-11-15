@@ -6,6 +6,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"runtime"
@@ -169,12 +170,15 @@ func main() {
 						}
 					}()
 
+					// Create the backend server; it runs with the signal-aware context below
+					b := backend.New(s, dataStore, &keys.Auth{Shared: token, Store: keyStore}, &webClientContent)
+
 					useTray := !cmd.Bool("no-tray") && s.SystemTray
 					if useTray {
 						// Set up tray handlers
 						tray.SetHandlers(tray.Handlers{
 							OpenWebClient: func() {
-								openWebClient(token)
+								openWebClientFrom(b, "/")
 							},
 							Hide: func() {
 								message := fmt.Sprintf("Hide the System Bridge tray icon? System Bridge will keep running. To restore it, open http://127.0.0.1:%d/settings, enable System tray in General Settings, save, then restart System Bridge.", utils.GetPort())
@@ -215,9 +219,6 @@ func main() {
 						})
 					}
 
-					// Create and run backend server with signal-aware context
-					b := backend.New(s, dataStore, &keys.Auth{Shared: token, Store: keyStore}, &webClientContent)
-
 					go reexec.Watch(cmdCtx, func(path string) {
 						slog.Info("System Bridge was upgraded, restarting", "path", path)
 						upgradedPath.Store(&path)
@@ -226,7 +227,7 @@ func main() {
 
 					// Show startup notification if requested
 					if cmd.Bool("open-web-client") {
-						openWebClient(token)
+						openWebClientFrom(b, "/")
 					}
 
 					if !useTray {
@@ -777,11 +778,11 @@ func main() {
 							if !strings.HasPrefix(path, "/") {
 								return fmt.Errorf("path must start with /: %q", path)
 							}
-							token, err := utils.LoadToken()
+							code, err := client.PairCode(cmdCtx)
 							if err != nil {
-								return fmt.Errorf("load token: %w", err)
+								return err
 							}
-							openWebClientPath(token, path)
+							openWebClientPath(code, path)
 							return nil
 						},
 					},
@@ -963,20 +964,31 @@ func main() {
 	}
 }
 
-func openWebClient(token string) {
-	openWebClientPath(token, "/")
+// openWebClientFrom opens the web client from the backend process, with a
+// pairing code it makes itself, as the server may not be listening yet
+func openWebClientFrom(b *backend.Backend, path string) {
+	code, err := b.NewPairCode()
+	if err != nil {
+		reportDesktopError("Failed to open web client", err)
+		return
+	}
+	openWebClientPath(code, path)
 }
 
-func openWebClientPath(token, path string) {
+// openWebClientPath opens a page of the web client with a one-time pairing
+// code, which the page trades for a key of its own. The URL holds the code,
+// so it is never logged.
+func openWebClientPath(code, path string) {
 	port := utils.GetPort()
 	// The connection params go before any #section, so the page still scrolls to it.
 	page, section, _ := strings.Cut(path, "#")
-	url := fmt.Sprintf("http://127.0.0.1:%d%s?host=127.0.0.1&port=%d&apiKey=%s", port, page, port, token)
+	query := url.Values{"host": {"127.0.0.1"}, "port": {strconv.Itoa(port)}, "pair": {code}}
+	webClientURL := fmt.Sprintf("http://127.0.0.1:%d%s?%s", port, page, query.Encode())
 	if section != "" {
-		url += "#" + section
+		webClientURL += "#" + section
 	}
-	slog.Info("Opening web client URL", "url", url)
-	if err := browser.OpenURL(url); err != nil {
+	slog.Info("Opening the web client", "path", path)
+	if err := browser.OpenURL(webClientURL); err != nil {
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open web client",
 			Message: "Failed to open web client in the default browser",
