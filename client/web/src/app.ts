@@ -1,4 +1,5 @@
 import "@timmo001/groundwork-ui/define/gw-app-bar.ts";
+import "@timmo001/groundwork-ui/define/gw-banner.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
@@ -18,6 +19,13 @@ import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
 import { connectionSettings, connectionStatus } from "./lib/atoms";
+import {
+  canInstall,
+  dismissInstall,
+  install,
+  installDismissed,
+  watchInstall,
+} from "./lib/install";
 import { DOCS_URL } from "./lib/links";
 import { type NavItem, navigation } from "./lib/navigation";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
@@ -26,7 +34,7 @@ import { visitPage } from "./lib/shortcuts";
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
 import { inApp, openComputers } from "./lib/mobile";
-import { watchForUpdates } from "./lib/update";
+import { reload, versionStale, watchForUpdates } from "./lib/update";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
@@ -59,6 +67,8 @@ const jumpOptions: readonly OptionItem[] = jumpItems.map((item) => ({
 registerPageTools();
 
 watchForUpdates();
+
+watchInstall();
 
 const renderPage = (location: Location) => {
   switch (location.name) {
@@ -100,8 +110,12 @@ export class SbApp extends LitElement {
       :host {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto auto 1fr;
         min-height: 100dvh;
+      }
+
+      .banners {
+        display: grid;
       }
 
       gw-app-bar {
@@ -211,6 +225,11 @@ export class SbApp extends LitElement {
 
   readonly #settings = new AtomController(this, () => connectionSettings);
 
+  readonly #stale = new AtomController(this, () => versionStale);
+
+  readonly #canInstall = new AtomController(this, () => canInstall);
+
+  readonly #dismissed = new AtomController(this, () => installDismissed);
   @query(".commands") private commands?: GwCommandMenu;
 
   /** The last page counted towards the app's shortcuts, so each visit counts once. */
@@ -286,6 +305,35 @@ export class SbApp extends LitElement {
     const active = jumpItems.find((item) => item.matches(location));
 
     return html`
+      <div class="banners">
+        <!-- A page from another version than the backend's, such as one the
+             browser kept from before System Bridge was updated -->
+        <gw-banner tone="warning" urgent ?open=${this.#stale.value}>
+          <p>System Bridge was updated. Reload to use the new version.</p>
+          <gw-button slot="actions" size="small" @click=${reload}
+            >Reload</gw-button
+          >
+        </gw-banner>
+        <!-- The offer to install System Bridge as an app, until it's turned
+             down once; then only the Devices page offers it -->
+        <gw-banner ?open=${this.#canInstall.value && !this.#dismissed.value}>
+          <p>
+            Install System Bridge to open it in its own window, like any other
+            app.
+          </p>
+          <gw-button slot="actions" size="small" @click=${install}
+            >Install</gw-button
+          >
+          <gw-button
+            slot="actions"
+            size="small"
+            appearance="plain"
+            variant="neutral"
+            @click=${dismissInstall}
+            >Not now</gw-button
+          >
+        </gw-banner>
+      </div>
       <gw-app-bar>
         <a slot="brand" class="brand" href=${href("overview")}>
           <img

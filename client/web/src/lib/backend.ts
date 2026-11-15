@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Effect, identity, Schema } from "effect";
 import {
   FetchHttpClient,
   HttpClient,
@@ -7,6 +7,7 @@ import {
 } from "effect/http";
 
 import type { ConnectionSettings } from "./connection-settings";
+import { onMismatched, pageVersion, versionHeader } from "./update";
 
 /** Why a request to one of the backend's HTTP routes failed, for the page. */
 export class BackendError extends Schema.TaggedError<BackendError>()(
@@ -26,12 +27,21 @@ export const send = Effect.fnUntraced(
   ) {
     const client = yield* HttpClient.HttpClient;
 
+    // Only the backend that served the page holds it to its version, not
+    // another computer it's connected to
+    const sameBackend = baseUrl(settings) === location.origin;
+
     const response = yield* client.execute(
       request.pipe(
         HttpClientRequest.prependUrl(baseUrl(settings)),
         HttpClientRequest.setHeader("X-API-Token", settings.token ?? ""),
+        pageVersion !== undefined && sameBackend
+          ? HttpClientRequest.setHeader(versionHeader, pageVersion)
+          : identity,
       ),
     );
+
+    if (response.status === 426) onMismatched();
 
     if (response.status >= 400) {
       const body = yield* HttpClientResponse.schemaBodyJson(

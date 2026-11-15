@@ -2,6 +2,7 @@ import {
   mdiDevices,
   mdiContentCopy,
   mdiDeleteOutline,
+  mdiDownload,
   mdiQrcode,
   mdiRefresh,
 } from "@mdi/js";
@@ -20,6 +21,7 @@ import { encode } from "uqr";
 import { AtomController } from "~/controllers/atom-controller";
 import { connectionSettings, registry } from "~/lib/atoms";
 import { baseUrl } from "~/lib/backend";
+import { canInstall, install } from "~/lib/install";
 import { mobile, pushClient } from "~/lib/mobile";
 import {
   pairingCode,
@@ -116,6 +118,7 @@ export class PageSettingsDevices extends SbPage {
 
   readonly #subscribers = new AtomController(this, () => pushSubscribers);
 
+  readonly #canInstall = new AtomController(this, () => canInstall);
   readonly #remove = new AtomController(this, () => removePushSubscriber);
 
   readonly #kinds = new AtomController(this, () => setPushKinds);
@@ -429,6 +432,23 @@ export class PageSettingsDevices extends SbPage {
     `;
   }
 
+  #renderInstall() {
+    if (!this.#canInstall.value) return nothing;
+
+    return html`
+      <gw-card
+        heading="Install System Bridge"
+        description="Open System Bridge in its own window, like any other app, and get its pushes while it's closed."
+        icon=${mdiDownload}
+        level=${this.cardLevel}
+      >
+        <gw-button appearance="filled" icon=${mdiDownload} @click=${install}
+          >Install</gw-button
+        >
+      </gw-card>
+    `;
+  }
+
   override render() {
     return html`
       <div class="page narrow">
@@ -441,8 +461,8 @@ export class PageSettingsDevices extends SbPage {
         })}
         ${this.gate(
           () => html`
-            ${this.#renderPairing()} ${this.#renderThisDevice()}
-            ${this.#renderSubscribers()}
+            ${this.#renderPairing()} ${this.#renderInstall()}
+            ${this.#renderThisDevice()} ${this.#renderSubscribers()}
           `,
           html`<gw-skeleton
             style="min-height: 18rem; border-radius: var(--gw-radius-l)"
