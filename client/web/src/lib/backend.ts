@@ -96,11 +96,19 @@ export const isClientKey = (token: string) =>
   token.startsWith("system-bridge_");
 
 /**
+ * Whether a token is the old shared token for the page to trade in. In the
+ * Android app the app trades it for the phone's own key, so the page uses
+ * what it's given.
+ */
+export const needsExchange = (token: string) =>
+  !isClientKey(token) && globalThis.groundworkShell === undefined;
+
+/**
  * Trades the old shared token for this browser's own key, which the page
- * keeps instead. A key is returned as it is.
+ * keeps instead. Anything else is returned as it is.
  */
 export const ownKey = (settings: ConnectionSettings, token: string) =>
-  isClientKey(token)
+  !needsExchange(token)
     ? Effect.succeed(token)
     : send(
         { ...settings, token },

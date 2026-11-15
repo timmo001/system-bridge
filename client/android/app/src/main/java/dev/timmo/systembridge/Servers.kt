@@ -1,8 +1,8 @@
 /**
  * The computers this phone has paired with, and which one is open, kept in
- * the app's preferences. Each keeps the API token it was given, which only
- * Kotlin reads: the pages get the list without tokens, as any paired
- * computer's page can ask for it.
+ * the app's preferences. Each keeps this phone's own key to it, or the old
+ * shared token until that's traded for one, which only Kotlin reads: the
+ * pages get the list without them, as any paired computer's page can ask.
  */
 package dev.timmo.systembridge
 

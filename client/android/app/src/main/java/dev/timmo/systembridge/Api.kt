@@ -24,9 +24,29 @@ object Api {
   private val io = Executors.newSingleThreadExecutor()
   private val main = Handler(Looper.getMainLooper())
 
+  /** Whether a token is already this phone's own key, not the old shared token. */
+  fun isKey(token: String) = token.startsWith("system-bridge_")
+
   /**
-   * Trades a pairing link's one-time code, from the QR code, for the
-   * computer's API token. The link names the computer, such as desk.local,
+   * Trades a computer's old shared token for this phone's own key, so it
+   * needn't pair again. Null when it can't, such as with the computer
+   * asleep: the old token keeps working until it's removed.
+   */
+  fun exchange(server: Server, client: JSONObject, done: (Server?) -> Unit) =
+    run<Server?>({ done(it.getOrNull()) }) {
+      val body =
+        JSONObject().put(
+          "client",
+          JSONObject().put("id", client.getString("id")).put("name", client.getString("name")).put("kind", client.getString("platform")),
+        )
+      val (status, text) = request("POST", "${server.url}api/keys/exchange", server.token, body)
+
+      if (status == 200) server.copy(token = JSONObject(text).getString("key")) else null
+    }
+
+  /**
+   * Trades a pairing link's one-time code, from the QR code, for this
+   * phone's own key. The link names the computer, such as desk.local,
    * and may carry its address in `ip` for a network where the name doesn't
    * resolve; the first that answers is kept.
    */
@@ -80,7 +100,7 @@ object Api {
             token,
           )
         }
-        401 -> error("That API token isn't right")
+        401 -> error("That API key isn't right")
         else -> error("The computer answered $status")
       }
     }
@@ -164,7 +184,7 @@ object Api {
       connection.requestMethod = method
       connection.connectTimeout = timeoutMs
       connection.readTimeout = timeoutMs
-      token?.let { connection.setRequestProperty("X-API-Token", it) }
+      token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
 
       if (body != null) {
         connection.doOutput = true

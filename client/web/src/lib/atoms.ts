@@ -44,7 +44,7 @@ import {
 } from "effect";
 import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
 
-import { isClientKey, ownKey } from "./backend";
+import { needsExchange, ownKey } from "./backend";
 import {
   type ConnectionSettings,
   loadConnectionSettings,
@@ -234,7 +234,7 @@ export const connection = Atom.make((get): Stream.Stream<ConnectionState> => {
 
   // Saved before keys: trade it for this browser's own key and keep that,
   // which connects again with it
-  if (!isClientKey(settings.token)) {
+  if (needsExchange(settings.token)) {
     return Stream.fromEffect(
       keyFor(settings, settings.token).pipe(
         Effect.tap((key) =>

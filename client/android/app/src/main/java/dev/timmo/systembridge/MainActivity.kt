@@ -206,6 +206,20 @@ class MainActivity : ShellActivity() {
   override fun onResume() {
     super.onResume()
     MediaControls.start(this)
+    exchangeOldTokens()
+  }
+
+  /**
+   * Trades each computer's old shared token for this phone's own key, one
+   * at a time. A computer that doesn't answer is tried again next time. The
+   * page gets the key the next time it opens.
+   */
+  private fun exchangeOldTokens() {
+    Servers.all(this).filterNot { Api.isKey(it.token) }.forEach { server ->
+      Api.exchange(server, Servers.client(this)) { exchanged ->
+        exchanged?.let { Servers.update(this, it) }
+      }
+    }
   }
 
   /**
@@ -389,6 +403,8 @@ class MainActivity : ShellActivity() {
         Servers.save(this, server)
         reply.ok(JSONObject().put("id", server.id).put("name", server.name))
         refreshOrigins()
+        // One added by hand may have the old token
+        exchangeOldTokens()
       },
       { reply.error(it.message ?: "Couldn't reach the computer") },
     )
