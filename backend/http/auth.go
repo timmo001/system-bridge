@@ -1,31 +1,14 @@
 package http
 
 import (
-	"crypto/subtle"
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strings"
 )
 
-// TokenValid says whether a request carries the API token, as X-API-Token,
-// the older token header or Authorization: Bearer
-func TokenValid(r *http.Request, token string) bool {
-	given := r.Header.Get("X-API-Token")
-	if given == "" {
-		given = r.Header.Get("token")
-	}
-	if given == "" {
-		if bearer, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer "); ok {
-			given = bearer
-		}
-	}
-	return token != "" && subtle.ConstantTimeCompare([]byte(given), []byte(token)) == 1
-}
-
 // AllowOrigins lets pages on other origins call a route, such as the web
-// client on its dev server or hosted elsewhere. The routes it wraps need the
-// token, sent as a header, and no cookies, so any origin may ask.
+// client on its dev server or hosted elsewhere. The routes it wraps need a
+// key, sent as a header, and no cookies, so any origin may ask.
 func AllowOrigins(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

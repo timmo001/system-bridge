@@ -17,6 +17,7 @@ import (
 
 	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
@@ -24,6 +25,7 @@ import (
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/types"
@@ -115,7 +117,24 @@ func main() {
 						return fmt.Errorf("error loading token: %w", err)
 					}
 
-					slog.Info("Your API token is", "token", token)
+					keyStore, err := keys.OpenDefault()
+					if err != nil {
+						return fmt.Errorf("error opening client keys: %w", err)
+					}
+					hasOwner, err := keyStore.HasOwner()
+					if err != nil {
+						return fmt.Errorf("error reading client keys: %w", err)
+					}
+					if !hasOwner {
+						ownerPath, err := keys.OwnerKeyPath()
+						if err != nil {
+							return err
+						}
+						if err := keyStore.MakeOwner(ownerPath); err != nil {
+							return fmt.Errorf("error making the owner key: %w", err)
+						}
+						slog.Info("Made the owner key, readable only by this user", "file", ownerPath)
+					}
 
 					// Setup data store
 					dataStore, err := data.NewDataStore()
@@ -197,7 +216,7 @@ func main() {
 					}
 
 					// Create and run backend server with signal-aware context
-					b := backend.New(s, dataStore, token, &webClientContent)
+					b := backend.New(s, dataStore, &keys.Auth{Shared: token, Store: keyStore}, &webClientContent)
 
 					go reexec.Watch(cmdCtx, func(path string) {
 						slog.Info("System Bridge was upgraded, restarting", "path", path)
@@ -802,6 +821,96 @@ func main() {
 								return err
 							}
 							return nil
+						},
+					},
+					{
+						Name:  "key",
+						Usage: "Make, list and remove the keys clients use to sign in. Run on this computer, as the user the service runs as.",
+						Commands: []*cli.Command{
+							{
+								Name:      "create",
+								Usage:     "Make a key for a client and print it once",
+								ArgsUsage: "<name>",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									name := strings.TrimSpace(strings.Join(cmd.Args().Slice(), " "))
+									if name == "" {
+										return fmt.Errorf("a name for the key is required")
+									}
+									store, err := keys.OpenDefault()
+									if err != nil {
+										return err
+									}
+									key, err := store.Create(keys.Client{ID: uuid.NewString(), Name: name, Kind: "cli"})
+									if err != nil {
+										return err
+									}
+									fmt.Println(key)
+									return nil
+								},
+							},
+							{
+								Name:  "list",
+								Usage: "List the clients with a key",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									store, err := keys.OpenDefault()
+									if err != nil {
+										return err
+									}
+									infos, err := store.List()
+									if err != nil {
+										return err
+									}
+									for _, info := range infos {
+										lastUsed := info.LastUsed
+										if lastUsed == "" {
+											lastUsed = "never"
+										}
+										fmt.Printf("%s\t%s\t%s\tmade %s\tlast used %s\n", info.ID, info.Name, info.Kind, info.Created, lastUsed)
+									}
+									return nil
+								},
+							},
+							{
+								Name:      "remove",
+								Usage:     "Remove a client's key, by its id from the list",
+								ArgsUsage: "<id>",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									store, err := keys.OpenDefault()
+									if err != nil {
+										return err
+									}
+									return store.Remove(cmd.Args().First())
+								},
+							},
+							{
+								Name:  "owner",
+								Usage: "Make a new owner key, written to a file only this user can read, when every key has been removed",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "replace", Usage: "Replace the owner key even if there is one"},
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									store, err := keys.OpenDefault()
+									if err != nil {
+										return err
+									}
+									hasOwner, err := store.HasOwner()
+									if err != nil {
+										return err
+									}
+									if hasOwner && !cmd.Bool("replace") {
+										return fmt.Errorf("there is already an owner key; use --replace to make a new one")
+									}
+									path, err := keys.OwnerKeyPath()
+									if err != nil {
+										return err
+									}
+									if err := store.MakeOwner(path); err != nil {
+										return err
+									}
+									fmt.Println("Owner key written to", path)
+									return nil
+								},
+							},
 						},
 					},
 					{

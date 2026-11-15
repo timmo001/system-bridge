@@ -10,6 +10,7 @@ import (
 	gorillawebsocket "github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -19,7 +20,7 @@ func newTestWebsocketServer(t *testing.T) (*WebsocketServer, string) {
 	t.Helper()
 
 	ws := &WebsocketServer{
-		token:         "test-token",
+		auth:          &keys.Auth{Shared: "test-token"},
 		authTimeout:   testAuthTimeout,
 		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),

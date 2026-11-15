@@ -34,6 +34,7 @@ import (
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/push"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
@@ -53,15 +54,15 @@ type Backend struct {
 	wsServer         *websocket.WebsocketServer
 	webClientContent *embed.FS
 	discoveryManager *discovery.DiscoveryManager
-	token            string
+	auth             *keys.Auth
 }
 
-func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
+func New(settings *settings.Settings, dataStore *data.DataStore, auth *keys.Auth, webClientContent *embed.FS) *Backend {
 	_ = bus.GetInstance()
 	slog.Info("EventBus initialized")
 
 	eventRouter := event.NewMessageRouter()
-	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
+	wsServer := websocket.NewWebsocketServer(auth, dataStore, eventRouter)
 
 	discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
 
@@ -72,7 +73,7 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 		wsServer:         wsServer,
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
-		token:            token,
+		auth:             auth,
 	}
 }
 
@@ -235,23 +236,28 @@ func (b *Backend) Run(ctx context.Context) error {
 	})
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
+	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.auth, cancel))
 
-	// Pairing hands a phone the API token for a one-time code from a QR code
+	// Pairing hands a phone a key of its own for a one-time code from a QR code
 	pairCodes := api_http.NewPairCodes()
-	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.token, pairCodes)))
-	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.token, pairCodes, api_http.ThisService())))
+	mux.HandleFunc("/api/pair/code", api_http.AllowOrigins(api_http.PairCodeHandler(b.auth, pairCodes)))
+	mux.HandleFunc("/api/pair", api_http.AllowOrigins(api_http.PairHandler(b.auth, pairCodes, api_http.ThisService())))
+
+	// Each client's key: listing, making and removing them, and the one-off
+	// trade of the old shared token for a client's own
+	mux.HandleFunc("/api/keys", api_http.AllowOrigins(api_http.KeysHandler(b.auth)))
+	mux.HandleFunc("/api/keys/exchange", api_http.AllowOrigins(api_http.KeyExchangeHandler(b.auth)))
 
 	// One event over HTTP, for what has no WebSocket, such as a phone's tiles
-	mux.HandleFunc("/api/event", api_http.AllowOrigins(api_http.EventHandler(b.token, b.eventRouter)))
+	mux.HandleFunc("/api/event", api_http.AllowOrigins(api_http.EventHandler(b.auth, b.eventRouter)))
 
 	// The newest releases and their notes, for the web client's What's new page
-	mux.HandleFunc("/api/releases", api_http.AllowOrigins(api_http.ReleasesHandler(b.token)))
+	mux.HandleFunc("/api/releases", api_http.AllowOrigins(api_http.ReleasesHandler(b.auth)))
 
 	if pushStore != nil {
-		mux.HandleFunc("/api/push/vapid-key", api_http.AllowOrigins(api_http.PushVAPIDKeyHandler(b.token, pushStore)))
-		mux.HandleFunc("/api/push/subscriptions", api_http.AllowOrigins(api_http.PushSubscriptionsHandler(b.token, pushStore)))
-		mux.HandleFunc("/api/push/preferences", api_http.AllowOrigins(api_http.PushPreferencesHandler(b.token, pushStore)))
+		mux.HandleFunc("/api/push/vapid-key", api_http.AllowOrigins(api_http.PushVAPIDKeyHandler(b.auth, pushStore)))
+		mux.HandleFunc("/api/push/subscriptions", api_http.AllowOrigins(api_http.PushSubscriptionsHandler(b.auth, pushStore)))
+		mux.HandleFunc("/api/push/preferences", api_http.AllowOrigins(api_http.PushPreferencesHandler(b.auth, pushStore)))
 	}
 
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
@@ -267,11 +273,12 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	mcpServer := mcp.NewMCPServer(b.token, b.eventRouter, b.dataStore)
+	mcpServer := mcp.NewMCPServer(b.auth, b.eventRouter, b.dataStore)
 	mux.Handle("/api/mcp", mcpServer)
 
 	mux.HandleFunc("/api", api_http.HandleAPI)
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
+		b.auth,
 		b.dataStore,
 	))
 
@@ -296,7 +303,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler(b.auth))
+	mux.HandleFunc("/api/media/file/url", api_http.AllowOrigins(api_http.MediaFileURLHandler(b.auth)))
 
 	// Set up SPA file server (must be last to avoid catching API routes)
 	subFS, err := fs.Sub(b.webClientContent, "client/web/dist")

@@ -9,6 +9,7 @@ import (
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -26,6 +27,9 @@ type WebSocketRequest struct {
 	Data  any    `json:"data" mapstructure:"data"`
 	// WebSocketRequest fields
 	Token string `json:"token" mapstructure:"token"`
+	// Type and Key are a first message of {"type":"auth","key":...}
+	Type string `json:"type" mapstructure:"type"`
+	Key  string `json:"key" mapstructure:"key"`
 }
 
 // connectionInfo holds connection data with write synchronization.
@@ -39,7 +43,7 @@ type connectionInfo struct {
 }
 
 type WebsocketServer struct {
-	token         string
+	auth          *keys.Auth
 	authTimeout   time.Duration
 	upgrader      websocket.Upgrader
 	connections   map[string]*connectionInfo
@@ -49,9 +53,9 @@ type WebsocketServer struct {
 	EventRouter   *event.MessageRouter
 }
 
-func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
+func NewWebsocketServer(auth *keys.Auth, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
-		token:         token,
+		auth:          auth,
 		authTimeout:   websocketAuthTimeout,
 		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),

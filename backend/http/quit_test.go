@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/timmo001/system-bridge/keys"
 )
 
 func TestQuitHandler(t *testing.T) {
@@ -25,7 +27,7 @@ func TestQuitHandler(t *testing.T) {
 			request.Header.Set("X-API-Token", test.token)
 			response := httptest.NewRecorder()
 			quit := false
-			QuitHandler("secret", func() { quit = true })(response, request)
+			QuitHandler(&keys.Auth{Shared: "secret"}, func() { quit = true })(response, request)
 			if response.Code != test.status || quit != test.quit {
 				t.Fatalf("got status=%d quit=%v, want status=%d quit=%v", response.Code, quit, test.status, test.quit)
 			}

@@ -9,18 +9,19 @@ import (
 	"slices"
 	"time"
 
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/push"
 )
 
 // PushVAPIDKeyHandler answers the VAPID public key clients subscribe with
-func PushVAPIDKeyHandler(token string, store *push.Store) http.HandlerFunc {
+func PushVAPIDKeyHandler(auth *keys.Auth, store *push.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}
@@ -53,9 +54,9 @@ func requestOrigin(r *http.Request) string {
 
 // PushSubscriptionsHandler lists (GET), keeps (POST) and drops (DELETE) push
 // subscriptions, on Groundwork's push contract
-func PushSubscriptionsHandler(token string, store *push.Store) http.HandlerFunc {
+func PushSubscriptionsHandler(auth *keys.Auth, store *push.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}
@@ -125,14 +126,14 @@ func PushSubscriptionsHandler(token string, store *push.Store) http.HandlerFunc 
 }
 
 // PushPreferencesHandler sets which kinds of push a client gets
-func PushPreferencesHandler(token string, store *push.Store) http.HandlerFunc {
+func PushPreferencesHandler(auth *keys.Auth, store *push.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}

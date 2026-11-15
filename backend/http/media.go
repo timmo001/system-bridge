@@ -2,8 +2,8 @@ package http
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
-	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -18,13 +18,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/settings"
-	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 )
 
-// ServeMediaFileDataHandler handles requests to serve media files from predefined base directories
-func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
+// ServeMediaFileDataHandler serves media files from predefined base
+// directories, to a request with a signed URL or a client key
+func ServeMediaFileDataHandler(auth *keys.Auth) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		serveMediaFile(w, r, auth)
+	}
+}
+
+func serveMediaFile(w http.ResponseWriter, r *http.Request, auth *keys.Auth) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -48,19 +55,7 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate API token
-	expectedToken, err := utils.LoadToken()
-	if err != nil {
-		slog.Error("Failed to load token for authentication", "error", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	if !mediaRequestAuthorised(query, base, path, expectedToken, time.Now()) {
+	if !auth.Valid(r) && !mediaRequestAuthorised(query, base, path, auth, time.Now()) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid or expired signature"}); err != nil {
@@ -184,19 +179,76 @@ func MediaFileSignature(token, base, path string, expires int64) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
+// maxMediaURLLifetime caps how long a signed media URL can last
+const maxMediaURLLifetime = 24 * time.Hour
+
+// mediaSecret signs the URLs MediaFileURLHandler makes. It is made on each
+// start, so those URLs don't outlive it.
+var mediaSecret = func() string {
+	random := make([]byte, 32)
+	if _, err := rand.Read(random); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(random)
+}()
+
+// MediaFileURLHandler signs a short-lived URL for one media file, so it can
+// be given to a device that has no key, such as a cast device. It needs a key.
+func MediaFileURLHandler(auth *keys.Auth) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			return
+		}
+		if !auth.ValidOrShared(r) {
+			writeError(w, http.StatusUnauthorized, "Invalid API key")
+			return
+		}
+		var body struct {
+			Base      string `json:"base"`
+			Path      string `json:"path"`
+			ExpiresIn int64  `json:"expiresIn"`
+		}
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes)).Decode(&body); err != nil || body.Base == "" || body.Path == "" {
+			writeError(w, http.StatusBadRequest, "Missing required parameters: base, path")
+			return
+		}
+		lifetime := time.Duration(body.ExpiresIn) * time.Second
+		if lifetime <= 0 || lifetime > maxMediaURLLifetime {
+			lifetime = maxMediaURLLifetime
+		}
+		expires := time.Now().Add(lifetime).Unix()
+		query := url.Values{
+			"base":    {body.Base},
+			"path":    {body.Path},
+			"expires": {strconv.FormatInt(expires, 10)},
+			"sig":     {MediaFileSignature(mediaSecret, body.Base, body.Path, expires)},
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"url":     "/api/media/file/data?" + query.Encode(),
+			"expires": expires,
+		})
+	}
+}
+
 // mediaRequestAuthorised accepts an unexpired signature for this base and
 // path, or the deprecated token query parameter.
-func mediaRequestAuthorised(query url.Values, base, path, token string, now time.Time) bool {
+func mediaRequestAuthorised(query url.Values, base, path string, auth *keys.Auth, now time.Time) bool {
 	if sig := query.Get("sig"); sig != "" {
 		expires, err := strconv.ParseInt(query.Get("expires"), 10, 64)
 		if err != nil || now.Unix() > expires {
 			return false
 		}
-		return hmac.Equal([]byte(sig), []byte(MediaFileSignature(token, base, path, expires)))
+		if hmac.Equal([]byte(sig), []byte(MediaFileSignature(mediaSecret, base, path, expires))) {
+			return true
+		}
+		// URLs the connectors sign with the old shared token
+		return auth != nil && auth.Shared != "" && hmac.Equal([]byte(sig), []byte(MediaFileSignature(auth.Shared, base, path, expires)))
 	}
 
 	legacy := query.Get("token")
-	if legacy == "" || subtle.ConstantTimeCompare([]byte(legacy), []byte(token)) != 1 {
+	if legacy == "" || !auth.SharedToken(legacy) {
 		return false
 	}
 	legacyTokenWarning.Do(func() {

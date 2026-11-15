@@ -7,19 +7,20 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 )
 
 // EventHandler runs one event, as the WebSocket would, so something that
 // only speaks HTTP, such as a quick settings tile, can lock or sleep the
 // computer. It needs the same token and goes through the same handlers.
-func EventHandler(token string, router *event.MessageRouter) http.HandlerFunc {
+func EventHandler(auth *keys.Auth, router *event.MessageRouter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}

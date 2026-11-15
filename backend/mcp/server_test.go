@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
@@ -475,5 +476,5 @@ func newTestServer(t *testing.T) *MCPServer {
 	require.NoError(t, err)
 	require.NoError(t, dataStore.SetModuleData(types.ModuleCPU, types.CPUData{}))
 	require.NoError(t, dataStore.SetModuleData(types.ModuleMemory, types.MemoryData{}))
-	return NewMCPServer(testToken, event.NewMessageRouter(), dataStore)
+	return NewMCPServer(&keys.Auth{Shared: testToken}, event.NewMessageRouter(), dataStore)
 }

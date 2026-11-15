@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/keys"
 )
 
 // The Python connector's media_file_url test pins the same value, so the two
@@ -33,10 +33,8 @@ func TestServeMediaFileDataHandlerAuth(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(musicDir, "song.mp3"), []byte("audio"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	token, err := utils.LoadToken()
-	if err != nil {
-		t.Fatal(err)
-	}
+	token := "shared-token"
+	auth := &keys.Auth{Shared: token}
 
 	future := time.Now().Add(time.Hour).Unix()
 	past := time.Now().Add(-time.Minute).Unix()
@@ -55,6 +53,10 @@ func TestServeMediaFileDataHandlerAuth(t *testing.T) {
 		status int
 	}{
 		{"valid signature", signed("music", "song.mp3", future), http.StatusOK},
+		{"signature from the server", url.Values{
+			"base": {"music"}, "path": {"song.mp3"}, "expires": {strconv.FormatInt(future, 10)},
+			"sig": {MediaFileSignature(mediaSecret, "music", "song.mp3", future)},
+		}, http.StatusOK},
 		{"expired signature", signed("music", "song.mp3", past), http.StatusUnauthorized},
 		{"signature for another path", signed("music", "other.mp3", future), http.StatusUnauthorized},
 		{"signature for another base", signed("videos", "song.mp3", future), http.StatusUnauthorized},
@@ -69,7 +71,7 @@ func TestServeMediaFileDataHandlerAuth(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			request := httptest.NewRequest(http.MethodGet, "/api/media/file/data?"+test.query.Encode(), nil)
 			response := httptest.NewRecorder()
-			ServeMediaFileDataHandler(response, request)
+			ServeMediaFileDataHandler(auth)(response, request)
 			if response.Code != test.status {
 				t.Fatalf("got status %d, want %d: %s", response.Code, test.status, response.Body.String())
 			}

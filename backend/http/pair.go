@@ -14,8 +14,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/shirou/gopsutil/v4/host"
 
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -134,15 +136,15 @@ func localName() string {
 }
 
 // PairCodeHandler makes a pairing code and its link, for the QR code. It
-// needs the token.
-func PairCodeHandler(token string, codes *PairCodes) http.HandlerFunc {
+// needs a key.
+func PairCodeHandler(auth *keys.Auth, codes *PairCodes) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}
@@ -174,9 +176,9 @@ type pairRequest struct {
 	} `json:"client"`
 }
 
-// PairHandler trades a pairing code for the API token. It takes no token, as
-// the code is the credential, and each code works once.
-func PairHandler(token string, codes *PairCodes, service PairedService) http.HandlerFunc {
+// PairHandler trades a pairing code for a key of the client's own. It takes
+// no key, as the code is the credential, and each code works once.
+func PairHandler(auth *keys.Auth, codes *PairCodes, service PairedService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
@@ -192,9 +194,25 @@ func PairHandler(token string, codes *PairCodes, service PairedService) http.Han
 			writeError(w, http.StatusUnauthorized, "Unknown or expired pairing code")
 			return
 		}
-		slog.Info("Paired a client", "name", request.Client.Name, "platform", request.Client.Platform)
+		client := keys.Client{ID: request.Client.ID, Name: request.Client.Name, Kind: request.Client.Platform}
+		if client.ID == "" {
+			client.ID = uuid.NewString()
+		}
+		if strings.TrimSpace(client.Name) == "" {
+			client.Name = "Paired client"
+		}
+		if client.Kind == "" {
+			client.Kind = "other"
+		}
+		key, err := auth.Store.Create(client)
+		if err != nil {
+			slog.Error("Failed to make a client key", "error", err)
+			writeError(w, http.StatusInternalServerError, "Failed to make a key")
+			return
+		}
+		slog.Info("Paired a client", "name", client.Name, "platform", request.Client.Platform)
 		writeJSON(w, http.StatusOK, map[string]any{
-			"token":   token,
+			"token":   key,
 			"service": service,
 		})
 	}

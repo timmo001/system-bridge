@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/timmo001/system-bridge/keys"
 )
 
 func makePairCode(t *testing.T, codes *PairCodes, token string) *httptest.ResponseRecorder {
@@ -15,20 +18,26 @@ func makePairCode(t *testing.T, codes *PairCodes, token string) *httptest.Respon
 	request.Host = "192.0.2.10:9170"
 	request.Header.Set("X-API-Token", token)
 	response := httptest.NewRecorder()
-	PairCodeHandler("secret", codes)(response, request)
+	PairCodeHandler(&keys.Auth{Shared: "secret"}, codes)(response, request)
 	return response
 }
 
-func pairWith(codes *PairCodes, code string) *httptest.ResponseRecorder {
+func testAuth(t *testing.T) *keys.Auth {
+	t.Helper()
+	return &keys.Auth{Shared: "secret", Store: keys.Open(filepath.Join(t.TempDir(), "keys.json"))}
+}
+
+func pairWith(auth *keys.Auth, codes *PairCodes, code string) *httptest.ResponseRecorder {
 	body := `{"code":"` + code + `","client":{"id":"phone","name":"Pixel","platform":"android"}}`
 	request := httptest.NewRequest(http.MethodPost, "/api/pair", strings.NewReader(body))
 	response := httptest.NewRecorder()
-	PairHandler("secret", codes, PairedService{ID: "uuid", Name: "desk"})(response, request)
+	PairHandler(auth, codes, PairedService{ID: "uuid", Name: "desk"})(response, request)
 	return response
 }
 
 func TestPairing(t *testing.T) {
 	codes := NewPairCodes()
+	auth := testAuth(t)
 
 	created := makePairCode(t, codes, "secret")
 	if created.Code != http.StatusOK {
@@ -42,7 +51,7 @@ func TestPairing(t *testing.T) {
 		t.Errorf("link: got %q, want %q", made.Link, want)
 	}
 
-	first := pairWith(codes, made.Code)
+	first := pairWith(auth, codes, made.Code)
 	if first.Code != http.StatusOK {
 		t.Fatalf("pairing: got %d", first.Code)
 	}
@@ -53,11 +62,11 @@ func TestPairing(t *testing.T) {
 	if err := json.NewDecoder(first.Body).Decode(&paired); err != nil {
 		t.Fatal(err)
 	}
-	if paired.Token != "secret" || paired.Service.ID != "uuid" {
+	if paired.Token == "secret" || !auth.Key(paired.Token) || paired.Service.ID != "uuid" {
 		t.Errorf("pairing answered %+v", paired)
 	}
 
-	if again := pairWith(codes, made.Code); again.Code != http.StatusUnauthorized {
+	if again := pairWith(auth, codes, made.Code); again.Code != http.StatusUnauthorized {
 		t.Errorf("a code works once: got %d the second time", again.Code)
 	}
 }
@@ -85,8 +94,9 @@ func TestPairingRefused(t *testing.T) {
 
 	t.Run("a wrong code", func(t *testing.T) {
 		codes := NewPairCodes()
+		auth := testAuth(t)
 		makePairCode(t, codes, "secret")
-		if response := pairWith(codes, "NOTACODE"); response.Code != http.StatusUnauthorized {
+		if response := pairWith(auth, codes, "NOTACODE"); response.Code != http.StatusUnauthorized {
 			t.Errorf("got %d", response.Code)
 		}
 	})
@@ -98,7 +108,7 @@ func TestPairingRefused(t *testing.T) {
 			t.Fatal(err)
 		}
 		codes.now = func() time.Time { return time.Now().Add(pairCodeLifetime + time.Second) }
-		if response := pairWith(codes, code); response.Code != http.StatusUnauthorized {
+		if response := pairWith(testAuth(t), codes, code); response.Code != http.StatusUnauthorized {
 			t.Errorf("got %d", response.Code)
 		}
 	})

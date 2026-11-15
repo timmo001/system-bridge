@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 
 	"log/slog"
@@ -22,12 +21,13 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// authenticated accepts a client key as Authorization: Bearer, or the old
+// shared token as a Bearer or the deprecated token query parameter
 func (s *MCPServer) authenticated(r *http.Request) bool {
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		token = strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if s.auth.ValidOrShared(r) {
+		return true
 	}
-	return token != "" && token == s.token
+	return s.auth.SharedToken(r.URL.Query().Get("token"))
 }
 
 func isWebSocketUpgrade(r *http.Request) bool {

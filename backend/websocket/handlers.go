@@ -47,6 +47,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 	}()
 
 	authenticated := false
+	keyAuthed := false
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
@@ -64,8 +65,17 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			continue
 		}
 
-		// Validate token
-		if msg.Token != ws.token {
+		// A first message of {"type":"auth","key":...} signs the connection
+		// in with a client key. Until then each message carries the old
+		// shared token.
+		if msg.Type == "auth" {
+			if !ws.auth.Key(msg.Key) {
+				slog.Error("Invalid key received")
+				ws.SendError(conn, msg, "BAD_KEY", "Invalid key")
+				break
+			}
+			keyAuthed = true
+		} else if !keyAuthed && !ws.auth.SharedToken(msg.Token) {
 			slog.Error("Invalid token received")
 			ws.SendError(conn, msg, "BAD_TOKEN", "Invalid token")
 			continue
@@ -77,6 +87,9 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			}
 			authenticated = true
 			ws.markAuthenticated(conn)
+		}
+		if msg.Type == "auth" {
+			continue
 		}
 
 		// Handle different event types

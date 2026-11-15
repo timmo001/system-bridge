@@ -1,13 +1,14 @@
 package http
 
 import (
-	"crypto/subtle"
 	"net"
 	"net/http"
+
+	"github.com/timmo001/system-bridge/keys"
 )
 
 // QuitHandler lets the local desktop client request a graceful shutdown.
-func QuitHandler(token string, quit func()) http.HandlerFunc {
+func QuitHandler(auth *keys.Auth, quit func()) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
@@ -19,8 +20,8 @@ func QuitHandler(token string, quit func()) http.HandlerFunc {
 			http.Error(w, "Local requests only", http.StatusForbidden)
 			return
 		}
-		if token == "" || subtle.ConstantTimeCompare([]byte(r.Header.Get("X-API-Token")), []byte(token)) != 1 {
-			http.Error(w, "Invalid API token", http.StatusUnauthorized)
+		if !auth.ValidOrShared(r) {
+			http.Error(w, "Invalid API key", http.StatusUnauthorized)
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

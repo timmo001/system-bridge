@@ -13,6 +13,7 @@ import (
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/settings"
 )
 
@@ -246,7 +247,7 @@ func setupTestWebSocket(t *testing.T) {
 	router := event.NewMessageRouter()
 
 	// Create a WebSocket server instance (this will set it as the global instance)
-	ws := websocket.NewWebsocketServer("test-token", dataStore, router)
+	ws := websocket.NewWebsocketServer(&keys.Auth{Shared: "test-token"}, dataStore, router)
 
 	// Register test connections so ConnectionExists checks pass
 	// We need to add fake connections for the test connection IDs used in tests

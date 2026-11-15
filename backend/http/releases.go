@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -18,14 +19,14 @@ type releasesResponse struct {
 
 // ReleasesHandler answers the newest releases and their notes, for the web
 // client's What's new page
-func ReleasesHandler(token string) http.HandlerFunc {
+func ReleasesHandler(auth *keys.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
-		if !TokenValid(r, token) {
+		if !auth.ValidOrShared(r) {
 			writeError(w, http.StatusUnauthorized, "Invalid API token")
 			return
 		}
