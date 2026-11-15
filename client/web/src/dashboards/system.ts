@@ -49,7 +49,7 @@ import { Match } from "effect";
 import { html, nothing, type TemplateResult } from "lit";
 
 import "~/components/sb-action-alert";
-import "~/components/sb-action-button";
+import "@timmo001/groundwork-ui/define/gw-action-button.ts";
 import "~/components/sb-hyprland-events";
 import "~/components/sb-hyprland-tools";
 import "~/components/sb-hyprland-option";
@@ -70,6 +70,7 @@ import {
   hyprlandDispatchTowards,
   registry,
   reloadHyprlandConfig,
+  runAction,
   runGlobalShortcut,
   setHyprlandSubmap,
   setKeyboardLayout,
@@ -992,12 +993,15 @@ const shortcutColumns = (() => {
       cell: ({ row }) => {
         const { shortcut } = row.original;
 
-        return html`<sb-action-button
-          icon-only
-          label=${shortcut.description || shortcut.name}
-          .icon=${mdiPlay}
-          .atom=${runGlobalShortcut(shortcut.name)}
-        ></sb-action-button>`;
+        return html`<gw-action-button
+          variant="neutral"
+          appearance="plain"
+          size="small"
+          labels="hide"
+          icon=${mdiPlay}
+          .action=${runAction(runGlobalShortcut(shortcut.name))}
+          >${shortcut.description || shortcut.name}</gw-action-button
+        >`;
       },
     }),
   ]);
@@ -1069,13 +1073,16 @@ const directionButtons = (
 ) =>
   directionIcons.map(
     ([direction, name, path]) =>
-      html`<sb-action-button
-        icon-only
+      html`<gw-action-button
+        variant="neutral"
+        appearance="plain"
+        size="small"
+        labels="hide"
         quiet
-        label="${verb} ${name.toLowerCase()}"
-        .icon=${path}
-        .atom=${hyprlandDispatchTowards(dispatcher)(direction)}
-      ></sb-action-button>`,
+        icon=${path}
+        .action=${runAction(hyprlandDispatchTowards(dispatcher)(direction))}
+        >${verb} ${name.toLowerCase()}</gw-action-button
+      >`,
   );
 
 const dispatcherButtons = [
@@ -1103,12 +1110,15 @@ const dispatcherButton = ([dispatcher, label, path]: readonly [
   string,
   string,
 ]) =>
-  html`<sb-action-button
+  html`<gw-action-button
+    variant="neutral"
+    appearance="plain"
+    size="small"
     quiet
-    label=${label}
-    .icon=${path}
-    .atom=${hyprlandDispatch(dispatcher)}
-  ></sb-action-button>`;
+    icon=${path}
+    .action=${runAction(hyprlandDispatch(dispatcher))}
+    >${label}</gw-action-button
+  >`;
 
 const dispatcherCard = () => {
   const buttons = dispatcherButtons.map(dispatcherButton);
@@ -1260,13 +1270,16 @@ const dashboardSection = (section: {
 
 const omarchyCards = (omarchy: OmarchyData) => html`
   <gw-card heading="Menus" description="${omarchy.menus.length} routes">
-    <sb-action-button
+    <gw-action-button
       slot="actions"
+      variant="neutral"
+      appearance="plain"
+      size="small"
       quiet
-      label="Close menu"
-      .icon=${mdiClose}
-      .atom=${closeOmarchyMenu}
-    ></sb-action-button>
+      icon=${mdiClose}
+      .action=${runAction(closeOmarchyMenu)}
+      >Close menu</gw-action-button
+    >
     <sb-data-table
       local
       label="Omarchy menus"
@@ -1531,11 +1544,14 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
           layout === desktop.keyboard.layout
             ? []
             : [
-                html`<sb-action-button
-                  label=${layout}
-                  .icon=${mdiKeyboardOutline}
-                  .atom=${setKeyboardLayout(layout)}
-                ></sb-action-button>`,
+                html`<gw-action-button
+                  variant="neutral"
+                  appearance="plain"
+                  size="small"
+                  icon=${mdiKeyboardOutline}
+                  .action=${runAction(setKeyboardLayout(layout))}
+                  >${layout}</gw-action-button
+                >`,
               ],
         );
 
@@ -1654,12 +1670,15 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
             heading: "Hyprland",
             description: "What only Hyprland reports, and its controls",
             icon: mdiViewQuiltOutline,
-            actions: html`<sb-action-button
+            actions: html`<gw-action-button
+              variant="neutral"
+              appearance="plain"
+              size="small"
               quiet
-              label="Reload config"
-              .icon=${mdiReload}
-              .atom=${reloadHyprlandConfig}
-            ></sb-action-button>`,
+              icon=${mdiReload}
+              .action=${runAction(reloadHyprlandConfig)}
+              >Reload config</gw-action-button
+            >`,
             cards: hyprlandCards(hyprland),
           })
     }

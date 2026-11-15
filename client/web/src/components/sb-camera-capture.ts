@@ -5,7 +5,7 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import "./sb-action-button";
+import "@timmo001/groundwork-ui/define/gw-action-button.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
@@ -15,6 +15,7 @@ import {
   cameraCapture,
   cameraCaptureSize,
   registry,
+  runAction,
   settings,
 } from "~/lib/atoms";
 import { mobile } from "~/lib/mobile";
@@ -146,11 +147,14 @@ export class SbCameraCapture extends LitElement {
     return html`
       <div class="row wrap">
         ${this.#renderSize(camera)}
-        <sb-action-button
-          label="Take picture"
-          .icon=${mdiCamera}
-          .atom=${cameraCapture(camera.id)}
-        ></sb-action-button>
+        <gw-action-button
+          variant="neutral"
+          appearance="plain"
+          size="small"
+          icon=${mdiCamera}
+          .action=${runAction(cameraCapture(camera.id))}
+          >Take picture</gw-action-button
+        >
         ${
           source === null
             ? nothing

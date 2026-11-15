@@ -117,6 +117,33 @@ export function actionResult<A>(
   };
 }
 
+/** An action atom that takes no argument. */
+export type ActionAtom = Atom.Writable<
+  AsyncResult.AsyncResult<unknown, BridgeError>,
+  undefined
+>;
+
+/**
+ * Runs an action atom as `gw-action-button`'s `action`, which rejects with
+ * why it failed in words the page can show. The atom keeps its result, so an
+ * alert listing failures and anything showing what it returned still see it.
+ */
+export const runAction = (atom: ActionAtom) => async () => {
+  const unmount = registry.mount(atom);
+
+  try {
+    registry.set(atom, undefined);
+
+    await Effect.runPromise(
+      AtomRegistry.getResult(registry, atom, { suspendOnWaiting: true }).pipe(
+        Effect.mapError((error) => new Error(errorMessage(error))),
+      ),
+    );
+  } finally {
+    unmount();
+  }
+};
+
 /** Why an action failed, if it did, for an alert listing failures. */
 const failureMessage = (
   result: AsyncResult.AsyncResult<unknown, BridgeError>,
