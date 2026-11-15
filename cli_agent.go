@@ -13,6 +13,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/backend/mcp"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/version"
 	"github.com/urfave/cli/v3"
@@ -136,15 +137,15 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 	return manifest, nil
 }
 
-// bearerTransport adds the API token to every request
+// bearerTransport adds the key to every request
 type bearerTransport struct {
-	token string
-	base  http.RoundTripper
+	key  string
+	base http.RoundTripper
 }
 
 func (t bearerTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	request = request.Clone(request.Context())
-	request.Header.Set("Authorization", "Bearer "+t.token)
+	request.Header.Set("Authorization", "Bearer "+t.key)
 	return t.base.RoundTrip(request)
 }
 
@@ -185,9 +186,9 @@ func agentCall(ctx context.Context, name string, input map[string]any) ([]byte, 
 		return nil, err
 	}
 
-	token, err := utils.LoadToken()
+	key, err := keys.LoadOwnerKey()
 	if err != nil {
-		return nil, fmt.Errorf("load token: %w", err)
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, agentTimeout(name))
@@ -196,7 +197,7 @@ func agentCall(ctx context.Context, name string, input map[string]any) ([]byte, 
 	client := sdkmcp.NewClient(&sdkmcp.Implementation{Name: "system-bridge-agent", Version: version.Version}, nil)
 	session, err := client.Connect(ctx, &sdkmcp.StreamableClientTransport{
 		Endpoint:   fmt.Sprintf("http://127.0.0.1:%d/api/mcp", utils.GetPort()),
-		HTTPClient: &http.Client{Transport: bearerTransport{token: token, base: http.DefaultTransport}},
+		HTTPClient: &http.Client{Transport: bearerTransport{key: key, base: http.DefaultTransport}},
 		MaxRetries: -1,
 	}, nil)
 	if err != nil {

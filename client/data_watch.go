@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -40,16 +41,15 @@ type WatchOptions struct {
 	Modules []types.ModuleName
 	Writer  io.Writer
 
-	url       string
-	loadToken func() (string, error)
-	dialer    *websocket.Dialer
+	url     string
+	loadKey func() (string, error)
+	dialer  *websocket.Dialer
 }
 
 type websocketRequest struct {
 	ID    string               `json:"id"`
 	Event event.EventType      `json:"event"`
 	Data  websocketRequestData `json:"data"`
-	Token string               `json:"token"`
 }
 
 type websocketRequestData struct {
@@ -75,13 +75,13 @@ func Watch(ctx context.Context, options WatchOptions) error {
 		return err
 	}
 
-	loadToken := options.loadToken
-	if loadToken == nil {
-		loadToken = utils.LoadToken
+	loadKey := options.loadKey
+	if loadKey == nil {
+		loadKey = keys.LoadOwnerKey
 	}
-	token, err := loadToken()
+	key, err := loadKey()
 	if err != nil {
-		return fmt.Errorf("error loading token: %w", err)
+		return err
 	}
 
 	url := options.url
@@ -114,12 +114,15 @@ func Watch(ctx context.Context, options WatchOptions) error {
 	})
 	defer stopCancellation()
 
+	if err := signIn(conn, key); err != nil {
+		return watchError(ctx, "sign in", err)
+	}
+
 	registerID := uuid.NewString()
 	if err := conn.WriteJSON(websocketRequest{
 		ID:    registerID,
 		Event: event.EventRegisterDataListener,
 		Data:  websocketRequestData{Modules: options.Modules},
-		Token: token,
 	}); err != nil {
 		return watchError(ctx, "register data listener", err)
 	}
@@ -146,7 +149,6 @@ func Watch(ctx context.Context, options WatchOptions) error {
 		ID:    uuid.NewString(),
 		Event: event.EventGetData,
 		Data:  websocketRequestData{Modules: options.Modules},
-		Token: token,
 	}); err != nil {
 		return watchError(ctx, "request initial data", err)
 	}

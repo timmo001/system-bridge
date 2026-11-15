@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/utils"
 )
 
 // Quit requests shutdown of the local backend after the caller has confirmed it.
 func Quit(ctx context.Context) error {
-	token, err := utils.LoadToken()
+	key, err := keys.LoadOwnerKey()
 	if err != nil {
-		return fmt.Errorf("load token: %w", err)
+		return err
 	}
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -21,7 +22,7 @@ func Quit(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("create quit request: %w", err)
 	}
-	request.Header.Set("X-API-Token", token)
+	request.Header.Set("Authorization", "Bearer "+key)
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("quit System Bridge: %w", err)

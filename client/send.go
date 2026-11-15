@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -22,7 +23,18 @@ type eventRequest struct {
 	ID    string          `json:"id"`
 	Event event.EventType `json:"event"`
 	Data  any             `json:"data"`
-	Token string          `json:"token"`
+}
+
+// socketAuth is a WebSocket's first message, which signs it in with a key
+type socketAuth struct {
+	Type string `json:"type"`
+	Key  string `json:"key"`
+}
+
+// signIn signs a WebSocket connection in with a key. A wrong key is
+// answered with BAD_KEY and the connection closed.
+func signIn(conn *websocket.Conn, key string) error {
+	return conn.WriteJSON(socketAuth{Type: "auth", Key: key})
 }
 
 // Send sends one event to the local backend and waits for its answer.
@@ -56,9 +68,9 @@ func request(ctx context.Context, timeout time.Duration, eventType event.EventTy
 // requestReply is request, waiting for a reply of the given type when it's
 // set, for events such as COMMAND_EXECUTE that answer more than once
 func requestReply(ctx context.Context, timeout time.Duration, eventType event.EventType, data any, reply event.ResponseType) (json.RawMessage, error) {
-	token, err := utils.LoadToken()
+	key, err := keys.LoadOwnerKey()
 	if err != nil {
-		return nil, fmt.Errorf("load token: %w", err)
+		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -75,8 +87,11 @@ func requestReply(ctx context.Context, timeout time.Duration, eventType event.Ev
 	stopCancellation := context.AfterFunc(ctx, func() { _ = conn.Close() })
 	defer stopCancellation()
 
+	if err := signIn(conn, key); err != nil {
+		return nil, watchError(ctx, "sign in", err)
+	}
 	id := uuid.NewString()
-	if err := conn.WriteJSON(eventRequest{ID: id, Event: eventType, Data: data, Token: token}); err != nil {
+	if err := conn.WriteJSON(eventRequest{ID: id, Event: eventType, Data: data}); err != nil {
 		return nil, watchError(ctx, "send event", err)
 	}
 	for {

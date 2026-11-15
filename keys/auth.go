@@ -1,10 +1,13 @@
 package keys
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -82,6 +85,22 @@ func OwnerKeyPath() (string, error) {
 		return "", fmt.Errorf("could not get config path: %w", err)
 	}
 	return filepath.Join(dir, "owner-key"), nil
+}
+
+// LoadOwnerKey reads the owner key, which the CLI signs in with on this host
+func LoadOwnerKey() (string, error) {
+	path, err := OwnerKeyPath()
+	if err != nil {
+		return "", err
+	}
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return "", fmt.Errorf("no owner key at %s: start System Bridge once to make it, or run system-bridge client key owner", path)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to read the owner key: %w", err)
+	}
+	return strings.TrimSpace(string(raw)), nil
 }
 
 // OpenDefault opens the store in the config directory

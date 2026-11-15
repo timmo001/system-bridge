@@ -18,7 +18,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-const testToken = "secret-test-token"
+const testKey = "secret-test-key"
 
 type watchServer struct {
 	url      string
@@ -37,6 +37,16 @@ func newWatchServer(t *testing.T, handler func(*websocket.Conn, websocketRequest
 			return
 		}
 		defer func() { _ = conn.Close() }()
+
+		// The first message signs the connection in with the key
+		var auth socketAuth
+		if err := conn.ReadJSON(&auth); err != nil {
+			return
+		}
+		if auth.Type != "auth" || auth.Key != testKey {
+			t.Errorf("first message %+v, want an auth message with the key", auth)
+			return
+		}
 
 		var register websocketRequest
 		if err := conn.ReadJSON(&register); err != nil {
@@ -58,8 +68,8 @@ func watchOptions(server watchServer, writer io.Writer, modules ...types.ModuleN
 		Modules: modules,
 		Writer:  writer,
 		url:     server.url,
-		loadToken: func() (string, error) {
-			return testToken, nil
+		loadKey: func() (string, error) {
+			return testKey, nil
 		},
 	}
 }
@@ -82,7 +92,6 @@ func TestWatchRegistersBeforeRequestingDataAndStreamsOnlyUpdates(t *testing.T) {
 		require.NoError(t, conn.ReadJSON(&getData))
 		require.Equal(t, event.EventGetData, getData.Event)
 		require.Equal(t, []types.ModuleName{types.ModuleCPU, types.ModuleMemory}, getData.Data.Modules)
-		require.Equal(t, testToken, getData.Token)
 
 		require.NoError(t, conn.WriteJSON(event.MessageResponse{
 			ID:      getData.ID,
@@ -112,7 +121,7 @@ func TestWatchRegistersBeforeRequestingDataAndStreamsOnlyUpdates(t *testing.T) {
 
 	err := Watch(context.Background(), watchOptions(server, &output, types.ModuleCPU, types.ModuleMemory))
 	require.ErrorContains(t, err, "read data websocket")
-	require.NotContains(t, output.String(), testToken)
+	require.NotContains(t, output.String(), testKey)
 
 	var update event.MessageResponse
 	require.NoError(t, json.Unmarshal(bytes.TrimSpace(output.Bytes()), &update))
@@ -123,7 +132,6 @@ func TestWatchRegistersBeforeRequestingDataAndStreamsOnlyUpdates(t *testing.T) {
 	register := <-server.requests
 	require.Equal(t, event.EventRegisterDataListener, register.Event)
 	require.Equal(t, []types.ModuleName{types.ModuleCPU, types.ModuleMemory}, register.Data.Modules)
-	require.Equal(t, testToken, register.Token)
 }
 
 func TestWatchReturnsServerError(t *testing.T) {
@@ -206,19 +214,19 @@ func TestWatchRejectsMalformedStreamMessage(t *testing.T) {
 	require.ErrorContains(t, err, "read data websocket")
 }
 
-func TestWatchRejectsInvalidModulesBeforeLoadingToken(t *testing.T) {
-	tokenLoaded := false
+func TestWatchRejectsInvalidModulesBeforeLoadingKey(t *testing.T) {
+	keyLoaded := false
 	err := Watch(context.Background(), WatchOptions{
 		Modules: []types.ModuleName{"unknown"},
 		Writer:  io.Discard,
-		loadToken: func() (string, error) {
-			tokenLoaded = true
-			return testToken, nil
+		loadKey: func() (string, error) {
+			keyLoaded = true
+			return testKey, nil
 		},
 	})
 
 	require.EqualError(t, err, `unknown module "unknown"`)
-	require.False(t, tokenLoaded)
+	require.False(t, keyLoaded)
 }
 
 func TestWatchCancellationSendsNormalCloseAndUnblocksRead(t *testing.T) {
