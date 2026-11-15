@@ -9,9 +9,13 @@ Description: |-
   * Pair a computer by scanning the QR code in its web client, picking it
     from those found on your network, or entering its address and token
   * Use each computer's own web client, and switch between several
-  * Get its notifications, a note when a System Bridge update is out, and
-    a warning before it sleeps or shuts down, even with the app closed
-  * Lock it or put it to sleep from quick settings tiles
+  * Get its notifications, and a note when a System Bridge update is out,
+    even with the app closed
+  * Control what it's playing from the notifications and lock screen
+  * Lock it, put it to sleep, keep it awake, mute it, play or pause, or
+    send it your clipboard from quick settings tiles
+  * Open the pages you use most from the app's shortcuts, or add one to
+    the home screen
   * Share a link to open on the computer, or text to its clipboard
   * Use your phone's colours as a theme
 AuthorName: timmo001
