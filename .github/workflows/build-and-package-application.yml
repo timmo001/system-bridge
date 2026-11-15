@@ -166,8 +166,8 @@ jobs:
     if: ${{ !cancelled() && (needs.windows-changes.result != 'success' || needs.windows-changes.outputs.changed == 'true') }}
     runs-on: windows-latest
     env:
-      # python and uv are only needed by the Python connector
-      MISE_DISABLE_TOOLS: python,uv
+      # python and uv are only needed by the Python connector, and yamllint needs python
+      MISE_DISABLE_TOOLS: python,uv,pipx:yamllint
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

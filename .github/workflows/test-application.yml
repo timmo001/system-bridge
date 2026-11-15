@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # The image has Go, Bun and Node; the Python tools aren't needed here
-      MISE_DISABLE_TOOLS: python,uv
+      MISE_DISABLE_TOOLS: python,uv,pipx:yamllint
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
