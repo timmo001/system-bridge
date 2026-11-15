@@ -31,12 +31,21 @@ Authorization: Bearer {key}
       "kind": "android",
       "scopes": ["all"],
       "created": "2026-11-15T19:02:11Z"
+    },
+    {
+      "id": "8b2e…",
+      "name": "Home Assistant MCP",
+      "kind": "key",
+      "scopes": ["all"],
+      "created": "2026-11-15T19:10:40Z",
+      "lastUsed": "2026-11-15T19:12:03Z",
+      "usedInUrl": "2026-11-15T19:11:02Z"
     }
   ]
 }
 ```
 
-`kind` says how the client got its key, such as `android` from pairing, `web` for a browser, `key` for one made by hand, `cli` for one made on the computer, or `owner`. `lastUsed` is left out until the key is used, and is updated at most once a minute. The keys themselves are never listed.
+`kind` says how the client got its key, such as `android` from pairing, `web` for a browser, `key` for one made by hand, `cli` for one made on the computer, or `owner`. `lastUsed` is left out until the key is used, and is updated at most once a minute. `usedInUrl` is when the key was first sent in a URL, to the [MCP server](/api/mcp), where it can end up in a client's history or logs. A new key for the client clears it. The keys themselves are never listed.
 
 ## Make a key
 

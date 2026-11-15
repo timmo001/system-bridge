@@ -21,7 +21,13 @@ Authorization: Bearer YOUR_KEY
 
 A missing or invalid key is rejected with `401 Unauthorized`.
 
-A client that only takes a URL can still put the old shared API token in it, as `?token=`, until the token is removed in a later release. A key can't go in the URL.
+A client that only takes a URL, such as Home Assistant's integration, can put its key in the URL instead:
+
+```text
+http://{host}:9170/api/mcp?key=YOUR_KEY
+```
+
+Only this endpoint takes a key in its URL, and System Bridge never logs it. A URL can still end up in a client's history or logs, so **Settings > Devices** marks each key that has been sent in one, for you to remove it if it leaks. Prefer the header when the client takes one. The old shared API token also works as `?token=`, until it's removed in a later release.
 
 :::caution
 A key gives access to MCP tools that can read system data, send notifications, control media, displays and windows, and run the commands in your allowlist. Keep it secret, give each client its own so you can remove one, and use HTTPS when the connection crosses an untrusted network.
@@ -33,7 +39,7 @@ Home Assistant's <a href="https://www.home-assistant.io/integrations/mcp" target
 
 1. In Home Assistant, go to **Settings** > **Devices & services**.
 2. Select **Add integration**, then search for **Model Context Protocol**.
-3. Enter the Streamable HTTP URL with the API token, for example `http://192.168.1.10:9170/api/mcp?token=YOUR_TOKEN`. The integration takes only a URL, so for now it uses the old shared token, which you can print with `system-bridge client token`.
+3. Make a key for it with `system-bridge client key create "Home Assistant MCP"`, or under **Settings > Devices** in the web client. Enter the Streamable HTTP URL with the key, for example `http://192.168.1.10:9170/api/mcp?key=YOUR_KEY`. The integration takes only a URL, so the key goes in it.
 4. Complete the setup flow.
 5. Configure your conversation agent to use the System Bridge MCP tools.
 
@@ -48,7 +54,7 @@ http://{host}:9170/api/mcp
 Authorization: Bearer YOUR_KEY
 ```
 
-Client configuration formats and option names vary. Some clients take a custom `Authorization` header, while others take only a URL. Follow the client's documentation rather than assuming a particular configuration key.
+Client configuration formats and option names vary. Some clients take a custom `Authorization` header, while others take only a URL, which can carry the key as `?key=`. Follow the client's documentation rather than assuming a particular configuration key.
 
 ## Legacy WebSocket transport
 
@@ -553,7 +559,7 @@ Keep the system from idling, so it doesn't lock, blank the screen or sleep for b
 ### Unauthorized (`401`)
 
 - The key is missing, wrong or has been removed. Check it's listed under **Settings > Devices**, or make a new one with `system-bridge client key create`.
-- Send the key as an `Authorization: Bearer {key}` header. Only the old API token works as a `token` query parameter.
+- Send the key as an `Authorization: Bearer {key}` header, or in the URL as `?key=`. The old API token goes in `?token=` instead.
 
 ### Tool execution fails
 

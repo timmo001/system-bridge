@@ -36,7 +36,7 @@ How you send the key depends on the protocol:
 
 - **HTTP**: send `Authorization: Bearer {key}`.
 - **WebSocket**: send `{"type": "auth", "key": "{key}"}` as the first message. See [signing in](/api/websocket/#signing-in).
-- **MCP**: send `Authorization: Bearer {key}`.
+- **MCP**: send `Authorization: Bearer {key}`, or for a client that only takes a URL, `?key={key}`. See [the MCP server](/api/mcp).
 - **Media files**: ask for a [signed URL](/api/media-file-data), which holds no key.
 
 The `GET /api` and `GET /api/health` endpoints do not need a key.

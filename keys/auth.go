@@ -43,6 +43,18 @@ func (a *Auth) Key(key string) bool {
 	return ok
 }
 
+// KeyInURL says whether a request carries a client key in its `key` query
+// parameter, for clients that only take a URL. Only routes such clients use
+// may call it, and the URL must never be logged. The key's record is marked,
+// so the person knows it may have leaked.
+func (a *Auth) KeyInURL(r *http.Request) bool {
+	if a == nil || a.Store == nil {
+		return false
+	}
+	_, ok := a.Store.AuthenticateFromURL(r.URL.Query().Get("key"))
+	return ok
+}
+
 // SharedToken says whether a token is the old shared token
 func (a *Auth) SharedToken(token string) bool {
 	return a != nil && a.Shared != "" && equal(token, a.Shared)

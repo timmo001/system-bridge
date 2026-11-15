@@ -61,6 +61,33 @@ func TestHTTPAuthentication(t *testing.T) {
 	}
 }
 
+// An MCP client that only takes a URL can send its key as ?key=, which marks
+// the key as having been in a URL. The shared token doesn't work there.
+func TestKeyInURL(t *testing.T) {
+	handler := newTestServer(t)
+	key, err := handler.auth.Store.Create(keys.Client{ID: "ha", Name: "Home Assistant", Kind: "home-assistant"})
+	require.NoError(t, err)
+
+	initialize := func(query string) int {
+		request := httptest.NewRequest(http.MethodPost, "/api/mcp?"+query, strings.NewReader(
+			`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}`,
+		))
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("Accept", "application/json, text/event-stream")
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		return response.Code
+	}
+
+	assert.Equal(t, http.StatusUnauthorized, initialize("key="+testToken))
+	assert.Equal(t, http.StatusOK, initialize("key="+key))
+
+	infos, err := handler.auth.Store.List()
+	require.NoError(t, err)
+	require.Len(t, infos, 1)
+	assert.NotEmpty(t, infos[0].UsedInURL)
+}
+
 func TestLegacyStreamableHTTPInitialization(t *testing.T) {
 	handler := newTestServer(t)
 	response := serveMCPRequest(t, handler, `{
@@ -476,5 +503,6 @@ func newTestServer(t *testing.T) *MCPServer {
 	require.NoError(t, err)
 	require.NoError(t, dataStore.SetModuleData(types.ModuleCPU, types.CPUData{}))
 	require.NoError(t, dataStore.SetModuleData(types.ModuleMemory, types.MemoryData{}))
-	return NewMCPServer(&keys.Auth{Shared: testToken}, event.NewMessageRouter(), dataStore)
+	store := keys.Open(filepath.Join(t.TempDir(), "keys.json"))
+	return NewMCPServer(&keys.Auth{Shared: testToken, Store: store}, event.NewMessageRouter(), dataStore)
 }

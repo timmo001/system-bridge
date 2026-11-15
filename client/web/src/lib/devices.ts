@@ -67,11 +67,15 @@ export const removePushSubscriber = Atom.fn((clientId: string, get) =>
   ).pipe(Effect.tap(() => Effect.sync(() => get.refresh(pushSubscribers)))),
 );
 
-/** A client with a key, as `GET /api/keys` lists it: never the key itself. */
+/**
+ * A client with a key, as `GET /api/keys` lists it: never the key itself.
+ * `usedInUrl` is when its key first came in a URL, where it can leak.
+ */
 export const KeyedClient = Schema.Struct({
   ...Client.fields,
   created: Schema.String,
   lastUsed: Schema.optionalKey(Schema.String),
+  usedInUrl: Schema.optionalKey(Schema.String),
 });
 
 export interface KeyedClient extends Schema.Schema.Type<typeof KeyedClient> {}

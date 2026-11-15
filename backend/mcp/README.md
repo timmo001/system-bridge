@@ -21,9 +21,14 @@ such as `websocat`.
 ## Authentication
 
 Both transports take a client key as an `Authorization: Bearer YOUR_KEY`
-header. Until the old shared API token is removed, `MCPServer.ServeHTTP` also
-accepts it as a Bearer or as a `token` query parameter, such as
-`http://localhost:9170/api/mcp?token=YOUR_TOKEN`. A key can't go in the query.
+header. For clients that only take a URL, such as Home Assistant's MCP
+integration, they also take it as a `key` query parameter: the one route that
+does, as Groundwork's Client keys spec allows. Never log this route's URL. A key
+that comes in the query has its record marked (`usedInUrl`), which the web
+client's Devices list shows, so a leaked key can be found and removed.
+
+Until the old shared API token is removed, `MCPServer.ServeHTTP` also accepts
+it as a Bearer or as a `token` query parameter.
 
 Authentication runs before transport dispatch. A missing or invalid key or
 token receives `401 Unauthorized`.

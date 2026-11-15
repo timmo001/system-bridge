@@ -19,15 +19,18 @@ const OwnerID = "owner"
 const lastUsedGranularity = time.Minute
 
 // Record is what is kept for a client: who it is, its key's SHA-256 and never
-// the key, its scopes and when it was made and last used
+// the key, its scopes and when it was made and last used. UsedInURL is when
+// the key first came in a URL, which can leak through history and logs, so
+// the person knows which key to remove.
 type Record struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Kind     string   `json:"kind"`
-	Hash     string   `json:"hash"`
-	Scopes   []string `json:"scopes"`
-	Created  string   `json:"created"`
-	LastUsed string   `json:"lastUsed,omitempty"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Kind      string   `json:"kind"`
+	Hash      string   `json:"hash"`
+	Scopes    []string `json:"scopes"`
+	Created   string   `json:"created"`
+	LastUsed  string   `json:"lastUsed,omitempty"`
+	UsedInURL string   `json:"usedInUrl,omitempty"`
 }
 
 // Client is who a key is for. ID is kept by the client, so pairing again
@@ -40,12 +43,13 @@ type Client struct {
 
 // Info is a record as a list shows it, without its hash
 type Info struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Kind     string   `json:"kind"`
-	Scopes   []string `json:"scopes"`
-	Created  string   `json:"created"`
-	LastUsed string   `json:"lastUsed,omitempty"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Kind      string   `json:"kind"`
+	Scopes    []string `json:"scopes"`
+	Created   string   `json:"created"`
+	LastUsed  string   `json:"lastUsed,omitempty"`
+	UsedInURL string   `json:"usedInUrl,omitempty"`
 }
 
 // ErrNotFound is returned when removing a client that has no key
@@ -161,6 +165,16 @@ func (s *Store) Create(client Client) (string, error) {
 // is turned away before any lookup, and every record is compared in constant
 // time, so the answer takes as long wherever the match is.
 func (s *Store) Authenticate(key string) (Info, bool) {
+	return s.authenticate(key, false)
+}
+
+// AuthenticateFromURL is Authenticate for a key that came in a URL, which
+// marks its record so the person can see the key may have leaked
+func (s *Store) AuthenticateFromURL(key string) (Info, bool) {
+	return s.authenticate(key, true)
+}
+
+func (s *Store) authenticate(key string, inURL bool) (Info, bool) {
 	if _, ok := Parse(key); !ok {
 		return Info{}, false
 	}
@@ -181,20 +195,26 @@ func (s *Store) Authenticate(key string) (Info, bool) {
 	if found < 0 {
 		return Info{}, false
 	}
-	record := s.records[found]
 	now := s.now().UTC()
-	if last, err := time.Parse(time.RFC3339, record.LastUsed); err != nil || now.Sub(last) >= lastUsedGranularity {
+	changed := false
+	if last, err := time.Parse(time.RFC3339, s.records[found].LastUsed); err != nil || now.Sub(last) >= lastUsedGranularity {
 		s.records[found].LastUsed = now.Format(time.RFC3339)
-		record = s.records[found]
+		changed = true
+	}
+	if inURL && s.records[found].UsedInURL == "" {
+		s.records[found].UsedInURL = now.Format(time.RFC3339)
+		changed = true
+	}
+	if changed {
 		if err := s.save(); err != nil {
-			slog.Error("Failed to record a key's last use", "error", err)
+			slog.Error("Failed to record a key's use", "error", err)
 		}
 	}
-	return record.info(), true
+	return s.records[found].info(), true
 }
 
 func (r Record) info() Info {
-	return Info{ID: r.ID, Name: r.Name, Kind: r.Kind, Scopes: r.Scopes, Created: r.Created, LastUsed: r.LastUsed}
+	return Info{ID: r.ID, Name: r.Name, Kind: r.Kind, Scopes: r.Scopes, Created: r.Created, LastUsed: r.LastUsed, UsedInURL: r.UsedInURL}
 }
 
 // List is every client with a key

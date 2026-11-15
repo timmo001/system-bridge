@@ -44,7 +44,7 @@ Everything else needs a key:
 | HTTP routes, such as `/api/data/{module}` and `/api/quit` | `Authorization: Bearer` header |
 | `/api/media/file/data` | No key: a URL System Bridge signs for one file, which only reads that file until it expires |
 | `/api/websocket` | The first message, `{"type": "auth", "key": "..."}`. A wrong key closes the connection, as does no valid message within 10 seconds. |
-| `/api/mcp` | `Authorization: Bearer` header |
+| `/api/mcp` | `Authorization: Bearer` header, or the `key` query parameter for clients that only take a URL. System Bridge never logs that URL, and **Settings > Devices** marks each key that has been sent in one. |
 
 The WebSocket and MCP endpoints accept connections from any web origin, so the key is their only protection.
 
@@ -117,7 +117,7 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 | File | Contents |
 | --- | --- |
 | `settings.json` | Your settings, including the command allowlist and media directories |
-| `keys.json` | Each client's name, kind, key hash, and when it was made and last used. Never the keys. Readable only by your user |
+| `keys.json` | Each client's name, kind, key hash, when it was made and last used, and when its key was first sent in a URL. Never the keys. Readable only by your user |
 | `owner-key` | The owner key the CLI signs in with, readable only by your user |
 | `token` | The old shared API token, until it's removed. Readable only by your user |
 | `data/{module}.json` | The latest data for each module, rewritten on every update |

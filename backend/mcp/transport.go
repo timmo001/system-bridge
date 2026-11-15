@@ -21,10 +21,12 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-// authenticated accepts a client key as Authorization: Bearer, or the old
-// shared token as a Bearer or the deprecated token query parameter
+// authenticated accepts a client key as Authorization: Bearer, or in the key
+// query parameter for MCP clients that only take a URL. It also takes the old
+// shared token as a Bearer or the deprecated token query parameter. Never log
+// this route's URL, as it can hold a key.
 func (s *MCPServer) authenticated(r *http.Request) bool {
-	if s.auth.ValidOrShared(r) {
+	if s.auth.ValidOrShared(r) || s.auth.KeyInURL(r) {
 		return true
 	}
 	return s.auth.SharedToken(r.URL.Query().Get("token"))

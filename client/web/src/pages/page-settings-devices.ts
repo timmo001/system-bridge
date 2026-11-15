@@ -79,6 +79,10 @@ const keyDescription = (client: KeyedClient, thisClient?: string) =>
     client.lastUsed === undefined
       ? "Never used"
       : `Last used ${date.format(new Date(client.lastUsed))}`,
+    // A key sent in a URL can end up in history and logs, so say which
+    client.usedInUrl === undefined
+      ? undefined
+      : `Sent in a URL since ${date.format(new Date(client.usedInUrl))}`,
   ]
     .filter((part) => part !== undefined)
     .join(" · ");
