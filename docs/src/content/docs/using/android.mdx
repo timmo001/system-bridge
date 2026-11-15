@@ -21,7 +21,7 @@ If you have the old System Bridge app from Google Play, uninstall it first. The 
 
 ## Pairing a computer
 
-Pairing gives the phone the computer's API token, so anyone with the phone can control the computer, as with any client that has the token. To stop a phone connecting, change the token.
+Pairing gives the phone its own key to the computer, so anyone with the phone can control the computer, as with any client that has a key. To stop a phone connecting, remove its key under **Settings > Devices** in the web client. A phone paired before keys trades the old API token for its own key the next time it opens.
 
 On Android 17, the app asks for **local network access** first. It needs it to reach the computer at all. If you refuse, the app explains why and asks again when you tap **Allow**.
 
@@ -32,10 +32,10 @@ Then pair in one of three ways:
 On the computer, open the web client, go to **Settings**, **Devices**, and select **Make a pairing code**. In the app, tap **Scan the code** and point the camera at it. A code works once, for 5 minutes.
 </Step>
 <Step title="Pick it from your network">
-Tap **Look for computers** to list those running System Bridge on your network, then **Use** one to fill in its address. Add its API token, which you can get with `system-bridge client token`.
+Tap **Look for computers** to list those running System Bridge on your network, then **Use** one to fill in its address. Add a key for the phone, which you can make with `system-bridge client key create "My phone"`, or under **Settings > Devices** in the web client.
 </Step>
 <Step title="Enter it yourself">
-Type the computer's address, port (`9170`) and API token.
+Type the computer's address, port (`9170`) and a key for the phone.
 </Step>
 </Steps>
 

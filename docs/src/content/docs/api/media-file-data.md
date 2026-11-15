@@ -7,15 +7,28 @@ Download a media file from the machine running System Bridge. The file is return
 
 ## Authentication
 
-Requests are signed with your API token, so the URL can be handed to another device, such as a cast speaker, without sharing the token. A signed URL only reads the one file it was made for, until it expires. A missing, invalid or expired signature returns `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+Media file URLs hold no key. Ask System Bridge to sign one for a file, and the URL can be handed to another device, such as a cast speaker, without sharing your key. A signed URL only reads the one file it was made for, until it expires. A missing, invalid or expired signature returns `401 Unauthorized`.
 
-To sign a request, take the HMAC-SHA256 of `base`, `path` and `expires` joined by newlines, keyed with your API token, and hex-encode it:
+### Get a signed URL
 
-```text
-sig = hex(HMAC-SHA256(key = token, message = base + "\n" + path + "\n" + expires))
+Needs a [key](/api/#authentication), as `Authorization: Bearer`.
+
+```http
+POST /api/media/file/url
+Authorization: Bearer {key}
+Content-Type: application/json
+
+{ "base": "music", "path": "albums/song.mp3", "expiresIn": 3600 }
 ```
 
-Sign `base` and `path` as they are, before URL encoding. The Python connector's `media_file_url()` helper builds a signed URL for you.
+```json title="Response"
+{
+  "url": "/api/media/file/data?base=music&expires=1794771735&path=albums%2Fsong.mp3&sig=…",
+  "expires": 1794771735
+}
+```
+
+`expiresIn` is in seconds, and 24 hours at most, which is also what you get without it. `url` is relative to System Bridge's address. URLs are signed with a secret made each time System Bridge starts, so they stop working when it restarts too. The Python connector's `HTTPClient.media_file_url()` asks for one for you.
 
 ## Request
 
@@ -26,13 +39,13 @@ GET /api/media/file/data?base={base}&path={path}&expires={expires}&sig={sig}
 - `base`: the base directory to serve from (see below).
 - `path`: the path to the file, relative to `base`.
 - `expires`: when the URL stops working, in Unix seconds.
-- `sig`: the signature described above.
+- `sig`: the signature.
 
 All four parameters are required.
 
-### Deprecated: token parameter
+### Deprecated: the API token
 
-Passing your API token as `token` in place of `expires` and `sig` still works, but it puts the token in the URL, which can end up on other devices and in their logs. System Bridge logs a warning the first time it's used, and support will be removed in a later release.
+Until the shared API token is removed in a later release, two older ways still work. A URL signed by the client with the token, as the HMAC-SHA256 of `base`, `path` and `expires` joined by newlines, keyed with the token. And the token itself as `token`, in place of `expires` and `sig`, which puts it in the URL, where it can end up on other devices and in their logs. System Bridge logs a warning the first time that's used.
 
 ### Base directories
 
@@ -66,7 +79,7 @@ Errors return a JSON body of the form `{ "error": "..." }` with one of these sta
 | Status | Meaning |
 | --- | --- |
 | `400 Bad Request` | Missing `base` or `path`, an invalid base directory, or the path is not a regular file. |
-| `401 Unauthorized` | The signature is missing, invalid or expired, or the deprecated token is incorrect. |
+| `401 Unauthorized` | The signature is missing, invalid or expired, or the deprecated token is wrong. |
 | `403 Forbidden` | The path escapes the base directory, or the file type is not allowed. |
 | `404 Not Found` | The file does not exist. |
 | `413 Payload Too Large` | The file is larger than 100 MB. |

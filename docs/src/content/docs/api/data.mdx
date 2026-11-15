@@ -7,28 +7,14 @@ Get a module's current data over HTTP.
 
 ## Authentication
 
-This endpoint requires authentication via the `X-API-Token` header or the `token` header.
+Needs a [key](/api/#authentication), as `Authorization: Bearer`.
 
 ## Request
 
-<Tabs syncKey="auth-header">
-<Tab title="X-API-Token header">
-
 ```http
 GET /api/data/{module}
-X-API-Token: {token}
+Authorization: Bearer {key}
 ```
-
-</Tab>
-<Tab title="token header">
-
-```http
-GET /api/data/{module}
-token: {token}
-```
-
-</Tab>
-</Tabs>
 
 `{module}` is one of: `audio`, `battery`, `bluetooth`, `cameras`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
 

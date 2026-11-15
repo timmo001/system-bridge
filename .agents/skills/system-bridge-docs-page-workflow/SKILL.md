@@ -20,11 +20,11 @@ description: Let clients run programs you choose on the machine running System B
 ---
 
 :::warning
-Anyone with your API token can run every command on the allowlist.
+Any client with a key can run every command on the allowlist.
 :::
 
 ```bash
-system-bridge client token
+system-bridge client key list
 ```
 ````
 

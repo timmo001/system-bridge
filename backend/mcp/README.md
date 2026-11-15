@@ -20,13 +20,13 @@ such as `websocat`.
 
 ## Authentication
 
-Both transports use the System Bridge API token. `MCPServer.ServeHTTP` accepts either:
+Both transports take a client key as an `Authorization: Bearer YOUR_KEY`
+header. Until the old shared API token is removed, `MCPServer.ServeHTTP` also
+accepts it as a Bearer or as a `token` query parameter, such as
+`http://localhost:9170/api/mcp?token=YOUR_TOKEN`. A key can't go in the query.
 
-- A `token` query parameter, such as `http://localhost:9170/api/mcp?token=YOUR_TOKEN`
-- An `Authorization: Bearer YOUR_TOKEN` header
-
-Authentication runs before transport dispatch. Missing or invalid tokens
-receive `401 Unauthorized`.
+Authentication runs before transport dispatch. A missing or invalid key or
+token receives `401 Unauthorized`.
 
 ## Transports
 

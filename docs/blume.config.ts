@@ -49,6 +49,7 @@ export default defineConfig(
                 "/api/data",
                 "/api/media-file-data",
                 "/api/event",
+                "/api/keys",
                 "/api/pairing",
                 "/api/push",
                 "/api/releases",

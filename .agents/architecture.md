@@ -144,7 +144,9 @@ system-bridge client data run --all --pretty
 # Or locally: go run . client data run --all --pretty
 
 # Other client commands
-system-bridge client token                    # Print API token
+system-bridge client key create <name>        # Make a client key, printed once
+system-bridge client key list                 # List the clients with a key
+system-bridge client token                    # Print the old shared API token
 system-bridge client notification             # Send test notification
 system-bridge client discovery list           # List discovered services
 ```

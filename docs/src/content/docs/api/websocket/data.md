@@ -12,7 +12,6 @@ To request data, send a message with the `GET_DATA` event listing each module to
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DATA",
     "data": {
         "modules": ["system"]
@@ -27,7 +26,6 @@ To receive data whenever it changes, send the `REGISTER_DATA_LISTENER` event wit
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "REGISTER_DATA_LISTENER",
     "data": { "modules": ["cpu", "memory", "system"] }
 }
@@ -56,7 +54,6 @@ To stop receiving updates, send the `UNREGISTER_DATA_LISTENER` event. It takes n
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "UNREGISTER_DATA_LISTENER",
     "data": {}
 }
@@ -135,7 +132,6 @@ Send the `GET_HISTORY` event to get them. With no data it returns everything it 
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_HISTORY",
     "data": { "since": 1761300000000, "modules": ["cpu", "gpus"] }
 }
@@ -201,7 +197,6 @@ Send the `GET_DIAGNOSTICS` event, with no data, to see how the app is doing. It'
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DIAGNOSTICS"
 }
 ```

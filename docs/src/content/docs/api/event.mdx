@@ -5,13 +5,13 @@ description: Send one WebSocket event over the HTTP API, for clients that only s
 
 Send one event and get its response, without opening a WebSocket. The Android app's quick settings tiles use it to lock the computer or put it to sleep. It takes the same events, through the same handlers, as the [WebSocket API](/api/websocket/).
 
-Needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+Needs a [key](/api/#authentication), as `Authorization: Bearer`.
 
 ## Request
 
 ```http
 POST /api/event
-X-API-Token: {token}
+Authorization: Bearer {key}
 Content-Type: application/json
 
 { "event": "POWER_LOCK", "data": {} }

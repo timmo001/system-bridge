@@ -1,6 +1,6 @@
 ---
 title: Running
-description: Start System Bridge from the desktop, the terminal or a service, find your token, and where it keeps its files.
+description: Start System Bridge from the desktop, the terminal or a service, make keys for your clients, and where it keeps its files.
 ---
 
 ## Linux
@@ -161,26 +161,24 @@ For headless or multi-user setups, you can run System Bridge as a system-wide se
    sudo systemctl status system-bridge
    ```
 
-### Token
+### Keys
 
-The `token` is essential to connect to the API/WebSocket. You can get it using the CLI command:
+Each client connects with its own [key](/api/#authentication). Pair the Android app, make a key under **Settings > Devices** in the web client, or make one on the computer with:
 
 ```bash
-system-bridge client token
+system-bridge client key create "My script"
 ```
 
 :::note
-The token is stored per user, so run this command as the same user that runs the backend. If you run System Bridge as a system service under root, switch to that user first:
+Keys are stored per user, so run this command as the same user that runs the backend. If you run System Bridge as a system service under root, switch to that user first:
 
 ```bash
 sudo su -
-system-bridge client token
+system-bridge client key create "My script"
 ```
-
-You can also use the short form `system-bridge c t`.
 :::
 
-Alternatively, you can find your Token in the application startup logs when running the backend. The logs will show "Your API token is" followed by your token value.
+See [keys in the CLI](/using/cli/#keys) for listing and removing them, and the owner key the CLI uses. The old shared API token still works until it's removed in a later release: print it with `system-bridge client token`.
 
 ## Windows
 
@@ -257,6 +255,6 @@ System Bridge can show and change your Discord voice settings once you connect i
 ## Next steps
 
 - Open the [web client](/using/web-client/) to monitor and control your system.
-- Use the [CLI](/using/cli/) and get your [token](/using/cli/#token).
+- Use the [CLI](/using/cli/) and make [keys](/using/cli/#keys).
 - Connect to the [API and WebSocket](/api/) to read data and control your system.
 - Integrate with [Home Assistant](/using/home-assistant/).

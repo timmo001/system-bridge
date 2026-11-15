@@ -1,6 +1,6 @@
 ---
 title: Status and health
-description: Check whether the System Bridge backend is running, without a token.
+description: Check whether the System Bridge backend is running, without a key.
 ---
 
 These endpoints report whether the backend is running. Neither requires authentication.

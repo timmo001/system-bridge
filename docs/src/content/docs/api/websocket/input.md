@@ -12,7 +12,6 @@ Send the `KEYBOARD_KEYPRESS` event with a `key` to press a single key. It respon
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "KEYBOARD_KEYPRESS",
     "data": {
         "key": "a",
@@ -37,7 +36,6 @@ Send the `KEYBOARD_TEXT` event with a `text` string to type text. It responds wi
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "KEYBOARD_TEXT",
     "data": {
         "text": "hello",
@@ -58,7 +56,6 @@ Send the `CLIPBOARD_SET_TEXT` event with a `text` string to put it on the clipbo
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "CLIPBOARD_SET_TEXT",
     "data": {
         "text": "hello"
@@ -73,7 +70,6 @@ Send the `CLIPBOARD_GET_TEXT` event to read the clipboard's text. It responds wi
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "CLIPBOARD_GET_TEXT"
 }
 ```

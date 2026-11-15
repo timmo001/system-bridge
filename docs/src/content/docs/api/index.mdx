@@ -19,19 +19,31 @@ Replace `{host}` with the hostname or IP address of the machine running System B
 
 ## Authentication
 
-Most endpoints require your API token. Get it with the CLI:
+Most endpoints need a key. Each client has its own, so you can see which clients connect and remove one without touching the others. A key looks like `system-bridge_client_` followed by 49 letters and digits, and it's only shown once, when it's made. System Bridge keeps a hash of it, never the key.
 
-```bash
-system-bridge client token
-```
+A client gets its key by:
 
-See the [CLI reference](/using/cli/#token) for more ways to find it. How you pass the token depends on the protocol:
+- [Pairing](/api/pairing), for the Android app.
+- Being made by hand, under **Settings > Devices** in the web client, or on the computer with:
 
-- **HTTP**: send the `X-API-Token` or `token` header. The [event](/api/event), [pairing](/api/pairing), [push](/api/push) and [releases](/api/releases) endpoints take `Authorization: Bearer {token}` too, and answer pages on any origin, so a web client hosted elsewhere can call them. The media file endpoint takes a `token` query parameter instead.
-- **WebSocket**: include `token` in every message you send.
-- **MCP**: authenticated with the same token.
+  ```bash
+  system-bridge client key create "My script"
+  ```
 
-The `GET /api` and `GET /api/health` endpoints do not require a token.
+On first start, System Bridge also makes an owner key and writes it to the `owner-key` file in the [settings directory](/running/#file-locations), readable only by your user. The CLI signs in with it. See [keys in the CLI](/using/cli/#keys).
+
+How you send the key depends on the protocol:
+
+- **HTTP**: send `Authorization: Bearer {key}`.
+- **WebSocket**: send `{"type": "auth", "key": "{key}"}` as the first message. See [signing in](/api/websocket/#signing-in).
+- **MCP**: send `Authorization: Bearer {key}`.
+- **Media files**: ask for a [signed URL](/api/media-file-data), which holds no key.
+
+The `GET /api` and `GET /api/health` endpoints do not need a key.
+
+### Moving from the API token
+
+Before keys, every client used one shared API token. A client that has it can [trade it for its own key](/api/keys#exchange-the-api-token), once. Until the token is removed in a later release, it still works where it did: in the `X-API-Token` or `token` header, as a Bearer, in each WebSocket message's `token` field, and in the `token` query parameter of the MCP and media file endpoints.
 
 ## Protocols
 

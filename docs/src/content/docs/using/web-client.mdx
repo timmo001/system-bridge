@@ -30,13 +30,17 @@ The web client connects to the backend over the WebSocket API. On the **Connecti
 - **Host**: the hostname or IP address of the machine running System Bridge. It starts with the address you opened the web client from.
 - **Port**: the backend port (default `9170`).
 - **Use a secure connection**: turn on when the backend is served over HTTPS.
-- **API token**: your System Bridge token.
+- **API key**: a [key](/api/#authentication) for this browser. Make one with `system-bridge client key create`, or under **Settings > Devices** on a device that's already connected.
 
-You need your token to connect. See [how to find your token](/running/#token). The settings are kept in your browser.
+The old API token works too, until it's removed in a later release: the web client trades it for this browser's own key and keeps that. The settings are kept in your browser.
 
 :::tip
-When the backend opens the web client for you, the host, port, and token are filled in automatically.
+When the backend opens the web client for you, the host, port, and token are filled in automatically, and the token is traded for this browser's own key.
 :::
+
+### Keys
+
+**Settings > Devices** lists every client with a key to this computer: its name, how it got its key, when it was made and when it was last used. **Remove** signs a client out at once. **New key** makes a key by hand, for a script or another app, and shows it once to copy.
 
 ## Getting around
 

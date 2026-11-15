@@ -13,22 +13,18 @@ http://{host}:9170/api/mcp
 
 Replace `{host}` with the hostname or IP address of the machine running System Bridge. The port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable. Use `https://` when System Bridge is exposed through SSL configuration or TLS termination.
 
-All connections require your API token. Pass it as a `token` query parameter:
+All connections need a [key](/api/#authentication). Make one for the MCP client under **Settings > Devices** in the web client, or with `system-bridge client key create "My agent"`, and send it as a header:
 
 ```text
-http://{host}:9170/api/mcp?token=YOUR_TOKEN
+Authorization: Bearer YOUR_KEY
 ```
 
-Clients that support custom headers can instead send:
+A missing or invalid key is rejected with `401 Unauthorized`.
 
-```text
-Authorization: Bearer YOUR_TOKEN
-```
-
-A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+A client that only takes a URL can still put the old shared API token in it, as `?token=`, until the token is removed in a later release. A key can't go in the URL.
 
 :::caution
-The token provides access to MCP tools that can read system data, send notifications, control media, displays and windows, and run the commands in your allowlist. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
+A key gives access to MCP tools that can read system data, send notifications, control media, displays and windows, and run the commands in your allowlist. Keep it secret, give each client its own so you can remove one, and use HTTPS when the connection crosses an untrusted network.
 :::
 
 ## Home Assistant
@@ -37,7 +33,7 @@ Home Assistant's <a href="https://www.home-assistant.io/integrations/mcp" target
 
 1. In Home Assistant, go to **Settings** > **Devices & services**.
 2. Select **Add integration**, then search for **Model Context Protocol**.
-3. Enter the token-bearing Streamable HTTP URL, for example `http://192.168.1.10:9170/api/mcp?token=YOUR_TOKEN`.
+3. Enter the Streamable HTTP URL with the API token, for example `http://192.168.1.10:9170/api/mcp?token=YOUR_TOKEN`. The integration takes only a URL, so for now it uses the old shared token, which you can print with `system-bridge client token`.
 4. Complete the setup flow.
 5. Configure your conversation agent to use the System Bridge MCP tools.
 
@@ -45,20 +41,22 @@ Use a hostname or IP address that Home Assistant can reach. Use `https://` if th
 
 ## Other MCP clients
 
-For a remote MCP client, choose its Streamable HTTP transport and use the token-bearing endpoint:
+For a remote MCP client, choose its Streamable HTTP transport, use the endpoint and send your key in the `Authorization` header:
 
 ```text
-http://{host}:9170/api/mcp?token=YOUR_TOKEN
+http://{host}:9170/api/mcp
+Authorization: Bearer YOUR_KEY
 ```
 
-Client configuration formats and option names vary. Some clients accept a remote MCP URL directly, while others require a transport type, URL field, or custom `Authorization` header. Follow the client's documentation rather than assuming a particular configuration key.
+Client configuration formats and option names vary. Some clients take a custom `Authorization` header, while others take only a URL. Follow the client's documentation rather than assuming a particular configuration key.
 
 ## Legacy WebSocket transport
 
-The SDK-backed WebSocket transport remains available at the same path for compatibility:
+The SDK-backed WebSocket transport remains available at the same path for compatibility, with the key as a header:
 
 ```text
-ws://{host}:9170/api/mcp?token=YOUR_TOKEN
+ws://{host}:9170/api/mcp
+Authorization: Bearer YOUR_KEY
 ```
 
 Use `wss://` when connecting through TLS. Streamable HTTP is the primary setup for clients that support remote MCP servers.
@@ -66,7 +64,7 @@ Use `wss://` when connecting through TLS. Streamable HTTP is the primary setup f
 For a stdio-only client, <a href="https://github.com/vi/websocat" target="_blank" rel="noopener noreferrer">`websocat`</a> can bridge the client's standard input and output to the legacy WebSocket:
 
 ```bash
-websocat "ws://localhost:9170/api/mcp?token=YOUR_TOKEN"
+websocat -H "Authorization: Bearer YOUR_KEY" "ws://localhost:9170/api/mcp"
 ```
 
 Configure the client to launch `websocat` with the WebSocket URL as its argument. The exact command and argument fields depend on the client.
@@ -91,7 +89,7 @@ Tools that only read, such as `system_bridge_get_data`, are marked with the `rea
 
 ### OpenCode plugin
 
-The OpenCode plugin in `opencode-plugin/` gives OpenCode the same tools as a `system-bridge` Code Mode namespace, without an MCP server entry or a token in your config. Load it from the repository:
+The OpenCode plugin in `opencode-plugin/` gives OpenCode the same tools as a `system-bridge` Code Mode namespace, without an MCP server entry or a key in your config. Load it from the repository:
 
 ```json
 {
@@ -99,7 +97,7 @@ The OpenCode plugin in `opencode-plugin/` gives OpenCode the same tools as a `sy
 }
 ```
 
-It reads the tools from `system-bridge agent tools --json` and runs each with `system-bridge agent call`, which calls this server on the local backend with your token, so they always match the `system-bridge` on your `PATH`. Tool names drop the `system_bridge_` prefix, so `system_bridge_get_data` is `tools["system-bridge"].get_data`. Tools that change something ask first, and "always allow" on `media_control`, `hyprland_dispatch`, `hyprland_set_option`, `discord_control`, `set_power_profile` or `run_command` covers one action, dispatcher, option, profile or command.
+It reads the tools from `system-bridge agent tools --json` and runs each with `system-bridge agent call`, which calls this server on the local backend with the owner key, so they always match the `system-bridge` on your `PATH`. Tool names drop the `system_bridge_` prefix, so `system_bridge_get_data` is `tools["system-bridge"].get_data`. Tools that change something ask first, and "always allow" on `media_control`, `hyprland_dispatch`, `hyprland_set_option`, `discord_control`, `set_power_profile` or `run_command` covers one action, dispatcher, option, profile or command.
 
 ## Tools
 
@@ -554,8 +552,8 @@ Keep the system from idling, so it doesn't lock, blank the screen or sleep for b
 
 ### Unauthorized (`401`)
 
-- The token is missing or incorrect. Run `system-bridge client token` on the host running the backend.
-- Pass the token as a `token` query parameter or `Authorization: Bearer {token}` header.
+- The key is missing, wrong or has been removed. Check it's listed under **Settings > Devices**, or make a new one with `system-bridge client key create`.
+- Send the key as an `Authorization: Bearer {key}` header. Only the old API token works as a `token` query parameter.
 
 ### Tool execution fails
 

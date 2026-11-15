@@ -5,13 +5,13 @@ description: Get the newest System Bridge releases and their notes, marked again
 
 Get the newest stable System Bridge releases, with their release notes, marked against the version the computer runs. The web client's [What's new](/using/web-client#whats-new) page uses it.
 
-Needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+Needs a [key](/api/#authentication), as `Authorization: Bearer`.
 
 ## Request
 
 ```http
 GET /api/releases
-X-API-Token: {token}
+Authorization: Bearer {key}
 ```
 
 ## Response

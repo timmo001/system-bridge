@@ -114,4 +114,4 @@ Select the bin button next to the command. Clients can't run it from then on.
 
 ## Security
 
-Anyone with your API token can run every command on the allowlist, so only add commands you're happy for them to run. An attempt to run a command that isn't on the list is logged as a warning. At the `INFO` log level, each run is logged too, with its command, arguments and the connection that asked for it. See [privacy and security](/privacy/).
+Any client with a key can run every command on the allowlist, so only add commands you're happy for them to run. An attempt to run a command that isn't on the list is logged as a warning. At the `INFO` log level, each run is logged too, with its command, arguments and the connection that asked for it. See [privacy and security](/privacy/).

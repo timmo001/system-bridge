@@ -216,4 +216,4 @@ A process is asked to stop, as closing it would, so it can save first. `--force`
 
 ## Security
 
-Anyone with your API token can do all of this, including shutting the machine down. Keep the token private, and see [privacy and security](/privacy/).
+Any client with a key can do all of this, including shutting the machine down. Keep keys private, remove those you no longer use under **Settings > Devices**, and see [privacy and security](/privacy/).

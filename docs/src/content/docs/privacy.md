@@ -3,7 +3,7 @@ title: Privacy and security
 description: What System Bridge sends, receives and stores, who can access it, and what they can do.
 ---
 
-System Bridge has no accounts, telemetry, analytics or crash reporting, and it never sends your system data anywhere. Clients on your machine or network fetch it from System Bridge, and only with your API token. To be found on your local network, System Bridge does share your hostname and IP address there without a token (see [Network discovery](#network-discovery)).
+System Bridge has no accounts, telemetry, analytics or crash reporting, and it never sends your system data anywhere. Clients on your machine or network fetch it from System Bridge, and only with a key. To be found on your local network, System Bridge does share your hostname and IP address there without a key (see [Network discovery](#network-discovery)).
 
 This page lists every way the app communicates, so you can decide what to allow.
 
@@ -25,33 +25,34 @@ Nothing else leaves your machine unless you ask for it, for example by opening a
 
 The backend listens on port `9170` on every network interface, so other devices on your network can reach it. Change the port with `SYSTEM_BRIDGE_PORT`.
 
-The API uses plain HTTP and WebSocket, without TLS. Anyone who can see your network traffic can read the data and your API token as they pass. Use it on networks you trust, or put it behind a TLS proxy or VPN.
+The API uses plain HTTP and WebSocket, without TLS. Anyone who can see your network traffic can read the data and the keys as they pass. Use it on networks you trust, or put it behind a TLS proxy or VPN.
 
-### What needs the API token
+### What needs a key
 
-Your API token is a random UUID, created on first start and stored in the `token` file in the [settings directory](/running/#file-locations). Only your user can read it.
+Each client has its own [key](/api/#authentication), from pairing or made by hand, listed under **Settings > Devices** in the web client. A key is shown once, when it's made. System Bridge keeps only its SHA-256 hash, in the `keys.json` file in the [settings directory](/running/#file-locations), which only your user can read. Remove a client's key to sign it out. Keys are never logged.
 
-These need no token, and only show that System Bridge is running:
+These need no key, and only show that System Bridge is running:
 
 - `/api`: a fixed status message.
 - `/api/health`: the status, current time and System Bridge version.
-- The [web client](/using/web-client/) files. The web client asks for your token before it shows any data.
+- The [web client](/using/web-client/) files. The web client asks for a key before it shows any data.
 
-Everything else needs the token:
+Everything else needs a key:
 
-| Endpoint | How the token is sent |
+| Endpoint | How the key is sent |
 | --- | --- |
-| `/api/data/{module}` | `X-API-Token` or `token` header |
-| `/api/media/file/data` | A URL signed with the token (`expires` and `sig`), or the deprecated `token` query parameter. A signed URL only reads one file, until it expires. |
-| `/api/websocket` | `token` field in every message. The connection closes if no valid message arrives within 10 seconds. |
-| `/api/mcp` | `token` query parameter or `Authorization: Bearer` header |
-| `/api/quit` | `X-API-Token` header |
+| HTTP routes, such as `/api/data/{module}` and `/api/quit` | `Authorization: Bearer` header |
+| `/api/media/file/data` | No key: a URL System Bridge signs for one file, which only reads that file until it expires |
+| `/api/websocket` | The first message, `{"type": "auth", "key": "..."}`. A wrong key closes the connection, as does no valid message within 10 seconds. |
+| `/api/mcp` | `Authorization: Bearer` header |
 
-The WebSocket and MCP endpoints accept connections from any web origin, so the token is their only protection.
+The WebSocket and MCP endpoints accept connections from any web origin, so the key is their only protection.
 
-### What a client with your token can do
+Before keys, every client used one shared API token, a random UUID in the `token` file. Until it's removed in a later release, it still works where it did, including in the `X-API-Token` header, each WebSocket message's `token` field and the `token` query parameter of the MCP and media file endpoints, and a client can [trade it for its own key](/api/keys#exchange-the-api-token).
 
-Treat the token like a password. A client with it can:
+### What a client with a key can do
+
+Every key can do everything, so treat each like a password. A client with one can:
 
 - Read every [data module](/api/data/). These include your hostname, IP and MAC addresses, logged-in users, running processes, what's playing, which apps are using your camera or microphone, and your Discord voice state and latest notification.
 - List files and read file details anywhere your user can access, starting from your user directories and any media directories you add.
@@ -62,7 +63,7 @@ Treat the token like a password. A client with it can:
 - Read and change System Bridge settings.
 - Mute, deafen, change volumes, toggle your camera and screenshare, and play soundboard sounds in Discord, if you've set it up.
 
-System Bridge only sends system data to clients that have connected with the token and asked for it.
+System Bridge only sends system data to clients that have connected with a key and asked for it.
 
 ## Network discovery
 
@@ -116,13 +117,15 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 | File | Contents |
 | --- | --- |
 | `settings.json` | Your settings, including the command allowlist and media directories |
-| `token` | Your API token, readable only by your user |
+| `keys.json` | Each client's name, kind, key hash, and when it was made and last used. Never the keys. Readable only by your user |
+| `owner-key` | The owner key the CLI signs in with, readable only by your user |
+| `token` | The old shared API token, until it's removed. Readable only by your user |
 | `data/{module}.json` | The latest data for each module, rewritten on every update |
 | `data/history.json` | Up to the last 24 hours of the readings the web client graphs, such as CPU, memory, temperatures and network rates, saved every 5 minutes. Readable only by your user |
 | `discord.json` | Your Discord application's credentials, if you set up Discord. Readable only by your user when saved from the web client or the API |
 | `discord-token.json` | Your Discord access token, readable only by your user |
 
-The web client stores the host, port and API token you connect with in your browser's local storage, along with the graphs' time range. When you open the web client from the system tray, these are passed in the URL.
+The web client stores the host, port and its key in your browser's local storage, along with the graphs' time range. When you open the web client from the system tray, the host, port and old API token are passed in the URL, and the page trades the token for its own key.
 
 ### Logs
 
@@ -130,15 +133,14 @@ System Bridge writes one log file a day to the [logs directory](/running/#file-l
 
 The default `WARN` level only logs warnings and errors. If you raise it to `INFO`, logs also include:
 
-- Your API token, logged at startup.
-- The web client URL, including your token, when you open it from the system tray.
+- The web client URL, including the old API token, when you open it from the system tray.
 - The contents of notification, open, command, power and settings requests.
 
 At `DEBUG`, logs also include the contents of other requests, such as the text in keyboard text requests.
 
 Discord setup requests are never logged with their contents, so your Discord client secret stays out of the logs at every level. The backend never sends the secret back to clients either, and the Python connector hides it in its own logs.
 
-Logs stay on your machine. Before you share them in a bug report, check them and remove your token.
+Logs stay on your machine. Before you share them in a bug report, check them and remove the API token.
 
 ## Optional: Discord
 

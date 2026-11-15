@@ -48,7 +48,7 @@ netstat -ano | findstr :9170   # Windows
 export SYSTEM_BRIDGE_PORT=9171
 ```
 
-**Token / auth failures:** regenerate with `system-bridge client token`. Token path is under the per-OS data dir (see below).
+**Key / auth failures:** check the client is listed by `system-bridge client key list`, and make it a new key with `system-bridge client key create <name>`. The CLI signs in with the owner key; if that's missing or removed, run `system-bridge client key owner --replace`. Keys are never logged, so the backend log only says a key was invalid. The old shared token still works until it's removed: `system-bridge client token`.
 
 **Cross-compilation:**
 
@@ -68,12 +68,14 @@ Some modules may not cross-build due to OS-specific dependencies.
 ## File Locations
 
 ```
-App data (settings, token):
+App data (settings, keys, token):
   Linux:   ~/.local/share/system-bridge/v5/
   Windows: %LOCALAPPDATA%\system-bridge\v5\
   macOS:   ~/Library/Application Support/system-bridge/v5/
 
-Token:      <app data>/token
+Client keys: <app data>/keys.json (hashes only)
+Owner key:   <app data>/owner-key
+Token:       <app data>/token (old shared token, until it's removed)
 Logs:
   Linux:   ~/.local/state/system-bridge/YYYY-MM-DD.log
   Windows: %LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log

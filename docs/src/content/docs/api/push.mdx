@@ -5,7 +5,7 @@ description: Subscribe a phone or browser to Web Push from System Bridge, and ch
 
 System Bridge pushes to phones and browsers while their app is closed, with Web Push and VAPID. The Android app subscribes through UnifiedPush, and the web client, installed as an app, through the browser's push service. Both use the same routes.
 
-Every route needs the API token, as `X-API-Token`, the `token` header or `Authorization: Bearer`.
+Every route needs a [key](/api/#authentication), as `Authorization: Bearer`.
 
 ## What gets pushed
 

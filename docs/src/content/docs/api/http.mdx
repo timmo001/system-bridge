@@ -6,7 +6,7 @@ description: The System Bridge HTTP API for simple request/response reads, and w
 The HTTP API handles simple request/response reads: confirming the backend is running and fetching a module's current data. For everything else, use the [WebSocket API](/api/websocket/), which is the primary interface and covers most operations: live data, input, media and power control, notifications, settings, and commands.
 
 :::note
-Most endpoints need your API token. See [Authentication](/api/#authentication).
+Most endpoints need a key. See [Authentication](/api/#authentication).
 :::
 
 ## Base URL
@@ -23,7 +23,7 @@ Replace `{host}` with the hostname or IP address of the machine running System B
 
 <CardGroup cols={3}>
   <Card title="Status and health" href="/api/status" icon="heart-pulse">
-    Confirm the backend is running. No token required.
+    Confirm the backend is running. No key required.
   </Card>
   <Card title="Data" href="/api/data" icon="database">
     Fetch a module's current data on demand.
@@ -34,8 +34,11 @@ Replace `{host}` with the hostname or IP address of the machine running System B
   <Card title="Events" href="/api/event" icon="send">
     Send one WebSocket event, such as locking the computer.
   </Card>
+  <Card title="Keys" href="/api/keys" icon="key-round">
+    List, make and remove keys, and trade the API token for one.
+  </Card>
   <Card title="Pairing" href="/api/pairing" icon="qr-code">
-    Hand a phone the API token through a one-time code.
+    Give a phone its own key through a one-time code.
   </Card>
   <Card title="Push" href="/api/push" icon="bell-ring">
     Subscribe a phone or browser to pushes.

@@ -28,7 +28,6 @@ On Windows, only the actions up to `MUTE` work, and not with `player`. System Br
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "MEDIA_CONTROL",
     "data": {
         "action": "PAUSE"
@@ -39,7 +38,6 @@ On Windows, only the actions up to `MUTE` work, and not with `player`. System Br
 ```json title="Seek a particular player"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "MEDIA_CONTROL",
     "data": {
         "action": "SEEK",
@@ -80,7 +78,6 @@ The volume values are the percentages that Discord's sliders show. In testing, D
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "DISCORD_CONTROL",
     "data": {
         "action": "SET_INPUT_VOLUME",
@@ -104,7 +101,6 @@ Send the `AUDIO_CONTROL` event to set an audio output's, input's or app's volume
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "AUDIO_CONTROL",
     "data": {
         "id": "alsa_output.pci-0000_00_1f.3.analog-stereo",
@@ -132,7 +128,6 @@ Forgetting a device unpairs it, so it has to be paired again before it can conne
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "BLUETOOTH_CONNECT",
     "data": {
         "address": "80:C3:BA:7B:93:4E"
@@ -153,7 +148,6 @@ Send the `CAMERA_CONTROL` event to set one of a webcam's controls, such as its b
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "CAMERA_CONTROL",
     "data": {
         "id": "usb-Insta360_Insta360_Link_2C-video-index0",
@@ -175,7 +169,6 @@ Send the `CAMERA_CAPTURE` event to take a picture with a webcam. Linux only, and
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "CAMERA_CAPTURE",
     "data": {
         "id": "usb-Insta360_Insta360_Link_2C-video-index0",
@@ -221,7 +214,6 @@ Keeping awake stops the system idling, so it doesn't lock, blank the screen or s
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "SYSTEM_SET_POWER_PROFILE",
     "data": {
         "profile": "performance"
@@ -248,7 +240,6 @@ Closing a window asks it to close, as its close button does, so an app may ask t
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "DESKTOP_SET_WINDOW_STATE",
     "data": {
         "id": "0x555dbf21c9e0",
@@ -270,7 +261,6 @@ Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state,
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "DISPLAY_CONTROL",
     "data": {
         "id": "HDMI-A-2",
@@ -311,7 +301,6 @@ Moving a window leaves the focus where it is. Hyprland only pins floating window
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "HYPRLAND_RUN_GLOBAL_SHORTCUT",
     "data": {
         "name": "omarchy:panel.omarchy.clock"
@@ -344,7 +333,6 @@ The direction is `down`, `left`, `right` or `up`. When Hyprland refuses, such as
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "HYPRLAND_DISPATCH",
     "data": {
         "dispatcher": "move_focus",
@@ -360,7 +348,6 @@ Option names take dots or colons, such as `general.col.active_border` or `genera
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "HYPRLAND_GET_OPTION",
     "data": { "name": "general.col.active_border" }
 }
@@ -391,7 +378,6 @@ The [`desktop`](/api/data/#desktop) data's `hyprland.options` reports `animation
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "HYPRLAND_SET_OPTION",
     "data": {
         "name": "animations.enabled",
@@ -411,7 +397,6 @@ The [`desktop`](/api/data/#desktop) data's `hyprland.options` reports `animation
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "HYPRLAND_EVAL",
     "data": { "code": "hl.notification.create({ text = \"Hi\" })" }
 }
@@ -431,7 +416,6 @@ The action is `open`, `close` or `toggle`. The ids are in the [`desktop`](/api/d
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "OMARCHY_PANEL",
     "data": {
         "action": "toggle",
@@ -447,7 +431,6 @@ Send the `NOTIFICATION` event to show a desktop notification. `title` and `messa
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "NOTIFICATION",
     "data": {
         "title": "Hello",
@@ -473,7 +456,6 @@ The response type is `NOTIFICATION_SENT`, and its data is what was sent with the
 ```json title="A notification with buttons"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "NOTIFICATION",
     "data": {
         "title": "Washing machine",
@@ -506,7 +488,6 @@ Send the `NOTIFICATION_DISMISS` event with a notification's `id` to close it. Th
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "NOTIFICATION_DISMISS",
     "data": {
         "id": 47
@@ -521,7 +502,6 @@ Send the `NOTIFICATION_PRESS` event with a notification's `id` and a button's `a
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "NOTIFICATION_PRESS",
     "data": {
         "id": 47,
@@ -537,7 +517,6 @@ Send the `OPEN` event with a `path` to open a file or folder with the default ap
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "OPEN",
     "data": {
         "path": "C:\\users\\user\\Downloads\\example.txt"
@@ -552,7 +531,6 @@ Send the `OPEN` event with a `url` to open it in the default browser.
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "OPEN",
     "data": {
         "url": "https://timmo.dev"
@@ -570,7 +548,6 @@ Send the `PROCESS_KILL` event to end a process. It's asked to stop, as closing i
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "PROCESS_KILL",
     "data": {
         "id": 12345
@@ -594,7 +571,6 @@ Control the system power state with one of the following events. Each takes empt
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "POWER_SLEEP",
     "data": {}
 }

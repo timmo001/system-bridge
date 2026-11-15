@@ -18,7 +18,6 @@ Send the `GET_DIRECTORIES` event to list the available base directories. It take
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DIRECTORIES",
     "data": {}
 }
@@ -31,7 +30,6 @@ Send the `GET_DIRECTORY` event with the base directory key to look up a single d
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DIRECTORY",
     "data": {
         "base": "documents"
@@ -46,7 +44,6 @@ Send the `GET_FILES` event with a base directory, and optionally a relative `pat
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_FILES",
     "data": {
         "base": "documents",
@@ -62,7 +59,6 @@ Send the `GET_FILE` event with the absolute `path` to a file to get its informat
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_FILE",
     "data": {
         "path": "/home/user/Documents/example.txt"
@@ -79,7 +75,6 @@ Send the `VALIDATE_DIRECTORY` event with a `path` to check whether it exists and
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "VALIDATE_DIRECTORY",
     "data": {
         "path": "/home/user/Music"
@@ -94,7 +89,6 @@ Send the `GET_DISK_MOUNTS` event to list mounted disks, categorised into primary
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DISK_MOUNTS",
     "data": {}
 }
@@ -111,7 +105,6 @@ Send the `GET_SETTINGS` event to retrieve the current settings. It takes no data
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_SETTINGS",
     "data": {}
 }
@@ -124,7 +117,6 @@ Send the `UPDATE_SETTINGS` event with the settings object to update. It responds
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "UPDATE_SETTINGS",
     "data": {
         "autostart": true,
@@ -148,7 +140,6 @@ Each of these changes one command in `commands.allowlist` and leaves the rest as
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "COMMAND_UPDATE",
     "data": {
         "id": "9ef69bc3-62f8-4d86-952d-5f498bbddf0f",
@@ -194,7 +185,6 @@ Send the `GET_DISCORD_SETUP` event to see how far Discord is set up. It takes no
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_DISCORD_SETUP",
     "data": {}
 }
@@ -229,7 +219,6 @@ Send the `UPDATE_DISCORD_SETUP` event with the application's `clientId` and `cli
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "UPDATE_DISCORD_SETUP",
     "data": {
         "clientId": "123456789012345678",
@@ -249,7 +238,6 @@ Send the `COMMAND_EXECUTE` event with the `commandID` of an allowlisted command:
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "COMMAND_EXECUTE",
     "data": {
         "commandID": "my-command"
@@ -270,7 +258,6 @@ Send the `GET_COMMAND_PREFABS` event to list the [prefab commands](/features/com
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "GET_COMMAND_PREFABS",
     "data": {}
 }
@@ -303,7 +290,6 @@ Send the `EXIT_APPLICATION` event to shut down the backend. It takes empty `data
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "EXIT_APPLICATION",
     "data": {}
 }

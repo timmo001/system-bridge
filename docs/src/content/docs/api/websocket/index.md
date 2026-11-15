@@ -22,21 +22,32 @@ GET /api/websocket
 
 By default this is served on port `9170`, so the full URL is usually `ws://{host}:9170/api/websocket`.
 
+## Signing in
+
+A browser can't set headers on a WebSocket, so the first message signs the connection in with your client's [key](/api/#authentication):
+
+```json title="First message"
+{
+    "type": "auth",
+    "key": "system-bridge_client_..."
+}
+```
+
+Nothing is sent back when the key is right. A wrong one is answered with a `BAD_KEY` error, and the connection is closed.
+
 ## Request format
 
-Every message you send uses the same envelope:
+Once signed in, every message you send uses the same envelope:
 
 ```json title="Request"
 {
     "id": "abc123",
-    "token": "abc123",
     "event": "EVENT_NAME",
     "data": {}
 }
 ```
 
 - `id`: An identifier you choose. It is echoed back on the response so you can match requests to responses.
-- `token`: Your API token. See [how to find your token](/using/cli/#token).
 - `event`: The event to trigger (for example `GET_DATA`).
 - `data`: The payload for the event. Use `{}` when the event takes no data.
 
@@ -70,15 +81,15 @@ When a request fails, the response `type` is `ERROR` and `subtype` describes the
 {
     "id": "abc123",
     "type": "ERROR",
-    "subtype": "BAD_TOKEN",
+    "subtype": "BAD_REQUEST",
     "data": {},
-    "message": "Invalid token"
+    "message": "Invalid request"
 }
 ```
 
 Possible error subtypes include:
 
-- `BAD_REQUEST`, `BAD_TOKEN`, `BAD_JSON`
+- `BAD_REQUEST`, `BAD_KEY`, `BAD_TOKEN`, `BAD_JSON`
 - `BAD_DIRECTORY`, `BAD_FILE`, `BAD_PATH`
 - `INVALID_ACTION`, `MISSING_ACTION`
 - `LISTENER_ALREADY_REGISTERED`, `LISTENER_NOT_REGISTERED`
