@@ -43,7 +43,6 @@ type Json = Schema.Json;
 
 const BackendRequest = Schema.fromJsonString(
   Schema.Struct({
-    token: Schema.String,
     id: Schema.String,
     event: Schema.String,
     data: Schema.Struct({
@@ -81,10 +80,6 @@ const moduleData = new Map<string, Json>([
 /** What the fake backend sends back for each request. */
 const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
   const { id } = request;
-
-  if (request.token !== token) {
-    return [{ id, type: "ERROR", subtype: "BAD_TOKEN", message: "Bad token" }];
-  }
 
   switch (request.event) {
     case "GET_DATA":
@@ -220,6 +215,8 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
 
 let server: ReturnType<typeof Bun.serve>;
 
+const signedIn = new WeakSet();
+
 beforeAll(() => {
   server = Bun.serve({
     hostname: "127.0.0.1",
@@ -230,6 +227,22 @@ beforeAll(() => {
         : new Response("Upgrade required", { status: 426 }),
     websocket: {
       message: (ws, message) => {
+        const frame = Schema.decodeUnknownSync(
+          Schema.fromJsonString(
+            Schema.Struct({
+              type: Schema.optionalKey(Schema.String),
+              key: Schema.optionalKey(Schema.String),
+            }),
+          ),
+        )(String(message));
+
+        // The first message signs the connection in with its key
+        if (frame.type === "auth") {
+          if (frame.key === token) signedIn.add(ws);
+
+          return;
+        }
+
         const request = Schema.decodeSync(BackendRequest)(String(message));
 
         if (request.event === "EXIT_APPLICATION") {
@@ -238,7 +251,18 @@ beforeAll(() => {
           return;
         }
 
-        for (const reply of repliesFor(request)) {
+        const replies = signedIn.has(ws)
+          ? repliesFor(request)
+          : [
+              {
+                id: request.id,
+                type: "ERROR",
+                subtype: "BAD_TOKEN",
+                message: "Bad token",
+              },
+            ];
+
+        for (const reply of replies) {
           ws.send(JSON.stringify(reply));
         }
       },

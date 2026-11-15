@@ -35,7 +35,7 @@ import {
   ModuleDataSchemas,
   ModuleName,
 } from "./generated/modules.js";
-import { ErrorBody, Health } from "./protocol.js";
+import { ErrorBody, Health, KeyClient as Client, NewKey } from "./protocol.js";
 
 export class SystemBridgeApi extends HttpApi.make("system-bridge")
   .add(
@@ -47,8 +47,17 @@ export class SystemBridgeApi extends HttpApi.make("system-bridge")
     HttpApiGroup.make("data").add(
       HttpApiEndpoint.get("module", "/api/data/:module", {
         params: { module: ModuleName },
-        headers: { token: Schema.String },
+        headers: { authorization: Schema.String },
         success: Schema.Json,
+      }),
+    ),
+  )
+  .add(
+    HttpApiGroup.make("keys").add(
+      HttpApiEndpoint.post("exchange", "/api/keys/exchange", {
+        headers: { authorization: Schema.String },
+        payload: Schema.Struct({ client: Client }),
+        success: NewKey,
       }),
     ),
   ) {}
@@ -67,12 +76,17 @@ export interface HttpOptions extends ConnectionOptions {
 }
 
 export interface Interface {
-  /** Backend status, timestamp and version. Needs no token. */
+  /** Backend status, timestamp and version. Needs no key. */
   readonly health: Effect.Effect<Health, HttpError>;
   /** The latest data for one module. */
   readonly getModuleData: <M extends ModuleName>(
     module: M,
   ) => Effect.Effect<ModuleData[M], HttpError | DataMissingError>;
+  /**
+   * Trades the old shared token (the connection's `token`) for this client's
+   * own key. Use the key as the `token` from then on.
+   */
+  readonly exchangeKey: (client: Client) => Effect.Effect<NewKey, HttpError>;
 }
 
 const fromResponse = Effect.fnUntraced(function* (
@@ -165,7 +179,7 @@ export const make = Effect.fnUntraced(function* (options: HttpOptions) {
     const body = yield* client.data
       .module({
         params: { module },
-        headers: { token: Redacted.value(options.token) },
+        headers: { authorization: `Bearer ${Redacted.value(options.token)}` },
       })
       .pipe(handle(`GET /api/data/${module}`));
 
@@ -189,7 +203,18 @@ export const make = Effect.fnUntraced(function* (options: HttpOptions) {
     );
   });
 
-  return SystemBridgeHttp.of({ health, getModuleData });
+  const exchangeKey = Effect.fn("SystemBridgeHttp.exchangeKey")(function* (
+    who: Client,
+  ) {
+    return yield* client.keys
+      .exchange({
+        headers: { authorization: `Bearer ${Redacted.value(options.token)}` },
+        payload: { client: who },
+      })
+      .pipe(handle("POST /api/keys/exchange"));
+  });
+
+  return SystemBridgeHttp.of({ health, getModuleData, exchangeKey });
 });
 
 export class SystemBridgeHttp extends Context.Service<

@@ -29,7 +29,7 @@ beforeAll(() => {
           version: "5.11.1",
         }),
       "/api/data/:module": (request) => {
-        if (request.headers.get("token") !== token) {
+        if (request.headers.get("authorization") !== `Bearer ${token}`) {
           return Response.json({ error: "Invalid token" }, { status: 401 });
         }
 

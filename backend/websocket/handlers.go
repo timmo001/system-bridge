@@ -69,10 +69,10 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		// in with a client key. Until then each message carries the old
 		// shared token.
 		if msg.Type == "auth" {
-			if !ws.auth.Key(msg.Key) {
+			if !ws.auth.Key(msg.Key) && !ws.auth.SharedToken(msg.Key) {
 				slog.Error("Invalid key received")
 				ws.SendError(conn, msg, "BAD_KEY", "Invalid key")
-				break
+				continue
 			}
 			keyAuthed = true
 		} else if !keyAuthed && !ws.auth.SharedToken(msg.Token) {

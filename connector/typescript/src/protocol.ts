@@ -1010,4 +1010,21 @@ export interface Health extends Schema.Schema.Type<typeof Health> {}
 
 export const ErrorBody = Schema.Struct({ error: Schema.String });
 
+/**
+ * A client with a key, as Groundwork's Client keys contract has it. Kept here
+ * rather than imported because Groundwork's package ships TypeScript source.
+ */
+export const KeyClient = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  kind: Schema.String,
+});
+
+export interface KeyClient extends Schema.Schema.Type<typeof KeyClient> {}
+
+/** What `POST /api/keys/exchange` answers: the key, shown once, and its client. */
+export const NewKey = Schema.Struct({ key: Schema.String, client: KeyClient });
+
+export interface NewKey extends Schema.Schema.Type<typeof NewKey> {}
+
 export const Empty = Schema.Struct({});

@@ -424,7 +424,7 @@ const errorFromResponse = (
 
   return Match.value(response.subtype ?? "NONE").pipe(
     Match.when("LISTENER_ALREADY_REGISTERED", () => Option.none()),
-    Match.whenOr("BAD_TOKEN", "BAD_API_KEY", "MISSING_TOKEN", () =>
+    Match.whenOr("BAD_TOKEN", "BAD_KEY", "BAD_API_KEY", "MISSING_TOKEN", () =>
       Option.some(new AuthenticationError({ message })),
     ),
     Match.when("TIMEOUT", () =>
@@ -442,7 +442,6 @@ const toConnectionError = (cause: Socket.SocketError) =>
 const encodeRequest = <A, I>(
   payload: Schema.Codec<A, I>,
   message: {
-    readonly token: string;
     readonly id: string;
     readonly event: EventType;
     readonly data: A;
@@ -451,7 +450,6 @@ const encodeRequest = <A, I>(
   Schema.encodeEffect(
     Schema.fromJsonString(
       Schema.Struct({
-        token: Schema.String,
         id: Schema.String,
         event: Schema.String,
         data: payload,
@@ -514,6 +512,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   );
 
   const writer = yield* socket.writer;
+
+  // The key signs the connection in once, as the first message
+  yield* writer
+    .write(JSON.stringify({ type: "auth", key: Redacted.value(options.token) }))
+    .pipe(Effect.mapError(toConnectionError));
 
   const pending = MutableHashMap.empty<string, PendingRequest>();
 
@@ -666,7 +669,6 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     data: A,
   ) =>
     encodeRequest(payload, {
-      token: Redacted.value(options.token),
       id,
       event,
       data,
