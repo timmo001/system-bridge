@@ -2,6 +2,77 @@
 
 lockfile_version = 3
 
+[[tools.actionlint]]
+version = "1.7.12"
+backend = "aqua:rhysd/actionlint"
+specifiers = ["1.7.12"]
+
+[tools.actionlint."platforms.linux-arm64"]
+checksum = "sha256:325e971b6ba9bfa504672e29be93c24981eeb1c07576d730e9f7c8805afff0c6"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924897"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.linux-arm64-musl"]
+checksum = "sha256:325e971b6ba9bfa504672e29be93c24981eeb1c07576d730e9f7c8805afff0c6"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924897"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.linux-x64"]
+checksum = "sha256:8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924896"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.linux-x64-baseline"]
+checksum = "sha256:8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924896"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.linux-x64-musl"]
+checksum = "sha256:8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924896"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924896"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.macos-arm64"]
+checksum = "sha256:aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924893"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.macos-x64"]
+checksum = "sha256:5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924880"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.macos-x64-baseline"]
+checksum = "sha256:5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924880"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.windows-x64"]
+checksum = "sha256:6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924919"
+provenance = "github-attestations"
+
+[tools.actionlint."platforms.windows-x64-baseline"]
+checksum = "sha256:6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9"
+url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"
+url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924919"
+provenance = "github-attestations"
+
 [[tools.bun]]
 version = "1.4.4"
 backend = "core:bun"
@@ -171,6 +242,65 @@ url = "https://github.com/golangci/golangci-lint/releases/download/v2.15.0/golan
 url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/647132900"
 provenance = "github-attestations"
 
+[[tools.hk]]
+version = "2.12.0"
+backend = "packslip:github.com/jdx/hk"
+specifiers = ["2.12.0"]
+
+[tools.hk."platforms.linux-arm64"]
+checksum = "sha256:0f4e44802c3fcf98461b6608281353ae1944b82fd12f4a683f8e2e6683e562f3"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-unknown-linux-gnu.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.linux-arm64-musl"]
+checksum = "sha256:82758b9671b4b3627f126dc8e9803bb156c23893b4f9ec212797f81c4d242e50"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-unknown-linux-musl.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.linux-x64"]
+checksum = "sha256:db98f893b882f064c1f7abcc96f4ccc31e8154fd1ba0f7f94823d371c2c4fdad"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-gnu.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.linux-x64-baseline"]
+checksum = "sha256:db98f893b882f064c1f7abcc96f4ccc31e8154fd1ba0f7f94823d371c2c4fdad"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-gnu.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.linux-x64-musl"]
+checksum = "sha256:cab1ba30c605444112b4499790a97bd28dda83ffc352baa4aa87d5abfb12c668"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-musl.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:cab1ba30c605444112b4499790a97bd28dda83ffc352baa4aa87d5abfb12c668"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-musl.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.macos-arm64"]
+checksum = "sha256:269c17d47e884c19adb77144d5957e854fc5fc6a1a6f9c1a0a5b19431e2fabb8"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-apple-darwin.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.windows-x64"]
+checksum = "sha256:052f2ea36dc679cae7fbbd57f75c2b4e5c4cd7bb6711f7bf6b9a147524ffe9f9"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-pc-windows-msvc.zip"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
+[tools.hk."platforms.windows-x64-baseline"]
+checksum = "sha256:052f2ea36dc679cae7fbbd57f75c2b4e5c4cd7bb6711f7bf6b9a147524ffe9f9"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-pc-windows-msvc.zip"
+signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
+repository_ids = { repository = "922514152" }
+
 [[tools.node]]
 version = "26.13.1"
 backend = "core:node"
@@ -219,6 +349,77 @@ url = "https://nodejs.org/dist/v26.13.1/node-v26.13.1-win-x64.zip"
 [tools.node."platforms.windows-x64-baseline"]
 checksum = "sha256:e2edda75bfb089654705cf65a13b58933bfd5f57148e8ebda916f58a2474f1f7"
 url = "https://nodejs.org/dist/v26.13.1/node-v26.13.1-win-x64.zip"
+
+[[tools."npm:markdownlint-cli2"]]
+version = "0.24.1"
+aube = { path = ".mise/locks/npm-markdownlint-cli2/0.24.1", digest = "sha256:6737143ae7b051a66903dc3736b592c8d9c2bc14ea0e67c82cad855dd2506792" }
+backend = "npm:markdownlint-cli2"
+specifiers = ["0.24.1"]
+
+[[tools."pipx:yamllint"]]
+version = "1.38.0"
+backend = "pipx:yamllint"
+specifiers = ["1.38.0"]
+uv = { path = ".mise/locks/pipx-yamllint/1.38.0", digest = "sha256:75d8d19d279e54d443fa22822aeaeebef75b34d7f6a6fe5a70848fe8e9cefee8" }
+
+[[tools.pkl]]
+version = "0.33.0"
+backend = "aqua:apple/pkl"
+specifiers = ["0.33.0"]
+
+[tools.pkl."platforms.linux-arm64"]
+checksum = "sha256:edcea361402ecab0f3a93f86b1a896c41d00a9241f4962f70278254b08fbd26d"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-aarch64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756970"
+
+[tools.pkl."platforms.linux-arm64-musl"]
+checksum = "sha256:edcea361402ecab0f3a93f86b1a896c41d00a9241f4962f70278254b08fbd26d"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-aarch64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756970"
+
+[tools.pkl."platforms.linux-x64"]
+checksum = "sha256:b9a6ddea6b382b7d4db4cf78e77aa3858e0c8a7e02939d2ba298574b5d1fcc69"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-amd64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756975"
+
+[tools.pkl."platforms.linux-x64-baseline"]
+checksum = "sha256:b9a6ddea6b382b7d4db4cf78e77aa3858e0c8a7e02939d2ba298574b5d1fcc69"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-amd64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756975"
+
+[tools.pkl."platforms.linux-x64-musl"]
+checksum = "sha256:b9a6ddea6b382b7d4db4cf78e77aa3858e0c8a7e02939d2ba298574b5d1fcc69"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-amd64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756975"
+
+[tools.pkl."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:b9a6ddea6b382b7d4db4cf78e77aa3858e0c8a7e02939d2ba298574b5d1fcc69"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-linux-amd64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714756975"
+
+[tools.pkl."platforms.macos-arm64"]
+checksum = "sha256:e39c157df0f00a35d34b46270a768784edcaf509aafbf743849b27b4c83ef83b"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-macos-aarch64"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714757040"
+
+[tools.pkl."platforms.windows-x64"]
+checksum = "sha256:9875af0d17d3535ed0e3903f3ae71fc8007268949328f73c2d12942fca11840c"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-windows-amd64.exe"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714757051"
+
+[tools.pkl."platforms.windows-x64-baseline"]
+checksum = "sha256:9875af0d17d3535ed0e3903f3ae71fc8007268949328f73c2d12942fca11840c"
+checksum_source = "mise-versions"
+url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-windows-amd64.exe"
+url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714757051"
 
 [[tools.python]]
 version = "3.14.10"
@@ -279,6 +480,77 @@ provenance = "github-attestations"
 checksum = "sha256:c1876a9795d3a94ee49a1499a69cd91e26ca3e2829593f93fa6e4db90d05402b"
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.14.10+20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
 provenance = "github-attestations"
+
+[[tools.shellcheck]]
+version = "0.11.0"
+backend = "aqua:koalaman/shellcheck"
+specifiers = ["0.11.0"]
+
+[tools.shellcheck."platforms.linux-arm64"]
+checksum = "sha256:12b331c1d2db6b9eb13cfca64306b1b157a86eb69db83023e261eaa7e7c14588"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.aarch64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056934"
+
+[tools.shellcheck."platforms.linux-arm64-musl"]
+checksum = "sha256:12b331c1d2db6b9eb13cfca64306b1b157a86eb69db83023e261eaa7e7c14588"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.aarch64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056934"
+
+[tools.shellcheck."platforms.linux-x64"]
+checksum = "sha256:8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056942"
+
+[tools.shellcheck."platforms.linux-x64-baseline"]
+checksum = "sha256:8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056942"
+
+[tools.shellcheck."platforms.linux-x64-musl"]
+checksum = "sha256:8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056942"
+
+[tools.shellcheck."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056942"
+
+[tools.shellcheck."platforms.macos-arm64"]
+checksum = "sha256:56affdd8de5527894dca6dc3d7e0a99a873b0f004d7aabc30ae407d3f48b0a79"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.aarch64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056932"
+
+[tools.shellcheck."platforms.macos-x64"]
+checksum = "sha256:3c89db4edcab7cf1c27bff178882e0f6f27f7afdf54e859fa041fca10febe4c6"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056930"
+
+[tools.shellcheck."platforms.macos-x64-baseline"]
+checksum = "sha256:3c89db4edcab7cf1c27bff178882e0f6f27f7afdf54e859fa041fca10febe4c6"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.xz"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056930"
+
+[tools.shellcheck."platforms.windows-x64"]
+checksum = "sha256:8a4e35ab0b331c85d73567b12f2a444df187f483e5079ceffa6bda1faa2e740e"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.zip"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056944"
+
+[tools.shellcheck."platforms.windows-x64-baseline"]
+checksum = "sha256:8a4e35ab0b331c85d73567b12f2a444df187f483e5079ceffa6bda1faa2e740e"
+checksum_source = "mise-versions"
+url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.zip"
+url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056944"
 
 [[tools.uv]]
 version = "0.13.8"

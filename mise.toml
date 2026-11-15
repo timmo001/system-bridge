@@ -8,6 +8,13 @@ node = "26.13.1"
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
 uv = "0.13.8"
+# The linters the hk pre-push hook runs, matching the shared lint workflows.
+hk = "2.12.0"
+pkl = "0.33.0"
+"pipx:yamllint" = "1.38.0"
+"npm:markdownlint-cli2" = "0.24.1"
+actionlint = "1.7.12"
+shellcheck = "0.11.0"
 
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
@@ -169,11 +176,8 @@ hide = true
 depends = ["lint:go", "generate:schemas:check"]
 
 [tasks."install:hooks"]
-description = "Install the post-commit hook (Nix hashes) and the pre-push hook (Go lint, schema drift)"
-run = [
-  "mise generate git-pre-commit --write --hook post-commit --task nix:post-commit",
-  "mise generate git-pre-commit --write --hook pre-push --task hooks:pre-push",
-]
+description = "Install the hk hooks: pre-push (shared lints, Go lint, schema drift) and post-commit (Nix hashes)"
+run = "hk install"
 
 [tasks."android:build"]
 description = "Build the Android app's pairing page and its debug and release APKs"

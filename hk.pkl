@@ -1,0 +1,21 @@
+// Git hooks: the shared lints from timmo001/workflows before a push, then the
+// Go lint and generated schema check, and the Nix hashes after a commit.
+// Run the lints by hand with `hk check`.
+amends "package://github.com/timmo001/workflows/releases/download/20261114.0/hk-base@20261114.0.0#/base.pkl"
+
+hooks {
+  ["pre-push"] {
+    steps {
+      ["repo"] {
+        check = "mise run hooks:pre-push"
+      }
+    }
+  }
+  ["post-commit"] {
+    steps {
+      ["nix-hashes"] {
+        check = "mise run nix:post-commit"
+      }
+    }
+  }
+}
