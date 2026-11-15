@@ -48,7 +48,7 @@ export default Plugin.define({
         );
       }
 
-      // No token means System Bridge has never run here, so leave the
+      // No owner key means System Bridge has never run here, so leave the
       // namespace out.
       if (!manifest.success.available) return;
 

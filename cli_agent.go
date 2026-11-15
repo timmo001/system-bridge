@@ -63,7 +63,7 @@ type agentManifestTool struct {
 }
 
 type agentManifest struct {
-	// Whether this machine has a backend to call: its token exists
+	// Whether this machine has a backend to call: its owner key exists
 	Available bool                `json:"available"`
 	Tools     []agentManifestTool `json:"tools"`
 }
@@ -105,8 +105,8 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 	}
 
 	manifest := agentManifest{Tools: make([]agentManifestTool, 0, len(tools))}
-	if tokenPath, err := utils.GetTokenFilePath(); err == nil {
-		if _, err := os.Stat(tokenPath); err == nil {
+	if ownerKeyPath, err := keys.OwnerKeyPath(); err == nil {
+		if _, err := os.Stat(ownerKeyPath); err == nil {
 			manifest.Available = true
 		}
 	}
