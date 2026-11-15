@@ -6,6 +6,5 @@
     }),
     event='EVENT_TEST',
     id='abc123',
-    token='abc123',
   )
 # ---

@@ -171,10 +171,11 @@ def media_file_url(
     path: str,
     expires_in: timedelta = timedelta(hours=24),
 ) -> str:
-    """Return a signed URL for a media file, valid for expires_in.
+    """Return a URL for a media file signed with the old shared token.
 
-    The signature only covers this base and path, so the URL can be sent to
-    other devices without sharing the API token.
+    Deprecated: clients now have their own keys and can't sign, so use
+    HTTPClient.media_file_url, which System Bridge signs. These URLs work
+    until the shared token is removed.
     """
     expires = int((utcnow() + expires_in).timestamp())
     message = f"{base}\n{path}\n{expires}".encode()

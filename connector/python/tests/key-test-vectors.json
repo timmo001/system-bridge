@@ -1,0 +1,61 @@
+{
+  "format": "<service>_<kind>_<43 base62 random><6 base62 CRC32 checksum>",
+  "alphabet": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  "checksum": "CRC32 (IEEE) of the UTF-8 bytes before it, in base62, padded to 6 with leading zeros",
+  "hash": "Lowercase hex SHA-256 of the whole key",
+  "crc32Check": {
+    "input": "123456789",
+    "crc32": 3421780262
+  },
+  "valid": [
+    {
+      "key": "kestrel_key_0000000000000000000000000000000000000000000337xIf",
+      "service": "kestrel",
+      "kind": "key",
+      "random": "0000000000000000000000000000000000000000000",
+      "crc32": 2794623753,
+      "checksum": "337xIf",
+      "sha256": "a1ce06e872071183408fc35cbbb86dd138125f38675388e0741800a3ba39c6c5"
+    },
+    {
+      "key": "system-bridge_client_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz03GVkI",
+      "service": "system-bridge",
+      "kind": "client",
+      "random": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "crc32": 48264290,
+      "checksum": "03GVkI",
+      "sha256": "eadd598fb948e5e7d709f211503e83f11fcb52f901279d56397fbc669a72a9b8"
+    },
+    {
+      "key": "upnext_owner_7Xq2LmP9vB4nR8tK1wZ6yC3dF5gH0jS2aE9uI4oQ7rT31DOOf",
+      "service": "upnext",
+      "kind": "owner",
+      "random": "7Xq2LmP9vB4nR8tK1wZ6yC3dF5gH0jS2aE9uI4oQ7rT",
+      "crc32": 2766366881,
+      "checksum": "31DOOf",
+      "sha256": "3e7f9f3fd7f57971808a5349f557d4cb8bbdd145f6e12861dd4f1f850a646b62"
+    }
+  ],
+  "invalid": [
+    {
+      "key": "kestrel_key_0000000000000000000000000000000000000000000337xI0",
+      "reason": "The checksum does not match"
+    },
+    {
+      "key": "kestrel_key_0000000000000000000000000000000000000000000337xI",
+      "reason": "Cut short"
+    },
+    {
+      "key": "Kestrel_key_0000000000000000000000000000000000000000000337xIf",
+      "reason": "The service has a capital"
+    },
+    {
+      "key": "kestrel_0000000000000000000000000000000000000000000337xIf",
+      "reason": "No kind"
+    },
+    {
+      "key": "upnext_owner_7Xq2LmP-vB4nR8tK1wZ6yC3dF5gH0jS2aE9uI4oQ7rT31DOOf",
+      "reason": "A character outside base62"
+    }
+  ]
+}

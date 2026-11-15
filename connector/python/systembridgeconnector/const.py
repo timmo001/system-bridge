@@ -240,6 +240,7 @@ class EventSubType(StrEnum):
 
     NONE = "NONE"
     BAD_TOKEN = "BAD_TOKEN"
+    BAD_KEY = "BAD_KEY"
     BAD_DIRECTORY = "BAD_DIRECTORY"
     BAD_FILE = "BAD_FILE"
     BAD_JSON = "BAD_JSON"

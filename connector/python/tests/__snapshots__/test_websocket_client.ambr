@@ -1,15 +1,4 @@
 # serializer version: 1
-# name: test_bad_token
-  Response(
-    data=dict({
-    }),
-    id='test',
-    message='Message sent',
-    module=None,
-    subtype=None,
-    type='N/A',
-  )
-# ---
 # name: test_discord_control
   Response(
     data=dict({

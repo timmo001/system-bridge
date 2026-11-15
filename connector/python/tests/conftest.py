@@ -3,7 +3,7 @@
 import asyncio
 from collections.abc import AsyncGenerator
 from dataclasses import asdict
-from json import dumps
+from json import dumps, loads
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
@@ -25,6 +25,8 @@ from . import (
     bad_request_response,
     health_response,
     json_response,
+    key_exchange_response,
+    media_file_url_response,
     module_data_response,
     process_message,
     text_response,
@@ -44,6 +46,8 @@ def mock_http_client_session_generator(
         app = web.Application()
         app.router.add_get("/api/data/{module}", module_data_response)
         app.router.add_get("/api/health", health_response)
+        app.router.add_post("/api/keys/exchange", key_exchange_response)
+        app.router.add_post("/api/media/file/url", media_file_url_response)
         app.router.add_delete("/test/json", json_response)
         app.router.add_get("/test/badrequest", bad_request_response)
         app.router.add_get("/test/json", json_response)
@@ -96,9 +100,33 @@ async def mock_websocket_session_generator(
         """Return a websocket response."""
         ws = web.WebSocketResponse()
         await ws.prepare(request)
+        signed_in = False
 
         async for msg in ws:
             if msg.type == web.WSMsgType.TEXT:
+                # The first message signs the connection in with its key. A
+                # wrong one is answered, then closed, as the backend does
+                if (frame := loads(msg.data)).get("type") == "auth":
+                    signed_in = frame.get("key") == TOKEN
+                    if not signed_in:
+                        await ws.send_str(
+                            dumps(
+                                asdict(
+                                    Response(
+                                        id="",
+                                        type=EventType.ERROR,
+                                        subtype=EventSubType.BAD_KEY,
+                                        message="Invalid key",
+                                        data={},
+                                    )
+                                )
+                            )
+                        )
+                        await ws.close()
+                    continue
+                if not signed_in:
+                    continue
+
                 response = await process_message(msg.data)
                 _LOGGER.info(response)
 

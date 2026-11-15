@@ -97,6 +97,11 @@ BLUETOOTH_TIMEOUT = 35.0
 # The backend allows 20 seconds for a camera to start and settle
 CAMERA_CAPTURE_TIMEOUT = 25.0
 
+# Replies that say the key, or the old token, was turned away
+_AUTH_FAILURES = frozenset(
+    {EventSubType.BAD_KEY, EventSubType.BAD_TOKEN, "BAD_API_KEY"}
+)
+
 
 class WebSocketClient(Base):
     """WebSocket Client."""
@@ -110,7 +115,11 @@ class WebSocketClient(Base):
         websocket: aiohttp.ClientWebSocketResponse | None = None,
         can_close_session: bool = False,
     ) -> None:
-        """Initialise."""
+        """Initialise.
+
+        The token is this client's own key, or the old shared token until
+        it's traded for one with HTTPClient.exchange_key.
+        """
         super().__init__()
         self._api_host = api_host
         self._api_port = api_port
@@ -143,6 +152,9 @@ class WebSocketClient(Base):
         )
         try:
             self._websocket = await self._session.ws_connect(url=url, heartbeat=30)
+            # The key signs the connection in once, as the first message. A
+            # wrong one is answered with BAD_KEY and the socket is closed
+            await self._websocket.send_json({"type": "auth", "key": self._token})
         except (
             aiohttp.WSServerHandshakeError,
             aiohttp.ClientConnectionError,
@@ -1592,10 +1604,7 @@ class WebSocketClient(Base):
                         name,
                         message,
                     )
-                elif (
-                    message[EventKey.SUBTYPE] == EventSubType.BAD_TOKEN
-                    or message[EventKey.SUBTYPE] == "BAD_API_KEY"
-                ):
+                elif message[EventKey.SUBTYPE] in _AUTH_FAILURES:
                     self._logger.error(
                         "[%s]: %s",
                         name,
@@ -1757,9 +1766,9 @@ class WebSocketClient(Base):
         if message.type == aiohttp.WSMsgType.TEXT:
             message_json = message.json()
 
-            if message_json[EventKey.TYPE] == EventType.ERROR and (
-                message_json[EventKey.SUBTYPE] == EventSubType.BAD_TOKEN
-                or message_json[EventKey.SUBTYPE] == "BAD_API_KEY"
+            if (
+                message_json[EventKey.TYPE] == EventType.ERROR
+                and message_json[EventKey.SUBTYPE] in _AUTH_FAILURES
             ):
                 raise AuthenticationException(message_json[EventKey.MESSAGE])
 
@@ -1784,7 +1793,6 @@ class WebSocketClient(Base):
             raise ValueError(f"Timeout must be positive, got {timeout}")
 
         request = Request(
-            token=self._token,
             id=request_id if request_id is not None else uuid4().hex,
             event=event,
             data=data,

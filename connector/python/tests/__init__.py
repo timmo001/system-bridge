@@ -35,6 +35,10 @@ _LOGGER = logging.getLogger(__name__)
 
 API_HOST: Final[str] = "127.0.0.1"
 TOKEN: Final[str] = "abc123"
+# A valid System Bridge key, from key-test-vectors.json
+CLIENT_KEY: Final[str] = (
+    "system-bridge_client_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz03GVkI"
+)
 
 WEBSOCKET_PATH: Final[str] = "/api/websocket"
 
@@ -82,13 +86,35 @@ async def health_response(_: web.Request):
 
 
 async def module_data_response(request: web.Request):
-    """Return a module data response."""
+    """Return a module data response, for a request with the key."""
+    if request.headers.get("Authorization") != f"Bearer {TOKEN}":
+        return web.json_response({"error": "Invalid API key"}, status=401)
     module = request.match_info["module"]
     if module == "cpu":
         return web.json_response(asdict(FIXTURE_CPU))
     if module == "displays":
         return web.json_response([asdict(display) for display in FIXTURE_DISPLAYS])
     return web.json_response({"error": "Module not found"}, status=404)
+
+
+async def key_exchange_response(request: web.Request):
+    """Return a client's own key, for the old token."""
+    if request.headers.get("Authorization") != f"Bearer {TOKEN}":
+        return web.json_response({"error": "Invalid API token"}, status=401)
+    body = await request.json()
+    return web.json_response({"key": CLIENT_KEY, "client": body["client"]})
+
+
+async def media_file_url_response(request: web.Request):
+    """Return a signed media file URL."""
+    body = await request.json()
+    return web.json_response(
+        {
+            "url": f"/api/media/file/data?base={body['base']}&path={body['path']}"
+            f"&expires={body['expiresIn']}&sig=signed",
+            "expires": body["expiresIn"],
+        }
+    )
 
 
 async def json_response(_: web.Request):
@@ -310,14 +336,6 @@ def command_change_response(request: Request) -> Response:
 async def process_request(request: Request) -> Response:
     """Process a request."""
     _LOGGER.info("Event: %s", request.event)
-
-    if request.token != TOKEN:
-        return Response(
-            id=request.id,
-            type=EventType.ERROR,
-            subtype=EventSubType.BAD_TOKEN,
-            data=request.data,
-        )
 
     if request.event == EventType.GET_DATA:
         return Response(

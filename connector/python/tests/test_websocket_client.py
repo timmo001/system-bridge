@@ -1555,18 +1555,17 @@ async def test_unknown_message(
 
 
 @pytest.mark.asyncio
-async def test_bad_token(
-    snapshot: SnapshotAssertion,
+async def test_bad_key(
     mock_websocket_session: ClientSessionGenerator,
 ):
-    """Test the websocket client."""
+    """Test a wrong key is turned away when the connection signs in."""
     client = await mock_websocket_session()
     ws = await client.ws_connect("/api/websocket")
 
     websocket_client = WebSocketClient(
         api_host=API_HOST,
         api_port=client.port,
-        token="badtoken",
+        token="badkey",
         session=client.session,
         websocket=ws,
         can_close_session=True,
@@ -1574,12 +1573,10 @@ async def test_bad_token(
 
     await websocket_client.connect()
 
-    assert (
-        await websocket_client.exit_backend(
-            request_id=REQUEST_ID,
-        )
-        == snapshot
-    )
+    with pytest.raises(AuthenticationException):
+        await websocket_client.receive_message()
+
+    await websocket_client.close()
 
 
 @pytest.mark.asyncio

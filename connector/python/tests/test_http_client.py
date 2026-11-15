@@ -1,6 +1,7 @@
 """Test the http client module."""
 
 import asyncio
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -13,7 +14,10 @@ from systembridgeconnector.exceptions import (
 from systembridgeconnector.http_client import HTTPClient
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
 from systembridgeconnector.models.fixtures.modules.displays import FIXTURE_DISPLAYS
+from systembridgeconnector.models.keys import KeyClient
 from systembridgeconnector.models.modules import Module
+
+from . import CLIENT_KEY, TOKEN
 
 
 @pytest.mark.asyncio
@@ -28,6 +32,28 @@ async def test_get_module_data(mock_http_client: HTTPClient):
     """Test the get module data method maps data to models."""
     assert await mock_http_client.get_module_data(Module.CPU) == FIXTURE_CPU
     assert await mock_http_client.get_module_data(Module.DISPLAYS) == FIXTURE_DISPLAYS
+
+
+@pytest.mark.asyncio
+async def test_exchange_key(mock_http_client: HTTPClient):
+    """Test the old token is traded for the client's own key."""
+    client = KeyClient(id="ha-entry", name="Home Assistant", kind="home-assistant")
+    new_key = await mock_http_client.exchange_key(client)
+    assert new_key.key == CLIENT_KEY
+    assert new_key.client == client
+    assert CLIENT_KEY not in repr(new_key)
+
+
+@pytest.mark.asyncio
+async def test_media_file_url(mock_http_client: HTTPClient):
+    """Test a media file URL comes signed from System Bridge, without the key."""
+    url = await mock_http_client.media_file_url(
+        "music", "song.mp3", timedelta(minutes=5)
+    )
+    assert url.startswith("http://127.0.0.1:")
+    assert "/api/media/file/data?" in url
+    assert "expires=300" in url
+    assert TOKEN not in url
 
 
 @pytest.mark.asyncio
