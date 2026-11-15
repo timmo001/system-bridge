@@ -17,7 +17,7 @@ from systembridgeconnector.models.fixtures.modules.displays import FIXTURE_DISPL
 from systembridgeconnector.models.keys import KeyClient
 from systembridgeconnector.models.modules import Module
 
-from . import CLIENT_KEY, TOKEN
+from . import CLIENT_KEY, PAIRING_CODE, TOKEN
 
 
 @pytest.mark.asyncio
@@ -42,6 +42,15 @@ async def test_exchange_key(mock_http_client: HTTPClient):
     assert new_key.key == CLIENT_KEY
     assert new_key.client == client
     assert CLIENT_KEY not in repr(new_key)
+
+
+@pytest.mark.asyncio
+async def test_pair(mock_http_client: HTTPClient):
+    """Test a pairing code is traded for the client's own key."""
+    client = KeyClient(id="ha-entry", name="Home Assistant", kind="home-assistant")
+    assert await mock_http_client.pair(PAIRING_CODE, client) == CLIENT_KEY
+    with pytest.raises(AuthenticationException):
+        await mock_http_client.pair("WRONGCODE", client)
 
 
 @pytest.mark.asyncio

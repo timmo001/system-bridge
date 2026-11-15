@@ -45,7 +45,9 @@ class HTTPClient(Base):
 
     @property
     def _headers(self) -> dict[str, str]:
-        """Return the headers for a request, with the key."""
+        """Return the headers for a request, with the key when there is one."""
+        if not self._token:
+            return BASE_HEADERS
         return {**BASE_HEADERS, "Authorization": f"Bearer {self._token}"}
 
     async def delete(
@@ -85,6 +87,26 @@ class HTTPClient(Base):
         return NewKey(
             **await self.post("/api/keys/exchange", {"client": asdict(client)})
         )
+
+    async def pair(self, code: str, client: KeyClient) -> str:
+        """Trade a one-time pairing code for this client's own key.
+
+        The code is made in the web client's Devices page and works once, for
+        five minutes, so no key is needed. Keep the client's id, so pairing
+        again replaces its key rather than adding another.
+        """
+        data = await self.post(
+            "/api/pair",
+            {
+                "code": code,
+                "client": {
+                    "id": client.id,
+                    "name": client.name,
+                    "platform": client.kind,
+                },
+            },
+        )
+        return data["token"]
 
     async def media_file_url(
         self,

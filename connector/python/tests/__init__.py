@@ -35,6 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API_HOST: Final[str] = "127.0.0.1"
 TOKEN: Final[str] = "abc123"
+PAIRING_CODE: Final[str] = "MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR"
 # A valid System Bridge key, from key-test-vectors.json
 CLIENT_KEY: Final[str] = (
     "system-bridge_client_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz03GVkI"
@@ -103,6 +104,21 @@ async def key_exchange_response(request: web.Request):
         return web.json_response({"error": "Invalid API token"}, status=401)
     body = await request.json()
     return web.json_response({"key": CLIENT_KEY, "client": body["client"]})
+
+
+async def pair_response(request: web.Request):
+    """Return a client's own key, for the one pairing code that works."""
+    body = await request.json()
+    if body["code"] != PAIRING_CODE:
+        return web.json_response(
+            {"error": "Unknown or expired pairing code"}, status=401
+        )
+    return web.json_response(
+        {
+            "token": CLIENT_KEY,
+            "service": {"id": "test-uuid", "name": body["client"]["platform"]},
+        }
+    )
 
 
 async def media_file_url_response(request: web.Request):

@@ -28,6 +28,7 @@ from . import (
     key_exchange_response,
     media_file_url_response,
     module_data_response,
+    pair_response,
     process_message,
     text_response,
     unauthorised_response,
@@ -48,6 +49,7 @@ def mock_http_client_session_generator(
         app.router.add_get("/api/health", health_response)
         app.router.add_post("/api/keys/exchange", key_exchange_response)
         app.router.add_post("/api/media/file/url", media_file_url_response)
+        app.router.add_post("/api/pair", pair_response)
         app.router.add_delete("/test/json", json_response)
         app.router.add_get("/test/badrequest", bad_request_response)
         app.router.add_get("/test/json", json_response)
