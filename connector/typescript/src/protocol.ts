@@ -176,6 +176,7 @@ export const ResponseSubtype = Schema.Literals([
   "NONE",
   "BAD_REQUEST",
   "BAD_TOKEN",
+  "BAD_KEY",
   "BAD_JSON",
   "BAD_DIRECTORY",
   "BAD_FILE",

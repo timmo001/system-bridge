@@ -236,9 +236,22 @@ beforeAll(() => {
           ),
         )(String(message));
 
-        // The first message signs the connection in with its key
+        // The first message signs the connection in with its key. A wrong
+        // one is answered, then the socket is closed, as the backend does
         if (frame.type === "auth") {
-          if (frame.key === token) signedIn.add(ws);
+          if (frame.key === token) {
+            signedIn.add(ws);
+          } else {
+            ws.send(
+              JSON.stringify({
+                id: "",
+                type: "ERROR",
+                subtype: "BAD_KEY",
+                message: "Invalid key",
+              }),
+            );
+            ws.close();
+          }
 
           return;
         }
@@ -251,18 +264,9 @@ beforeAll(() => {
           return;
         }
 
-        const replies = signedIn.has(ws)
-          ? repliesFor(request)
-          : [
-              {
-                id: request.id,
-                type: "ERROR",
-                subtype: "BAD_TOKEN",
-                message: "Bad token",
-              },
-            ];
+        if (!signedIn.has(ws)) return;
 
-        for (const reply of replies) {
+        for (const reply of repliesFor(request)) {
           ws.send(JSON.stringify(reply));
         }
       },
@@ -431,7 +435,7 @@ describe("SystemBridgeWebSocket", () => {
   });
 
   test.each([
-    ["a bad token", "wrong", "AuthenticationError"],
+    ["a bad key", "wrong", "AuthenticationError"],
     ["an error reply", token, "BadRequestError"],
   ] as const)("map %s", async (_, used, tag) => {
     const error = await run(

@@ -548,6 +548,9 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
   const closed = yield* Deferred.make<never, ConnectionError>();
 
+  // The backend answers a wrong key with BAD_KEY, then closes the socket
+  const signInFailed = yield* Deferred.make<never, AuthenticationError>();
+
   const prefix = (yield* Random.nextInt).toString(36);
 
   const counter = yield* Ref.make(0);
@@ -576,6 +579,22 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   };
 
   const onResponse = Effect.fnUntraced(function* (response: WebSocketResponse) {
+    if (response.type === "ERROR" && response.subtype === "BAD_KEY") {
+      const error = new AuthenticationError({
+        message: response.message ?? "Invalid key",
+      });
+
+      yield* Deferred.fail(signInFailed, error);
+
+      yield* Effect.forEach(
+        MutableHashMap.values(pending),
+        (request) => Deferred.fail(request.deferred, error),
+        { discard: true },
+      );
+
+      return;
+    }
+
     if (response.type === "DATA_UPDATE") {
       yield* PubSub.publish(responses, response);
 
@@ -699,7 +718,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
 
     const response = yield* write(event, id, payload, data).pipe(
       Effect.andThen(
-        Effect.raceFirst(Deferred.await(deferred), Deferred.await(closed)),
+        Effect.raceAllFirst([
+          Deferred.await(deferred),
+          // Before closed: a rejected key closes the socket too
+          Deferred.await(signInFailed),
+          Deferred.await(closed),
+        ]),
       ),
       Effect.timeoutOrElse({
         duration: timeout,

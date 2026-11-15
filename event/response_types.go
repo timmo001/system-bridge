@@ -93,6 +93,7 @@ const (
 	ResponseSubtypeNone                      ResponseSubtype = "NONE"
 	ResponseSubtypeBadRequest                ResponseSubtype = "BAD_REQUEST"
 	ResponseSubtypeBadToken                  ResponseSubtype = "BAD_TOKEN"
+	ResponseSubtypeBadKey                    ResponseSubtype = "BAD_KEY"
 	ResponseSubtypeBadJSON                   ResponseSubtype = "BAD_JSON"
 	ResponseSubtypeBadDirectory              ResponseSubtype = "BAD_DIRECTORY"
 	ResponseSubtypeBadFile                   ResponseSubtype = "BAD_FILE"

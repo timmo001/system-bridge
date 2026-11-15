@@ -67,12 +67,12 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 
 		// A first message of {"type":"auth","key":...} signs the connection
 		// in with a client key. Until then each message carries the old
-		// shared token.
+		// shared token. A wrong key closes the connection, as the spec has it.
 		if msg.Type == "auth" {
 			if !ws.auth.Key(msg.Key) && !ws.auth.SharedToken(msg.Key) {
 				slog.Error("Invalid key received")
-				ws.SendError(conn, msg, "BAD_KEY", "Invalid key")
-				continue
+				ws.SendError(conn, msg, event.ResponseSubtypeBadKey, "Invalid key")
+				break
 			}
 			keyAuthed = true
 		} else if !keyAuthed && !ws.auth.SharedToken(msg.Token) {
