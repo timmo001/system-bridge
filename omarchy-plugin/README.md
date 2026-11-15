@@ -110,7 +110,7 @@ System Bridge module:
 system-bridge client data watch --module desktop --module system ...
 ```
 
-It reads System Bridge settings and its local authentication token through the
+It reads System Bridge settings and its local owner key through the
 System Bridge client. Its buttons run `system-bridge client` commands to open
 the web client, control Bluetooth devices, the desktop, Discord, displays and
 media, run your allowlisted commands, and quit or start System Bridge. The

@@ -92,7 +92,7 @@ Omarchy plugins run as unsandboxed code inside `omarchy-shell`. Review the
 source before installing it.
 
 This plugin starts `system-bridge client data watch` and reads System Bridge's
-local settings and authentication token through that client. Its buttons run
+local settings and owner key through that client. Its buttons run
 `system-bridge client` commands to open the web client, control the desktop,
 media, Discord and displays, run your allowlisted commands, and quit or start
 System Bridge.
