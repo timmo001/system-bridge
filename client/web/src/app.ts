@@ -3,6 +3,7 @@ import "@timmo001/groundwork-ui/define/gw-banner.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
+import "@timmo001/groundwork-ui/define/gw-install-banner.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import {
   mdiBookOpenVariant,
@@ -11,6 +12,8 @@ import {
   mdiPaletteOutline,
   mdiServerNetwork,
 } from "@mdi/js";
+import { Option } from "effect";
+import { AsyncResult } from "effect/reactivity";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, query } from "lit/decorators.js";
 
@@ -19,13 +22,7 @@ import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
 import { connectionSettings, connectionStatus } from "./lib/atoms";
-import {
-  canInstall,
-  dismissInstall,
-  install,
-  installDismissed,
-  watchInstall,
-} from "./lib/install";
+import { watchInstall } from "./lib/install";
 import { DOCS_URL } from "./lib/links";
 import { type NavItem, navigation } from "./lib/navigation";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
@@ -33,7 +30,7 @@ import { visitPage } from "./lib/shortcuts";
 // Applies the stored theme and registers its WebMCP tools on every page
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
-import { inApp, openComputers } from "./lib/mobile";
+import { inApp, mobileConnection, openComputers } from "./lib/mobile";
 import { update, versionStale, watchForUpdates } from "./lib/update";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
@@ -227,9 +224,8 @@ export class SbApp extends LitElement {
 
   readonly #stale = new AtomController(this, () => versionStale);
 
-  readonly #canInstall = new AtomController(this, () => canInstall);
+  readonly #mobile = new AtomController(this, () => mobileConnection);
 
-  readonly #dismissed = new AtomController(this, () => installDismissed);
   @query(".commands") private commands?: GwCommandMenu;
 
   /** The last page counted towards the app's shortcuts, so each visit counts once. */
@@ -316,23 +312,11 @@ export class SbApp extends LitElement {
         </gw-banner>
         <!-- The offer to install System Bridge as an app, until it's turned
              down once; then only the Devices page offers it -->
-        <gw-banner ?open=${this.#canInstall.value && !this.#dismissed.value}>
-          <p>
-            Install System Bridge to open it in its own window, like any other
-            app.
-          </p>
-          <gw-button slot="actions" size="small" @click=${install}
-            >Install</gw-button
-          >
-          <gw-button
-            slot="actions"
-            size="small"
-            appearance="plain"
-            variant="neutral"
-            @click=${dismissInstall}
-            >Not now</gw-button
-          >
-        </gw-banner>
+        <gw-install-banner
+          storage-key="system-bridge:install-dismissed"
+          message="Install System Bridge to open it in its own window, like any other app."
+          .pwa=${Option.getOrUndefined(AsyncResult.value(this.#mobile.value))?.pwa}
+        ></gw-install-banner>
       </div>
       <gw-app-bar>
         <a slot="brand" class="brand" href=${href("overview")}>
