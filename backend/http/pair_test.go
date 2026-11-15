@@ -85,6 +85,19 @@ func TestPairLink(t *testing.T) {
 	}
 }
 
+// A code typed in by hand as the pairing page groups it still works
+func TestPairingTypedCode(t *testing.T) {
+	codes := NewPairCodes()
+	code, _, err := codes.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+	typed := strings.ToLower(code[:4] + "-" + code[4:8] + " " + code[8:])
+	if response := pairWith(testAuth(t), codes, typed); response.Code != http.StatusOK {
+		t.Errorf("got %d", response.Code)
+	}
+}
+
 func TestPairingRefused(t *testing.T) {
 	t.Run("making a code without the token", func(t *testing.T) {
 		if response := makePairCode(t, NewPairCodes(), "wrong"); response.Code != http.StatusUnauthorized {

@@ -62,8 +62,11 @@ func (p *PairCodes) Create() (string, time.Time, error) {
 	return code, expires, nil
 }
 
-// take uses up a code, saying whether it was there and still worked
+// take uses up a code, saying whether it was there and still worked. A code
+// typed in by hand may be grouped with dashes or spaces, as the pairing page
+// shows it, or in lower case, so those don't count.
 func (p *PairCodes) take(code string) bool {
+	code = strings.ToUpper(strings.NewReplacer("-", "", " ", "").Replace(code))
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	expires, ok := p.codes[code]
