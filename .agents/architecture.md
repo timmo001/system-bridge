@@ -2,7 +2,7 @@
 
 ## Code Structure
 
-```
+```text
 .
 ├── main.go              # Entry point - CLI commands, systray, signal handling
 ├── backend/             # HTTP and WebSocket server implementation
@@ -14,9 +14,10 @@
 │   └── module/          # Data modules (cpu, memory, disks, etc.)
 ├── event/               # Event system
 │   └── handler/         # Event handlers for WebSocket messages
+├── keys/                # Client keys: making, checking and storing them, to Groundwork's spec
 ├── settings/            # Settings management (settings.go)
 ├── utils/               # Shared utilities
-│   ├── token.go         # Token management (separate from settings)
+│   ├── token.go         # The old shared token, until it's removed
 │   └── handlers/        # Action handlers (filesystem, keyboard, media, notification, power)
 ├── types/               # Shared type definitions
 ├── bus/                 # Internal event bus
@@ -38,7 +39,8 @@ Data modules live under `data/module/`. Each module collects specific system inf
 - The facade imports and calls the subpackage (e.g., `system.GetCameraUsage()`)
 
 **Example structure:**
-```
+
+```text
 data/module/
   system.go              # Facade, imports system subpackage
   system/
@@ -51,9 +53,14 @@ data/module/
 
 ## API and Authentication
 
-- **Token Authentication**: All HTTP/WebSocket endpoints require a token
-  - Token is managed by `utils/token.go` and stored separately from settings
-  - Load with `utils.LoadToken()`
+- **Client keys**: each client signs in with its own key, from pairing, the
+  web client's Devices page or `system-bridge client key create`
+  - `keys/` makes and checks keys and keeps only their hashes in `keys.json`;
+    `keys.Auth` checks a request
+  - HTTP and MCP take `Authorization: Bearer`; a WebSocket's first message is
+    `{"type":"auth","key":...}`; `/api/mcp` alone also takes `?key=`
+  - The CLI signs in with the owner key, read with `keys.LoadOwnerKey()`
+  - The old shared token (`utils/token.go`) still works until it's removed
 - **Port**: Read from `SYSTEM_BRIDGE_PORT` environment variable (default: 9170)
 - **Settings**: Managed by `settings/settings.go` (shared across packages)
 
@@ -70,7 +77,7 @@ data/module/
 3. **MCP Server** (`backend/mcp/`):
    - Model Context Protocol server for AI assistant integration
    - Exposes system capabilities as standardized tools
-   - WebSocket transport with token authentication
+   - Streamable HTTP and WebSocket transports, signed in with a key
    - See `backend/mcp/README.md` for detailed documentation
 
 4. **Event Handlers** (`event/handler/`):
@@ -80,6 +87,7 @@ data/module/
 ## Web Client Embedding
 
 The Vite static build is embedded at compile time:
+
 ```go
 //go:embed all:client/web/dist/*
 var webClientContent embed.FS
@@ -97,6 +105,7 @@ mise run generate:schemas
 ```
 
 **How it works:**
+
 - Parses Go struct definitions and string enums in the `types/` directory
 - Generates Effect schemas in `connector/typescript/src/generated/modules.ts`, each with a same-name type
 - Runs automatically before `mise run build:all` or `mise run build:client:web` when a file under `types/` or the generator has changed
@@ -185,6 +194,7 @@ bun outdated
 ```
 
 **When adding new dependencies:**
+
 - Prefer well-maintained packages with active communities
 - Check license compatibility
 - Document any system dependencies in README.md
