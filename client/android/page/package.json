@@ -11,10 +11,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@timmo001/groundwork-mobile": "0.47.0",
-    "@timmo001/groundwork-pwa": "0.47.0",
-    "@timmo001/groundwork-tokens": "0.47.0",
-    "@timmo001/groundwork-ui": "0.47.0",
+    "@timmo001/groundwork-mobile": "0.48.0",
+    "@timmo001/groundwork-pwa": "0.48.0",
+    "@timmo001/groundwork-tokens": "0.48.0",
+    "@timmo001/groundwork-ui": "0.48.0",
     "effect": "4.1.4"
   },
   "devDependencies": {
