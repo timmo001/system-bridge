@@ -63,7 +63,7 @@ func KeyExchangeHandler(auth *keys.Auth) http.HandlerFunc {
 func KeysHandler(auth *keys.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !auth.ValidOrShared(r) {
-			writeError(w, http.StatusUnauthorized, "Invalid API key")
+			writeError(w, http.StatusUnauthorized, "Invalid key")
 			return
 		}
 		switch r.Method {

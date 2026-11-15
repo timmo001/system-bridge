@@ -100,7 +100,7 @@ object Api {
             token,
           )
         }
-        401 -> error("That API key isn't right")
+        401 -> error("That key isn't right")
         else -> error("The computer answered $status")
       }
     }

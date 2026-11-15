@@ -29,7 +29,7 @@ const validate = (form: ConnectionForm): FormErrors => {
     ...(!(Number.isInteger(port) && port >= 1 && port <= 65535) && {
       port: "Enter a port from 1 to 65535",
     }),
-    ...(form.token === "" && { token: "Enter the API key" }),
+    ...(form.token === "" && { token: "Enter the key" }),
   };
 };
 
@@ -126,7 +126,7 @@ export class PageConnection extends SbPage {
         ${this.renderHeader({
           heading: "Connection",
           description:
-            "Where to find System Bridge, and the API key to use. The settings are kept in this browser.",
+            "Where to find System Bridge, and the key to use. The settings are kept in this browser.",
           icon: mdiLanConnect,
         })}
         ${this.renderResult(
@@ -161,7 +161,7 @@ export class PageConnection extends SbPage {
                 ></gw-switch>
               </gw-setting-row>
               <gw-input
-                label="API key"
+                label="Key"
                 name="token"
                 type="password"
                 autocomplete="off"

@@ -17,7 +17,7 @@ func GetModuleDataHandler(auth *keys.Auth, dataStore *data.DataStore) http.Handl
 		if !auth.ValidOrShared(r) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
-			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API key"}); err != nil {
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid key"}); err != nil {
 				slog.Error("Failed to encode response", "error", err)
 			}
 			return

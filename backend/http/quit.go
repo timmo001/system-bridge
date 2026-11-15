@@ -21,7 +21,7 @@ func QuitHandler(auth *keys.Auth, quit func()) http.HandlerFunc {
 			return
 		}
 		if !auth.ValidOrShared(r) {
-			http.Error(w, "Invalid API key", http.StatusUnauthorized)
+			http.Error(w, "Invalid key", http.StatusUnauthorized)
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

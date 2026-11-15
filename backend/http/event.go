@@ -21,7 +21,7 @@ func EventHandler(auth *keys.Auth, router *event.MessageRouter) http.HandlerFunc
 			return
 		}
 		if !auth.ValidOrShared(r) {
-			writeError(w, http.StatusUnauthorized, "Invalid API token")
+			writeError(w, http.StatusUnauthorized, "Invalid key")
 			return
 		}
 		var body struct {

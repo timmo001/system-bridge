@@ -88,7 +88,7 @@ async def health_response(_: web.Request):
 async def module_data_response(request: web.Request):
     """Return a module data response, for a request with the key."""
     if request.headers.get("Authorization") != f"Bearer {TOKEN}":
-        return web.json_response({"error": "Invalid API key"}, status=401)
+        return web.json_response({"error": "Invalid key"}, status=401)
     module = request.match_info["module"]
     if module == "cpu":
         return web.json_response(asdict(FIXTURE_CPU))
