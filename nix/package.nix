@@ -51,7 +51,7 @@ let
 
     dontFixup = true;
 
-    outputHash = "sha256-s2QQhx4T9yesVMw9SPj7L5/tLNDvZ5VKyCZuMtugHis=";
+    outputHash = "sha256-8c1yzWxKFZzQFwQJvDW1xgerOyCgn6VE7cFp9+LTL9I=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
