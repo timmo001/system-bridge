@@ -50,20 +50,32 @@ SigLevel = PackageRequired DatabaseOptional TrustedOnly
 Server = https://packages.timmo.dev/$arch
 ```
 
-Then install the latest stable release, or `system-bridge-git` for the latest `dev` branch, which is rebuilt on every commit:
+For the latest stable release, install `system-bridge`:
 
 ```bash
 sudo pacman -Syu system-bridge
+```
+
+For the development branch, install `system-bridge-git`. It's built from the latest `dev` branch, and rebuilt on every commit that changes the app:
+
+```bash
+sudo pacman -Syu system-bridge-git
 ```
 
 `pacman -Syu` keeps it up to date with the rest of your system. These are unofficial packages, not supported by Arch Linux.
 
 **From the AUR**
 
-The same packages build from source with an AUR helper such as [yay](https://github.com/Jguer/yay): [system-bridge](https://aur.archlinux.org/packages/system-bridge) for the latest stable release, or [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) for the `dev` branch.
+The same packages build from source with an AUR helper such as [yay](https://github.com/Jguer/yay). For the latest stable release, use the [system-bridge](https://aur.archlinux.org/packages/system-bridge) package:
 
 ```bash
 yay -S system-bridge
+```
+
+For the development branch, use the [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) package. This builds and installs the application from the latest `dev` branch:
+
+```bash
+yay -S system-bridge-git
 ```
 
 **From a release**
