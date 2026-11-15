@@ -1,0 +1,11 @@
+{
+  "ignores": [
+    "**/node_modules/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "temp/**",
+    "docs/**",
+    ".agents/skills/**",
+    ".mise/**",
+  ],
+}
