@@ -222,7 +222,7 @@ System Bridge reads the following environment variables at startup. All are opti
 | Variable | Default | Description |
 | --- | --- | --- |
 | `SYSTEM_BRIDGE_PORT` | `9170` | Port for the HTTP and WebSocket API. Must be between `1` and `65535`; invalid values fall back to the default. |
-| `SYSTEM_BRIDGE_CONFIG_DIR` | Per-OS path (see [File locations](#file-locations)) | Absolute path to override the directory holding settings, the token and stored data. |
+| `SYSTEM_BRIDGE_CONFIG_DIR` | Per-OS path (see [File locations](#file-locations)) | Absolute path to override the directory holding settings, keys and stored data. |
 | `SYSTEM_BRIDGE_LOG_DIR` | Per-OS path (see [File locations](#file-locations)) | Absolute path to override the directory where log files are written. |
 
 :::note
@@ -238,15 +238,15 @@ Environment="SYSTEM_BRIDGE_PORT=9171"
 
 ### File locations
 
-By default, settings, the token and logs are stored in per-user directories:
+By default, settings, keys and logs are stored in per-user directories:
 
-| Platform | Settings / token / data | Logs |
+| Platform | Settings / keys / data | Logs |
 | --- | --- | --- |
 | Linux | `~/.local/share/system-bridge/v5/` | `~/.local/state/system-bridge/YYYY-MM-DD.log` |
 | Windows | `%LOCALAPPDATA%\system-bridge\v5\` | `%LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log` |
 | macOS | `~/Library/Application Support/system-bridge/v5/` | `~/Library/Logs/system-bridge/YYYY-MM-DD.log` |
 
-The token is stored as a `token` file inside the settings directory. Override these locations with `SYSTEM_BRIDGE_CONFIG_DIR` and `SYSTEM_BRIDGE_LOG_DIR`.
+The settings directory holds `keys.json`, with a hash of each client's key, and `owner-key`, the key the CLI signs in with. The old shared API token is in a `token` file there until it's removed in a later release. See [Data stored on your machine](/privacy/#data-stored-on-your-machine) for every file. Override these locations with `SYSTEM_BRIDGE_CONFIG_DIR` and `SYSTEM_BRIDGE_LOG_DIR`.
 
 ### Discord
 

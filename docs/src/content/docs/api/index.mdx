@@ -45,6 +45,20 @@ The `GET /api` and `GET /api/health` endpoints do not need a key.
 
 Before keys, every client used one shared API token. A client that has it can [trade it for its own key](/api/keys#exchange-the-api-token), once. Until the token is removed in a later release, it still works where it did: in the `X-API-Token` or `token` header, as a Bearer, in each WebSocket message's `token` field, and in the `token` query parameter of the MCP and media file endpoints.
 
+## Version header
+
+The web client sends its version, such as `5.29.0`, in the `X-System-Bridge-Version` header, so a page left open across an update finds out. When it doesn't match the backend's version, the backend answers `426 Upgrade Required` and leaves the request undone:
+
+```json
+{
+  "message": "This page is version 5.28.0, but System Bridge is 5.29.0. Reload to use the new version.",
+  "server": "5.29.0",
+  "client": "5.28.0"
+}
+```
+
+`GET /api/health` answers whatever the version, so a client can always read the backend's. A request without the header isn't checked, so other clients don't need to send it.
+
 ## Protocols
 
 <CardGroup cols={3}>
