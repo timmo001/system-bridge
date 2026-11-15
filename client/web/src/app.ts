@@ -34,7 +34,7 @@ import { visitPage } from "./lib/shortcuts";
 import "./lib/theme";
 // Connects to the Android app's shell, or the PWA's pieces outside it
 import { inApp, openComputers } from "./lib/mobile";
-import { reload, versionStale, watchForUpdates } from "./lib/update";
+import { update, versionStale, watchForUpdates } from "./lib/update";
 import { registerPageTools } from "./lib/webmcp";
 import "./pages/page-connection";
 import "./pages/page-module";
@@ -310,7 +310,7 @@ export class SbApp extends LitElement {
              browser kept from before System Bridge was updated -->
         <gw-banner tone="warning" urgent ?open=${this.#stale.value}>
           <p>System Bridge was updated. Reload to use the new version.</p>
-          <gw-button slot="actions" size="small" @click=${reload}
+          <gw-button slot="actions" size="small" @click=${update.reload}
             >Reload</gw-button
           >
         </gw-banner>

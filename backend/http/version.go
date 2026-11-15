@@ -6,13 +6,21 @@ import (
 )
 
 // VersionHeader is the header a page of the web client sends to say which
-// version it is.
+// version it is, as Groundwork's version contract names it for the app.
 const VersionHeader = "X-System-Bridge-Version"
 
 // anyVersion are the paths open to a page of any version, so a client can
 // always learn the backend's.
 var anyVersion = map[string]bool{
 	"/api/health": true,
+}
+
+// versionMismatch is the body of a 426, as Groundwork's version contract has it:
+// https://groundwork.timmo.dev/phones/pwa#server
+type versionMismatch struct {
+	Message string `json:"message"`
+	Server  string `json:"server"`
+	Client  string `json:"client"`
 }
 
 // RequireVersion answers 426 to an API request from a page of another version
@@ -24,10 +32,14 @@ func RequireVersion(version string, next http.Handler) http.Handler {
 		client := r.Header.Get(VersionHeader)
 
 		if client != "" && client != version && !anyVersion[r.URL.Path] {
-			writeError(w, http.StatusUpgradeRequired, fmt.Sprintf(
-				"This page is version %s, but System Bridge is %s. Reload to use the new version.",
-				client, version,
-			))
+			writeJSON(w, http.StatusUpgradeRequired, versionMismatch{
+				Message: fmt.Sprintf(
+					"This page is version %s, but System Bridge is %s. Reload to use the new version.",
+					client, version,
+				),
+				Server: version,
+				Client: client,
+			})
 
 			return
 		}

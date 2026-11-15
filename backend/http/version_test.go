@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,6 +29,15 @@ func TestRequireVersion(t *testing.T) {
 			handler.ServeHTTP(response, request)
 			if response.Code != test.status {
 				t.Fatalf("got status=%d, want %d", response.Code, test.status)
+			}
+			if test.status == http.StatusUpgradeRequired {
+				var body versionMismatch
+				if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+					t.Fatalf("decoding the body: %v", err)
+				}
+				if body.Message == "" || body.Server != "1.0.0" || body.Client != test.client {
+					t.Fatalf("got body=%+v", body)
+				}
 			}
 		})
 	}

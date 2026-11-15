@@ -6,8 +6,10 @@ import {
   HttpClientResponse,
 } from "effect/http";
 
+import { versionMismatchStatus } from "@timmo001/groundwork-pwa/update";
+
 import type { ConnectionSettings } from "./connection-settings";
-import { onMismatched, pageVersion, versionHeader } from "./update";
+import { update } from "./update";
 
 /** Why a request to one of the backend's HTTP routes failed, for the page. */
 export class BackendError extends Schema.TaggedError<BackendError>()(
@@ -35,21 +37,26 @@ export const send = Effect.fnUntraced(
       request.pipe(
         HttpClientRequest.prependUrl(baseUrl(settings)),
         HttpClientRequest.setHeader("X-API-Token", settings.token ?? ""),
-        pageVersion !== undefined && sameBackend
-          ? HttpClientRequest.setHeader(versionHeader, pageVersion)
-          : identity,
+        sameBackend ? HttpClientRequest.setHeaders(update.headers) : identity,
       ),
     );
 
-    if (response.status === 426) onMismatched();
+    if (response.status === versionMismatchStatus) update.mismatched();
 
     if (response.status >= 400) {
+      // A 426 says why in `message`, as Groundwork's version contract has it
       const body = yield* HttpClientResponse.schemaBodyJson(
-        Schema.Struct({ error: Schema.String }),
+        Schema.Struct({
+          error: Schema.optional(Schema.String),
+          message: Schema.optional(Schema.String),
+        }),
       )(response).pipe(Effect.orElseSucceed(() => undefined));
 
       return yield* new BackendError({
-        message: body?.error ?? `System Bridge answered ${response.status}`,
+        message:
+          body?.error ??
+          body?.message ??
+          `System Bridge answered ${response.status}`,
       });
     }
 

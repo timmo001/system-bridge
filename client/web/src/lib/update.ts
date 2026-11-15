@@ -5,93 +5,32 @@
  * old one. Two things tell the page: the backend refuses an API call from a
  * page of another version with a 426, and Vite names the entry script by its
  * content, so a different name in the index the server sends means a new
- * build. Either way the service worker checks for the new build, which takes
- * over by itself, and the page reloads onto it. Without a worker, such as
- * over plain HTTP on the network, the reload fetches it itself.
+ * build. Either way Groundwork's `watchVersion` moves the page onto it.
  */
+import { watchVersion } from "@timmo001/groundwork-pwa/update";
 import { Atom } from "effect/reactivity";
 
 import { connectionStatus, registry } from "./atoms";
 import { mobile } from "./mobile";
 
-/** The header an API call sends to say which version its page is. */
-export const versionHeader = "X-System-Bridge-Version";
+/** Whether the page is still on an old version after reloading once. */
+export const versionStale = Atom.make(false).pipe(Atom.keepAlive);
 
 /**
- * The version of the backend that served this page, which it puts in the
- * index. Not there when something else serves the page, such as the dev
- * server or the hosted client, which no backend holds to a version.
+ * The watch on the page's version, which comes from the meta tag the backend
+ * puts in the index. It has none when something else serves the page, such
+ * as the dev server or the hosted client, which no backend holds to a version.
  */
-export const pageVersion =
-  document
-    .querySelector('meta[name="system-bridge-version"]')
-    ?.getAttribute("content") ?? undefined;
+export const update = watchVersion({
+  app: "system-bridge",
+  worker: mobile.then(({ pwa }) => pwa?.worker),
+  onStale: () => registry.set(versionStale, true),
+});
 
 const entrySelector = 'script[type="module"][src]';
 
 /** The entry script this page loaded, such as /assets/index-1a2b3c.js. */
 const loaded = document.querySelector(entrySelector)?.getAttribute("src");
-
-/** What the page asked to be reloaded for, so one release reloads it once. */
-const reloadedKey = "system-bridge:reloaded-for-version";
-
-/** How long a new worker gets to take over before the page reloads anyway. */
-const takeOverTimeout = 10_000;
-
-/** Whether the page is still on an old version after reloading once. */
-export const versionStale = Atom.make(false).pipe(Atom.keepAlive);
-
-let updating = false;
-
-/** Reloads the page onto the backend's release, once the worker has it. */
-const reloadForUpdate = async () => {
-  const pwa = (await mobile).pwa;
-  const registration = await pwa?.worker;
-
-  if (
-    registration !== undefined &&
-    navigator.serviceWorker.controller !== null
-  ) {
-    const takenOver = new Promise<void>((resolve) => {
-      navigator.serviceWorker.addEventListener("controllerchange", () =>
-        resolve(),
-      );
-      setTimeout(resolve, takeOverTimeout);
-    });
-
-    await registration.update().catch(() => undefined);
-
-    if (registration.installing !== null || registration.waiting !== null) {
-      await takenOver;
-    }
-  }
-
-  location.reload();
-};
-
-/**
- * Called when the page finds it's not the backend's version. It moves onto
- * the new release once by itself, and says so where that didn't help. Every
- * call meanwhile waits on the same move.
- */
-export const onMismatched = () => {
-  if (updating || registry.get(versionStale)) return;
-
-  const identity = pageVersion ?? loaded ?? "";
-
-  if (sessionStorage.getItem(reloadedKey) !== identity) {
-    sessionStorage.setItem(reloadedKey, identity);
-    updating = true;
-    void reloadForUpdate();
-
-    return;
-  }
-
-  registry.set(versionStale, true);
-};
-
-/** Reloads the page, for the banner's button. */
-export const reload = () => location.reload();
 
 let checking = false;
 
@@ -111,7 +50,7 @@ const checkForUpdate = async () => {
       ?.getAttribute("src");
 
     if (served !== undefined && served !== null && served !== loaded)
-      onMismatched();
+      update.mismatched();
   } catch {
     // The computer is unreachable; the next check tries again
   } finally {
