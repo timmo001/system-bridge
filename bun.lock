@@ -62,7 +62,6 @@
         "@timmo001/groundwork-ui": "0.45.0",
         "effect": "4.1.4",
         "lit": "^3.3.2",
-        "uqr": "0.1.3",
       },
       "devDependencies": {
         "@oxlint/plugins": "1.93.0",

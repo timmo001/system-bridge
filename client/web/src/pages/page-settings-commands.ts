@@ -2,7 +2,6 @@ import {
   mdiCheck,
   mdiClose,
   mdiConsoleLine,
-  mdiContentCopy,
   mdiPlay,
   mdiPlus,
   mdiTrashCanOutline,
@@ -22,6 +21,7 @@ import { repeat } from "lit/directives/repeat.js";
 
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-copy.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
@@ -319,12 +319,6 @@ export class PageSettingsCommands extends SbSettingsPage {
       ? event.currentTarget.dataset.id
       : undefined;
   }
-
-  #onCopyId = (event: MouseEvent) => {
-    const id = this.#commandId(event);
-
-    if (id !== undefined) void navigator.clipboard.writeText(id);
-  };
 
   #onRun = (event: MouseEvent) => {
     const id = this.#commandId(event);
@@ -696,17 +690,11 @@ ${result.stderr}</pre>`
         <div class="details">
           ${this.#renderRuns(command, prefab, usesPrefab)}
           <span class="id">
-            <span class="mono">${command.id}</span>
-            <gw-button
-              variant="neutral"
-              appearance="plain"
-              size="small"
+            <gw-copy
+              value=${command.id}
+              label="ID of ${command.name}"
               labels="hide"
-              icon=${mdiContentCopy}
-              data-id=${command.id}
-              @click=${this.#onCopyId}
-              >Copy the ID of ${command.name}</gw-button
-            >
+            ></gw-copy>
           </span>
         </div>
         ${this.#renderOutcome(

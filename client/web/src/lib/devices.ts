@@ -3,6 +3,7 @@ import { HttpClientRequest } from "effect/http";
 import { Atom } from "effect/reactivity";
 
 import { connectionSettings } from "./atoms";
+import type { ConnectionSettings } from "./connection-settings";
 import { decodeBody, send } from "./backend";
 
 /** What `POST /api/pair/code` answers. */
@@ -34,12 +35,18 @@ export interface PushSubscriber extends Schema.Schema.Type<
   typeof PushSubscriber
 > {}
 
-/** Makes a one-time pairing code, for the QR code. */
-export const pairingCode = Atom.fn((_: undefined, get) =>
-  send(get(connectionSettings), HttpClientRequest.post("/api/pair/code")).pipe(
-    Effect.flatMap(decodeBody(PairingCode)),
-  ),
-);
+/** Makes a code for `gw-pairing`, which shows it and asks for another. */
+export const makePairingOffer = (settings: ConnectionSettings) =>
+  Effect.runPromise(
+    send(settings, HttpClientRequest.post("/api/pair/code")).pipe(
+      Effect.flatMap(decodeBody(PairingCode)),
+      Effect.map(({ code, link, expiresAt }) => ({
+        code,
+        link,
+        expires: expiresAt,
+      })),
+    ),
+  );
 
 /** The devices, phones and browsers, getting pushes from this computer. */
 export const pushSubscribers = Atom.make((get) =>

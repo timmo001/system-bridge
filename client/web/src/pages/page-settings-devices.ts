@@ -1,11 +1,5 @@
-import {
-  mdiDevices,
-  mdiContentCopy,
-  mdiDeleteOutline,
-  mdiDownload,
-  mdiQrcode,
-  mdiRefresh,
-} from "@mdi/js";
+import { mdiDevices, mdiDeleteOutline, mdiDownload, mdiQrcode } from "@mdi/js";
+import "@timmo001/groundwork-ui/define/gw-pairing.ts";
 import type {
   Mobile,
   MobilePushOptions,
@@ -13,10 +7,9 @@ import type {
 } from "@timmo001/groundwork-mobile/view";
 import { Option } from "effect";
 import { AsyncResult } from "effect/reactivity";
-import { css, html, nothing, svg } from "lit";
+import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
-import { encode } from "uqr";
 
 import { AtomController } from "~/controllers/atom-controller";
 import { connectionSettings, registry } from "~/lib/atoms";
@@ -24,7 +17,7 @@ import { baseUrl } from "~/lib/backend";
 import { canInstall, install } from "~/lib/install";
 import { mobile, pushClient } from "~/lib/mobile";
 import {
-  pairingCode,
+  makePairingOffer,
   PushKind,
   type PushSubscriber,
   pushSubscribers,
@@ -47,30 +40,7 @@ const kindInfo: Readonly<
   },
 };
 
-const time = new Intl.DateTimeFormat(undefined, { timeStyle: "short" });
-
 const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
-
-/** A QR code drawn from its modules, so it needs no markup from a string. */
-const qrCode = (text: string) => {
-  const { size, data } = encode(text, { border: 2, ecc: "M" });
-
-  const path = data
-    .flatMap((row, y) =>
-      row.flatMap((dark, x) => (dark ? [`M${x} ${y}h1v1h-1z`] : [])),
-    )
-    .join("");
-
-  return html`<svg
-    class="qr"
-    viewBox="0 0 ${size} ${size}"
-    shape-rendering="crispEdges"
-    role="img"
-    aria-label="QR code for the pairing link"
-  >
-    ${svg`<rect width=${size} height=${size} fill="#fff"></rect><path d=${path} fill="#000"></path>`}
-  </svg>`;
-};
 
 /** The kinds a subscriber gets, as words, such as "Notifications, Updates". */
 const kindsText = (kinds: readonly PushKind[]) =>
@@ -85,36 +55,11 @@ const kindsText = (kinds: readonly PushKind[]) =>
  */
 @customElement("page-settings-devices")
 export class PageSettingsDevices extends SbPage {
-  static override styles = [
-    ...SbPage.styles,
-    css`
-      .pairing {
-        display: grid;
-        grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-        gap: var(--gw-space-4);
-        align-items: start;
-      }
-
-      @media (width < 40rem) {
-        .pairing {
-          grid-template-columns: minmax(0, 1fr);
-        }
-      }
-
-      .qr {
-        width: 100%;
-        max-width: 14rem;
-        aspect-ratio: 1;
-        border-radius: var(--gw-radius-m);
-      }
-    `,
-  ];
+  static override styles = [...SbPage.styles];
 
   protected readonly pageTitle = "Devices";
 
   readonly #settings = new AtomController(this, () => connectionSettings);
-
-  readonly #code = new AtomController(this, () => pairingCode);
 
   readonly #subscribers = new AtomController(this, () => pushSubscribers);
 
@@ -131,6 +76,9 @@ export class PageSettingsDevices extends SbPage {
 
   @state() private pushBusy = false;
 
+  /** Whether the pairing card shows a code, which is only made once asked. */
+  @state() private pairing = false;
+
   /** Why turning pushes on or off last failed. */
   @state() private pushError: string | undefined;
 
@@ -146,18 +94,11 @@ export class PageSettingsDevices extends SbPage {
     });
   }
 
-  #makeCode = () => {
-    registry.set(pairingCode, undefined);
+  #startPairing = () => {
+    this.pairing = true;
   };
 
-  #copyLink = (event: Event) => {
-    const link =
-      event.currentTarget instanceof HTMLElement
-        ? event.currentTarget.dataset.link
-        : undefined;
-
-    if (link !== undefined) void navigator.clipboard.writeText(link);
-  };
+  #makeOffer = () => makePairingOffer(this.#settings.value);
 
   #onRemove = (event: Event) => {
     const id =
@@ -250,9 +191,6 @@ export class PageSettingsDevices extends SbPage {
     // from its own menu instead. Wait to know, so the card doesn't flash
     if (this.mobile === undefined || this.mobile.shell) return nothing;
 
-    const result = this.#code.value;
-    const code = Option.getOrUndefined(AsyncResult.value(result));
-
     return html`
       <gw-card
         heading="Pair the Android app"
@@ -261,51 +199,14 @@ export class PageSettingsDevices extends SbPage {
         level=${this.cardLevel}
       >
         ${
-          code === undefined
-            ? html`<gw-button
+          this.pairing
+            ? html`<gw-pairing .make=${this.#makeOffer}></gw-pairing>`
+            : html`<gw-button
                 appearance="filled"
                 icon=${mdiQrcode}
-                ?loading=${result.waiting}
-                @click=${this.#makeCode}
+                @click=${this.#startPairing}
                 >Make a pairing code</gw-button
               >`
-            : html`<div class="pairing">
-                ${qrCode(code.link)}
-                <div class="stack">
-                  <p class="mono small break">${code.link}</p>
-                  <p class="muted small">
-                    Works once, until ${time.format(new Date(code.expiresAt))}
-                  </p>
-                  <div class="row wrap">
-                    ${
-                      navigator.clipboard === undefined
-                        ? nothing
-                        : html`<gw-button
-                            icon=${mdiContentCopy}
-                            data-link=${code.link}
-                            @click=${this.#copyLink}
-                            >Copy the link</gw-button
-                          >`
-                    }
-                    <gw-button
-                      icon=${mdiRefresh}
-                      ?loading=${result.waiting}
-                      @click=${this.#makeCode}
-                      >New code</gw-button
-                    >
-                  </div>
-                </div>
-              </div>`
-        }
-        ${
-          AsyncResult.isFailure(result)
-            ? html`<p class="error-text">
-                ${Option.match(AsyncResult.error(result), {
-                  onNone: () => "Couldn't make a pairing code",
-                  onSome: (error) => error.message,
-                })}
-              </p>`
-            : nothing
         }
       </gw-card>
     `;

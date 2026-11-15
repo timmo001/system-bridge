@@ -2,7 +2,6 @@ import {
   mdiAlertCircleOutline,
   mdiCheckCircle,
   mdiCircleOutline,
-  mdiContentCopy,
   mdiCogOutline,
   mdiOpenInNew,
   mdiProgressClock,
@@ -15,6 +14,7 @@ import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-card.ts";
+import "@timmo001/groundwork-ui/define/gw-copy.ts";
 import { icon } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
@@ -151,12 +151,6 @@ export class PageSettingsDiscord extends SbPage {
       .guide li::marker {
         color: var(--gw-color-text-secondary);
       }
-
-      .copy {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--gw-space-2);
-      }
     `,
   ];
 
@@ -167,8 +161,6 @@ export class PageSettingsDiscord extends SbPage {
   @state() private clientId: string | null = null;
 
   @state() private clientSecret = "";
-
-  @state() private copied = false;
 
   protected readonly pageTitle = "Discord setup";
 
@@ -182,18 +174,6 @@ export class PageSettingsDiscord extends SbPage {
     if (event.target instanceof HTMLInputElement) {
       this.clientSecret = event.target.value;
     }
-  };
-
-  #copyRedirect = async (event: MouseEvent) => {
-    const value =
-      event.currentTarget instanceof HTMLElement
-        ? event.currentTarget.dataset.value
-        : undefined;
-
-    if (value === undefined) return;
-
-    await navigator.clipboard.writeText(value);
-    this.copied = true;
   };
 
   /** Reads the fields, which start with the saved client ID. */
@@ -293,19 +273,7 @@ export class PageSettingsDiscord extends SbPage {
           </li>
           <li>
             On the same page, add this redirect and save:
-            <span class="copy">
-              <code>${setup.redirectUri}</code>
-              <gw-button
-                variant="neutral"
-                appearance="plain"
-                size="small"
-                labels="hide"
-                icon=${this.copied ? mdiCheckCircle : mdiContentCopy}
-                data-value=${setup.redirectUri}
-                @click=${this.#copyRedirect}
-                >${this.copied ? "Redirect copied" : "Copy the redirect"}</gw-button
-              >
-            </span>
+            <gw-copy value=${setup.redirectUri} label="Redirect"></gw-copy>
           </li>
           <li>
             Enter the client ID and secret here, then approve the prompt in
