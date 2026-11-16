@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   build:
-    uses: timmo001/workflows/.github/workflows/build-android.yml@36ba6651f1296cce685ede8ac38b9574c9291028 # master
+    uses: timmo001/workflows/.github/workflows/build-android.yml@5451f6867a5cb2b9b6318a82e00f7dd9f9fc279a # 20261116.0
     with:
       working-directory: client/android
       mise-install-args: bun android-sdk java gradle
@@ -59,7 +59,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.release-tag != '')
     permissions:
       contents: write
-    uses: timmo001/workflows/.github/workflows/publish-android-release.yml@fa479eabebf26cc5f655b165c20423fb8fcc0cf4 # 20261115.0
+    uses: timmo001/workflows/.github/workflows/publish-android-release.yml@5451f6867a5cb2b9b6318a82e00f7dd9f9fc279a # 20261116.0
     with:
       release-tag: ${{ github.event.release.tag_name || inputs.release-tag }}
       working-directory: client/android
