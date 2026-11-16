@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@oxlint/plugins": "1.93.0",
-    "@timmo001/oxlint-rules": "0.6.5",
+    "@timmo001/oxlint-rules": "0.7.1",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
