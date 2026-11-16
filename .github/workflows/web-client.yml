@@ -50,7 +50,3 @@ jobs:
       - name: Lint, typecheck, format check and build web client
         working-directory: client/web
         run: bun run --parallel --no-exit-on-error lint typecheck format:check build
-
-      - name: Validate Cloudflare Workers upload
-        working-directory: client/web
-        run: bun run deploy --dry-run

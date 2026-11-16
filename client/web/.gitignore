@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+# Alchemy's local state and build output
+.alchemy/
 
 # Editor directories and files
 .vscode/*

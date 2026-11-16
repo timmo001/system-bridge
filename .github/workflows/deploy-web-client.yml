@@ -1,0 +1,40 @@
+---
+# Deploys the prod stage of the hosted web client's Alchemy stack in
+# client/web/alchemy.run.ts from dev: the system-bridge-client Worker at
+# system-bridge-client.timmo.dev. The Cloudflare token comes from
+# docs/stacks/github.ts.
+name: Deploy web client
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - .github/workflows/deploy-web-client.yml
+      - bun.lock
+      - bunfig.toml
+      - client/web/**
+      - connector/typescript/**
+      - mise.toml
+      - package.json
+  workflow_dispatch: {}
+
+# Deploys queue rather than cancel, so a stack update never stops halfway
+concurrency:
+  group: system-bridge-client-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    uses: timmo001/workflows/.github/workflows/deploy-alchemy.yml@db6f3692a31de24d2bee17e505dfd2bf3fd5a076 # 20261116.1
+    with:
+      task: deploy:client:web
+      smoke-check: |
+        https://system-bridge-client.timmo.dev 200
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

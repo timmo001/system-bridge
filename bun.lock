@@ -65,9 +65,12 @@
         "lit": "^3.3.2",
       },
       "devDependencies": {
+        "@alchemy.run/cloudflare": "2.0.0-beta.87",
+        "@effect/platform-bun": "4.1.4",
         "@oxlint/plugins": "1.93.0",
         "@timmo001/oxlint-rules": "0.7.1",
         "@types/node": "^26.0.0",
+        "alchemy": "2.0.0-beta.87",
         "concurrently": "^10.0.0",
         "eslint-plugin-lit": "2.3.1",
         "eslint-plugin-wc": "3.1.0",
@@ -76,7 +79,6 @@
         "prettier": "^3.8.3",
         "typescript": "7.0.2",
         "vite": "^8.0.10",
-        "wrangler": "4.162.0",
       },
     },
     "connector/typescript": {

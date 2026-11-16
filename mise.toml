@@ -509,6 +509,18 @@ description = "Remove web client build artifacts"
 run = "rm -rf client/web/dist"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-web-client.ps1"
 
+[tasks."plan:client:web"]
+description = "Show what deploying the hosted web client's prod stage would change"
+depends = ["install:js"]
+dir = "client/web"
+run = "bun run plan"
+
+[tasks."deploy:client:web"]
+description = "Build the hosted web client, then deploy its prod stage with Alchemy"
+depends = ["install:js"]
+dir = "client/web"
+run = "bun run deploy"
+
 [tasks.deps]
 description = "Install all dependencies (go, web client, docs)"
 depends = ["install:js"]
