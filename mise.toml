@@ -548,10 +548,6 @@ run = [
   "bun run lint",
 ]
 
-[tasks."omarchy-plugin:test-publisher"]
-description = "Test the Omarchy plugin publisher"
-run = "bash .github/scripts/bash/publish-omarchy-plugin.test.sh"
-
 [tasks."omarchy-plugin:validate"]
 description = "Validate the Omarchy plugin with the installed Omarchy"
 run = "omarchy plugin validate omarchy-plugin"

@@ -37,42 +37,18 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # The app's tools are in client/android/mise.toml, which mise only reads
-  # once it's trusted
-  MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}/client/android
-
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Set up mise
-        uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5
-        with:
-          working_directory: client/android
-          install_args: bun android-sdk java gradle
-
-      - name: Install the SDK packages
-        working-directory: client/android
-        run: android --no-metrics sdk install platform-tools "platforms/$ANDROID_API" build-tools/37.0.0
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --filter ./client/android/page
-
-      - name: Build
-        working-directory: client/android
-        run: mise run app:build
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: system-bridge-android
-          path: client/android/app/build/outputs/apk/
-          if-no-files-found: error
+    uses: timmo001/workflows/.github/workflows/build-android.yml@36ba6651f1296cce685ede8ac38b9574c9291028 # master
+    with:
+      working-directory: client/android
+      mise-install-args: bun android-sdk java gradle
+      setup-command: |
+        android --no-metrics sdk install platform-tools "platforms/$ANDROID_API" build-tools/37.0.0
+        bun install --frozen-lockfile --cwd "$GITHUB_WORKSPACE" --filter ./client/android/page
+      build-command: mise run app:build
+      apk-directory: client/android/app/build/outputs/apk/
+      artifact-name: system-bridge-android
 
   # Stable releases only, as with PyPI and npm, or a release tag given by hand
   # to publish one again, such as one whose release job failed

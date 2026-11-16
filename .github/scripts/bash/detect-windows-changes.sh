@@ -31,7 +31,6 @@ while IFS= read -r file; do
       | .agents/* | .claude/* | .vscode/* | .scripts/linux/* \
       | .github/workflows/* | .github/ISSUE_TEMPLATE/* \
       | .github/scripts/bash/package-linux.sh \
-      | .github/scripts/bash/publish-omarchy-plugin*.sh \
       | .github/scripts/bash/report-aur-status.sh \
       | .github/scripts/bash/validate-debian-control.sh \
       | .github/scripts/bash/detect-aur-changes.sh \

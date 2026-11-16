@@ -77,12 +77,13 @@ mise run package:windows-installer
 
 - Edit `omarchy-plugin/` in this repository. Do not edit the generated
   `timmo001/omarchy-system-bridge` repository directly.
-- The plugin must remain self-contained, with no symlinks or imports outside
-  `omarchy-plugin/`.
-- Run `mise run omarchy-plugin:test-publisher` and
-  `mise run omarchy-plugin:validate` after changing it.
-- A validated push to `dev` publishes the directory and root `LICENSE` to the
-  generated repository through `.github/workflows/publish-omarchy-plugin.yml`.
+- The plugin must remain self-contained and flat, with no subdirectories,
+  symlinks or imports outside `omarchy-plugin/`.
+- Run `mise run omarchy-plugin:validate` after changing it.
+- A validated push to `dev` publishes the files git tracks in the directory,
+  and the root `LICENSE`, to the generated repository through
+  `.github/workflows/publish-omarchy-plugin.yml`, which calls the shared
+  workflows in `timmo001/workflows`.
 
 ## Home Assistant Dashboard
 
