@@ -548,6 +548,24 @@ run = [
   "bun run lint",
 ]
 
+[tasks."docs:plan"]
+description = "Build the docs site, then show what deploying its prod stage would change"
+depends = ["docs:build"]
+dir = "docs"
+run = "bun run plan"
+
+[tasks."docs:deploy"]
+description = "Build the docs site, then deploy its prod stage with Alchemy"
+depends = ["docs:build"]
+dir = "docs"
+run = "bun run deploy"
+
+[tasks."docs:deploy:github"]
+description = "Mint CI's Cloudflare token into the repository's secrets"
+depends = ["install:js"]
+dir = "docs"
+run = "bun run deploy:github"
+
 [tasks."omarchy-plugin:validate"]
 description = "Validate the Omarchy plugin with the installed Omarchy"
 run = "omarchy plugin validate omarchy-plugin"

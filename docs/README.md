@@ -12,10 +12,8 @@ Run from `docs/`:
 - `bun run validate` - check every link and anchor
 - `bun run preview` - preview the production build
 - `bun run brand` - regenerate the brand images from `src/assets/logo.svg`
-- `bun run deploy:preview` - upload a preview version without promoting it
-- `bun run deploy` - deploy the built site to Cloudflare Workers
 
-From the repo root you can also use the mise tasks: `mise run docs:dev`, `docs:build`, `docs:validate` and `docs:lint`.
+From the repo root you can also use the mise tasks: `mise run docs:dev`, `docs:build`, `docs:validate` and `docs:lint`, plus `docs:plan` to build the site and show what a deploy would change, and `docs:deploy` to build and deploy it.
 
 ## Structure
 
@@ -26,4 +24,6 @@ From the repo root you can also use the mise tasks: `mise run docs:dev`, `docs:b
 
 ## Hosting
 
-The site builds to a Cloudflare Worker, since its MCP server needs a server. `bun run build` writes the Worker's config to `dist/server/wrangler.json` from `wrangler.jsonc`, which holds the name, custom domain and compatibility settings. Deploy with `bun run deploy`, which uses that generated config.
+The site builds to a Cloudflare Worker, since its MCP server needs a server. `alchemy.run.ts` is the Alchemy stack for the `system-bridge-docs` Worker at system-bridge.timmo.dev, and the Deploy docs workflow deploys it on pushes to `dev`.
+
+CI's Cloudflare token and the repository secrets it reads come from `stacks/github.ts`. Deploy it once from a machine with `mise run docs:deploy:github`, and again to rotate the token.

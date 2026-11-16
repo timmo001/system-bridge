@@ -11,7 +11,7 @@ Run from `docs/`:
 - Check links and anchors: `bun run validate`
 - Preview the build: `bun run preview`
 - Regenerate brand images: `bun run brand`
-- Validate the Worker upload: `bun run deploy --dry-run`
+- Show what a deploy would change: `mise run docs:plan` from the repo root
 
 From the repo root: `mise run docs:build`, `mise run docs:validate` and `mise run docs:lint`. From an agent, start the dev server in the background with `mise run serve:docs`; it is at `https://docs.system-bridge.localhost`. While it runs, `blume build` refuses to run, so use `bun run build --isolated` to check a change. Use `mise run docs:dev` only for foreground debugging.
 
