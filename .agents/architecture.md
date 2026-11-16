@@ -133,7 +133,16 @@ bun run build
 bun run format:check
 bun run format:write
 bun run typecheck
+
+# Show what deploying the hosted copy would change
+bun run plan
 ```
+
+The same build is also served at `system-bridge-client.timmo.dev` by the
+`system-bridge-client` Worker, from the Alchemy stack in
+`client/web/alchemy.run.ts`. `.github/workflows/deploy-web-client.yml`
+deploys it on pushes to `dev` that change the client or the TypeScript
+connector.
 
 ## CLI Commands for Testing
 

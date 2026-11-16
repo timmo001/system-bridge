@@ -22,7 +22,7 @@ mise tasks
 
 - **Backend**: Go application (HTTP/WebSocket APIs)
 - **MCP Server**: Model Context Protocol server
-- **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`)
+- **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`). A hosted copy at `system-bridge-client.timmo.dev` is deployed separately as a Cloudflare Worker, from the Alchemy stack in `client/web/alchemy.run.ts` by the Deploy web client workflow on pushes to `dev`
 - **Home Assistant frontend**: Lovelace dashboard, view and section strategies (`custom:system-bridge`) at `client/home-assistant/frontend/`, built into `system-bridge-dashboard.js` and published to the generated mirror `timmo001/system-bridge-dashboard`, with a release for each System Bridge release. It reads the integration's entities by their unique ID keys, so check `src/registry.ts` when Core changes them; `TODO(Core)` comments mark pages and sections waiting on Core entities
 - **CLI**: Command-line interface
 - **Docs**: Blume site at `docs/`, using `@timmo001/docs-kit`, deployed separately as a Cloudflare Worker with a docs MCP server at `/mcp`, from the Alchemy stack in `docs/alchemy.run.ts` by the Deploy docs workflow on pushes to `dev`
@@ -64,6 +64,7 @@ mise tasks
 - Uses the `~/` path alias and the `UIElement` mixin from `~/mixins`
 - Data comes from the `@timmo001/effect-system-bridge` connector, held in `effect/reactivity` Atoms (`src/lib/atoms.ts`) and read through `AtomController`; Effect Schema handles validation
 - Checks: `cd client/web && bun run lint`, `bun run typecheck`, `bun run format:check`
+- Show what a deploy of the hosted copy would change with `mise run plan:client:web`. CI deploys it, so don't run `deploy:client:web` by hand unless asked
 
 ## Packaging
 
