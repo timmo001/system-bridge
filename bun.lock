@@ -11,10 +11,10 @@
     "client/android/page": {
       "name": "@system-bridge/android-page",
       "dependencies": {
-        "@timmo001/groundwork-mobile": "0.50.0",
-        "@timmo001/groundwork-pwa": "0.50.0",
-        "@timmo001/groundwork-tokens": "0.50.0",
-        "@timmo001/groundwork-ui": "0.50.0",
+        "@timmo001/groundwork-mobile": "0.51.0",
+        "@timmo001/groundwork-pwa": "0.51.0",
+        "@timmo001/groundwork-tokens": "0.51.0",
+        "@timmo001/groundwork-ui": "0.51.0",
         "effect": "4.1.4",
       },
       "devDependencies": {
@@ -56,11 +56,11 @@
         "@tanstack/charts": "1.5.0",
         "@tanstack/lit-table": "9.3.1",
         "@timmo001/effect-system-bridge": "workspace:*",
-        "@timmo001/groundwork-auth": "0.50.0",
-        "@timmo001/groundwork-mobile": "0.50.0",
-        "@timmo001/groundwork-pwa": "0.50.0",
-        "@timmo001/groundwork-tokens": "0.50.0",
-        "@timmo001/groundwork-ui": "0.50.0",
+        "@timmo001/groundwork-auth": "0.51.0",
+        "@timmo001/groundwork-mobile": "0.51.0",
+        "@timmo001/groundwork-pwa": "0.51.0",
+        "@timmo001/groundwork-tokens": "0.51.0",
+        "@timmo001/groundwork-ui": "0.51.0",
         "effect": "4.1.4",
         "lit": "^3.3.2",
       },
@@ -104,7 +104,7 @@
         "@astrojs/cloudflare": "14.4.8",
         "@fontsource-variable/inter": "5.3.0",
         "@fontsource-variable/jetbrains-mono": "5.3.0",
-        "@timmo001/docs-kit": "0.50.0",
+        "@timmo001/docs-kit": "0.51.0",
         "blume": "2.2.7",
         "sharp": "0.35.5",
       },
@@ -959,19 +959,19 @@
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.19.11", "", {}, "sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A=="],
 
-    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.50.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.50.0", "@timmo001/groundwork-ui": "0.50.0", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-wFj3UIIw5OGYAk5F9I/HCSgpy1Rc272Y2fpi7oU82Etso74W145AYz9Q++tzIaxiW4QENBus6vuIAgCEtrZoxA=="],
+    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.51.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.51.0", "@timmo001/groundwork-ui": "0.51.0", "sharp": "0.35.5" }, "peerDependencies": { "blume": "^2.2.6" } }, "sha512-aTPelN9LUFA/1f/5jysMdWq6d4ozX/zz8T2fgrs4NafNzGHzoknQEd8FftE84eRJ1t4PayJAdbBwM9uEowW8SQ=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
-    "@timmo001/groundwork-auth": ["@timmo001/groundwork-auth@0.50.0", "", { "dependencies": { "effect": "4.1.4" } }, "sha512-e9i+gZ5q1rz6cApbeD0CT8iKHx6RMEGPWPUgXFhQ06c7N5j487swlGwP/nC7yjkM3VE8Pt33qip00L9nxVUAdA=="],
+    "@timmo001/groundwork-auth": ["@timmo001/groundwork-auth@0.51.0", "", { "dependencies": { "effect": "4.1.4" } }, "sha512-fw+Zuw3mNkOjYxLIoqhBCmls+0I/9mYt9J8xWHGq2MTPMXRQL1xt8VddE52zsPekRAVd5eVQUsHzJJFLux9V4A=="],
 
-    "@timmo001/groundwork-mobile": ["@timmo001/groundwork-mobile@0.50.0", "", { "dependencies": { "@timmo001/groundwork-pwa": "0.50.0", "@timmo001/groundwork-tokens": "0.50.0", "effect": "4.1.4" } }, "sha512-YSihLYZ+cm7yXgbcZLhXfODTay5VnyJFYRSzBWd7RzJfOV6Hig+tKKYLxyqEd0Et0eZ9Al5CKuAv+RSdvhv5wA=="],
+    "@timmo001/groundwork-mobile": ["@timmo001/groundwork-mobile@0.51.0", "", { "dependencies": { "@timmo001/groundwork-pwa": "0.51.0", "@timmo001/groundwork-tokens": "0.51.0", "effect": "4.1.4" } }, "sha512-sZgXSnH2D8LNRHp5bJz6kwo7zQE7HnGNF9F5ZsBHmGwkYOqYDLJWkpLCLW8wuzqRNdxY5O8KZWcl28p50q2ZZA=="],
 
-    "@timmo001/groundwork-pwa": ["@timmo001/groundwork-pwa@0.50.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.50.0", "effect": "4.1.4", "sharp": "0.35.5" }, "peerDependencies": { "vite": "^8.0.0" }, "optionalPeers": ["vite"] }, "sha512-6VD1km+l5J+MxGM+/ExEpi5XA+kF21Ygf8HeGJv66KMVOPYKM/rRd1DFILtFA1mw103WtyPv1oipwvuawu2SQQ=="],
+    "@timmo001/groundwork-pwa": ["@timmo001/groundwork-pwa@0.51.0", "", { "dependencies": { "@timmo001/groundwork-tokens": "0.51.0", "effect": "4.1.4", "sharp": "0.35.5" }, "peerDependencies": { "vite": "^8.0.0" }, "optionalPeers": ["vite"] }, "sha512-EyVU5Q8bDuSLthzUBtDVR+r7DC1Ao4Cst0nX5pP176i9IEi61PQ8tyuYtAVEtkEjG2PrjdGuMjTNDp7ff/bMtg=="],
 
-    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.50.0", "", { "dependencies": { "@effect/platform-node": "4.1.4", "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.4" }, "bin": { "groundwork-tokens": "src/bin.ts" } }, "sha512-85XddWA4jOUu9ujdeuUeciKg9OFNWX+Q9VlJw8E+yphR4C8mlqd1LjR9HZrsyH7ML2Xx1p/2XvFrsIT3eSEsPg=="],
+    "@timmo001/groundwork-tokens": ["@timmo001/groundwork-tokens@0.51.0", "", { "dependencies": { "@effect/platform-node": "4.1.4", "@types/culori": "4.0.1", "culori": "4.0.2", "effect": "4.1.4" }, "bin": { "groundwork-tokens": "src/bin.ts" } }, "sha512-tkVyPTGK1BCShzwjEyBP9DRw91opctQ0IcOPatXVZ1GqGbKpY72evHKVmZO8ouym6qz2TFP3MUmueoEW6y8Kcw=="],
 
-    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.50.0", "", { "dependencies": { "@codemirror/lang-json": "6.0.2", "@codemirror/language": "6.13.1", "@codemirror/search": "6.7.2", "@codemirror/state": "6.7.6", "@codemirror/view": "6.43.15", "@lezer/highlight": "1.2.5", "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11", "micromark": "4.0.3", "micromark-extension-gfm": "3.0.0", "uqr": "0.1.3" } }, "sha512-AQqR/rGm2r7tsjPKUd2z2F8YYmsyJ/AAocQ7EGv3prq//1k3FS/ySCONSbIgTG89GByb+BtlJSogKMJBXk3IEA=="],
+    "@timmo001/groundwork-ui": ["@timmo001/groundwork-ui@0.51.0", "", { "dependencies": { "@codemirror/lang-json": "6.0.2", "@codemirror/language": "6.13.1", "@codemirror/search": "6.7.2", "@codemirror/state": "6.7.6", "@codemirror/view": "6.43.15", "@lezer/highlight": "1.2.5", "@tanstack/table-core": "9.3.1", "@tanstack/virtual-core": "3.19.11", "micromark": "4.0.3", "micromark-extension-gfm": "3.0.0", "uqr": "0.1.3" } }, "sha512-XXyU+8pptQiUde0ZSP3bPMt6PJ7jbVdvzoZMnaUqBjeCEJJ36V4mcks9koXJreiKXdXJCwP3y8UURvXT8qu3Mw=="],
 
     "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.7.1", "", { "peerDependencies": { "@oxlint/plugins": "^1.91.0", "oxlint": "^1.91.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-d4ZmZ03tWs4l0AKhrDWOaKayLC56HH0EtmhFb2GGMD1kOxN7Nkzo3p1wSNJFpJ06O9rj8TF7VJThYdpmTprxLg=="],
 
