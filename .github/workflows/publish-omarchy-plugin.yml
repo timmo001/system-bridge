@@ -28,14 +28,14 @@ concurrency:
 
 jobs:
   validate:
-    uses: timmo001/workflows/.github/workflows/validate-omarchy-plugin.yml@5451f6867a5cb2b9b6318a82e00f7dd9f9fc279a # 20261116.0
+    uses: timmo001/workflows/.github/workflows/validate-omarchy-plugin.yml@db6f3692a31de24d2bee17e505dfd2bf3fd5a076 # 20261116.1
     with:
       plugin-directory: omarchy-plugin
 
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     needs: validate
-    uses: timmo001/workflows/.github/workflows/publish-omarchy-plugin.yml@5451f6867a5cb2b9b6318a82e00f7dd9f9fc279a # 20261116.0
+    uses: timmo001/workflows/.github/workflows/publish-omarchy-plugin.yml@db6f3692a31de24d2bee17e505dfd2bf3fd5a076 # 20261116.1
     with:
       plugin-directory: omarchy-plugin
       publish-repository: timmo001/omarchy-system-bridge
