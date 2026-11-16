@@ -20,7 +20,7 @@ import { browserClientId, browserName } from "./utils";
 /** Why a request to one of the backend's HTTP routes failed, for the page. */
 export class BackendError extends Schema.TaggedError<BackendError>()(
   "BackendError",
-  { message: Schema.String },
+  { message: Schema.String, cause: Schema.optionalKey(Schema.Defect()) },
 ) {}
 
 /** The backend's address, which serves the routes. */
@@ -86,9 +86,10 @@ export const decodeBody =
   (response: HttpClientResponse.HttpClientResponse) =>
     HttpClientResponse.schemaBodyJson(schema)(response).pipe(
       Effect.mapError(
-        () =>
+        (cause) =>
           new BackendError({
             message: "System Bridge answered in a way this page doesn't know",
+            cause,
           }),
       ),
     );

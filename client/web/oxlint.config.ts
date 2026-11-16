@@ -194,4 +194,14 @@ export default defineConfig({
       { prefer: "type-imports", disallowTypeAnnotations: false },
     ],
   },
+  overrides: [
+    {
+      // The router's two casts: a route's name, params and search all come
+      // from the same entry of `routes`, which TypeScript can't correlate.
+      files: ["src/lib/router.ts"],
+      rules: {
+        "timmo/prefer-types-over-assertions": "off",
+      },
+    },
+  ],
 });

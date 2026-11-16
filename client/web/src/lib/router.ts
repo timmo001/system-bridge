@@ -119,7 +119,6 @@ export type Location =
 const definitionOf = <K extends RouteName>(
   name: K,
 ): RouteDefinition<ParamsOf<K>, SearchOf<K>> =>
-  // oxlint-disable-next-line timmo/prefer-types-over-assertions -- ParamsOf and SearchOf are read from this same entry
   routes[name] as RouteDefinition<ParamsOf<K>, SearchOf<K>>;
 
 /**
@@ -196,7 +195,6 @@ const parse = (url: URL): Location => {
 
     if (Option.isNone(params)) continue;
 
-    // oxlint-disable-next-line timmo/prefer-types-over-assertions -- the name and both schemas come from the same entry of `routes`
     return {
       name,
       params: params.value,
