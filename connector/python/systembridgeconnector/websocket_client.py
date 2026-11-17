@@ -58,6 +58,7 @@ from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
 from .models.display_control import DisplayControl
 from .models.history import MetricHistory
+from .models.input_status import InputStatus
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_control import MediaControl
@@ -72,6 +73,7 @@ from .models.modules.desktop import (
     HyprlandOptionValue,
 )
 from .models.modules.disks import DiskMounts
+from .models.mouse import MouseButton, MouseClick, MouseMove, MouseScroll
 from .models.notification import (
     Notification,
     NotificationDismissRequest,
@@ -96,6 +98,9 @@ BLUETOOTH_TIMEOUT = 35.0
 
 # The backend allows 20 seconds for a camera to start and settle
 CAMERA_CAPTURE_TIMEOUT = 25.0
+
+# The backend allows 2 minutes for the user to allow remote control
+INPUT_STATUS_TIMEOUT = 125.0
 
 # Replies that say the key, or the old token, was turned away
 _AUTH_FAILURES = frozenset(
@@ -662,6 +667,64 @@ class WebSocketClient(Base):
             wait_for_response=True,
             response_type=EventType.KEYBOARD_TEXT_SENT,
         )
+
+    async def mouse_move(
+        self,
+        model: MouseMove,
+        request_id: str | None = None,
+    ) -> Response:
+        """Move the pointer by an amount, in pixels."""
+        return await self._action(
+            EventType.MOUSE_MOVE, EventType.MOUSE_MOVED, model, request_id
+        )
+
+    async def mouse_click(
+        self,
+        model: MouseClick,
+        request_id: str | None = None,
+    ) -> Response:
+        """Click a mouse button, left by default."""
+        return await self._action(
+            EventType.MOUSE_CLICK, EventType.MOUSE_CLICKED, model, request_id
+        )
+
+    async def mouse_button(
+        self,
+        model: MouseButton,
+        request_id: str | None = None,
+    ) -> Response:
+        """Hold a mouse button down or release it, to drag."""
+        return await self._action(
+            EventType.MOUSE_BUTTON, EventType.MOUSE_BUTTON_SET, model, request_id
+        )
+
+    async def mouse_scroll(
+        self,
+        model: MouseScroll,
+        request_id: str | None = None,
+    ) -> Response:
+        """Scroll by wheel notches. Positive y scrolls up, positive x right."""
+        return await self._action(
+            EventType.MOUSE_SCROLL, EventType.MOUSE_SCROLLED, model, request_id
+        )
+
+    async def get_input_status(
+        self,
+        request_id: str | None = None,
+    ) -> InputStatus:
+        """Get which backend presses keys and moves the pointer, or why none can.
+
+        On GNOME and KDE the first check asks the user to allow remote control.
+        """
+        response = await self.send_message(
+            EventType.GET_INPUT_STATUS,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.INPUT_STATUS,
+            timeout=INPUT_STATUS_TIMEOUT,
+        )
+        return InputStatus(**self._response_dict(response, "input status"))
 
     async def audio_control(
         self,

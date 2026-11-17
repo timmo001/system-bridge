@@ -36,6 +36,7 @@ import {
   HyprlandEvent,
   HyprlandLog,
   HyprlandOptionValue,
+  InputStatus,
   MetricHistory,
   ModuleDataUpdate,
   type ModuleName,
@@ -89,6 +90,10 @@ import {
   MediaControl,
   MediaDirectory,
   ModulesRequest,
+  MouseButton,
+  MouseClick,
+  MouseMove,
+  MouseScroll,
   Notification,
   NotificationDismissRequest,
   NotificationEvent,
@@ -218,6 +223,23 @@ export interface Interface {
   readonly keyboardText: (
     text: KeyboardText,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Moves the pointer by an amount, in pixels. */
+  readonly mouseMove: (move: MouseMove) => Effect.Effect<void, WebSocketError>;
+  readonly mouseClick: (
+    click: MouseClick,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Holds a mouse button down or releases it, to drag. */
+  readonly mouseButton: (
+    button: MouseButton,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly mouseScroll: (
+    scroll: MouseScroll,
+  ) => Effect.Effect<void, WebSocketError>;
+  /**
+   * Which backend presses keys and moves the pointer, or why none can. On
+   * GNOME and KDE the first check asks the person to allow remote control.
+   */
+  readonly getInputStatus: Effect.Effect<InputStatus, WebSocketError>;
   readonly audioControl: (
     control: AudioControl,
   ) => Effect.Effect<void, WebSocketError>;
@@ -501,6 +523,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   const cameraCaptureTimeout = Duration.max(
     requestTimeout,
     Duration.seconds(25),
+  );
+
+  // The backend allows 2 minutes for the person to allow remote control
+  const inputStatusTimeout = Duration.max(
+    requestTimeout,
+    Duration.seconds(125),
   );
 
   const socket = yield* Socket.makeWebSocket(websocketUrl(options), {
@@ -1108,6 +1136,51 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const mouseMove = Effect.fn("SystemBridgeWebSocket.mouseMove")(function* (
+    move: MouseMove,
+  ) {
+    yield* call("MOUSE_MOVE", "MOUSE_MOVED", MouseMove, move, ignoreReply);
+  });
+
+  const mouseClick = Effect.fn("SystemBridgeWebSocket.mouseClick")(function* (
+    click: MouseClick,
+  ) {
+    yield* call("MOUSE_CLICK", "MOUSE_CLICKED", MouseClick, click, ignoreReply);
+  });
+
+  const mouseButton = Effect.fn("SystemBridgeWebSocket.mouseButton")(function* (
+    button: MouseButton,
+  ) {
+    yield* call(
+      "MOUSE_BUTTON",
+      "MOUSE_BUTTON_SET",
+      MouseButton,
+      button,
+      ignoreReply,
+    );
+  });
+
+  const mouseScroll = Effect.fn("SystemBridgeWebSocket.mouseScroll")(function* (
+    scroll: MouseScroll,
+  ) {
+    yield* call(
+      "MOUSE_SCROLL",
+      "MOUSE_SCROLLED",
+      MouseScroll,
+      scroll,
+      ignoreReply,
+    );
+  });
+
+  const getInputStatus = call(
+    "GET_INPUT_STATUS",
+    "INPUT_STATUS",
+    Empty,
+    {},
+    InputStatus,
+    inputStatusTimeout,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.getInputStatus"));
+
   const audioControl = Effect.fn("SystemBridgeWebSocket.audioControl")(
     function* (control: AudioControl) {
       yield* call(
@@ -1690,6 +1763,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     executeCommand,
     keyboardKeypress,
     keyboardText,
+    mouseMove,
+    mouseClick,
+    mouseButton,
+    mouseScroll,
+    getInputStatus,
     audioControl,
     bluetoothConnect,
     bluetoothDisconnect,

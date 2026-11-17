@@ -40,6 +40,7 @@ export const EventType = Schema.Literals([
   "GET_FILE",
   "GET_FILES",
   "GET_HISTORY",
+  "GET_INPUT_STATUS",
   "GET_SETTINGS",
   "HYPRLAND_DISPATCH",
   "HYPRLAND_DISPATCH_RAW",
@@ -62,6 +63,10 @@ export const EventType = Schema.Literals([
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
   "MEDIA_CONTROL",
+  "MOUSE_BUTTON",
+  "MOUSE_CLICK",
+  "MOUSE_MOVE",
+  "MOUSE_SCROLL",
   "NOTIFICATION",
   "NOTIFICATION_DISMISS",
   "NOTIFICATION_PRESS",
@@ -144,9 +149,14 @@ export const ResponseType = Schema.Literals([
   "HYPRLAND_WINDOW_SET",
   "HYPRLAND_WORKSPACE_MOVED",
   "HYPRLAND_WORKSPACE_RENAMED",
+  "INPUT_STATUS",
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
+  "MOUSE_BUTTON_SET",
+  "MOUSE_CLICKED",
+  "MOUSE_MOVED",
+  "MOUSE_SCROLLED",
   "NOTIFICATION_ACTION",
   "NOTIFICATION_CLOSED",
   "NOTIFICATION_DISMISSED",
@@ -478,6 +488,42 @@ export const KeyboardText = Schema.Struct({
 });
 
 export interface KeyboardText extends Schema.Schema.Type<typeof KeyboardText> {}
+
+/** Moves the pointer by an amount, in pixels. */
+export const MouseMove = Schema.Struct({
+  x: Schema.Int,
+  y: Schema.Int,
+});
+
+export interface MouseMove extends Schema.Schema.Type<typeof MouseMove> {}
+
+export const MouseButtonName = Schema.Literals(["left", "right", "middle"]);
+
+export type MouseButtonName = typeof MouseButtonName.Type;
+
+/** Clicks a button, left by default. */
+export const MouseClick = Schema.Struct({
+  button: Schema.optionalKey(MouseButtonName),
+  double: Schema.optionalKey(Schema.Boolean),
+});
+
+export interface MouseClick extends Schema.Schema.Type<typeof MouseClick> {}
+
+/** Holds a button down or releases it, to drag. */
+export const MouseButton = Schema.Struct({
+  button: Schema.optionalKey(MouseButtonName),
+  action: Schema.Literals(["down", "up"]),
+});
+
+export interface MouseButton extends Schema.Schema.Type<typeof MouseButton> {}
+
+/** Scrolls by wheel notches. Positive `y` scrolls up, positive `x` right. */
+export const MouseScroll = Schema.Struct({
+  x: Schema.optionalKey(Schema.Int),
+  y: Schema.optionalKey(Schema.Int),
+});
+
+export interface MouseScroll extends Schema.Schema.Type<typeof MouseScroll> {}
 
 /** Text to put on the clipboard. Linux only. */
 export const ClipboardTextRequest = Schema.Struct({ text: Schema.String });

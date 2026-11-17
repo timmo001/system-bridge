@@ -1088,6 +1088,14 @@ export interface HyprlandOptionValue extends Schema.Schema.Type<
   typeof HyprlandOptionValue
 > {}
 
+export const InputStatus = Schema.Struct({
+  available: Schema.Boolean,
+  backend: Schema.NullOr(Schema.String),
+  reason: Schema.NullOr(Schema.String),
+});
+
+export interface InputStatus extends Schema.Schema.Type<typeof InputStatus> {}
+
 export const MediaPlayer = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
