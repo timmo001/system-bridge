@@ -13,7 +13,7 @@ import (
 func TestListToolsWithoutBackend(t *testing.T) {
 	tools, err := ListTools(context.Background())
 	require.NoError(t, err)
-	require.Len(t, tools, 55)
+	require.Len(t, tools, 60)
 
 	readOnly := map[string]bool{}
 	for _, tool := range tools {

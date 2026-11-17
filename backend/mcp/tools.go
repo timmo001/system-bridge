@@ -487,6 +487,50 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"text"}),
 	}, eventTool[keyboardTextInput](handlers, event.EventKeyboardText))
 
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_input_status",
+		Description: "Check whether System Bridge can press keys, type and move the pointer, and which backend it uses: wayland, libei (the RemoteDesktop portal), x11 or robotgo, or why it can't. On GNOME and KDE the first check asks the user to allow remote control.",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
+	}, queryTool[struct{}, types.InputStatus](handlers, event.EventGetInputStatus))
+
+	button := map[string]any{"type": "string", "enum": []string{"left", "right", "middle"}, "description": "The button, left by default"}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_mouse_move",
+		Description: "Move the pointer by an amount from where it is, in pixels",
+		InputSchema: objectSchema(map[string]any{
+			"x": map[string]any{"type": "integer", "minimum": -2000, "maximum": 2000, "description": "Pixels to move right, or left when negative"},
+			"y": map[string]any{"type": "integer", "minimum": -2000, "maximum": 2000, "description": "Pixels to move down, or up when negative"},
+		}, []string{}),
+	}, eventTool[mouseAmountInput](handlers, event.EventMouseMove))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_mouse_click",
+		Description: "Click a mouse button where the pointer is",
+		InputSchema: objectSchema(map[string]any{
+			"button": button,
+			"double": boolean("Whether to double-click"),
+		}, []string{}),
+	}, eventTool[mouseClickInput](handlers, event.EventMouseClick))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_mouse_button",
+		Description: "Hold a mouse button down or release it, such as to drag with system_bridge_mouse_move between the two. Always release a button you held.",
+		InputSchema: objectSchema(map[string]any{
+			"button": button,
+			"action": map[string]any{"type": "string", "enum": []string{"down", "up"}, "description": "Hold the button down, or release it"},
+		}, []string{"action"}),
+	}, eventTool[mouseButtonInput](handlers, event.EventMouseButton))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_mouse_scroll",
+		Description: "Scroll where the pointer is, by mouse wheel notches",
+		InputSchema: objectSchema(map[string]any{
+			"x": map[string]any{"type": "integer", "minimum": -50, "maximum": 50, "description": "Notches to scroll right, or left when negative"},
+			"y": map[string]any{"type": "integer", "minimum": -50, "maximum": 50, "description": "Notches to scroll up, or down when negative"},
+		}, []string{}),
+	}, eventTool[mouseAmountInput](handlers, event.EventMouseScroll))
+
 	discordActions := []string{}
 	for _, action := range []discord.Action{
 		discord.ActionJoinVoiceChannel, discord.ActionLeaveVoiceChannel, discord.ActionOpenTextChannel,

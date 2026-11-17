@@ -187,6 +187,21 @@ type keyboardTextInput struct {
 	Delay int    `json:"delay,omitempty"`
 }
 
+type mouseAmountInput struct {
+	X int `json:"x,omitempty"`
+	Y int `json:"y,omitempty"`
+}
+
+type mouseClickInput struct {
+	Button string `json:"button,omitempty"`
+	Double bool   `json:"double,omitempty"`
+}
+
+type mouseButtonInput struct {
+	Button string `json:"button,omitempty"`
+	Action string `json:"action"`
+}
+
 type discordControlInput struct {
 	Action    string   `json:"action"`
 	ChannelID string   `json:"channel_id,omitempty"`
