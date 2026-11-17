@@ -43,6 +43,34 @@ Before keys, every client used one shared API token. It still works until it's r
 system-bridge client token
 ```
 
+## Remote computers
+
+The `client` and `agent` commands can call another computer's System Bridge instead of this one's. Pair with it first, the same way as a phone: make a one-time code under **Settings > Devices** in that computer's web client, or with `system-bridge client remote code` there, and pass its link to:
+
+```bash
+system-bridge client remote pair 'http://desk.local:9170/?ip=192.168.1.5&pair=MZXW6YTBOI4DQNZXGQ2DGMBQGE3TSNBR'
+```
+
+The code works once, for 5 minutes. It's traded for a key of this computer's own, listed under **Settings > Devices** there, and kept with the computer's address in the `remotes.json` file in the [settings directory](/running/#file-locations), which only you can read. With only the code, give the address too, with `--host`, and `--port` or `--ssl` if they differ from `9170` over HTTP. Pairing the same computer again replaces its key.
+
+Then add `--remote` with its name, address or ID to send a command there:
+
+```bash
+system-bridge client --remote desk clipboard get
+system-bridge client data watch --module cpu --remote desk
+```
+
+Or set `SYSTEM_BRIDGE_REMOTE` to send every command there. List and forget paired computers with:
+
+```bash
+system-bridge client remote list
+system-bridge client remote remove desk
+```
+
+Forgetting one leaves its key on that computer until you remove it under **Settings > Devices**. If that key is removed, pair again.
+
+`client key`, `client token`, `client quit` and `client data run` only work on this computer, so they refuse `--remote`. `client data list` lists this build's modules.
+
 ## Notification
 
 To send a notification, use the following command:
@@ -75,6 +103,8 @@ Add `--settings` to open General Settings, or `--path` to open any page, includi
 ```bash
 system-bridge client open --path /media#media-controls
 ```
+
+With `--remote`, it opens a [paired computer's](#remote-computers) web client instead.
 
 ## Quit
 
@@ -391,6 +421,8 @@ echo '{"modules":["cpu"]}' | system-bridge agent call get_data
 ```
 
 `agent tools` prints every tool with its input schema and whether it only reads, and whether this machine has an owner key, without needing the backend. `agent call` checks the input against the tool's schema, runs it on the local backend and prints its result as JSON.
+
+Add `--remote`, or set `SYSTEM_BRIDGE_REMOTE`, to run the tools on a [paired computer](#remote-computers) instead. `agent tools` then names it in `remote`, and each tool's `argv` keeps the `--remote`. Set the variable where OpenCode starts to point the plugin's `system-bridge` namespace there. The tools are this build's, so a computer on an older release may not have them all.
 
 ## Version
 

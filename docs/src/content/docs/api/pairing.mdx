@@ -5,7 +5,7 @@ description: Give a phone its own key through a one-time code from a QR code, ov
 
 Pairing connects a phone without typing an address or a key. A client that already has a key, such as the web client, makes a one-time code and shows its link as a QR code. The phone scans it and trades the code for a [key](/api/#authentication) of its own.
 
-Each phone gets its own key, listed under **Settings > Devices** in the web client. A browser pairs the same way: a pairing link opened in one, or the web client opened by System Bridge itself, carries a code in `pair` that the page trades for that browser's own key. To stop a phone connecting, remove its key there. Pairing the same phone again replaces its key rather than adding another.
+Each phone gets its own key, listed under **Settings > Devices** in the web client. A browser pairs the same way: a pairing link opened in one, or the web client opened by System Bridge itself, carries a code in `pair` that the page trades for that browser's own key. Another computer's [CLI](/using/cli/#remote-computers) pairs with the link too, with `platform` `cli`. To stop a phone connecting, remove its key there. Pairing the same phone again replaces its key rather than adding another.
 
 ## Make a code
 
