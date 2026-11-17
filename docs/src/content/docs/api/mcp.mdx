@@ -105,6 +105,8 @@ The OpenCode plugin in `opencode-plugin/` gives OpenCode the same tools as a `sy
 
 It reads the tools from `system-bridge agent tools --json` and runs each with `system-bridge agent call`, which calls this server on the local backend with the owner key, so they always match the `system-bridge` on your `PATH`. Tool names drop the `system_bridge_` prefix, so `system_bridge_get_data` is `tools["system-bridge"].get_data`. Tools that change something ask first, and "always allow" on `media_control`, `hyprland_dispatch`, `hyprland_set_option`, `discord_control`, `set_power_profile` or `run_command` covers one action, dispatcher, option, profile or command.
 
+When this computer is [paired with others](/using/cli/#remote-computers), every tool also takes `remote`, naming the paired computer to run it on; leave it out for this one. Allowing a tool on one computer doesn't allow it on another.
+
 ## Tools
 
 ### `system_bridge_audio_control`

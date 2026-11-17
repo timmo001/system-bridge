@@ -422,7 +422,7 @@ echo '{"modules":["cpu"]}' | system-bridge agent call get_data
 
 `agent tools` prints every tool with its input schema and whether it only reads, and whether this machine has an owner key, without needing the backend. `agent call` checks the input against the tool's schema, runs it on the local backend and prints its result as JSON.
 
-Add `--remote`, or set `SYSTEM_BRIDGE_REMOTE`, to run the tools on a [paired computer](#remote-computers) instead. `agent tools` then names it in `remote`, and each tool's `argv` keeps the `--remote`. Set the variable where OpenCode starts to point the plugin's `system-bridge` namespace there. The tools are this build's, so a computer on an older release may not have them all.
+Add `--remote`, or set `SYSTEM_BRIDGE_REMOTE`, to run the tools on a [paired computer](#remote-computers) instead. `agent tools` then names it in `remote`, and each tool's `argv` keeps the `--remote`. Without it, `agent tools` lists the paired computers in `remotes`, and the OpenCode plugin adds a `remote` input to every tool, so one session can reach this computer and each paired one. Setting the variable where OpenCode starts points the whole `system-bridge` namespace at one computer instead. The tools are this build's, so a computer on an older release may not have them all.
 
 ## Version
 
