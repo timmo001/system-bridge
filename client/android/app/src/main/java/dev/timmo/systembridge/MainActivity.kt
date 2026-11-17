@@ -130,8 +130,9 @@ class MainActivity : ShellActivity() {
 
   /**
    * Whether a pull at a point may refresh the page: nothing under it is
-   * scrolled down, and it's not in an open popover or dialog, such as the
-   * page search. The web client scrolls inside its own elements, so the
+   * scrolled down or handles its own touches (`touch-action: none`, such as
+   * the Remote trackpad), and it's not in an open popover or dialog, such as
+   * the page search. The web client scrolls inside its own elements, so the
    * WebView alone can't tell.
    */
   private val pageAtTopScript =
@@ -145,6 +146,7 @@ class MainActivity : ShellActivity() {
       }
       for (let node = element; node; node = node.parentElement ?? node.getRootNode().host) {
         if (node.scrollTop > 0) return false;
+        if (getComputedStyle(node).touchAction === "none") return false;
         try {
           if (node.matches(":popover-open, dialog[open], [aria-modal=true]")) return false;
         } catch {}
