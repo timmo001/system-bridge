@@ -24,14 +24,48 @@ const decodeInput = Schema.decodeUnknownEffect(Input);
 
 const isNonEmptyString = Schema.is(Schema.NonEmptyString);
 
+const isProperties = Schema.is(Schema.Record(Schema.String, Schema.Unknown));
+
 /**
  * What the permission covers: the tool, narrowed by its resource input when
- * it names one, so "always allow" on media_control covers one action.
+ * it names one, so "always allow" on media_control covers one action, and by
+ * the paired computer it runs on, so allowing it here doesn't allow it there.
  */
-const permissionTarget = (tool: ManifestTool, input: typeof Input.Type) => {
+const permissionTarget = (
+  tool: ManifestTool,
+  input: typeof Input.Type,
+  remote: string | undefined,
+) => {
   const value = tool.resource === undefined ? undefined : input[tool.resource];
+  const target = isNonEmptyString(value) ? `${tool.name} ${value}` : tool.name;
 
-  return isNonEmptyString(value) ? `${tool.name} ${value}` : tool.name;
+  return remote === undefined ? target : `${target} on ${remote}`;
+};
+
+/**
+ * A tool's input with `remote`, which picks a paired computer to run it on,
+ * when any are paired.
+ */
+const withRemote = (
+  input: ManifestTool["input"],
+  remotes: readonly string[],
+): ManifestTool["input"] => {
+  if (remotes.length === 0) return input;
+
+  const properties = isProperties(input.properties) ? input.properties : {};
+
+  return {
+    ...input,
+    properties: {
+      ...properties,
+      remote: {
+        type: "string",
+        enum: [...remotes],
+        description:
+          "A paired computer to run this on, rather than this one. Leave it out for this one.",
+      },
+    },
+  };
 };
 
 export default Plugin.define({
@@ -48,8 +82,8 @@ export default Plugin.define({
         );
       }
 
-      // No owner key means System Bridge has never run here, and no remote
-      // is picked with SYSTEM_BRIDGE_REMOTE, so leave the namespace out.
+      // No owner key means System Bridge has never run here, and with no
+      // computer paired either, leave the namespace out.
       if (!manifest.success.available) return;
 
       const sessionDirectory = (call: Tool.Context) =>
@@ -71,11 +105,12 @@ export default Plugin.define({
         tool: ManifestTool,
         call: Tool.Context,
         input: typeof Input.Type,
-        stdin: string,
+        remote: string | undefined,
+        command: string,
       ) => {
         if (tool.access !== "write") return Effect.void;
 
-        const target = permissionTarget(tool, input);
+        const target = permissionTarget(tool, input, remote);
         const resource = `${namespace}_${target}`;
 
         return context.permission.assert({
@@ -85,9 +120,7 @@ export default Plugin.define({
           resources: [resource],
           // An empty save list keeps "always" from being stored, so the next call asks again.
           save: tool.alwaysAsk ? [] : [resource],
-          metadata: {
-            command: `system-bridge ${tool.argv.join(" ")} ${stdin}`,
-          },
+          metadata: { command },
           source: { type: "tool", messageID: call.messageID, id: call.id },
         });
       };
@@ -96,11 +129,28 @@ export default Plugin.define({
         (tool: ManifestTool) =>
         (input: typeof Input.Type, call: Tool.Context) =>
           Effect.gen(function* () {
-            const stdin = JSON.stringify(input);
+            // `remote` is the plugin's, not the tool's, so it goes to the
+            // binary as --remote
+            const { remote: picked, ...rest } = input;
+            const remote = isNonEmptyString(picked) ? picked : undefined;
+            const [first = "agent", ...others] = tool.argv;
 
-            yield* assertWrite(tool, call, input, stdin);
+            const argv =
+              remote === undefined
+                ? tool.argv
+                : [first, "--remote", remote, ...others];
 
-            const stdout = yield* runSystemBridge(tool.argv, {
+            const stdin = JSON.stringify(rest);
+
+            yield* assertWrite(
+              tool,
+              call,
+              rest,
+              remote,
+              `system-bridge ${argv.join(" ")} ${stdin}`,
+            );
+
+            const stdout = yield* runSystemBridge(argv, {
               cwd: yield* sessionDirectory(call),
               stdin: tool.stdin ? stdin : undefined,
               timeout: tool.timeoutMillis,
@@ -121,14 +171,22 @@ export default Plugin.define({
             };
           });
 
+      const remotes = manifest.success.remotes ?? [];
+
+      const machine =
+        manifest.success.remote === undefined
+          ? "This machine"
+          : `The paired computer ${manifest.success.remote}, not this one,`;
+
+      const paired =
+        remotes.length === 0
+          ? ""
+          : ` Each tool can run on a paired computer instead, named in its remote input: ${remotes.join(", ")}.`;
+
       yield* context.tool.transform((draft) => {
         draft.namespace({
           name: namespace,
-          description: `${
-            manifest.success.remote === undefined
-              ? "This machine"
-              : `The paired computer ${manifest.success.remote}, not this one,`
-          } through System Bridge: read system modules (cpu, memory, disks, processes, sensors, media, audio, displays and the desktop with its Hyprland windows, workspaces, binds, options and config errors), metric history, media files and the clipboard, and control windows, workspaces, Hyprland, media, audio, displays, Bluetooth, cameras, Discord, the keyboard, notifications, the clipboard, power and Omarchy menus.`,
+          description: `${machine} through System Bridge: read system modules (cpu, memory, disks, processes, sensors, media, audio, displays and the desktop with its Hyprland windows, workspaces, binds, options and config errors), metric history, media files and the clipboard, and control windows, workspaces, Hyprland, media, audio, displays, Bluetooth, cameras, Discord, the keyboard, notifications, the clipboard, power and Omarchy menus.${paired}`,
         });
 
         for (const tool of manifest.success.tools) {
@@ -137,7 +195,7 @@ export default Plugin.define({
           draft.add({
             name: tool.name,
             description: tool.description,
-            input: strictInput(tool.input),
+            input: strictInput(withRemote(tool.input, remotes)),
             output: tool.json ? Schema.Unknown : Schema.String,
             options:
               tool.access === "write"

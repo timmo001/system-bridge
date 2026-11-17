@@ -27,6 +27,7 @@ const Manifest = Schema.fromJsonString(
   Schema.Struct({
     available: Schema.Boolean,
     remote: Schema.optionalKey(Schema.String),
+    remotes: Schema.optionalKey(Schema.Array(Schema.String)),
     tools: Schema.Array(ManifestTool),
   }),
 );
