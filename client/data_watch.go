@@ -10,9 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/types"
-	"github.com/timmo001/system-bridge/utils"
 )
 
 const closeTimeout = time.Second
@@ -41,8 +39,7 @@ type WatchOptions struct {
 	Modules []types.ModuleName
 	Writer  io.Writer
 
-	url     string
-	loadKey func() (string, error)
+	backend func(context.Context) (Backend, error)
 	dialer  *websocket.Dialer
 }
 
@@ -75,31 +72,27 @@ func Watch(ctx context.Context, options WatchOptions) error {
 		return err
 	}
 
-	loadKey := options.loadKey
-	if loadKey == nil {
-		loadKey = keys.LoadOwnerKey
+	backendFor := options.backend
+	if backendFor == nil {
+		backendFor = BackendFor
 	}
-	key, err := loadKey()
+	backend, err := backendFor(ctx)
 	if err != nil {
 		return err
 	}
 
-	url := options.url
-	if url == "" {
-		url = fmt.Sprintf("ws://127.0.0.1:%d/api/websocket", utils.GetPort())
-	}
 	dialer := options.dialer
 	if dialer == nil {
 		dialer = websocket.DefaultDialer
 	}
-	conn, response, err := dialer.DialContext(ctx, url, nil)
+	conn, response, err := dialer.DialContext(ctx, backend.WebSocket(), nil)
 	if err != nil {
 		if response != nil && response.Body != nil {
 			if closeErr := response.Body.Close(); closeErr != nil {
-				return fmt.Errorf("connect to data websocket: %w (close response body: %v)", err, closeErr)
+				return fmt.Errorf("connect to data websocket: %w (close response body: %v)", backend.Unreachable(err), closeErr)
 			}
 		}
-		return fmt.Errorf("connect to data websocket: %w", err)
+		return backend.Unreachable(err)
 	}
 	defer func() { _ = conn.Close() }()
 
@@ -114,7 +107,7 @@ func Watch(ctx context.Context, options WatchOptions) error {
 	})
 	defer stopCancellation()
 
-	if err := signIn(conn, key); err != nil {
+	if err := signIn(conn, backend.Key); err != nil {
 		return watchError(ctx, "sign in", err)
 	}
 
@@ -131,7 +124,7 @@ func Watch(ctx context.Context, options WatchOptions) error {
 	for {
 		responseMessage, err := readResponse(conn)
 		if err != nil {
-			return watchError(ctx, "await data listener acknowledgement", err)
+			return backend.Rejected(watchError(ctx, "await data listener acknowledgement", err))
 		}
 		if responseMessage.ID != registerID {
 			continue
@@ -180,6 +173,10 @@ func readResponse(conn *websocket.Conn) (event.MessageResponse, error) {
 	response := event.MessageResponse{Data: &json.RawMessage{}}
 	if err := conn.ReadJSON(&response); err != nil {
 		return event.MessageResponse{}, err
+	}
+	// The answer to signing in carries no id, as the auth message has none
+	if response.Subtype == event.ResponseSubtypeBadKey {
+		return event.MessageResponse{}, ErrBadKey
 	}
 	if response.ID == "" || response.Type == "" {
 		return event.MessageResponse{}, fmt.Errorf("malformed websocket response: id and type are required")

@@ -6,6 +6,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"os/signal"
@@ -250,6 +251,8 @@ func main() {
 				Name:    "client",
 				Aliases: []string{"c", "cli"},
 				Usage:   "Run the client",
+				Flags:   []cli.Flag{remoteFlag()},
+				Before:  withRemote,
 				// Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 				// 	// TODO: CLI client
 				// 	// -- Access the data store
@@ -403,8 +406,9 @@ func main() {
 								},
 							},
 							{
-								Name:  "run",
-								Usage: "Run a data module and print JSON output",
+								Name:   "run",
+								Usage:  "Run a data module in this process and print JSON output",
+								Before: localOnly,
 								Flags: []cli.Flag{
 									&cli.StringFlag{
 										Name:     "module",
@@ -745,14 +749,18 @@ func main() {
 							},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							err := notification.Send(notification.NotificationData{
+							data := notification.NotificationData{
 								Title:      cmd.String("title"),
 								Message:    cmd.String("message"),
 								Icon:       cmd.String("icon"),
 								Sound:      cmd.String("sound"),
 								ActionURL:  cmd.String("action-url"),
 								ActionPath: cmd.String("action-path"),
-							})
+							}
+							if client.RemoteName(cmdCtx) != "" {
+								return client.Send(cmdCtx, event.EventNotification, data)
+							}
+							err := notification.Send(data)
 							if err != nil {
 								slog.Warn("Failed to send notification", "err", err)
 							}
@@ -782,7 +790,11 @@ func main() {
 							if err != nil {
 								return err
 							}
-							openWebClientPath(code, path)
+							backend, err := client.BackendFor(cmdCtx)
+							if err != nil {
+								return err
+							}
+							openWebClientPath(backend.URL, code.Code, path)
 							return nil
 						},
 					},
@@ -808,8 +820,9 @@ func main() {
 						},
 					},
 					{
-						Name:  "quit",
-						Usage: "Confirm and quit the local System Bridge backend",
+						Name:   "quit",
+						Usage:  "Confirm and quit the local System Bridge backend",
+						Before: localOnly,
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes", Aliases: []string{"y"}, Usage: "Quit without asking for confirmation"},
 						},
@@ -824,9 +837,11 @@ func main() {
 							return nil
 						},
 					},
+					remoteCommand(),
 					{
-						Name:  "key",
-						Usage: "Make, list and remove the keys clients use to sign in. Run on this computer, as the user the service runs as.",
+						Name:   "key",
+						Usage:  "Make, list and remove the keys clients use to sign in. Run on this computer, as the user the service runs as.",
+						Before: localOnly,
 						Commands: []*cli.Command{
 							{
 								Name:      "create",
@@ -918,6 +933,7 @@ func main() {
 						Name:    "token",
 						Aliases: []string{"t"},
 						Usage:   "Print the API token",
+						Before:  localOnly,
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							token, err := utils.LoadToken()
 							if err != nil {
@@ -972,23 +988,29 @@ func openWebClientFrom(b *backend.Backend, path string) {
 		reportDesktopError("Failed to open web client", err)
 		return
 	}
-	openWebClientPath(code, path)
+	openWebClientPath(url.URL{Scheme: "http", Host: net.JoinHostPort("127.0.0.1", strconv.Itoa(utils.GetPort()))}, code, path)
 }
 
-// openWebClientPath opens a page of the web client with a one-time pairing
-// code, which the page trades for a key of its own. The URL holds the code,
-// so it is never logged.
-func openWebClientPath(code, path string) {
-	port := utils.GetPort()
+// openWebClientPath opens a page of the web client a backend serves, with a
+// one-time pairing code, which the page trades for a key of its own. The URL
+// holds the code, so it is never logged.
+func openWebClientPath(backend url.URL, code, path string) {
+	port := backend.Port()
+	if port == "" {
+		port = "80"
+		if backend.Scheme == "https" {
+			port = "443"
+		}
+	}
 	// The connection params go before any #section, so the page still scrolls to it.
 	page, section, _ := strings.Cut(path, "#")
-	query := url.Values{"host": {"127.0.0.1"}, "port": {strconv.Itoa(port)}, "pair": {code}}
-	webClientURL := fmt.Sprintf("http://127.0.0.1:%d%s?%s", port, page, query.Encode())
-	if section != "" {
-		webClientURL += "#" + section
+	query := url.Values{"host": {backend.Hostname()}, "port": {port}, "pair": {code}}
+	if backend.Scheme == "https" {
+		query.Set("ssl", "true")
 	}
+	webClientURL := url.URL{Scheme: backend.Scheme, Host: backend.Host, Path: page, RawQuery: query.Encode(), Fragment: section}
 	slog.Info("Opening the web client", "path", path)
-	if err := browser.OpenURL(webClientURL); err != nil {
+	if err := browser.OpenURL(webClientURL.String()); err != nil {
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open web client",
 			Message: "Failed to open web client in the default browser",

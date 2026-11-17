@@ -7,14 +7,15 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/backend/mcp"
+	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/keys"
-	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/version"
 	"github.com/urfave/cli/v3"
 )
@@ -63,9 +64,13 @@ type agentManifestTool struct {
 }
 
 type agentManifest struct {
-	// Whether this machine has a backend to call: its owner key exists
-	Available bool                `json:"available"`
-	Tools     []agentManifestTool `json:"tools"`
+	// Whether there is a backend to call: this machine's owner key exists, or
+	// the remote --remote names is paired
+	Available bool `json:"available"`
+	// Remote is the name of the paired computer the tools call, when it's
+	// not this one
+	Remote string              `json:"remote,omitempty"`
+	Tools  []agentManifestTool `json:"tools"`
 }
 
 func agentTimeout(name string) time.Duration {
@@ -105,7 +110,17 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 	}
 
 	manifest := agentManifest{Tools: make([]agentManifestTool, 0, len(tools))}
-	if ownerKeyPath, err := keys.OwnerKeyPath(); err == nil {
+	argv := []string{"agent"}
+	if remote := client.RemoteName(ctx); remote != "" {
+		paired, err := client.FindRemote(remote)
+		if err != nil {
+			return agentManifest{}, err
+		}
+		manifest.Available = true
+		manifest.Remote = paired.Name
+		// Each call goes to the same remote, even without the variable
+		argv = append(argv, "--remote", remote)
+	} else if ownerKeyPath, err := keys.OwnerKeyPath(); err == nil {
 		if _, err := os.Stat(ownerKeyPath); err == nil {
 			manifest.Available = true
 		}
@@ -123,7 +138,7 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 		}
 		manifest.Tools = append(manifest.Tools, agentManifestTool{
 			Name:          name,
-			Argv:          []string{"agent", "call", name},
+			Argv:          append(slices.Clone(argv), "call", name),
 			Description:   strings.ReplaceAll(tool.Description, agentToolPrefix, ""),
 			Access:        access,
 			Pinned:        agentPinned[name],
@@ -137,16 +152,22 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 	return manifest, nil
 }
 
-// bearerTransport adds the key to every request
+// bearerTransport adds the key to every request, and notes when the backend
+// turns it down
 type bearerTransport struct {
-	key  string
-	base http.RoundTripper
+	key      string
+	base     http.RoundTripper
+	rejected bool
 }
 
-func (t bearerTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+func (t *bearerTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	request = request.Clone(request.Context())
 	request.Header.Set("Authorization", "Bearer "+t.key)
-	return t.base.RoundTrip(request)
+	response, err := t.base.RoundTrip(request)
+	if err == nil && response.StatusCode == http.StatusUnauthorized {
+		t.rejected = true
+	}
+	return response, err
 }
 
 // validateAgentInput checks the input against the tool's manifest schema,
@@ -180,13 +201,13 @@ func validateAgentInput(ctx context.Context, name string, input map[string]any) 
 	return fmt.Errorf("no tool %s, see system-bridge agent tools", name)
 }
 
-// agentCall runs one tool on the running backend and returns its result as JSON
+// agentCall runs one tool on the backend and returns its result as JSON
 func agentCall(ctx context.Context, name string, input map[string]any) ([]byte, error) {
 	if err := validateAgentInput(ctx, name, input); err != nil {
 		return nil, err
 	}
 
-	key, err := keys.LoadOwnerKey()
+	backend, err := client.BackendFor(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -194,14 +215,18 @@ func agentCall(ctx context.Context, name string, input map[string]any) ([]byte, 
 	ctx, cancel := context.WithTimeout(ctx, agentTimeout(name))
 	defer cancel()
 
-	client := sdkmcp.NewClient(&sdkmcp.Implementation{Name: "system-bridge-agent", Version: version.Version}, nil)
-	session, err := client.Connect(ctx, &sdkmcp.StreamableClientTransport{
-		Endpoint:   fmt.Sprintf("http://127.0.0.1:%d/api/mcp", utils.GetPort()),
-		HTTPClient: &http.Client{Transport: bearerTransport{key: key, base: http.DefaultTransport}},
+	mcpClient := sdkmcp.NewClient(&sdkmcp.Implementation{Name: "system-bridge-agent", Version: version.Version}, nil)
+	transport := &bearerTransport{key: backend.Key, base: http.DefaultTransport}
+	session, err := mcpClient.Connect(ctx, &sdkmcp.StreamableClientTransport{
+		Endpoint:   backend.HTTP("/api/mcp"),
+		HTTPClient: &http.Client{Transport: transport},
 		MaxRetries: -1,
 	}, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not reach the System Bridge backend (is it running?): %v", err)
+		if transport.rejected {
+			return nil, backend.Rejected(client.ErrBadKey)
+		}
+		return nil, backend.Unreachable(err)
 	}
 	defer func() { _ = session.Close() }()
 
@@ -231,12 +256,14 @@ func agentCall(ctx context.Context, name string, input map[string]any) ([]byte, 
 
 func agentCommand() *cli.Command {
 	return &cli.Command{
-		Name:  "agent",
-		Usage: "The Code Mode tools agent plugins register, from the MCP server's tools",
+		Name:   "agent",
+		Usage:  "The Code Mode tools agent plugins register, from the MCP server's tools",
+		Flags:  []cli.Flag{remoteFlag()},
+		Before: withRemote,
 		Commands: []*cli.Command{
 			{
 				Name:  "tools",
-				Usage: "Print the Code Mode tools as JSON, and whether this machine has a backend to call",
+				Usage: "Print the Code Mode tools as JSON, and whether there is a backend to call",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "json", Usage: "Print as JSON (the only format)", Value: true},
 				},

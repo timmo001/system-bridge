@@ -3,14 +3,11 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/keys"
-	"github.com/timmo001/system-bridge/utils"
 )
 
 const sendTimeout = 10 * time.Second
@@ -37,7 +34,7 @@ func signIn(conn *websocket.Conn, key string) error {
 	return conn.WriteJSON(socketAuth{Type: "auth", Key: key})
 }
 
-// Send sends one event to the local backend and waits for its answer.
+// Send sends one event to the backend and waits for its answer.
 func Send(ctx context.Context, eventType event.EventType, data any) error {
 	return SendWithin(ctx, sendTimeout, eventType, data)
 }
@@ -48,7 +45,7 @@ func SendWithin(ctx context.Context, timeout time.Duration, eventType event.Even
 	return err
 }
 
-// Request sends one event to the local backend and returns the data of its
+// Request sends one event to the backend and returns the data of its
 // answer as JSON
 func Request(ctx context.Context, eventType event.EventType, data any) (json.RawMessage, error) {
 	return request(ctx, sendTimeout, eventType, data)
@@ -59,7 +56,7 @@ func RequestWithin(ctx context.Context, timeout time.Duration, eventType event.E
 	return request(ctx, timeout, eventType, data)
 }
 
-// request sends one event to the local backend and returns the data of its
+// request sends one event to the backend and returns the data of its
 // answer, undecoded.
 func request(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {
 	return requestReply(ctx, timeout, eventType, data, "")
@@ -68,26 +65,25 @@ func request(ctx context.Context, timeout time.Duration, eventType event.EventTy
 // requestReply is request, waiting for a reply of the given type when it's
 // set, for events such as COMMAND_EXECUTE that answer more than once
 func requestReply(ctx context.Context, timeout time.Duration, eventType event.EventType, data any, reply event.ResponseType) (json.RawMessage, error) {
-	key, err := keys.LoadOwnerKey()
+	backend, err := BackendFor(ctx)
 	if err != nil {
 		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	url := fmt.Sprintf("ws://127.0.0.1:%d/api/websocket", utils.GetPort())
-	conn, response, err := websocket.DefaultDialer.DialContext(ctx, url, nil)
+	conn, response, err := websocket.DefaultDialer.DialContext(ctx, backend.WebSocket(), nil)
 	if err != nil {
 		if response != nil && response.Body != nil {
 			_ = response.Body.Close()
 		}
-		return nil, fmt.Errorf("connect to websocket: %w", err)
+		return nil, backend.Unreachable(err)
 	}
 	defer func() { _ = conn.Close() }()
 	stopCancellation := context.AfterFunc(ctx, func() { _ = conn.Close() })
 	defer stopCancellation()
 
-	if err := signIn(conn, key); err != nil {
+	if err := signIn(conn, backend.Key); err != nil {
 		return nil, watchError(ctx, "sign in", err)
 	}
 	id := uuid.NewString()
@@ -97,7 +93,7 @@ func requestReply(ctx context.Context, timeout time.Duration, eventType event.Ev
 	for {
 		responseMessage, err := readResponse(conn)
 		if err != nil {
-			return nil, watchError(ctx, "await event response", err)
+			return nil, backend.Rejected(watchError(ctx, "await event response", err))
 		}
 		if responseMessage.ID != id {
 			continue

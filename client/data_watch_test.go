@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"net/url"
 	"testing"
 	"time"
 
@@ -58,7 +58,7 @@ func newWatchServer(t *testing.T, handler func(*websocket.Conn, websocketRequest
 	t.Cleanup(server.Close)
 
 	return watchServer{
-		url:      "ws" + strings.TrimPrefix(server.URL, "http"),
+		url:      server.URL,
 		requests: requests,
 	}
 }
@@ -67,9 +67,12 @@ func watchOptions(server watchServer, writer io.Writer, modules ...types.ModuleN
 	return WatchOptions{
 		Modules: modules,
 		Writer:  writer,
-		url:     server.url,
-		loadKey: func() (string, error) {
-			return testKey, nil
+		backend: func(context.Context) (Backend, error) {
+			address, err := url.Parse(server.url)
+			if err != nil {
+				return Backend{}, err
+			}
+			return Backend{URL: *address, Key: testKey}, nil
 		},
 	}
 }
@@ -219,9 +222,9 @@ func TestWatchRejectsInvalidModulesBeforeLoadingKey(t *testing.T) {
 	err := Watch(context.Background(), WatchOptions{
 		Modules: []types.ModuleName{"unknown"},
 		Writer:  io.Discard,
-		loadKey: func() (string, error) {
+		backend: func(context.Context) (Backend, error) {
 			keyLoaded = true
-			return testKey, nil
+			return Backend{Key: testKey}, nil
 		},
 	})
 
