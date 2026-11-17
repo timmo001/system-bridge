@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/timmo001/system-bridge/client"
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/urfave/cli/v3"
 )
 
@@ -24,13 +25,130 @@ func printJSON(w io.Writer, value any) error {
 	return err
 }
 
+// savedCommand finds a command on the allowlist by its id
+func savedCommand(ctx context.Context, id string) (settings.SettingsCommandDefinition, error) {
+	commands, err := client.Commands(ctx)
+	if err != nil {
+		return settings.SettingsCommandDefinition{}, err
+	}
+	for _, command := range commands {
+		if command.ID == id {
+			return command, nil
+		}
+	}
+	return settings.SettingsCommandDefinition{}, fmt.Errorf("no command on the allowlist has id %s", id)
+}
+
+// printCommand prints a saved command, as JSON with --json
+func printCommand(cmd *cli.Command, command settings.SettingsCommandDefinition, action string) error {
+	if cmd.Bool("json") {
+		return printJSON(cmd.Root().Writer, command)
+	}
+	_, err := fmt.Fprintf(cmd.Root().Writer, "%s %s (%s)\n", action, command.Name, command.ID)
+	return err
+}
+
 func commandCommand() *cli.Command {
 	jsonFlag := &cli.BoolFlag{Name: "json", Usage: "Output as JSON"}
 
 	return &cli.Command{
 		Name:  "command",
-		Usage: "List and run the allowlisted commands, and see the prefabs",
+		Usage: "List, run, add, change and remove the allowlisted commands, and see the prefabs",
 		Commands: []*cli.Command{
+			{
+				Name:      "add",
+				Usage:     "Add a command to the allowlist: a program by its absolute path with its arguments, or a prefab",
+				ArgsUsage: "[-- /absolute/path/to/program [arguments...]]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "name", Usage: "What the command does, shown in clients and Home Assistant", Required: true},
+					&cli.StringFlag{Name: "prefab", Usage: "A prefab's id from system-bridge client command prefabs. With a program, the program replaces the prefab's"},
+					&cli.StringFlag{Name: "working-dir", Usage: "Absolute path of the directory it runs in"},
+					jsonFlag,
+				},
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					definition := settings.SettingsCommandDefinition{
+						Name:       cmd.String("name"),
+						Prefab:     cmd.String("prefab"),
+						WorkingDir: cmd.String("working-dir"),
+					}
+					if args := cmd.Args().Slice(); len(args) > 0 {
+						definition.Command = args[0]
+						definition.Arguments = args[1:]
+					}
+					if definition.Command == "" && definition.Prefab == "" {
+						return fmt.Errorf("give a program after --, or a --prefab")
+					}
+
+					added, err := client.AddCommand(cmdCtx, definition)
+					if err != nil {
+						return err
+					}
+					return printCommand(cmd, added, "Added")
+				},
+			},
+			{
+				Name:      "update",
+				Usage:     "Change a command on the allowlist. Only what's given changes; a program after -- replaces the command and its arguments",
+				ArgsUsage: "<command id> [-- /absolute/path/to/program [arguments...]]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "name", Usage: "What the command does"},
+					&cli.StringFlag{Name: "prefab", Usage: "A prefab's id, or an empty string to remove it"},
+					&cli.StringFlag{Name: "working-dir", Usage: "Absolute path of the directory it runs in, or an empty string for the default"},
+					jsonFlag,
+				},
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					args := cmd.Args().Slice()
+					if len(args) == 0 {
+						return fmt.Errorf("a command id is required")
+					}
+					current, err := savedCommand(cmdCtx, args[0])
+					if err != nil {
+						return err
+					}
+
+					if cmd.IsSet("name") {
+						current.Name = cmd.String("name")
+					}
+					if cmd.IsSet("prefab") {
+						current.Prefab = cmd.String("prefab")
+					}
+					if cmd.IsSet("working-dir") {
+						current.WorkingDir = cmd.String("working-dir")
+					}
+					if len(args) > 1 {
+						current.Command = args[1]
+						current.Arguments = args[2:]
+					}
+
+					updated, err := client.UpdateCommand(cmdCtx, current)
+					if err != nil {
+						return err
+					}
+					return printCommand(cmd, updated, "Updated")
+				},
+			},
+			{
+				Name:      "remove",
+				Usage:     "Take a command off the allowlist, so clients can no longer run it",
+				ArgsUsage: "<command id>",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					id := cmd.Args().First()
+					if id == "" {
+						return fmt.Errorf("a command id is required")
+					}
+					// The backend succeeds for an id that isn't there, so a
+					// typo would look like it worked
+					removed, err := savedCommand(cmdCtx, id)
+					if err != nil {
+						return err
+					}
+					if err := client.RemoveCommand(cmdCtx, id); err != nil {
+						return err
+					}
+					_, err = fmt.Fprintf(cmd.Root().Writer, "Removed %s (%s)\n", removed.Name, removed.ID)
+					return err
+				},
+			},
 			{
 				Name:  "list",
 				Usage: "List the commands on the allowlist",

@@ -160,6 +160,17 @@ system-bridge client command run 9ef69bc3-62f8-4d86-952d-5f498bbddf0f
 
 `run` waits for the command to finish, prints its output, and exits with its exit code, so scripts can check it. Add `--json` to `list` or `prefabs` for JSON.
 
+Add a command with a name and the program's full path, followed by its arguments after `--`, or from a prefab. Change one by its ID, giving only what changes, or remove it:
+
+```bash
+system-bridge client command add --name "Restart audio" -- /usr/bin/systemctl --user restart pipewire
+system-bridge client command add --name "Lock" --prefab lock
+system-bridge client command update 9ef69bc3-62f8-4d86-952d-5f498bbddf0f --name "Restart sound"
+system-bridge client command remove 9ef69bc3-62f8-4d86-952d-5f498bbddf0f
+```
+
+`add` and `update` print the command with its ID, or the saved command with `--json`. With `update`, a program after `--` replaces the program and its arguments. System Bridge checks the program and working directory as it does in the [web client](/features/commands/#adding-a-command).
+
 ## Desktop
 
 Focus, close or change a window, show a workspace, or switch the keyboard layout:

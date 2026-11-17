@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
@@ -56,6 +57,39 @@ func CommandPrefabs(ctx context.Context) ([]types.CommandPrefab, error) {
 		return nil, fmt.Errorf("decode command prefabs: %w", err)
 	}
 	return prefabs, nil
+}
+
+// AddCommand adds a command to the allowlist with COMMAND_ADD, giving it a new
+// id when it has none, and returns it as saved
+func AddCommand(ctx context.Context, command settings.SettingsCommandDefinition) (settings.SettingsCommandDefinition, error) {
+	if command.ID == "" {
+		command.ID = uuid.NewString()
+	}
+	if command.Arguments == nil {
+		command.Arguments = []string{}
+	}
+	if err := Send(ctx, event.EventCommandAdd, command); err != nil {
+		return settings.SettingsCommandDefinition{}, err
+	}
+	return command, nil
+}
+
+// UpdateCommand replaces a command on the allowlist, matched by its id, with
+// COMMAND_UPDATE
+func UpdateCommand(ctx context.Context, command settings.SettingsCommandDefinition) (settings.SettingsCommandDefinition, error) {
+	if command.Arguments == nil {
+		command.Arguments = []string{}
+	}
+	if err := Send(ctx, event.EventCommandUpdate, command); err != nil {
+		return settings.SettingsCommandDefinition{}, err
+	}
+	return command, nil
+}
+
+// RemoveCommand takes a command off the allowlist with COMMAND_REMOVE. The
+// backend succeeds for an id that isn't there.
+func RemoveCommand(ctx context.Context, id string) error {
+	return Send(ctx, event.EventCommandRemove, map[string]any{"id": id})
 }
 
 // RunCommand runs an allowlisted command and waits for it to finish

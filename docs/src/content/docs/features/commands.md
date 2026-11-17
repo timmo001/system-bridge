@@ -25,6 +25,12 @@ System Bridge checks a command when it's added and again before each run:
 
 The program runs directly, not through a shell, so pipes, `&&` and variables such as `$HOME` aren't expanded. To use them, put them in a script and add the script.
 
+Other clients can add commands too, with the same checks:
+
+- **CLI**: [`system-bridge client command add`](/using/cli/#commands), with the program and its arguments after `--`. Add `--remote` to add it on a paired computer.
+- **API**: send [`COMMAND_ADD`](/api/websocket/system/) with the command.
+- **MCP**: an assistant can add one with [`system_bridge_add_command`](/api/mcp/#system_bridge_add_command).
+
 ## Prefab commands
 
 Prefabs are ready-made commands for common tasks. Each one picks the right program for the platform and desktop, so you don't need its path.
@@ -108,9 +114,13 @@ Each part of a command in the list is a button: its name, the program, the argum
 
 Changing a prefab command's program gives it your own program in place of the prefab's. Leave the program empty to go back to the prefab's. System Bridge checks a new program or working directory the same way as when a command is added.
 
+From the CLI, use `system-bridge client command update` with the command's ID and the parts to change. An assistant can use [`system_bridge_update_command`](/api/mcp/#system_bridge_update_command), and the API takes `COMMAND_UPDATE`.
+
 ## Removing a command
 
 Select the bin button next to the command. Clients can't run it from then on.
+
+From the CLI, use `system-bridge client command remove` with the command's ID. An assistant can use [`system_bridge_remove_command`](/api/mcp/#system_bridge_remove_command), and the API takes `COMMAND_REMOVE`.
 
 ## Security
 
