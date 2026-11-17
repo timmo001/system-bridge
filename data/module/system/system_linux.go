@@ -29,7 +29,7 @@ import (
 func GetMicrophoneUsage() []string {
 	// PipeWire holds the ALSA device itself, so the ALSA owner_pid would
 	// always name pipewire rather than the app recording.
-	if apps, ok := pipeWireCaptureApps("Stream/Input/Audio"); ok {
+	if apps, ok := pipeWireCaptureApps("Stream/Input/Audio", ""); ok {
 		return apps
 	}
 
@@ -105,15 +105,20 @@ const (
 	pipeWireRetryTTL = time.Minute
 )
 
-// pipeWireNode is the part of a pw-dump object the capture checks read.
-// Decoding only these fields keeps the cached graph small: a full dump is
-// megabytes of property maps.
-type pipeWireNode struct {
+// pipeWireObject is the part of a pw-dump node or link the capture checks
+// read. Decoding only these fields keeps the cached graph small: a full dump
+// is megabytes of property maps.
+type pipeWireObject struct {
+	ID   int    `json:"id"`
 	Type string `json:"type"`
 	Info struct {
 		State string `json:"state"`
-		Props struct {
+		// Set on links only
+		OutputNodeID int `json:"output-node-id"`
+		InputNodeID  int `json:"input-node-id"`
+		Props        struct {
 			MediaClass    string `json:"media.class"`
+			MediaRole     string `json:"media.role"`
 			CaptureSink   any    `json:"stream.capture.sink"`
 			AppName       string `json:"application.name"`
 			ProcessBinary string `json:"application.process.binary"`
@@ -122,46 +127,79 @@ type pipeWireNode struct {
 	} `json:"info"`
 }
 
-var pipeWireDumpCache = utils.TTLValue[[]pipeWireNode]{TTL: pipeWireDumpTTL, FailTTL: pipeWireRetryTTL}
+// pipeWireGraph is the running nodes and active links from pw-dump.
+type pipeWireGraph struct {
+	nodes []pipeWireObject
+	links []pipeWireObject
+}
 
-// pipeWireNodes returns the running PipeWire nodes from pw-dump. ok is false
-// when PipeWire can't be queried.
-func pipeWireNodes() ([]pipeWireNode, bool) {
-	return pipeWireDumpCache.Get(func() ([]pipeWireNode, bool) {
+var pipeWireDumpCache = utils.TTLValue[pipeWireGraph]{TTL: pipeWireDumpTTL, FailTTL: pipeWireRetryTTL}
+
+// pipeWireNodes returns the running PipeWire nodes and active links from
+// pw-dump. ok is false when PipeWire can't be queried.
+func pipeWireNodes() (pipeWireGraph, bool) {
+	return pipeWireDumpCache.Get(func() (pipeWireGraph, bool) {
 		ctx, cancel := context.WithTimeout(context.Background(), pipeWireDumpTimeout)
 		defer cancel()
 		out, err := exec.CommandContext(ctx, "pw-dump").Output()
 		if err != nil {
 			slog.Debug("Failed to run pw-dump", "error", err)
-			return nil, false
+			return pipeWireGraph{}, false
 		}
-
-		var objects []pipeWireNode
-		if err := json.Unmarshal(out, &objects); err != nil {
+		graph, err := parsePipeWireDump(out)
+		if err != nil {
 			slog.Debug("Failed to parse pw-dump output", "error", err)
-			return nil, false
+			return pipeWireGraph{}, false
 		}
-		var nodes []pipeWireNode
-		for _, o := range objects {
-			if o.Type == "PipeWire:Interface:Node" && o.Info.State == "running" {
-				nodes = append(nodes, o)
-			}
-		}
-		return nodes, true
+		return graph, true
 	})
 }
 
+func parsePipeWireDump(out []byte) (pipeWireGraph, error) {
+	var objects []pipeWireObject
+	if err := json.Unmarshal(out, &objects); err != nil {
+		return pipeWireGraph{}, err
+	}
+	var graph pipeWireGraph
+	for _, o := range objects {
+		switch {
+		case o.Type == "PipeWire:Interface:Node" && o.Info.State == "running":
+			graph.nodes = append(graph.nodes, o)
+		case o.Type == "PipeWire:Interface:Link" && o.Info.State == "active":
+			graph.links = append(graph.links, o)
+		}
+	}
+	return graph, nil
+}
+
 // pipeWireCaptureApps returns the apps with a running PipeWire capture stream
-// of mediaClass, such as "Stream/Input/Audio". ok is false when PipeWire
+// of mediaClass, such as "Stream/Input/Audio". With sourceRole, only streams
+// linked to a node with that media.role count. ok is false when PipeWire
 // can't be queried, so callers can fall back to another source.
-func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
-	nodes, ok := pipeWireNodes()
+func pipeWireCaptureApps(mediaClass, sourceRole string) (apps []string, ok bool) {
+	graph, ok := pipeWireNodes()
 	if !ok {
 		return nil, false
 	}
+	return graph.captureApps(mediaClass, sourceRole), true
+}
 
-	apps = make([]string, 0)
-	for _, o := range nodes {
+func (graph pipeWireGraph) captureApps(mediaClass, sourceRole string) []string {
+	roles := make(map[int]string, len(graph.nodes))
+	for _, o := range graph.nodes {
+		roles[o.ID] = o.Info.Props.MediaRole
+	}
+	fedBySource := func(id int) bool {
+		for _, link := range graph.links {
+			if link.Info.InputNodeID == id && roles[link.Info.OutputNodeID] == sourceRole {
+				return true
+			}
+		}
+		return false
+	}
+
+	apps := make([]string, 0)
+	for _, o := range graph.nodes {
 		props := o.Info.Props
 		if props.MediaClass != mediaClass {
 			continue
@@ -169,6 +207,11 @@ func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
 		// Streams recording another app's output, such as a screen recorder
 		// capturing desktop audio, aren't using the microphone.
 		if props.CaptureSink == true || props.CaptureSink == "true" {
+			continue
+		}
+		// Screen sharing and remote desktop read video streams too, from a
+		// screencast rather than a camera.
+		if sourceRole != "" && !fedBySource(o.ID) {
 			continue
 		}
 		for _, name := range []string{props.AppName, props.ProcessBinary, props.NodeName} {
@@ -180,7 +223,7 @@ func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
 			}
 		}
 	}
-	return apps, true
+	return apps
 }
 
 // GetPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.

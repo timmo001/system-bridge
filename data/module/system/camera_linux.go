@@ -47,7 +47,7 @@ func GetCameraUsage() []string {
 	}
 	cameraHolders.Unlock()
 
-	pipeWireApps, pipeWireOK := pipeWireCaptureApps("Stream/Input/Video")
+	pipeWireApps, pipeWireOK := pipeWireCaptureApps("Stream/Input/Video", "Camera")
 
 	names := make([]string, 0, len(pids)+len(pipeWireApps))
 	for _, pid := range pids {
