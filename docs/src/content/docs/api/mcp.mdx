@@ -407,6 +407,10 @@ Kill a window's app on Hyprland without asking it to close, so anything unsaved 
 
 - `id` (required): The window's `id` from the `desktop` module's `windows`.
 
+### `system_bridge_input_status`
+
+Check whether System Bridge can press keys and move the pointer, and which backend it uses: `wayland`, `libei`, `x11` or `robotgo`, or why it can't. It takes no arguments. On GNOME and KDE the first check asks the person at the computer to allow remote control. See [input status](/api/websocket/input/#input-status).
+
 ### `system_bridge_keyboard_keypress`
 
 Press a key in whichever window has focus. See [keyboard keypress](/api/websocket/input/#keyboard-keypress).
@@ -493,6 +497,34 @@ Example arguments:
 ```json
 { "action": "SEEK", "player": "vlc", "position": 90 }
 ```
+
+### `system_bridge_mouse_button`
+
+Hold a mouse button down or release it, such as to drag with `system_bridge_mouse_move` in between. Always release a button you held. See [hold and release](/api/websocket/input/#hold-and-release).
+
+- `action` (required): `down` or `up`.
+- `button` (optional): `left`, `right` or `middle`. Defaults to `left`.
+
+### `system_bridge_mouse_click`
+
+Click a mouse button where the pointer is. See [click](/api/websocket/input/#click).
+
+- `button` (optional): `left`, `right` or `middle`. Defaults to `left`.
+- `double` (optional): `true` to double-click.
+
+### `system_bridge_mouse_move`
+
+Move the pointer by an amount from where it is. See [move](/api/websocket/input/#move).
+
+- `x` (optional): Pixels to move right, or left when negative, up to 2000.
+- `y` (optional): Pixels to move down, or up when negative, up to 2000.
+
+### `system_bridge_mouse_scroll`
+
+Scroll where the pointer is, by mouse wheel notches. See [scroll](/api/websocket/input/#scroll).
+
+- `x` (optional): Notches to scroll right, or left when negative, up to 50.
+- `y` (optional): Notches to scroll up, or down when negative, up to 50.
 
 ### `system_bridge_omarchy_menu`
 

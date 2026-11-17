@@ -1,9 +1,24 @@
 ---
 title: Remote control
-description: Open URLs and files, type and press keys, control windows, set audio volumes and display brightness, and sleep, lock or shut down the machine running System Bridge.
+description: Use the computer from a phone, open URLs and files, type, press keys and move the mouse, control windows, set audio volumes and display brightness, and sleep, lock or shut down the machine running System Bridge.
 ---
 
-System Bridge can act on the machine it runs on: open a website or file, type text or press keys, focus and arrange windows, set an audio device's volume, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
+System Bridge can act on the machine it runs on: open a website or file, type text or press keys, move and click the mouse, focus and arrange windows, set an audio device's volume, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
+
+## The Remote page
+
+The [web client](/using/web-client/#remote)'s **Remote** page puts the controls for using the computer from somewhere else on one page, ready for a phone:
+
+- A trackpad, with left and right buttons under it.
+- A box to type into, and Enter, Backspace, Tab, Delete and the arrow keys.
+- Shortcuts: Alt+Tab, Super, Esc, copy, paste, cut, undo, select all and F1 to F12. On a Mac they use Cmd.
+- The open windows and workspaces, to focus one or switch to it.
+- The clipboard: send text to it, or get what's on it.
+- **Open**, for a URL or a file.
+- Your saved [commands](/features/commands/), with how each run went, and a link to change them.
+- Links to the Media, Audio, Displays, Desktop, Bluetooth and System pages, which each link back.
+
+When keys and the mouse can't be sent, the trackpad, keyboard and shortcuts say why, with **Try again**. The rest of the page still works.
 
 ## Opening a URL or file
 
@@ -23,12 +38,31 @@ A URL opens in the default browser. A file opens in the app it's set to open wit
 
 ## Typing and pressing keys
 
-Home Assistant and the API can type text and press keys, as if on the machine's own keyboard. They go to whichever window has focus.
+The Remote page, Home Assistant and the API can type text and press keys, as if on the machine's own keyboard. They go to whichever window has focus.
 
 - Type text with [`KEYBOARD_TEXT`](/api/websocket/input/#keyboard-text), such as a search or a message.
 - Press a key with [`KEYBOARD_KEYPRESS`](/api/websocket/input/#keyboard-keypress), optionally holding `shift`, `ctrl`, `alt` or `cmd`. For example, `space` with no modifiers to pause a video, or `l` with `ctrl` to focus a browser's address bar.
 
 Both take an optional `delay` in milliseconds before they start, which helps when something else has to open first.
+
+## Moving and clicking the mouse
+
+Move the pointer, click, hold a button to drag, and scroll from the Remote page's trackpad, the API with the [mouse events](/api/websocket/input/#mouse), or the [MCP server](/api/mcp/)'s `system_bridge_mouse_*` tools. Moves are by an amount from where the pointer is, as on a trackpad, so they work across any number of displays.
+
+## How input reaches the desktop
+
+Keys and the mouse go through the first of these that works, checked the first time they're needed. Check which with [`GET_INPUT_STATUS`](/api/websocket/input/#input-status) or the MCP server's `system_bridge_input_status` tool.
+
+| Backend | Used on |
+| --- | --- |
+| `wayland` | Wayland desktops with the wlroots virtual keyboard and pointer, such as Hyprland and Sway |
+| `libei` | Other Wayland desktops with the RemoteDesktop portal, such as GNOME and KDE Plasma |
+| `x11` | X11 desktops |
+| `robotgo` | Windows and macOS |
+
+- **GNOME and KDE Plasma** ask once to allow remote control, the first time input is needed, such as when the Remote page opens. Allow it on the computer. System Bridge remembers it, so it doesn't ask again.
+- **On `wayland`**, typed text uses a US keyboard layout and only plain ASCII characters, whatever layout the computer uses.
+- **On macOS**, allow System Bridge under **Privacy & Security > Accessibility**.
 
 ## Clipboard
 
