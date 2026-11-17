@@ -64,13 +64,16 @@ type agentManifestTool struct {
 }
 
 type agentManifest struct {
-	// Whether there is a backend to call: this machine's owner key exists, or
-	// the remote --remote names is paired
+	// Whether there is a backend to call: this machine's owner key exists, a
+	// remote is paired, or the remote --remote names is paired
 	Available bool `json:"available"`
 	// Remote is the name of the paired computer the tools call, when it's
 	// not this one
-	Remote string              `json:"remote,omitempty"`
-	Tools  []agentManifestTool `json:"tools"`
+	Remote string `json:"remote,omitempty"`
+	// Remotes are the paired computers a call can name with --remote, when
+	// the tools call this one
+	Remotes []string            `json:"remotes,omitempty"`
+	Tools   []agentManifestTool `json:"tools"`
 }
 
 func agentTimeout(name string) time.Duration {
@@ -120,8 +123,20 @@ func agentManifestFor(ctx context.Context) (agentManifest, error) {
 		manifest.Remote = paired.Name
 		// Each call goes to the same remote, even without the variable
 		argv = append(argv, "--remote", remote)
-	} else if ownerKeyPath, err := keys.OwnerKeyPath(); err == nil {
-		if _, err := os.Stat(ownerKeyPath); err == nil {
+	} else {
+		if ownerKeyPath, err := keys.OwnerKeyPath(); err == nil {
+			if _, err := os.Stat(ownerKeyPath); err == nil {
+				manifest.Available = true
+			}
+		}
+		remotes, err := client.Remotes()
+		if err != nil {
+			return agentManifest{}, err
+		}
+		for _, paired := range remotes {
+			manifest.Remotes = append(manifest.Remotes, paired.Name)
+		}
+		if len(manifest.Remotes) > 0 {
 			manifest.Available = true
 		}
 	}
