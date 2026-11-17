@@ -58,7 +58,7 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeNone,
-				Message: "Failed to type text",
+				Message: "Failed to type text: " + err.Error(),
 			}
 		}
 

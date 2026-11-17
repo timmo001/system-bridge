@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-vgo/robotgo"
+	"github.com/timmo001/system-bridge/utils/handlers/input"
 )
 
 // KeypressData represents the data needed for a keyboard keypress
@@ -27,8 +27,12 @@ func SendText(text string) error {
 
 // indirection for testability
 var (
-	robotKeyTap                                     = robotgo.KeyTap
-	robotType   func(str string, args ...int) error = robotgo.TypeStr
+	robotKeyTap = func(key string, args ...any) error {
+		return input.Use(func(backend input.Backend) error { return backend.KeyTap(key, args...) })
+	}
+	robotType = func(str string, _ ...int) error {
+		return input.Use(func(backend input.Backend) error { return backend.TypeStr(str) })
+	}
 )
 
 func sendKeypress(data KeypressData) error {

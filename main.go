@@ -34,6 +34,7 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/confirmation"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
+	"github.com/timmo001/system-bridge/utils/handlers/input"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/timmo001/system-bridge/utils/reexec"
 	"github.com/timmo001/system-bridge/version"
@@ -170,6 +171,7 @@ func main() {
 							}
 						}
 					}()
+					defer input.Close()
 
 					// Create the backend server; it runs with the signal-aware context below
 					b := backend.New(s, dataStore, &keys.Auth{Shared: token, Store: keyStore}, &webClientContent)

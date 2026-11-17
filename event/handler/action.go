@@ -14,6 +14,7 @@ import (
 	"github.com/timmo001/system-bridge/data/module/processes"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils/handlers/input"
 )
 
 // registerAction registers an event that runs an action: it decodes the
@@ -128,7 +129,8 @@ func decodeRequest[T any](eventType event.EventType, message event.Message, vali
 func requestError(message event.Message, err error) event.MessageResponse {
 	subtype := event.ResponseSubtypeNone
 	switch {
-	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, cameras.ErrUnsupported), errors.Is(err, cameras.ErrNotAllowed), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed):
+	case errors.Is(err, bluetooth.ErrUnsupported), errors.Is(err, cameras.ErrUnsupported), errors.Is(err, cameras.ErrNotAllowed), errors.Is(err, desktop.ErrUnsupported), errors.Is(err, desktop.ErrNotAllowed),
+		errors.Is(err, input.ErrUnavailable):
 		subtype = event.ResponseSubtypeInvalidAction
 	case errors.Is(err, bluetooth.ErrNotFound), errors.Is(err, cameras.ErrNotFound), errors.Is(err, cameras.ErrInvalidValue),
 		errors.Is(err, desktop.ErrNotFound), errors.Is(err, desktop.ErrInvalidValue),

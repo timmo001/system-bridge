@@ -44,7 +44,7 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeNone,
-				Message: "Failed to press key",
+				Message: "Failed to press key: " + err.Error(),
 			}
 		}
 
