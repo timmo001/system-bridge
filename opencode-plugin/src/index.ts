@@ -48,8 +48,8 @@ export default Plugin.define({
         );
       }
 
-      // No owner key means System Bridge has never run here, so leave the
-      // namespace out.
+      // No owner key means System Bridge has never run here, and no remote
+      // is picked with SYSTEM_BRIDGE_REMOTE, so leave the namespace out.
       if (!manifest.success.available) return;
 
       const sessionDirectory = (call: Tool.Context) =>
@@ -124,8 +124,11 @@ export default Plugin.define({
       yield* context.tool.transform((draft) => {
         draft.namespace({
           name: namespace,
-          description:
-            "This machine through System Bridge: read system modules (cpu, memory, disks, processes, sensors, media, audio, displays and the desktop with its Hyprland windows, workspaces, binds, options and config errors), metric history, media files and the clipboard, and control windows, workspaces, Hyprland, media, audio, displays, Bluetooth, cameras, Discord, the keyboard, notifications, the clipboard, power and Omarchy menus.",
+          description: `${
+            manifest.success.remote === undefined
+              ? "This machine"
+              : `The paired computer ${manifest.success.remote}, not this one,`
+          } through System Bridge: read system modules (cpu, memory, disks, processes, sensors, media, audio, displays and the desktop with its Hyprland windows, workspaces, binds, options and config errors), metric history, media files and the clipboard, and control windows, workspaces, Hyprland, media, audio, displays, Bluetooth, cameras, Discord, the keyboard, notifications, the clipboard, power and Omarchy menus.`,
         });
 
         for (const tool of manifest.success.tools) {

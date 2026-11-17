@@ -26,6 +26,7 @@ export type ManifestTool = typeof ManifestTool.Type;
 const Manifest = Schema.fromJsonString(
   Schema.Struct({
     available: Schema.Boolean,
+    remote: Schema.optionalKey(Schema.String),
     tools: Schema.Array(ManifestTool),
   }),
 );
