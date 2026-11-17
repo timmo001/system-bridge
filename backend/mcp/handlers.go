@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"log/slog"
 
+	"github.com/google/uuid"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
@@ -222,6 +224,34 @@ type omarchyInput struct {
 
 type runCommandInput struct {
 	ID string `json:"id"`
+}
+
+type addCommandInput struct {
+	Name       string   `json:"name"`
+	Command    string   `json:"command,omitempty"`
+	Arguments  []string `json:"arguments,omitempty"`
+	WorkingDir string   `json:"workingDir,omitempty"`
+	Prefab     string   `json:"prefab,omitempty"`
+}
+
+// updateCommandInput has a pointer for each field, so a field left out keeps
+// its saved value
+type updateCommandInput struct {
+	ID         string    `json:"id"`
+	Name       *string   `json:"name,omitempty"`
+	Command    *string   `json:"command,omitempty"`
+	Arguments  *[]string `json:"arguments,omitempty"`
+	WorkingDir *string   `json:"workingDir,omitempty"`
+	Prefab     *string   `json:"prefab,omitempty"`
+}
+
+type removeCommandInput struct {
+	ID string `json:"id"`
+}
+
+// commandOutput wraps one allowlist entry, as structured output must be an object
+type commandOutput struct {
+	Command settings.SettingsCommandDefinition `json:"command"`
 }
 
 // actionOutput is what a tool that changes something returns
@@ -502,6 +532,118 @@ func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRe
 	}
 
 	return actionResult(response.Message)
+}
+
+// handleAddCommand adds a command to the allowlist with COMMAND_ADD, as the
+// web client and connectors do, so it's validated, saved and sent to every
+// connected client the same way
+func (h toolHandlers) handleAddCommand(_ context.Context, _ *sdkmcp.CallToolRequest, input addCommandInput) (*sdkmcp.CallToolResult, commandOutput, error) {
+	arguments := input.Arguments
+	if arguments == nil {
+		arguments = []string{}
+	}
+	added := settings.SettingsCommandDefinition{
+		ID:         uuid.NewString(),
+		Name:       input.Name,
+		Command:    input.Command,
+		WorkingDir: input.WorkingDir,
+		Arguments:  arguments,
+		Prefab:     input.Prefab,
+	}
+
+	if err := h.changeCommand(event.EventCommandAdd, added); err != nil {
+		return nil, commandOutput{}, err
+	}
+
+	output := commandOutput{Command: added}
+	return toolResult(output, output)
+}
+
+// handleUpdateCommand changes a command in the allowlist with COMMAND_UPDATE.
+// Only the given fields change; the rest keep their saved values.
+func (h toolHandlers) handleUpdateCommand(_ context.Context, _ *sdkmcp.CallToolRequest, input updateCommandInput) (*sdkmcp.CallToolResult, commandOutput, error) {
+	current, err := h.savedCommand(input.ID)
+	if err != nil {
+		return nil, commandOutput{}, err
+	}
+
+	updated := current
+	if input.Name != nil {
+		updated.Name = *input.Name
+	}
+	if input.Command != nil {
+		updated.Command = *input.Command
+	}
+	if input.Arguments != nil {
+		updated.Arguments = *input.Arguments
+	}
+	if input.WorkingDir != nil {
+		updated.WorkingDir = *input.WorkingDir
+	}
+	if input.Prefab != nil {
+		updated.Prefab = *input.Prefab
+	}
+
+	if err := h.changeCommand(event.EventCommandUpdate, updated); err != nil {
+		return nil, commandOutput{}, err
+	}
+
+	output := commandOutput{Command: updated}
+	return toolResult(output, output)
+}
+
+// handleRemoveCommand takes a command off the allowlist with COMMAND_REMOVE,
+// as the web client and connectors do
+func (h toolHandlers) handleRemoveCommand(_ context.Context, _ *sdkmcp.CallToolRequest, input removeCommandInput) (*sdkmcp.CallToolResult, actionOutput, error) {
+	// COMMAND_REMOVE succeeds for an id that isn't there, so check first to
+	// tell the caller about a wrong id
+	removed, err := h.savedCommand(input.ID)
+	if err != nil {
+		return nil, actionOutput{}, err
+	}
+
+	if err := h.changeCommand(event.EventCommandRemove, removed); err != nil {
+		return nil, actionOutput{}, err
+	}
+
+	return actionResult(fmt.Sprintf("Removed %s from the allowlist", removed.Name))
+}
+
+// savedCommand finds a command in the saved allowlist by its id
+func (h toolHandlers) savedCommand(id string) (settings.SettingsCommandDefinition, error) {
+	cfg, err := h.loadSettings()
+	if err != nil {
+		return settings.SettingsCommandDefinition{}, fmt.Errorf("load settings: %w", err)
+	}
+
+	index := slices.IndexFunc(cfg.Commands.Allowlist, func(cmd settings.SettingsCommandDefinition) bool {
+		return cmd.ID == id
+	})
+	if index < 0 {
+		return settings.SettingsCommandDefinition{}, fmt.Errorf("%w: %s", command.ErrCommandNotFound, id)
+	}
+	return cfg.Commands.Allowlist[index], nil
+}
+
+// changeCommand sends one command allowlist event, which validates the whole
+// allowlist before saving it and tells every connected client
+func (h toolHandlers) changeCommand(eventType event.EventType, cmd settings.SettingsCommandDefinition) error {
+	response := h.eventRouter.HandleMessage("mcp", event.Message{
+		ID:    generateID(),
+		Event: eventType,
+		Data: map[string]any{
+			"id":         cmd.ID,
+			"name":       cmd.Name,
+			"command":    cmd.Command,
+			"workingDir": cmd.WorkingDir,
+			"arguments":  cmd.Arguments,
+			"prefab":     cmd.Prefab,
+		},
+	})
+	if response.Type == event.ResponseTypeError {
+		return fmt.Errorf("%s", response.Message)
+	}
+	return nil
 }
 
 func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRequest, input runCommandInput) (*sdkmcp.CallToolResult, command.ExecuteResult, error) {

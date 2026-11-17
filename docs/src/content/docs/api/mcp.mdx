@@ -109,6 +109,22 @@ When this computer is [paired with others](/using/cli/#remote-computers), every 
 
 ## Tools
 
+### `system_bridge_add_command`
+
+Add a [command](/features/commands/) to the allowlist through [`COMMAND_ADD`](/api/websocket/system/), as adding one in the web client does. It's checked the same way, and every connected client gets the new settings. It returns `{ "command": { ... } }`, the saved command with its new `id`.
+
+- `name` (required): What the command is called in lists.
+- `command` (optional): The program's full path. Leave it out to run the prefab's program.
+- `arguments` (optional): The arguments, one per item, passed without a shell.
+- `workingDir` (optional): Where the program runs.
+- `prefab` (optional): A prefab's `id` from `system_bridge_list_command_prefabs`.
+
+Give `command` or `prefab`. Example arguments:
+
+```json
+{ "name": "Restart audio", "command": "/usr/bin/systemctl", "arguments": ["--user", "restart", "pipewire"] }
+```
+
 ### `system_bridge_audio_control`
 
 Set an audio output's, input's or app's volume or mute state, make an output or input the default, or move an app to another output. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
@@ -415,7 +431,7 @@ End a process. See [process control](/api/websocket/control/#process-control).
 
 ### `system_bridge_list_command_prefabs`
 
-List the [prefab commands](/features/commands/#prefab-commands), with whether each can run on this system, what it would run, and why not. It takes no arguments. An assistant can't add them: a prefab only runs once you add it to your commands.
+List the [prefab commands](/features/commands/#prefab-commands), with whether each can run on this system, what it would run, and why not. It takes no arguments. A prefab only runs once it's added to your commands, such as with `system_bridge_add_command`.
 
 ### `system_bridge_list_commands`
 
@@ -501,6 +517,12 @@ Open a URL in the default browser, or a file or folder with its default app. See
 
 Give one of them.
 
+### `system_bridge_remove_command`
+
+Take a command off the allowlist through [`COMMAND_REMOVE`](/api/websocket/system/), as removing one in the web client does. Clients can't run it from then on. An `id` that isn't on the allowlist is an error.
+
+- `id` (required): The command's `id` from `system_bridge_list_commands`.
+
 ### `system_bridge_run_command`
 
 Run a command from the allowlist and wait for it to finish. It returns the command's `exitCode`, `stdout` and `stderr`, and `error` when it couldn't run or timed out. Commands time out after 5 minutes.
@@ -548,6 +570,13 @@ Keep the system from idling, so it doesn't lock, blank the screen or sleep for b
 
 - `enabled` (required): `true` to keep it awake, `false` to let it idle.
 - `duration` (optional): Seconds until it may idle again.
+
+### `system_bridge_update_command`
+
+Change a command on the allowlist through [`COMMAND_UPDATE`](/api/websocket/system/), as editing one in the web client does. Only the fields given change; the rest keep their saved values. The command keeps its `id`, so clients using it carry on working. It returns `{ "command": { ... } }`, the saved command.
+
+- `id` (required): The command's `id` from `system_bridge_list_commands`.
+- `name`, `command`, `arguments`, `workingDir`, `prefab` (optional): The new values. An empty `command` goes back to the prefab's program, and an empty `workingDir` to the default.
 
 ## Troubleshooting
 

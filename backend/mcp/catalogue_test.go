@@ -13,7 +13,7 @@ import (
 func TestListToolsWithoutBackend(t *testing.T) {
 	tools, err := ListTools(context.Background())
 	require.NoError(t, err)
-	require.Len(t, tools, 52)
+	require.Len(t, tools, 55)
 
 	readOnly := map[string]bool{}
 	for _, tool := range tools {
@@ -22,5 +22,6 @@ func TestListToolsWithoutBackend(t *testing.T) {
 	assert.True(t, readOnly["system_bridge_get_data"])
 	assert.True(t, readOnly["system_bridge_list_files"])
 	assert.False(t, readOnly["system_bridge_run_command"])
+	assert.False(t, readOnly["system_bridge_add_command"])
 	assert.False(t, readOnly["system_bridge_camera_capture"])
 }

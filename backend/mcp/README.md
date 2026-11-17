@@ -127,6 +127,11 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_list_command_prefabs` lists the ready-made commands, with
   whether each can run on this system, from `prefab.List`.
 - `system_bridge_list_commands` lists the command allowlist.
+- `system_bridge_add_command`, `system_bridge_update_command` and
+  `system_bridge_remove_command` change one command on the allowlist through
+  `COMMAND_ADD`, `COMMAND_UPDATE` and `COMMAND_REMOVE`, as the web client and
+  connectors do. Update keeps the fields it isn't given, and update and remove
+  fail for an id that isn't on the allowlist.
 - `system_bridge_list_files` lists a media directory's files through
   `GET_FILES`.
 - `system_bridge_list_media_directories` lists the media directories through

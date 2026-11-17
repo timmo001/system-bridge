@@ -42,7 +42,9 @@ var agentResources = map[string]string{
 	"hyprland_dispatch":   "dispatcher",
 	"hyprland_set_option": "name",
 	"media_control":       "action",
+	"remove_command":      "id",
 	"run_command":         "id",
+	"update_command":      "id",
 	"set_power_profile":   "profile",
 }
 

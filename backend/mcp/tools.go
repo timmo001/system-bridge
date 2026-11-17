@@ -384,6 +384,39 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleListCommandPrefabs)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_add_command",
+		Description: "Add a command to the allowlist, so it can be run with system_bridge_run_command, as adding one in the web client's settings does. Give either an absolute path to an executable as command, or a prefab from system_bridge_list_command_prefabs; with both, command and arguments replace the prefab's program. Returns the new entry, with its id.",
+		InputSchema: objectSchema(map[string]any{
+			"name":       map[string]any{"type": "string", "description": "What the command does, shown in clients and Home Assistant"},
+			"command":    map[string]any{"type": "string", "description": "Absolute path to the executable, such as /usr/bin/systemctl. Leave out to run the prefab's program."},
+			"arguments":  map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Arguments passed to it, one per item, with no shell"},
+			"workingDir": map[string]any{"type": "string", "description": "Absolute path of the directory it runs in. Leave out for the default."},
+			"prefab":     map[string]any{"type": "string", "description": "Prefab id from system_bridge_list_command_prefabs"},
+		}, []string{"name"}),
+	}, handlers.handleAddCommand)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_update_command",
+		Description: "Change a command in the allowlist, by its id from system_bridge_list_commands, as editing it in the web client's settings does. Only the fields given change; the rest keep their saved values. Returns the saved entry.",
+		InputSchema: objectSchema(map[string]any{
+			"id":         map[string]any{"type": "string", "description": "Command id from the allowlist"},
+			"name":       map[string]any{"type": "string", "description": "What the command does, shown in clients and Home Assistant"},
+			"command":    map[string]any{"type": "string", "description": "Absolute path to the executable. An empty string runs the prefab's program."},
+			"arguments":  map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Arguments passed to it, one per item, with no shell. Replaces the saved ones."},
+			"workingDir": map[string]any{"type": "string", "description": "Absolute path of the directory it runs in. An empty string uses the default."},
+			"prefab":     map[string]any{"type": "string", "description": "Prefab id from system_bridge_list_command_prefabs. An empty string removes it."},
+		}, []string{"id"}),
+	}, handlers.handleUpdateCommand)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_remove_command",
+		Description: "Take a command off the allowlist, by its id from system_bridge_list_commands, as removing it in the web client's settings does. Clients can no longer run it.",
+		InputSchema: objectSchema(map[string]any{
+			"id": map[string]any{"type": "string", "description": "Command id from the allowlist"},
+		}, []string{"id"}),
+	}, handlers.handleRemoveCommand)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_media_directories",
 		Description: "List the media directories files can be listed from: the user's own folders and those added in the media settings, by key",
 		InputSchema: objectSchema(map[string]any{}, []string{}),

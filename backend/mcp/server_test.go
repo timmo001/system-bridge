@@ -208,12 +208,13 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 52)
+	require.Len(t, tools.Tools, 55)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
 	}
 	assert.ElementsMatch(t, []string{
+		"system_bridge_add_command",
 		"system_bridge_audio_control",
 		"system_bridge_bluetooth_connect",
 		"system_bridge_bluetooth_disconnect",
@@ -261,11 +262,13 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_omarchy_menu",
 		"system_bridge_omarchy_panel",
 		"system_bridge_open",
+		"system_bridge_remove_command",
 		"system_bridge_run_command",
 		"system_bridge_send_notification",
 		"system_bridge_set_clipboard",
 		"system_bridge_set_keep_awake",
 		"system_bridge_set_power_profile",
+		"system_bridge_update_command",
 	}, names)
 	assertToolSchemas(t, tools.Tools)
 
@@ -466,6 +469,53 @@ func TestCommandTools(t *testing.T) {
 	assert.Equal(t, command.ExecuteResult{CommandID: "hello", ExitCode: 3, Stdout: "hello world\n"}, run)
 
 	_, _, err = handlers.handleRunCommand(t.Context(), nil, runCommandInput{ID: "missing"})
+	assert.ErrorIs(t, err, command.ErrCommandNotFound)
+}
+
+func TestCommandAllowlistTools(t *testing.T) {
+	router := event.NewMessageRouter()
+	existing := settings.SettingsCommandDefinition{ID: "status", Name: "Status", Command: "/usr/bin/true", Arguments: []string{"status"}}
+	cfg := &settings.Settings{Commands: settings.SettingsCommands{Allowlist: []settings.SettingsCommandDefinition{existing}}}
+	handlers := toolHandlers{eventRouter: router, loadSettings: func() (*settings.Settings, error) { return cfg, nil }}
+
+	var received event.Message
+	for _, eventType := range []event.EventType{event.EventCommandAdd, event.EventCommandUpdate, event.EventCommandRemove} {
+		router.RegisterHandler(eventType, func(connection string, message event.Message) event.MessageResponse {
+			received = message
+			return event.MessageResponse{Type: event.ResponseTypeCommandAdded}
+		})
+	}
+
+	result, _, err := handlers.handleAddCommand(t.Context(), nil, addCommandInput{Name: "Gaming Mode", Command: "/usr/bin/true", Arguments: []string{"screen", "game"}})
+	require.NoError(t, err)
+	content, ok := result.Content[0].(*sdkmcp.TextContent)
+	require.True(t, ok)
+	var added commandOutput
+	require.NoError(t, json.Unmarshal([]byte(content.Text), &added))
+	assert.NotEmpty(t, added.Command.ID)
+	assert.Equal(t, event.EventCommandAdd, received.Event)
+	assert.Equal(t, map[string]any{
+		"id": added.Command.ID, "name": "Gaming Mode", "command": "/usr/bin/true",
+		"workingDir": "", "arguments": []string{"screen", "game"}, "prefab": "",
+	}, received.Data)
+
+	// Fields left out keep their saved values
+	name := "Screen status"
+	_, _, err = handlers.handleUpdateCommand(t.Context(), nil, updateCommandInput{ID: "status", Name: &name})
+	require.NoError(t, err)
+	assert.Equal(t, event.EventCommandUpdate, received.Event)
+	assert.Equal(t, map[string]any{
+		"id": "status", "name": "Screen status", "command": "/usr/bin/true",
+		"workingDir": "", "arguments": []string{"status"}, "prefab": "",
+	}, received.Data)
+
+	_, _, err = handlers.handleRemoveCommand(t.Context(), nil, removeCommandInput{ID: "status"})
+	require.NoError(t, err)
+	assert.Equal(t, event.EventCommandRemove, received.Event)
+
+	_, _, err = handlers.handleRemoveCommand(t.Context(), nil, removeCommandInput{ID: "missing"})
+	assert.ErrorIs(t, err, command.ErrCommandNotFound)
+	_, _, err = handlers.handleUpdateCommand(t.Context(), nil, updateCommandInput{ID: "missing", Name: &name})
 	assert.ErrorIs(t, err, command.ErrCommandNotFound)
 }
 
