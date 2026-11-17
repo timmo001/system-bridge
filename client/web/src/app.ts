@@ -37,6 +37,7 @@ import "./pages/page-connection";
 import "./pages/page-module";
 import "./pages/page-not-found";
 import "./pages/page-overview";
+import "./pages/page-remote";
 import "./pages/page-settings";
 import "./pages/page-settings-appearance";
 import "./pages/page-settings-devices";
@@ -82,6 +83,8 @@ const renderPage = (location: Location) => {
       }
 
       return html`<page-connection></page-connection>`;
+    case "remote":
+      return html`<page-remote></page-remote>`;
     case "settings":
       return html`<page-settings></page-settings>`;
     case "settingsAppearance":

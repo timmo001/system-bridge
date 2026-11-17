@@ -8,7 +8,6 @@ import {
 } from "@mdi/js";
 import type {
   CommandPrefab,
-  CommandResult,
   OmarchyTarget,
   Settings,
   SettingsCommandDefinition,
@@ -25,16 +24,15 @@ import "@timmo001/groundwork-ui/define/gw-copy.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
+import "~/components/sb-command-outcome";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
-  type BridgeError,
   type CommandChange,
   changeCommand,
   commandExecutions,
   commandPrefabs,
-  errorMessage,
   executeCommand,
   latestModuleData,
   registry,
@@ -43,8 +41,6 @@ import { generateUUID } from "~/lib/utils";
 import { selectValue } from "~/lib/select";
 
 import { SbSettingsPage } from "./sb-settings-page";
-
-type CommandOutcome = Omit<CommandResult, "commandID">;
 
 interface CommandForm {
   /** A prefab's ID, or empty for a custom command. */
@@ -120,25 +116,6 @@ const commandLine = (command: string, args: readonly string[]) =>
 
 const isFormKey = (name: string): name is keyof CommandForm =>
   name in emptyForm;
-
-/** A finished run, with failures shown like a failed command. */
-const outcome = (
-  execution: AsyncResult.AsyncResult<CommandResult, BridgeError>,
-): CommandOutcome | undefined => {
-  if (AsyncResult.isSuccess(execution)) return execution.value;
-
-  if (!AsyncResult.isFailure(execution)) return undefined;
-
-  return {
-    exitCode: 1,
-    stdout: "",
-    stderr: "",
-    error: Option.match(AsyncResult.error(execution), {
-      onNone: () => "The command couldn't run",
-      onSome: errorMessage,
-    }),
-  };
-};
 
 /** Commands that clients such as Home Assistant may run on this system. */
 @customElement("page-settings-commands")
@@ -240,17 +217,6 @@ export class PageSettingsCommands extends SbSettingsPage {
         border: 1px solid var(--gw-color-border-normal);
         border-radius: var(--gw-radius-l);
         box-shadow: var(--gw-shadow-l);
-      }
-
-      pre {
-        margin: 0;
-        max-height: 12rem;
-        padding: var(--gw-space-3);
-        overflow: auto;
-        font-size: var(--gw-font-size-xs);
-        background: var(--gw-color-surface-raised);
-        border: 1px solid var(--gw-color-border-normal);
-        border-radius: var(--gw-radius-m);
       }
     `,
   ];
@@ -584,32 +550,6 @@ export class PageSettingsCommands extends SbSettingsPage {
     `;
   }
 
-  #renderOutcome(result: CommandOutcome | undefined) {
-    if (result === undefined) return nothing;
-
-    const ok = result.exitCode === 0;
-
-    return html`
-      <div class="stack" style="--sb-stack-gap: var(--gw-space-2)">
-        <gw-chip
-          size="small"
-          tone=${ok ? "success" : "danger"}
-          style="align-self: start"
-        >
-          Exit code
-          ${result.exitCode}${result.error ? ` · ${result.error}` : ""}
-        </gw-chip>
-        ${result.stdout ? html`<pre>${result.stdout}</pre>` : nothing}
-        ${
-          result.stderr
-            ? html`<pre style="color: var(--gw-color-danger)">
-${result.stderr}</pre>`
-            : nothing
-        }
-      </div>
-    `;
-  }
-
   #renderCommand(command: SettingsCommandDefinition) {
     const execution = this.#executions.value.get(command.id);
     const running = execution?.waiting ?? false;
@@ -697,9 +637,7 @@ ${result.stderr}</pre>`
             ></gw-copy>
           </span>
         </div>
-        ${this.#renderOutcome(
-          execution === undefined || running ? undefined : outcome(execution),
-        )}
+        <sb-command-outcome .execution=${execution}></sb-command-outcome>
       </div>
     `;
   }

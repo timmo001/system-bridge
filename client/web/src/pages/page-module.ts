@@ -1,4 +1,4 @@
-import { mdiCodeJson, mdiViewDashboardOutline } from "@mdi/js";
+import { mdiCodeJson, mdiRemote, mdiViewDashboardOutline } from "@mdi/js";
 import type { ModuleName } from "@timmo001/effect-system-bridge";
 import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing, type TemplateResult } from "lit";
@@ -104,6 +104,18 @@ const shownHistory: ReadonlyMap<ModuleName, readonly ModuleName[]> = new Map(
     module === "system" ? ["system", "cpu", "gpus"] : [module],
   ]),
 );
+
+/**
+ * The modules whose controls Remote links to, so their pages link back.
+ */
+const remoteModules: ReadonlySet<ModuleName> = new Set([
+  "audio",
+  "bluetooth",
+  "desktop",
+  "displays",
+  "media",
+  "system",
+]);
 
 /**
  * The controls and settings that belong with a module's data, each with an
@@ -337,6 +349,18 @@ export class PageModule extends SbPage {
           description: info.description,
           icon: info.icon,
           actions: html`${
+              remoteModules.has(module)
+                ? html`<gw-button
+                    variant="neutral"
+                    appearance="plain"
+                    labels="hide"
+                    size="small"
+                    icon=${mdiRemote}
+                    href=${href("remote")}
+                    >Remote</gw-button
+                  >`
+                : nothing
+            }${
               shownHistory.has(module) && this.status.isConnected
                 ? html`<sb-history-export
                     .modules=${shownHistory.get(module)}

@@ -570,6 +570,36 @@ export const setClipboard = Atom.fn((text: string, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.setClipboard({ text }))),
 );
 
+/** Reads the text on the computer's clipboard. */
+export const getClipboard = Atom.fn((_: undefined, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.getClipboard)),
+);
+
+/**
+ * Which backend presses keys and moves the pointer, or why none can. Refresh
+ * it to check again. On GNOME and KDE the first check asks the person at the
+ * computer to allow remote control.
+ */
+export const inputStatus = Atom.make((get) =>
+  socket(get).pipe(Effect.flatMap((bridge) => bridge.getInputStatus)),
+);
+
+/**
+ * Sends keys or pointer input as it happens. Each call runs on its own, so a
+ * quick run of moves never cancels one still on its way, as setting an
+ * `Atom.fn` again would. Rejects with why it failed.
+ */
+export const sendInput = (
+  send: (bridge: Socket) => Effect.Effect<void, BridgeError>,
+): Promise<void> =>
+  Effect.runPromise(
+    AtomRegistry.getResult(registry, connection).pipe(
+      Effect.flatMap(connected),
+      Effect.flatMap(send),
+      Effect.mapError((error) => new Error(errorMessage(error))),
+    ),
+  );
+
 /** Sets an audio device's volume or mute, or makes it the default, one atom per device. */
 export const audioControl = Atom.family((id: string) =>
   Atom.fn((control: Omit<AudioControl, "id">, get) =>

@@ -17,6 +17,7 @@ import {
   mdiNewBox,
   mdiPaletteOutline,
   mdiPlayCircleOutline,
+  mdiRemote,
   mdiThermometer,
   mdiViewDashboardOutline,
   mdiVolumeHigh,
@@ -167,6 +168,7 @@ export const navigation: readonly NavSection[] = [
     label: "",
     items: [
       routeItem("overview", "Overview", mdiViewDashboardOutline),
+      routeItem("remote", "Remote", mdiRemote),
       ...moduleOrder.map(moduleItem),
     ],
   },
