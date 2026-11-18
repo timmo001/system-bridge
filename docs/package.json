@@ -33,6 +33,6 @@
     "effect": "4.1.4",
     "oxlint": "1.94.0",
     "oxlint-tsgolint": "7.0.2007",
-    "wrangler": "4.163.0"
+    "wrangler": "4.164.0"
   }
 }
