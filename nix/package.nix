@@ -95,7 +95,7 @@ buildGoModule {
   # Vendoring drops robotgo's C headers, which sit in directories without Go
   # files, so build from the module cache instead
   proxyVendor = true;
-  vendorHash = "sha256-NpK6+0ZsyS9ysrZ81lEq2z86o3QNdqsChnDO/z9Ww7A=";
+  vendorHash = "sha256-+qIbKdAPUa64865eWgv3TQQE01KkYDWgndxxOoxgYOI=";
 
   subPackages = [ "." ];
 
