@@ -103,7 +103,7 @@
       "name": "docs",
       "version": "0.0.1",
       "dependencies": {
-        "@astrojs/cloudflare": "14.4.8",
+        "@astrojs/cloudflare": "14.4.9",
         "@fontsource-variable/inter": "5.3.0",
         "@fontsource-variable/jetbrains-mono": "5.3.0",
         "@timmo001/docs-kit": "0.51.0",
@@ -176,7 +176,7 @@
 
     "@astrojs/astro2tsx": ["@astrojs/astro2tsx@0.1.4", "", { "dependencies": { "@emnapi/core": "1.11.3", "@emnapi/runtime": "1.11.3", "@napi-rs/wasm-runtime": "1.2.4" } }, "sha512-5dJqY4i1AlXxcsSFHkaegnrgdVs9J4U93y/YF0xmvmSOcNYVQnf4db3IhvqHZ5v8biLPlPlFmlYsqHj0c4/ZSA=="],
 
-    "@astrojs/cloudflare": ["@astrojs/cloudflare@14.4.8", "", { "dependencies": { "@astrojs/internal-helpers": "^0.13.2", "@astrojs/underscore-redirects": "^1.0.4", "@cloudflare/vite-plugin": "^1.67.0", "piccolore": "^0.1.3", "prismjs": "^1.30.0", "vite": "^8.3.6" }, "peerDependencies": { "astro": "^7.4.0", "wrangler": "^4.125.0" } }, "sha512-ousQRkwqvJnWnKO6hc5kt61xhDGbQMduwNCo3Vm5J6ec5kBq1P4QGc23uITFsUG+kdzoB0P+uMLiCVsdmUZWqA=="],
+    "@astrojs/cloudflare": ["@astrojs/cloudflare@14.4.9", "", { "dependencies": { "@astrojs/internal-helpers": "^0.13.2", "@astrojs/underscore-redirects": "^1.0.4", "@cloudflare/vite-plugin": "^1.69.1", "piccolore": "^0.1.3", "prismjs": "^1.30.0", "vite": "^8.3.8" }, "peerDependencies": { "astro": "^7.4.0", "wrangler": "^4.125.0" } }, "sha512-Aa7HHLmR+nqgxe61lclmNhSljehP5X47MSZVQ9T341mM4yRvMNo6Xqs0WYdzhhvqnc4akwmEyYY+b5nbkM1ZTw=="],
 
     "@astrojs/compiler-binding": ["@astrojs/compiler-binding@0.5.3", "", { "optionalDependencies": { "@astrojs/compiler-binding-android-arm64": "0.5.3", "@astrojs/compiler-binding-darwin-arm64": "0.5.3", "@astrojs/compiler-binding-darwin-x64": "0.5.3", "@astrojs/compiler-binding-linux-arm64-gnu": "0.5.3", "@astrojs/compiler-binding-linux-arm64-musl": "0.5.3", "@astrojs/compiler-binding-linux-x64-gnu": "0.5.3", "@astrojs/compiler-binding-linux-x64-musl": "0.5.3", "@astrojs/compiler-binding-wasm32-wasi": "0.5.3", "@astrojs/compiler-binding-win32-arm64-msvc": "0.5.3", "@astrojs/compiler-binding-win32-x64-msvc": "0.5.3" } }, "sha512-fHG6eWKvnSlV11dUMZSi4AynOGjVbNBgZZc704Hi9DW8WeKtbsS7fJQT3omz1Nba+5mccLQQGAWOQ65cnuNLtg=="],
 
