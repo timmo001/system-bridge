@@ -2,7 +2,7 @@
   "name": "system-bridge",
   "private": true,
   "description": "Bun workspace root for the TypeScript connector, web client, Home Assistant frontend, docs and OpenCode plugin. Its TypeScript also lets the language server resolve from the repository root.",
-  "packageManager": "bun@1.4.4",
+  "packageManager": "bun@1.4.5",
   "workspaces": [
     "client/android/page",
     "client/home-assistant/frontend",
