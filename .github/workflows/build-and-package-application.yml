@@ -445,7 +445,7 @@ jobs:
     needs:
       - build-linux
     container:
-      image: ghcr.io/timmo001/system-bridge/ci-build-arch:latest@sha256:ea75112a93dccaebd9b9c14da0cc109503fafdf612ac755c60172e46b9e4a5d4
+      image: ghcr.io/timmo001/system-bridge/ci-build-arch:latest@sha256:9a8ca5c5f34a0d2443cc05591dfcacd8bdf5a895bdf65630794cc42f6555fe9e
     runs-on: ubuntu-latest
     permissions:
       contents: read
