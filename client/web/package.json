@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@effect/platform-browser": "4.1.4",
+    "@effect/platform-browser": "4.1.5",
     "@lit/context": "^1.1.6",
     "@mdi/js": "7.4.47",
     "@tanstack/charts": "1.5.0",
@@ -27,12 +27,12 @@
     "@timmo001/groundwork-pwa": "0.51.0",
     "@timmo001/groundwork-tokens": "0.51.0",
     "@timmo001/groundwork-ui": "0.51.0",
-    "effect": "4.1.4",
+    "effect": "4.1.5",
     "lit": "^3.3.2"
   },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.87",
-    "@effect/platform-bun": "4.1.4",
+    "@effect/platform-bun": "4.1.5",
     "@oxlint/plugins": "1.94.0",
     "@timmo001/oxlint-rules": "0.7.1",
     "@types/node": "^26.0.0",
