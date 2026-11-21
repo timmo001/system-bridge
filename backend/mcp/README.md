@@ -136,6 +136,9 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   `GET_FILES`.
 - `system_bridge_list_media_directories` lists the media directories through
   `GET_DIRECTORIES`.
+- `system_bridge_list_services` returns the services module's latest data:
+  each provider's items, what's busy, each provider's last error and the
+  problems they reported.
 - `system_bridge_lock` locks the screen through `POWER_LOCK`. The other power
   actions aren't tools.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,

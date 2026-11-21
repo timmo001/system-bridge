@@ -377,6 +377,13 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleListCommands)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_list_services",
+		Description: "List the services, timers and checks the services providers report, such as backups: each item's health, summary, whether it's busy, its stats, notes, lists and actions, plus what's busy, each provider's last error and the problems they reported. A provider that failed keeps its earlier items, marked stale.",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+		Annotations: readOnly,
+	}, handlers.handleListServices)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_command_prefabs",
 		Description: "List the ready-made commands System Bridge has, such as locking the screen, with whether each can run on this system, what it would run, and why not. They only run once the user adds them to the allowlist.",
 		InputSchema: objectSchema(map[string]any{}, []string{}),

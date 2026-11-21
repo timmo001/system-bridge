@@ -14,6 +14,7 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/services"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
@@ -520,6 +521,19 @@ func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRe
 		commands = []settings.SettingsCommandDefinition{}
 	}
 	return toolResult(commands, commandsOutput{Commands: commands})
+}
+
+// handleListServices returns the services module's latest data
+func (h toolHandlers) handleListServices(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, types.ServicesData, error) {
+	module, err := h.dataStore.GetModule(types.ModuleServices)
+	if err != nil {
+		return nil, types.ServicesData{}, fmt.Errorf("get services: %w", err)
+	}
+	data, err := services.FromModuleData(module.Data)
+	if err != nil {
+		return nil, types.ServicesData{}, err
+	}
+	return toolResult(data, data)
 }
 
 func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, commandPrefabsOutput, error) {
