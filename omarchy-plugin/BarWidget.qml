@@ -26,6 +26,7 @@ BarWidget {
     || (currentOutput !== "" && currentOutput === activeOutput)
   readonly property var systemBridge: bar?.shell?.serviceFor("timmo.system-bridge")
   property bool openWhenPanelLoads: false
+  property string viewWhenPanelLoads: ""
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item
     ? panelLoader.item.popoutSwitchClosing === true : false
@@ -93,15 +94,17 @@ BarWidget {
     return null
   }
 
-  function open() {
+  // Opens the panel on a module's view, or on the overview without one
+  function open(view) {
     var widget = activeWidget()
-    if (widget && widget !== root) { widget.open(); return }
+    if (widget && widget !== root) { widget.open(view); return }
     if (panelLoader.item) {
       openWhenPanelLoads = false
-      panelLoader.item.open()
+      panelLoader.item.open(view)
       return
     }
     openWhenPanelLoads = true
+    viewWhenPanelLoads = view || ""
     panelLoader.active = true
   }
   function close() {
@@ -115,6 +118,13 @@ BarWidget {
     if (widget && widget !== root) { widget.togglePanel(); return }
     if (panelLoader.item && panelLoader.item.opened) panelLoader.item.close()
     else open()
+  }
+  // Closes the panel when it's showing this view, otherwise opens it there
+  function toggleView(view) {
+    var widget = activeWidget()
+    if (widget && widget !== root) { widget.toggleView(view); return }
+    if (panelLoader.item && panelLoader.item.opened && panelLoader.item.view === view) panelLoader.item.close()
+    else open(view)
   }
   function closeForPopoutSwitch() {
     var widget = activeWidget()
@@ -149,7 +159,7 @@ BarWidget {
       Qt.callLater(root.injectPanel)
       if (root.openWhenPanelLoads) {
         root.openWhenPanelLoads = false
-        item.open()
+        item.open(root.viewWhenPanelLoads)
       }
     }
   }
@@ -164,6 +174,8 @@ BarWidget {
         function show(): void { root.open() }
         function hide(): void { root.close() }
         function toggle(): void { root.togglePanel() }
+        function view(module: string): void { root.open(module) }
+        function toggleView(module: string): void { root.toggleView(module) }
       }
     }
   }

@@ -75,10 +75,13 @@ The plugin has no System Bridge settings of its own. Change those in the web
 client.
 
 The plugin exposes the `timmo.system-bridge` shell IPC target with `open`,
-`close`, `show`, `hide`, and `toggle` methods:
+`close`, `show`, `hide`, and `toggle` methods, plus `view` to open the panel on
+a module's view and `toggleView` to close it when it's already showing that
+view:
 
 ```bash
 omarchy-shell shell toggle timmo.system-bridge
+omarchy-shell timmo.system-bridge toggleView services
 ```
 
 ## Settings

@@ -156,8 +156,8 @@ Panel {
     return "Last updated " + Math.floor(elapsedMinutes / 60) + "h ago"
   }
 
-  function open() {
-    view = ""
+  function open(module) {
+    view = module || ""
     confirmingKey = ""
     resetCursor()
     controller.show()

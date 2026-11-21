@@ -69,10 +69,13 @@ the other quits System Bridge, or starts it while it's not running.
 The plugin has no System Bridge settings of its own. Change those in the
 [web client](/using/web-client/).
 
-The plugin exposes the `timmo.system-bridge` shell IPC target:
+The plugin exposes the `timmo.system-bridge` shell IPC target. `toggle` opens
+or closes the panel, and `toggleView` does the same on one module's view, such
+as `services`:
 
 ```bash
 omarchy-shell timmo.system-bridge toggle
+omarchy-shell timmo.system-bridge toggleView services
 ```
 
 ## Settings
