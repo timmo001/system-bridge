@@ -317,6 +317,7 @@ func main() {
 					},
 					systemCommand(),
 					commandCommand(),
+					servicesCommand(),
 					{
 						Name:    "data",
 						Aliases: []string{"d"},
