@@ -149,6 +149,9 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_open` opens a URL or a path through `OPEN`.
 - `system_bridge_run_command` runs a command from the allowlist and waits for
   its result through `command.Run`.
+- `system_bridge_run_service_action` runs an action the services module lists
+  and waits for it, broadcasting `SERVICE_ACTION_COMPLETED` as the
+  `SERVICE_ACTION` event does.
 - `system_bridge_send_notification` sends a desktop notification with required
   `title` and `message` fields and an optional `icon` and `urgency`.
 - `system_bridge_set_clipboard` puts text on the clipboard through

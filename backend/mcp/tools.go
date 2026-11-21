@@ -639,6 +639,16 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleRunCommand)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_run_service_action",
+		Description: "Run one of an item's actions from system_bridge_list_services, such as starting a backup, and wait for it to finish, returning whether it worked, a summary and its output. Only actions the provider lists and hasn't disabled can run. An action with a confirm question needs the user's say-so first: ask them it before running.",
+		InputSchema: objectSchema(map[string]any{
+			"provider": map[string]any{"type": "string", "description": "The item's provider id"},
+			"item":     map[string]any{"type": "string", "description": "The item's id"},
+			"action":   map[string]any{"type": "string", "description": "The action's id from the item's actions"},
+		}, []string{"provider", "item", "action"}),
+	}, handlers.handleRunServiceAction)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_send_notification",
 		Description: "Send a desktop notification to the system",
 		InputSchema: objectSchema(map[string]any{

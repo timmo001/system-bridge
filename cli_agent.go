@@ -31,8 +31,9 @@ const agentDefaultTimeout = 2 * time.Minute
 
 // agentTimeouts are the tools that can run longer than the default
 var agentTimeouts = map[string]time.Duration{
-	"run_command":       10 * time.Minute,
-	"bluetooth_connect": 2 * time.Minute,
+	"run_command":        10 * time.Minute,
+	"run_service_action": 10 * time.Minute,
+	"bluetooth_connect":  2 * time.Minute,
 }
 
 // agentResources name the input key whose value narrows a write's
@@ -44,6 +45,7 @@ var agentResources = map[string]string{
 	"media_control":       "action",
 	"remove_command":      "id",
 	"run_command":         "id",
+	"run_service_action":  "item",
 	"update_command":      "id",
 	"set_power_profile":   "profile",
 }

@@ -14,6 +14,7 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/services"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
@@ -240,6 +241,12 @@ type omarchyInput struct {
 
 type runCommandInput struct {
 	ID string `json:"id"`
+}
+
+type serviceActionInput struct {
+	Provider string `json:"provider"`
+	Item     string `json:"item"`
+	Action   string `json:"action"`
 }
 
 type addCommandInput struct {
@@ -534,6 +541,24 @@ func (h toolHandlers) handleListServices(_ context.Context, _ *sdkmcp.CallToolRe
 		return nil, types.ServicesData{}, err
 	}
 	return toolResult(data, data)
+}
+
+// handleRunServiceAction runs an action the services module lists and waits
+// for it, telling every client how it went as the SERVICE_ACTION event does
+func (h toolHandlers) handleRunServiceAction(ctx context.Context, _ *sdkmcp.CallToolRequest, input serviceActionInput) (*sdkmcp.CallToolResult, types.ServiceActionResult, error) {
+	request := event_handler.ServiceActionRequestData{Provider: input.Provider, Item: input.Item, Action: input.Action}
+	act, err := event_handler.CheckServiceAction(h.dataStore, request)
+	if err != nil {
+		return nil, types.ServiceActionResult{}, err
+	}
+
+	// Stop with the server too, as the event's actions do
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	stop := context.AfterFunc(command.ServerContext(), cancel)
+	defer stop()
+	result := event_handler.RunServiceAction(ctx, h.dataStore, act, request, generateID(), "mcp")
+	return toolResult(result, result)
 }
 
 func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, commandPrefabsOutput, error) {
