@@ -51,6 +51,12 @@ func SetServerContext(ctx context.Context) {
 	serverCtx = ctx
 }
 
+// ServerContext is the server-level context, for other work that should stop
+// when the server shuts down, such as service actions
+func ServerContext() context.Context {
+	return getServerContext()
+}
+
 // getServerContext returns the server context, or context.Background() if not set
 func getServerContext() context.Context {
 	serverCtxMu.RLock()

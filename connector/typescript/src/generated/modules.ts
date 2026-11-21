@@ -1506,6 +1506,19 @@ export interface ServiceAction extends Schema.Schema.Type<
   typeof ServiceAction
 > {}
 
+export const ServiceActionResult = Schema.Struct({
+  provider: Schema.String,
+  item: Schema.String,
+  action: Schema.String,
+  ok: Schema.Boolean,
+  summary: Schema.String,
+  output: Schema.String,
+});
+
+export interface ServiceActionResult extends Schema.Schema.Type<
+  typeof ServiceActionResult
+> {}
+
 export const ServiceBusy = Schema.Struct({
   provider: Schema.String,
   item: Schema.String,

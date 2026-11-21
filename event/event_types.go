@@ -77,6 +77,7 @@ const (
 	EventPowerSleep                EventType = "POWER_SLEEP"
 	EventProcessKill               EventType = "PROCESS_KILL"
 	EventRegisterDataListener      EventType = "REGISTER_DATA_LISTENER"
+	EventServiceAction             EventType = "SERVICE_ACTION"
 	EventSystemSetKeepAwake        EventType = "SYSTEM_SET_KEEP_AWAKE"
 	EventSystemSetPowerProfile     EventType = "SYSTEM_SET_POWER_PROFILE"
 	EventUnregisterDataListener    EventType = "UNREGISTER_DATA_LISTENER"

@@ -17,7 +17,7 @@ const (
 	// maxListOutput is as much of a provider document as is read, as for
 	// commands
 	maxListOutput = 1 << 20
-	// maxErrorOutput is as much of stderr as goes into an error
+	// maxErrorOutput is as much of stderr as goes into a list's error
 	maxErrorOutput = 2 << 10
 )
 
@@ -52,7 +52,8 @@ type result struct {
 	exitCode        int
 }
 
-// run runs argv with no shell, so its arguments are never interpreted. A
+// run runs argv with no shell, keeping up to limit bytes of each of stdout
+// and stderr, so its arguments are never interpreted. A
 // bare program name is looked up on PATH, so ["dot", "services", "export"]
 // works. It's an error when the command can't start, is cancelled or times
 // out; a non-zero exit is in the result.
@@ -77,7 +78,7 @@ func run(ctx context.Context, argv []string, timeout time.Duration, limit int) (
 	// Once the context ends, stop waiting on output a child still holds open
 	cmd.WaitDelay = time.Second
 	stdout := &cappedBuffer{limit: limit}
-	stderr := &cappedBuffer{limit: maxErrorOutput}
+	stderr := &cappedBuffer{limit: limit}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
@@ -120,9 +121,13 @@ func list(ctx context.Context, argv []string) ([]byte, error) {
 	return []byte(out.stdout), nil
 }
 
+// withStderr adds the start of stderr to a failed list's error
 func withStderr(err error, stderr string) error {
 	if stderr == "" {
 		return err
+	}
+	if len(stderr) > maxErrorOutput {
+		stderr = stderr[:maxErrorOutput] + "..."
 	}
 	return fmt.Errorf("%w: %s", err, stderr)
 }

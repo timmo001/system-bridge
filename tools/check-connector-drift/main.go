@@ -32,8 +32,9 @@ const (
 
 // Replies the clients don't need to wait for or handle, with why.
 var unhandledReplies = map[string]string{
-	"APPLICATION_EXITING": "EXIT_APPLICATION doesn't wait for a reply",
-	"COMMAND_EXECUTING":   "sent before COMMAND_COMPLETED, which the clients wait for",
+	"APPLICATION_EXITING":    "EXIT_APPLICATION doesn't wait for a reply",
+	"COMMAND_EXECUTING":      "sent before COMMAND_COMPLETED, which the clients wait for",
+	"SERVICE_ACTION_RUNNING": "sent before SERVICE_ACTION_COMPLETED, which the clients wait for",
 }
 
 // Go string types the connectors name differently. Other string types are
@@ -118,6 +119,7 @@ var handlerPairs = map[string]pairing{
 	"NotificationEventData":              {[]string{"NotificationEvent"}, []string{"NotificationEvent"}},
 	"OmarchyRequestData":                 {[]string{"OmarchyMenuRequest", "OmarchyPanelRequest"}, []string{"OmarchyMenuRequest", "OmarchyPanelRequest"}},
 	"ProcessKillRequestData":             {[]string{"ProcessKillRequest"}, []string{"ProcessKillRequest"}},
+	"ServiceActionRequestData":           {[]string{"ServiceActionRequest"}, []string{"ServiceActionRequest"}},
 	"SystemKeepAwakeRequestData":         {[]string{"KeepAwakeRequest"}, []string{"KeepAwakeRequest"}},
 	"SystemPowerProfileRequestData":      {[]string{"PowerProfileRequest"}, []string{"PowerProfileRequest"}},
 	// OPEN takes a path or a URL, which the connectors model as two requests

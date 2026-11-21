@@ -108,6 +108,18 @@ type ServiceBusy struct {
 	Since    *int64 `json:"since"`
 }
 
+// ServiceActionResult is how an action went, sent to every client as
+// SERVICE_ACTION_COMPLETED. Summary is the first line it printed, or why it
+// failed; Output is what it printed, cut off at 64 KiB.
+type ServiceActionResult struct {
+	Provider string `json:"provider"`
+	Item     string `json:"item"`
+	Action   string `json:"action"`
+	OK       bool   `json:"ok"`
+	Summary  string `json:"summary"`
+	Output   string `json:"output"`
+}
+
 // ServiceError is a problem a provider reported, such as a registration it
 // couldn't read, or an item System Bridge couldn't use
 type ServiceError struct {

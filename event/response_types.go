@@ -85,6 +85,8 @@ const (
 	ResponseTypePowerSleeping             ResponseType = "POWER_SLEEPING"
 	ResponseTypePowerStateChanged         ResponseType = "POWER_STATE_CHANGED"
 	ResponseTypeProcessKilled             ResponseType = "PROCESS_KILLED"
+	ResponseTypeServiceActionCompleted    ResponseType = "SERVICE_ACTION_COMPLETED"
+	ResponseTypeServiceActionRunning      ResponseType = "SERVICE_ACTION_RUNNING"
 	ResponseTypeSettingsChanged           ResponseType = "SETTINGS_CHANGED"
 	ResponseTypeSettingsResult            ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated           ResponseType = "SETTINGS_UPDATED"
@@ -118,5 +120,6 @@ const (
 	ResponseSubtypeMissingToken              ResponseSubtype = "MISSING_TOKEN"
 	ResponseSubtypeMissingValue              ResponseSubtype = "MISSING_VALUE"
 	ResponseSubtypeCommandNotFound           ResponseSubtype = "COMMAND_NOT_FOUND"
+	ResponseSubtypeServiceActionNotFound     ResponseSubtype = "SERVICE_ACTION_NOT_FOUND"
 	ResponseSubtypeUnknownEvent              ResponseSubtype = "UNKNOWN_EVENT"
 )
