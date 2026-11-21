@@ -29,6 +29,7 @@ import {
   memoryDashboard,
   sensorsDashboard,
 } from "~/dashboards/hardware";
+import { servicesDashboard } from "~/dashboards/services";
 import { type DashboardContext, dashboardStyles } from "~/dashboards/shared";
 import {
   bluetoothDashboard,
@@ -90,6 +91,7 @@ const dashboards: Readonly<
   networks: networksDashboard,
   processes: processesDashboard,
   sensors: sensorsDashboard,
+  services: servicesDashboard,
   system: systemDashboard,
 };
 

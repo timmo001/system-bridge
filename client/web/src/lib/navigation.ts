@@ -12,6 +12,7 @@ import {
   mdiInformationOutline,
   mdiLan,
   mdiLanConnect,
+  mdiListStatus,
   mdiMemory,
   mdiMonitor,
   mdiNewBox,
@@ -109,6 +110,11 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
     label: "Sensors",
     description: "Temperatures and fans",
     icon: mdiThermometer,
+  },
+  services: {
+    label: "Services",
+    description: "Services, timers and checks, and what's busy",
+    icon: mdiListStatus,
   },
   system: {
     label: "System",

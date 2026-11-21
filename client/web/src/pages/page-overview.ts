@@ -123,6 +123,13 @@ const summary = (module: ModuleName, data: ModulesData): string => {
           ? "Connected"
           : "Not connected"
         : "";
+    case "services":
+      if (data.services === undefined || data.services.providers.length === 0)
+        return "";
+
+      return data.services.busy.length > 0
+        ? `${data.services.busy.length} busy`
+        : formatQuantity(data.services.items.length, "item");
   }
 };
 

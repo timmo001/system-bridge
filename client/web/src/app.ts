@@ -1,6 +1,7 @@
 import "@timmo001/groundwork-ui/define/gw-app-bar.ts";
 import "@timmo001/groundwork-ui/define/gw-banner.ts";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
+import "@timmo001/groundwork-ui/define/gw-chip.ts";
 import type { GwCommandMenu } from "@timmo001/groundwork-ui/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-command-menu.ts";
 import "@timmo001/groundwork-ui/define/gw-install-banner.ts";
@@ -21,7 +22,11 @@ import "./styles/tokens.css";
 import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
-import { connectionSettings, connectionStatus } from "./lib/atoms";
+import {
+  connectionSettings,
+  connectionStatus,
+  latestModuleData,
+} from "./lib/atoms";
 import { watchInstall } from "./lib/install";
 import { DOCS_URL } from "./lib/links";
 import { type NavItem, navigation } from "./lib/navigation";
@@ -200,6 +205,18 @@ export class SbApp extends LitElement {
         outline-offset: var(--gw-focus-offset);
       }
 
+      .busy {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        border-radius: var(--gw-radius-pill);
+      }
+
+      .busy:focus-visible {
+        outline: var(--gw-focus-width) solid var(--gw-color-focus);
+        outline-offset: var(--gw-focus-offset);
+      }
+
       main {
         min-width: 0;
         padding: var(--gw-space-6) var(--sb-gutter) var(--gw-space-12);
@@ -228,6 +245,8 @@ export class SbApp extends LitElement {
   readonly #stale = new AtomController(this, () => versionStale);
 
   readonly #mobile = new AtomController(this, () => mobileConnection);
+
+  readonly #data = new AtomController(this, () => latestModuleData);
 
   @query(".commands") private commands?: GwCommandMenu;
 
@@ -287,6 +306,30 @@ export class SbApp extends LitElement {
         <gw-dot tone=${kind}></gw-dot>
       </a>
     `;
+  }
+
+  /**
+   * What the services providers say is busy, such as a backup, opening the
+   * Services page. Only shown while something is.
+   */
+  #renderBusy() {
+    const busy = this.#data.value.services?.busy ?? [];
+
+    if (busy.length === 0) return nothing;
+
+    const labels = busy.map((entry) => entry.label).join(", ");
+
+    return html`<a
+      slot="actions"
+      class="busy"
+      href=${href("module", { params: { module: "services" } })}
+      title="Busy: ${labels}"
+      aria-label="Busy: ${labels}. Services"
+    >
+      <gw-chip size="small" tone="accent"
+        >${busy.length === 1 ? "Busy" : `Busy · ${busy.length}`}</gw-chip
+      >
+    </a>`;
   }
 
   protected override updated(): void {
@@ -352,6 +395,7 @@ export class SbApp extends LitElement {
           value=${active?.href ?? ""}
           @pick=${this.#onJump}
         ></gw-command-menu>
+        ${this.#renderBusy()}
         <span slot="actions">${this.#renderStatus()}</span>
         ${this.#renderComputers()}
         <gw-button
