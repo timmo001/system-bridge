@@ -1,0 +1,113 @@
+# serializer version: 1
+# name: test_services
+  Services(
+    busy=list([
+      ServiceBusy(
+        item='kopia-offsite',
+        label='Off-site backup',
+        provider='dot',
+        since=1763599500000,
+      ),
+    ]),
+    errors=list([
+      ServiceError(
+        message='Unknown key busyy',
+        provider='dot',
+        source='services.d/foo.yml',
+      ),
+    ]),
+    items=list([
+      ServiceItem(
+        actions=list([
+          ServiceAction(
+            confirm=None,
+            disabled=None,
+            id='start',
+            label='Run now',
+          ),
+          ServiceAction(
+            confirm='Read back 10% of the files?',
+            disabled='Runs after the upload',
+            id='verify',
+            label='Verify',
+          ),
+        ]),
+        busy=True,
+        health=<ServiceHealth.RUNNING: 'running'>,
+        id='kopia-offsite',
+        kind='timer',
+        label='Off-site backup',
+        last_run=1763599500000,
+        last_success=1763513100000,
+        lists=list([
+          ServiceList(
+            id='sources',
+            items=list([
+              ServiceListItem(
+                label='Photos',
+                value='02:27',
+              ),
+            ]),
+            label='Sources',
+          ),
+        ]),
+        next_run=1763685900000,
+        notes=list([
+          'B2 is capped at the free 10 GB',
+        ]),
+        progress=0.4,
+        provider='dot',
+        stats=list([
+          ServiceStat(
+            id='r2_used',
+            kind=<ServiceStatKind.SIZE: 'size'>,
+            label='R2 used',
+            unit='GB',
+            value=7.1,
+          ),
+          ServiceStat(
+            id='state',
+            kind=None,
+            label='State',
+            unit=None,
+            value='uploading',
+          ),
+        ]),
+        summary='Uploading to B2',
+      ),
+      ServiceItem(
+        actions=list([
+        ]),
+        busy=False,
+        health=<ServiceHealth.STALE: 'stale'>,
+        id='snapshots',
+        kind='check',
+        label='Snapshots',
+        last_run=None,
+        last_success=None,
+        lists=list([
+        ]),
+        next_run=None,
+        notes=list([
+        ]),
+        progress=None,
+        provider='backups',
+        stats=list([
+        ]),
+        summary='Newest snapshot 3 hours ago',
+      ),
+    ]),
+    providers=list([
+      ServiceProvider(
+        error=None,
+        id='dot',
+        updated=1763600000000,
+      ),
+      ServiceProvider(
+        error='exited with code 1: repository locked',
+        id='backups',
+        updated=1763590000000,
+      ),
+    ]),
+  )
+# ---

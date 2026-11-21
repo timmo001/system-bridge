@@ -26,6 +26,7 @@ from systembridgeconnector.models.fixtures.modules.memory import FIXTURE_MEMORY
 from systembridgeconnector.models.fixtures.modules.networks import FIXTURE_NETWORKS
 from systembridgeconnector.models.fixtures.modules.processes import FIXTURE_PROCESSES
 from systembridgeconnector.models.fixtures.modules.sensors import FIXTURE_SENSORS
+from systembridgeconnector.models.fixtures.modules.services import FIXTURE_SERVICES
 from systembridgeconnector.models.fixtures.modules.system import FIXTURE_SYSTEM
 from systembridgeconnector.models.modules import ModulesData
 from systembridgeconnector.models.request import Request
@@ -61,6 +62,7 @@ MODULES_DATA = ModulesData(
     networks=FIXTURE_NETWORKS,
     processes=FIXTURE_PROCESSES,
     sensors=FIXTURE_SENSORS,
+    services=FIXTURE_SERVICES,
     system=FIXTURE_SYSTEM,
 )
 

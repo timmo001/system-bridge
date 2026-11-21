@@ -18,6 +18,7 @@ from .memory import Memory
 from .networks import Networks
 from .processes import Process
 from .sensors import Sensors
+from .services import Services
 from .system import System
 
 __all__ = [
@@ -40,6 +41,7 @@ __all__ = [
     "Process",
     "RegisterDataListener",
     "Sensors",
+    "Services",
     "System",
 ]
 
@@ -62,6 +64,7 @@ class Module(StrEnum):
     NETWORKS = "networks"
     PROCESSES = "processes"
     SENSORS = "sensors"
+    SERVICES = "services"
     SYSTEM = "system"
 
 
@@ -96,4 +99,5 @@ class ModulesData:
     networks: Networks | None = None
     processes: list[Process] | None = None
     sensors: Sensors | None = None
+    services: Services | None = None
     system: System | None = None

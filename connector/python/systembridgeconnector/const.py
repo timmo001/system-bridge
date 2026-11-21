@@ -22,6 +22,7 @@ from .models.modules.memory import Memory
 from .models.modules.networks import Networks
 from .models.modules.processes import Process
 from .models.modules.sensors import Sensors
+from .models.modules.services import Services
 from .models.modules.system import System
 from .models.notification import Notification
 from .models.open_path import OpenPath
@@ -303,6 +304,7 @@ class Model(StrEnum):
     RESPONSE = "response"
     SECRETS = "secrets"
     SENSORS = Module.SENSORS
+    SERVICES = Module.SERVICES
     SETTINGS = "settings"
     SYSTEM = Module.SYSTEM
 
@@ -333,5 +335,6 @@ MODEL_MAP = {
     Model.PROCESSES: Process,  # Map to Process not list[Process] so it can be mapped
     Model.RESPONSE: Response,
     Model.SENSORS: Sensors,
+    Model.SERVICES: Services,
     Model.SYSTEM: System,
 }

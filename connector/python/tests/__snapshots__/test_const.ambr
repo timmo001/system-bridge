@@ -26,6 +26,7 @@
     <Model.PROCESSES: 'processes'>: <class 'systembridgeconnector.models.modules.processes.Process'>,
     <Model.RESPONSE: 'response'>: <class 'systembridgeconnector.models.response.Response'>,
     <Model.SENSORS: 'sensors'>: <class 'systembridgeconnector.models.modules.sensors.Sensors'>,
+    <Model.SERVICES: 'services'>: <class 'systembridgeconnector.models.modules.services.Services'>,
     <Model.SYSTEM: 'system'>: <class 'systembridgeconnector.models.modules.system.System'>,
   })
 # ---

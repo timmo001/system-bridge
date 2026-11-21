@@ -112,6 +112,7 @@
     networks=None,
     processes=None,
     sensors=None,
+    services=None,
     system=System(
       boot_time=1234,
       camera_usage=list([
@@ -581,6 +582,7 @@
     networks=None,
     processes=None,
     sensors=None,
+    services=None,
     system=System(
       boot_time=1234,
       camera_usage=list([

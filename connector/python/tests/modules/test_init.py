@@ -23,6 +23,7 @@ modules = [
     Module.NETWORKS,
     Module.PROCESSES,
     Module.SENSORS,
+    Module.SERVICES,
     Module.SYSTEM,
 ]
 
@@ -64,4 +65,5 @@ def test_modules_data():
     assert modules_data.networks is None
     assert modules_data.processes is None
     assert modules_data.sensors is None
+    assert modules_data.services is None
     assert modules_data.system is None
