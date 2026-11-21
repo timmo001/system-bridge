@@ -74,6 +74,10 @@ from systembridgeconnector.models.notification import (
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
 from systembridgeconnector.models.response import Response
+from systembridgeconnector.models.service_action import (
+    ServiceActionRequest,
+    ServiceActionResult,
+)
 from systembridgeconnector.models.settings import (
     Settings,
     SettingsCommandDefinition,
@@ -689,6 +693,25 @@ async def test_discord_control(
             request_id=REQUEST_ID,
         )
         == snapshot
+    )
+
+
+@pytest.mark.asyncio
+async def test_service_action(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test a service action waits for its result."""
+    result = await mock_websocket_client_listening.service_action(
+        ServiceActionRequest(provider="dot", item="backup", action="start"),
+        request_id=REQUEST_ID,
+    )
+    assert result == ServiceActionResult(
+        provider="dot",
+        item="backup",
+        action="start",
+        ok=True,
+        summary="Started",
+        output="Started\n",
     )
 
 

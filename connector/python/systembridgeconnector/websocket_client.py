@@ -85,6 +85,7 @@ from .models.open_url import OpenUrl
 from .models.process_control import ProcessKillRequest
 from .models.request import Request
 from .models.response import Response
+from .models.service_action import ServiceActionRequest, ServiceActionResult
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
 from .models.system_control import (
     KeepAwakeRequest,
@@ -1487,6 +1488,39 @@ class WebSocketClient(Base):
             )
 
         return ExecuteResult(**response.data)
+
+    async def service_action(
+        self,
+        model: ServiceActionRequest,
+        request_id: str | None = None,
+        timeout: float = 315.0,
+    ) -> ServiceActionResult:
+        """Run one of a services item's actions and wait for it to finish.
+
+        Only actions the services module lists, and that aren't disabled, run.
+        The backend allows an action 5 minutes. Every client hears the result.
+        """
+        self._logger.info("Service action: %s", model)
+        response = await self.send_message(
+            EventType.SERVICE_ACTION,
+            request_id,
+            asdict(model),
+            wait_for_response=True,
+            response_type=EventType.SERVICE_ACTION_COMPLETED,
+            timeout=timeout,
+        )
+
+        if response.type == EventType.ERROR:
+            if response.subtype == "TIMEOUT":
+                raise ConnectionErrorException(
+                    response.message or "Timeout waiting for the service action"
+                )
+            raise BadRequestException(response.message or "Service action failed")
+
+        if not isinstance(response.data, dict):
+            raise TypeError("Service action response data must be a dict")
+
+        return ServiceActionResult(**response.data)
 
     async def get_commands(
         self,

@@ -262,8 +262,19 @@ def diagnostics_response(request: Request) -> Response:
     )
 
 
+def service_action_response(request: Request) -> Response:
+    """Reply to a service action with its result, as broadcast to every client."""
+    return Response(
+        id=request.id,
+        type=EventType.SERVICE_ACTION_COMPLETED,
+        data={**request.data, "ok": True, "summary": "Started", "output": "Started\n"},
+        message="Started",
+    )
+
+
 REQUEST_RESPONSES: Final[dict[EventType, Callable[[Request], Response]]] = {
     EventType.CAMERA_CAPTURE: camera_capture_response,
+    EventType.SERVICE_ACTION: service_action_response,
     EventType.GET_DIAGNOSTICS: diagnostics_response,
     EventType.GET_DISCORD_SETUP: discord_setup_response,
     EventType.UPDATE_DISCORD_SETUP: discord_setup_response,
