@@ -34,6 +34,7 @@ export default defineConfig(
             "/features/notifications",
             "/features/media",
             "/features/remote-control",
+            "/features/services",
             "/features/discord",
           ],
         },

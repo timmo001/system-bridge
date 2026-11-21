@@ -16,7 +16,7 @@ GET /api/data/{module}
 Authorization: Bearer {key}
 ```
 
-`{module}` is one of: `audio`, `battery`, `bluetooth`, `cameras`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
+`{module}` is one of: `audio`, `battery`, `bluetooth`, `cameras`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `services`, `system`.
 
 ## Response
 
@@ -357,6 +357,17 @@ Returns an array of objects, one per process.
 | `temperatures` | array | Temperature readings with `key`, `temperature`, `high`, and `critical`. When several chips share a driver, such as NVMe drives or memory modules, the later ones' keys end in a number, such as `nvme_composite_2`. |
 | `fans` | array | Fan readings with `key`, `name`, `label`, `speed_rpm`, `speed_min`, and `speed_max`. On Linux this includes hwmon fans and supported Lian Li UNI HID fan controllers when the process can read `/dev/hidraw*`. |
 | `windows_sensors` | object | Windows-only hardware and NVIDIA sensor tree. |
+
+### `services`
+
+What the [services providers](/features/services/) report. With no providers, every list is empty.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `providers` | array | Each provider's `id`, `updated` (when its last good read finished, Unix milliseconds) and `error` (why its last read failed, or `null`). |
+| `items` | array | Each item's `provider`, `id`, `label`, `kind`, `health`, `summary`, `busy`, `last_run`, `last_success`, `next_run`, `progress`, `stats`, `notes`, `lists` and `actions`. A failed provider's items are kept, marked `stale`. |
+| `busy` | array | What's busy: each entry's `provider`, `item`, `label` and `since`. |
+| `errors` | array | Problems the providers reported, or items System Bridge left out: each one's `provider`, `source` and `message`. |
 
 ### `system`
 

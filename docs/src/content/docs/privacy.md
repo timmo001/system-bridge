@@ -116,7 +116,7 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 
 | File | Contents |
 | --- | --- |
-| `settings.json` | Your settings, including the command allowlist and media directories |
+| `settings.json` | Your settings, including the command allowlist, media directories and services providers |
 | `keys.json` | Each client's name, kind, key hash, when it was made and last used, and when its key was first sent in a URL. Never the keys. Readable only by your user |
 | `owner-key` | The owner key the CLI signs in with, readable only by your user |
 | `token` | The old shared API token, until it's removed. Readable only by your user |

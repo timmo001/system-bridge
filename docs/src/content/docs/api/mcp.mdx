@@ -274,6 +274,7 @@ Available modules:
 | `networks` | Network interfaces, addresses, and throughput. |
 | `processes` | Running processes with CPU and memory usage. |
 | `sensors` | Hardware sensors such as temperatures and fan speeds. |
+| `services` | Services, timers and checks from the [services providers](/features/services/), and what's busy. |
 | `system` | Hostname, OS, uptime, users, and version details. |
 
 Example arguments:
@@ -453,6 +454,10 @@ It returns `{ "files": [...] }`, each with its `name`, `path`, `size`, `isDirect
 ### `system_bridge_list_media_directories`
 
 List the directories files can be listed from: your own folders, such as `downloads` and `pictures`, and those added in the media settings. It takes no arguments and returns `{ "directories": [...] }`, each with its `key` and `path`.
+
+### `system_bridge_list_services`
+
+List the services, timers and checks the [services providers](/features/services/) report, such as backups. It takes no arguments and returns the [`services` module](/api/data/#services)'s data: each item's health, summary, whether it's busy, its stats, notes, lists and actions, plus what's busy, each provider's last error and the problems they reported.
 
 ### `system_bridge_lock`
 

@@ -1,0 +1,180 @@
+---
+title: Services
+description: Show a computer's services, timers, backups and other checks, and what's busy, from a provider command.
+---
+
+The services module shows what a computer is doing beyond its hardware: long-running services, timers and the jobs they start, and checks such as a backup's newest snapshot or a sync tool's folders. Each item has a health, a summary, whether it's busy, and its own stats, notes and lists.
+
+System Bridge doesn't watch services itself. It reads them from a provider: a command you set up that prints what it knows in the [provider document](#the-provider-document). [dot](https://github.com/timmo001/dotfiles)'s `dot services export` is one, and any tool or script can be another.
+
+## Adding a provider
+
+Providers are set in the `services` section of `settings.json` in the [settings directory](/running/#file-locations). Each has an `id`, a `list` command and an `act` command, each written as a list of the program and its arguments:
+
+```json title="settings.json"
+{
+  "services": {
+    "providers": [
+      {
+        "id": "dot",
+        "list": ["dot", "services", "export"],
+        "act": ["dot", "services", "act"]
+      }
+    ]
+  }
+}
+```
+
+- `id` is how clients refer to the provider: letters, digits, `-` and `_`.
+- `list` prints the provider document. It's required.
+- `act` runs an item's actions, and can be left out, in which case the provider's items have no actions.
+
+The program runs directly, not through a shell. A name without a path, such as `dot`, is looked up on the `PATH` System Bridge runs with, which for a service can be shorter than your shell's, so a full path is safer.
+
+System Bridge reads the settings file before each read, so a change takes effect within a minute, without a restart.
+
+:::warning
+A provider runs any command you give it, so only the settings file can set one. Clients can't read or change providers, through the web client, the API or MCP.
+:::
+
+## How it's read
+
+System Bridge runs every provider's `list` command once a minute, all at once, and merges what they report in the order they're set. Each run can take up to 15 seconds and print up to 1 MB.
+
+A provider that fails, by exiting with an error, timing out, or printing something that isn't a version 1 document, keeps the items it last reported, marked `stale` unless they were already worse. Its busy list stays too, so a provider that can't be read never looks like it has nothing busy. Its error is in the module's `providers` list, with when it last read.
+
+The module's data, from [`GET /api/data/services`](/api/data/), the WebSocket or the clients, looks like this:
+
+```json
+{
+  "providers": [{ "id": "dot", "updated": 1763600000000, "error": null }],
+  "items": [
+    {
+      "provider": "dot",
+      "id": "kopia-offsite",
+      "label": "Off-site backup",
+      "kind": "timer",
+      "health": "running",
+      "summary": "Uploading to B2",
+      "busy": true,
+      "last_run": 1763599500000,
+      "last_success": 1763513100000,
+      "next_run": 1763685900000,
+      "progress": 0.4,
+      "stats": [],
+      "notes": [],
+      "lists": [],
+      "actions": [{ "id": "start", "label": "Run now", "confirm": null, "disabled": null }]
+    }
+  ],
+  "busy": [{ "provider": "dot", "item": "kopia-offsite", "label": "Off-site backup", "since": 1763599500000 }],
+  "errors": []
+}
+```
+
+Each item, busy entry and error names its `provider`, as two providers can use the same item ID. With no providers, every list is empty.
+
+## Seeing services
+
+- **Web client**: the **Services** page shows each item with its health, summary, progress, stats, notes and lists, and any provider that failed. While anything is busy, a **Busy** chip in the header links to it.
+- **CLI**: `system-bridge client services list` prints a table of the items, then any errors; add `--json` for the module's data. `system-bridge client services watch` prints the data as NDJSON each time it changes. See [the CLI](/using/cli/#services).
+- **MCP**: an assistant can read them with [`system_bridge_list_services`](/api/mcp/#system_bridge_list_services).
+
+## The provider document
+
+`list` prints one JSON document, version 1. System Bridge owns it, so any tool can implement it. Keys it doesn't know are ignored, so a provider can add its own.
+
+```json
+{
+  "version": 1,
+  "updated": 1763600000000,
+  "busy": [{ "item": "kopia-offsite", "label": "Off-site backup", "since": 1763599500000 }],
+  "items": [
+    {
+      "id": "kopia-offsite",
+      "label": "Off-site backup",
+      "kind": "timer",
+      "health": "running",
+      "summary": "Uploading to B2",
+      "busy": true,
+      "lastRun": 1763599500000,
+      "lastSuccess": 1763513100000,
+      "nextRun": 1763685900000,
+      "progress": 0.4,
+      "stats": [{ "id": "r2_used", "label": "R2 used", "value": 7.1, "unit": "GB", "kind": "size" }],
+      "notes": ["B2 is capped at the free 10 GB"],
+      "lists": [{ "id": "sources", "label": "Sources", "items": [{ "label": "Photos", "value": "02:27" }] }],
+      "actions": [
+        { "id": "start", "label": "Run now" },
+        { "id": "verify", "label": "Verify", "confirm": "Read back 10% of the files?", "disabled": "Runs after the upload" }
+      ]
+    }
+  ],
+  "errors": [{ "source": "services.d/foo.yml", "message": "Unknown key busyy" }]
+}
+```
+
+Times are Unix milliseconds.
+
+| Key | Meaning |
+| --- | --- |
+| `version` | Always `1`. Any other version is a failed read. |
+| `updated` | When the provider made the document. |
+| `busy` | What's busy: each entry's `item`, its `label` and `since` when. |
+| `items` | The services, timers and checks. |
+| `errors` | Problems the provider wants shown, such as a registration it couldn't read: a `source` and a `message`. |
+
+Each item has:
+
+| Key | Meaning |
+| --- | --- |
+| `id` | Required, and unique within the provider. |
+| `label` | Its name. The ID when left out. |
+| `kind` | `service`, `timer` or `check`, or another kind of the provider's own. |
+| `health` | Required: one of `failed`, `missing`, `inactive`, `stale`, `degraded`, `warning`, `running`, `paused` or `ok`, worst to best. |
+| `summary` | A line on what it's doing or how it went. |
+| `busy` | Whether it's busy now. |
+| `lastRun`, `lastSuccess`, `nextRun` | When it last ran, last worked and runs next. |
+| `progress` | How far through it is, from 0 to 1. |
+| `stats` | Figures: each has an `id`, a `label`, a `value` that's a number or a short string, an optional `unit`, and an optional `kind` of `duration` (seconds), `size` (bytes, unless it has a unit), `timestamp` or `count`, so clients can format it. |
+| `notes` | Short lines of text. |
+| `lists` | Lists of label and value pairs, each with an `id`, a `label` and its `items`. |
+| `actions` | What clients can ask the provider to do: each has an `id`, a `label`, an optional `confirm` question for clients to ask first, and an optional `disabled` reason it can't run now. |
+
+An item with no ID, the same ID as an earlier one, or a health outside the list is left out, as is a stat whose value isn't a number or a string. Each is added to `errors`, so one bad item doesn't hide the rest.
+
+## An example provider
+
+This script reports one check: how old the newest backup is, from the time a backup tool last touched a file.
+
+```bash title="~/.local/bin/backup-status"
+#!/usr/bin/env bash
+set -euo pipefail
+
+marker="$HOME/.local/state/backup/last-success"
+now=$(($(date +%s) * 1000))
+
+if [[ ! -f $marker ]]; then
+  printf '{"version":1,"updated":%d,"busy":[],"items":[{"id":"backup","label":"Backup","kind":"check","health":"missing","summary":"No backup yet"}],"errors":[]}\n' "$now"
+  exit 0
+fi
+
+last=$(($(stat -c %Y "$marker") * 1000))
+age=$(((now - last) / 1000))
+health=ok
+[[ $age -gt 86400 ]] && health=warning
+[[ $age -gt 259200 ]] && health=failed
+
+printf '{"version":1,"updated":%d,"busy":[],"items":[{"id":"backup","label":"Backup","kind":"check","health":"%s","summary":"Newest backup %d hours ago","lastSuccess":%d,"stats":[{"id":"age","label":"Age","value":%d,"kind":"duration"}]}],"errors":[]}\n' \
+  "$now" "$health" $((age / 3600)) "$last" "$age"
+```
+
+Make it executable, then add it as a provider with no `act`:
+
+```json title="settings.json"
+{
+  "services": {
+    "providers": [{ "id": "backup", "list": ["/home/me/.local/bin/backup-status"] }]
+  }
+}
+```
