@@ -17,12 +17,20 @@ Item {
   // The allowlisted commands, from system-bridge client command list.
   property var commands: []
 
+  // Whether the installed System Bridge has the services module, which older
+  // releases don't, so watching it would stop the watch starting at all.
+  property bool servicesAvailable: false
+  // How the last service action run from the panel went, as
+  // system-bridge client services act --json reports it.
+  property var lastServiceAction: null
+  property bool serviceActionRunning: false
+
   // Modules that report a list rather than an object.
   readonly property var listModules: ["gpus", "displays", "processes"]
   readonly property var watchedModules: [
     "desktop", "system", "processes", "cpu", "memory", "gpus", "sensors", "battery",
     "bluetooth", "displays", "audio", "disks", "networks", "media", "discord"
-  ]
+  ].concat(servicesAvailable ? ["services"] : [])
 
   readonly property var system: objectData(modules.system) ? modules.system : null
   readonly property var cpu: objectData(modules.cpu) ? modules.cpu : null
@@ -39,6 +47,32 @@ Item {
   readonly property var gpus: Array.isArray(modules.gpus) ? modules.gpus : []
   readonly property var displays: Array.isArray(modules.displays) ? modules.displays : []
   readonly property var processes: Array.isArray(modules.processes) ? modules.processes : []
+  readonly property var services: objectData(modules.services) ? modules.services : null
+  readonly property var serviceItems: services && Array.isArray(services.items) ? services.items : []
+  readonly property var serviceBusy: services && Array.isArray(services.busy) ? services.busy : []
+  readonly property var serviceProviders: services && Array.isArray(services.providers) ? services.providers : []
+  readonly property var failedServiceProviders: serviceProviders.filter(function(provider) {
+    return provider && provider.error !== null && provider.error !== undefined
+  })
+  // The worst health of every item, in the order the providers rank them, or
+  // "" with none.
+  readonly property var healthOrder: ["failed", "missing", "inactive", "stale", "degraded", "warning", "running", "paused", "ok"]
+  readonly property string servicesWorst: {
+    var worst = ""
+    for (var i = 0; i < serviceItems.length; i++) {
+      var rank = healthOrder.indexOf(String(serviceItems[i].health || ""))
+      if (rank >= 0 && (worst === "" || rank < healthOrder.indexOf(worst))) worst = healthOrder[rank]
+    }
+    return worst
+  }
+  // The bar's tone for the services: failed or missing items are danger, the
+  // other problems, or a provider that can't be read, a warning.
+  readonly property string servicesLevel: {
+    if (servicesWorst === "failed" || servicesWorst === "missing") return "danger"
+    if (failedServiceProviders.length > 0) return "warning"
+    if (["inactive", "stale", "degraded", "warning"].indexOf(servicesWorst) >= 0) return "warning"
+    return "normal"
+  }
 
   readonly property var cpuUsage: numberOrNull(cpu ? cpu.usage : null)
   readonly property var cpuLoad: numberOrNull(cpu ? cpu.load_average : null)
@@ -128,9 +162,60 @@ Item {
     }
   }
 
+  // Runs one of a services item's actions, keeping its result for the panel
+  function runServiceAction(provider, item, action) {
+    if (serviceActionProcess.running) return
+    lastServiceAction = { provider: provider, item: item, action: action, ok: false, summary: "Running…", output: "", running: true }
+    serviceActionRunning = true
+    serviceActionProcess.command = ["system-bridge", "client", "services", "act", "--json", "--yes", provider, item, action]
+    serviceActionProcess.running = true
+  }
+
+  Process {
+    id: serviceActionProcess
+    running: false
+    stdout: StdioCollector { id: serviceActionOutput; waitForEnd: true }
+    stderr: StdioCollector { id: serviceActionErrors; waitForEnd: true }
+    onExited: function(exitCode) {
+      var previous = root.lastServiceAction || {}
+      var result = null
+      try {
+        result = JSON.parse(String(serviceActionOutput.text || "").trim())
+      } catch (error) {
+        // Refused, or the backend didn't answer: stderr says why
+      }
+      root.lastServiceAction = result && typeof result === "object" ? result : {
+        provider: previous.provider, item: previous.item, action: previous.action, ok: false,
+        summary: String(serviceActionErrors.text || "").trim().replace(/^Error: /, "") || "That didn't work",
+        output: ""
+      }
+      root.serviceActionRunning = false
+    }
+  }
+
+  // The modules the installed System Bridge has, checked once before the
+  // watch starts
+  Process {
+    id: modulesProcess
+    running: true
+    command: ["system-bridge", "client", "data", "list", "--json"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var list = JSON.parse(String(text || "").trim())
+          root.servicesAvailable = Array.isArray(list) && list.indexOf("services") >= 0
+        } catch (error) {
+          // An older or missing System Bridge: watch the modules every release has
+        }
+      }
+    }
+    onExited: Qt.callLater(function() { if (!watchProcess.running) watchProcess.running = true })
+  }
+
   Process {
     id: watchProcess
-    running: true
+    running: false
     command: ["system-bridge", "client", "data", "watch"].concat(
       root.watchedModules.reduce(function(args, module) { return args.concat(["--module", module]) }, []))
     stdout: SplitParser {

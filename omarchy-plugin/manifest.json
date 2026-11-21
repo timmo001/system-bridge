@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timmo.system-bridge",
   "name": "System Bridge",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "author": "Timmo",
   "license": "Apache-2.0",
   "description": "Local system data and controls from System Bridge",
@@ -17,7 +17,7 @@
   },
   "barWidget": {
     "displayName": "System Bridge",
-    "description": "Shows CPU and memory, with a panel for every System Bridge module",
+    "description": "Shows CPU, memory and what's busy, with a panel for every System Bridge module",
     "category": "Info",
     "allowMultiple": false,
     "defaultSection": "right",

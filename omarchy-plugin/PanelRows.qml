@@ -8,6 +8,9 @@ import QtQuick
 //   "web"     opens a web client page (target is its path)
 //   "url"     opens an external link (target is the URL)
 //   "control" runs a System Bridge client control (target is its argv)
+//   "service-action" runs a services item's action (target is
+//                    { provider, item, action }), asking first when the row
+//                    has a confirm question
 QtObject {
   id: root
 
@@ -25,6 +28,7 @@ QtObject {
   readonly property string memoryIcon: "\u{F035B}"
   readonly property string networkIcon: "\u{F0317}"
   readonly property string processIcon: "\u{F1577}"
+  readonly property string servicesIcon: "\u{F15AB}"
   readonly property string settingsIcon: "\u{F08BB}"
   readonly property string systemIcon: "\u{F02FD}"
   readonly property string temperatureIcon: "\u{F050F}"
@@ -33,6 +37,7 @@ QtObject {
   readonly property var modules: [
     { module: "desktop", label: "Desktop", icon: root.desktopIcon, area: "System" },
     { module: "processes", label: "Processes", icon: root.processIcon, area: "System" },
+    { module: "services", label: "Services", icon: root.servicesIcon, area: "System" },
     { module: "system", label: "System", icon: root.systemIcon, area: "System" },
     { module: "audio", label: "Audio", icon: root.audioIcon, area: "Hardware" },
     { module: "battery", label: "Battery", icon: "\u{F0079}", area: "Hardware" },
@@ -121,7 +126,7 @@ QtObject {
   function row(fields) {
     return Object.assign({
       icon: "", secondaryText: "", section: "", meter: null, meterLevel: "normal",
-      kind: "", target: null, disabled: false
+      kind: "", target: null, disabled: false, confirm: ""
     }, fields)
   }
   // A plain reading, left out when there's nothing to show.
@@ -154,6 +159,7 @@ QtObject {
     case "networks": return service.networks && Array.isArray(service.networks.networks) ? quantity(service.networks.networks.length, "interface") : ""
     case "media": return service.media && present(service.media.title) ? String(service.media.title) : (service.modules.media !== undefined ? "Nothing playing" : "")
     case "discord": return service.discord ? (service.discord.connected ? "Connected" : "Not connected") : ""
+    case "services": return servicesSummary(service)
     }
     return ""
   }
@@ -198,6 +204,8 @@ QtObject {
 
     for (var m = 0; m < modules.length; m++) {
       var info = modules[m]
+      // Only System Bridge releases with the module have services
+      if (info.module === "services" && !service.servicesAvailable) continue
       var readings = overviewReadings(service, info.module, info.area)
       if (readings.length === 0)
         readings = [row({ key: "module-" + info.module, section: info.area, icon: info.icon, primaryText: info.label, secondaryText: summary(service, info.module), kind: "module", target: info.module })]
@@ -264,12 +272,26 @@ QtObject {
       if (service.modules.media !== undefined)
         rows.push(nowPlaying(service, section, "module"))
       break
+    case "services":
+      // What needs a look: what's busy, providers that failed and items that did
+      service.serviceBusy.forEach(function(busy) {
+        add({ key: "busy-" + text(busy.provider) + "-" + text(busy.item), icon: busyIcon, primaryText: text(busy.label) || text(busy.item), secondaryText: join(["Busy", num(busy.since) === null ? "" : "since " + ago(busy.since)]) })
+      })
+      service.failedServiceProviders.forEach(function(provider) {
+        add({ key: "provider-" + text(provider.id), icon: problemIcon, primaryText: "Couldn't read " + text(provider.id), secondaryText: text(provider.error), meterLevel: "warning" })
+      })
+      service.serviceItems.forEach(function(item) {
+        if (item.health === "failed" || item.health === "missing")
+          add({ key: "failed-" + text(item.provider) + "-" + text(item.id), icon: healthIcon(item.health), primaryText: text(item.label) || text(item.id), secondaryText: join([healthLabel(item.health), text(item.summary)]) })
+      })
+      break
     }
     return rows
   }
 
-  function moduleRows(service, module) {
+  function moduleRows(service, module, confirmingKey) {
     switch (module) {
+    case "services": return servicesRows(service, confirmingKey || "")
     case "system": return systemRows(service)
     case "processes": return processRows(service)
     case "cpu": return cpuRows(service)
@@ -788,5 +810,134 @@ QtObject {
     rows.push(webRow("web-discord", "In the web client", discordIcon, "All controls", "Volumes, devices, members and sounds", "/discord#discord-controls"))
     rows.push(webRow("web-discord-setup", "In the web client", settingsIcon, "Discord setup", "Connect System Bridge to Discord", "/discord#discord-setup"))
     return rows
+  }
+
+  readonly property string busyIcon: "\u{F051F}"
+  readonly property string problemIcon: "\u{F05D6}"
+
+  readonly property var healthLabels: ({
+    failed: "Failed", missing: "Missing", inactive: "Inactive", stale: "Stale", degraded: "Degraded",
+    warning: "Warning", running: "Running", paused: "Paused", ok: "OK"
+  })
+  function healthLabel(health) { return healthLabels[text(health)] || capitalised(health) }
+  function healthIcon(health) {
+    switch (text(health)) {
+    case "failed": case "missing": return problemIcon
+    case "inactive": return "\u{F0377}"
+    case "stale": case "degraded": case "warning": return "\u{F002A}"
+    case "running": return "\u{F04E6}"
+    case "paused": return "\u{F03E6}"
+    default: return "\u{F05E1}"
+    }
+  }
+
+  /** How long ago, or until, a time in Unix milliseconds is. */
+  function ago(millis) {
+    var time = num(millis)
+    if (time === null) return ""
+    var seconds = Math.round((time - Date.now()) / 1000)
+    var span = Math.abs(seconds)
+    if (span < 60) return "just now"
+    var amount = span < 3600 ? Math.round(span / 60) + "m" : (span < 86400 ? Math.round(span / 3600) + "h" : Math.round(span / 86400) + "d")
+    return seconds < 0 ? amount + " ago" : "in " + amount
+  }
+
+  function servicesSummary(service) {
+    if (!service.services) return ""
+    if (service.serviceProviders.length === 0) return "No provider set up"
+    if (service.serviceBusy.length > 0) return service.serviceBusy.length + " busy"
+    if (service.servicesWorst !== "" && service.servicesWorst !== "ok") return join([healthLabel(service.servicesWorst), quantity(service.serviceItems.length, "item")])
+    return quantity(service.serviceItems.length, "item")
+  }
+
+  /** A stat's value, formatted by the kind its provider gave it. */
+  function statValue(stat) {
+    var value = stat.value
+    var unit = text(stat.unit)
+    if (typeof value === "number" && isFinite(value)) {
+      switch (text(stat.kind)) {
+      case "duration": return duration(value)
+      case "size": if (unit === "") return bytes(value); break
+      case "timestamp": return ago(value)
+      case "count": return String(Math.round(value))
+      }
+    }
+    return unit === "" || text(value) === "" ? text(value) : text(value) + " " + unit
+  }
+
+  function list(value) { return Array.isArray(value) ? value : [] }
+
+  // Each item under its own heading: its health and summary, times, stats,
+  // notes and lists, then its actions. Problems come first.
+  function servicesRows(service, confirmingKey) {
+    var rows = []
+    var services = service.services
+    if (!services) return rows
+    if (service.serviceProviders.length === 0)
+      rows.push(row({ key: "no-provider", icon: servicesIcon, primaryText: "No services provider yet", secondaryText: "Add one to the settings file", kind: "url", target: "https://system-bridge.timmo.dev/features/services/" }))
+    service.failedServiceProviders.forEach(function(provider) {
+      rows.push(row({ key: "provider-" + text(provider.id), section: "Problems", icon: problemIcon, primaryText: "Couldn't read " + text(provider.id), secondaryText: join([text(provider.error), num(provider.updated) === null ? "" : "showing what it reported " + ago(provider.updated)]) }))
+    })
+    list(services.errors).forEach(function(problem, index) {
+      rows.push(row({ key: "error-" + index, section: "Problems", icon: problemIcon, primaryText: text(problem.source), secondaryText: join([text(problem.message), text(problem.provider)]) }))
+    })
+
+    var several = service.serviceProviders.length > 1
+    service.serviceItems.forEach(function(item) {
+      var key = "service-" + text(item.provider) + "-" + text(item.id)
+      var section = (text(item.label) || text(item.id)) + (several ? " (" + text(item.provider) + ")" : "")
+      var progress = num(item.progress)
+      rows.push(row({
+        key: key, section: section, icon: healthIcon(item.health),
+        primaryText: join([healthLabel(item.health), item.busy === true ? "Busy" : "", text(item.kind)]),
+        secondaryText: text(item.summary),
+        meter: progress === null ? null : progress * 100
+      }))
+      reading(rows, key + "-last-run", section, "\u{F02DA}", "Last run", ago(item.last_run))
+      reading(rows, key + "-last-success", section, "\u{F05E1}", "Last success", ago(item.last_success))
+      reading(rows, key + "-next-run", section, "\u{F00F0}", "Next run", ago(item.next_run))
+      list(item.stats).forEach(function(stat) {
+        reading(rows, key + "-stat-" + text(stat.id), section, "\u{F154E}", text(stat.label) || text(stat.id), statValue(stat))
+      })
+      list(item.notes).forEach(function(note, index) {
+        rows.push(row({ key: key + "-note-" + index, section: section, icon: "\u{F11D7}", primaryText: text(note) }))
+      })
+      list(item.lists).forEach(function(group) {
+        list(group.items).forEach(function(entry, index) {
+          rows.push(row({ key: key + "-list-" + text(group.id) + "-" + index, section: section, icon: "\u{F0279}", primaryText: text(entry.label), secondaryText: join([text(entry.value), text(group.label)]) }))
+        })
+      })
+      list(item.actions).forEach(function(action) {
+        rows.push(serviceActionRow(service, item, action, key, section, confirmingKey))
+      })
+      var last = service.lastServiceAction
+      if (last && last.provider === item.provider && last.item === item.id)
+        rows.push(row({
+          key: key + "-result", section: section, icon: last.running ? busyIcon : (last.ok ? "\u{F05E1}" : problemIcon),
+          primaryText: text(last.summary),
+          secondaryText: text(last.output).trim().split("\n").slice(-1)[0] || ""
+        }))
+    })
+
+    rows.push(webRow("web-services", "In the web client", servicesIcon, "All services", "Every item in full, with action output", "/services"))
+    return rows
+  }
+
+  // A row that runs an action. One with a question asks it on the first
+  // select and runs on the second.
+  function serviceActionRow(service, item, action, key, section, confirmingKey) {
+    var rowKey = key + "-action-" + text(action.id)
+    var disabled = action.disabled !== null && action.disabled !== undefined
+    var asking = confirmingKey === rowKey
+    return row({
+      key: rowKey, section: section, icon: asking ? "\u{F002A}" : "\u{F040D}",
+      primaryText: asking ? text(action.confirm) : text(action.label) || text(action.id),
+      secondaryText: disabled ? text(action.disabled)
+        : (asking ? "Select again to " + (text(action.label) || text(action.id)).toLowerCase() : text(action.confirm)),
+      kind: "service-action",
+      target: { provider: text(item.provider), item: text(item.id), action: text(action.id) },
+      confirm: text(action.confirm),
+      disabled: disabled || service.serviceActionRunning === true
+    })
   }
 }

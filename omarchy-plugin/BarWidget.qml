@@ -34,7 +34,13 @@ BarWidget {
     systemBridge.cpuUsage !== null && systemBridge.cpuUsage >= 90
     || systemBridge.memoryPercent !== null && systemBridge.memoryPercent >= 90
     || systemBridge.highTemperature || systemBridge.stale
-    || systemBridge.pendingReboot === true)
+    || systemBridge.pendingReboot === true
+    || systemBridge.servicesLevel === "warning")
+  // A service that failed or is missing, such as a backup
+  readonly property bool danger: systemBridge && (
+    systemBridge.criticalTemperature || systemBridge.servicesLevel === "danger")
+  readonly property bool busy: systemBridge && systemBridge.connected
+    && systemBridge.serviceBusy.length > 0
   readonly property string displayText: {
     if (!systemBridge || !systemBridge.connected) return " --%   --%"
     var cpu = systemBridge.cpuUsage === null ? "--" : Math.round(systemBridge.cpuUsage)
@@ -43,7 +49,7 @@ BarWidget {
   }
   readonly property color displayColor: {
     if (!systemBridge || !systemBridge.connected) return "#9b9b9b"
-    if (systemBridge.criticalTemperature) return bar ? bar.urgent : Commons.Color.urgent
+    if (danger) return bar ? bar.urgent : Commons.Color.urgent
     if (warning) return "#e5c07b"
     return bar ? bar.barForeground : Commons.Color.foreground
   }
@@ -60,13 +66,22 @@ BarWidget {
       ? systemBridge.cpuLoad.toFixed(2) : "--"
     var temperature = systemBridge && systemBridge.cpuTemperature !== null
       ? Math.round(systemBridge.cpuTemperature) + " °C" : "--"
-    return [
+    var lines = [
       "Status: " + status,
       "CPU: " + cpu,
       "Memory: " + memory,
       "Load: " + load,
       "CPU temperature: " + temperature
-    ].join("\n")
+    ]
+    if (systemBridge && systemBridge.services) {
+      if (systemBridge.serviceBusy.length > 0)
+        lines.push("Busy: " + systemBridge.serviceBusy.map(function(entry) { return String(entry.label || entry.item) }).join(", "))
+      if (systemBridge.servicesWorst !== "" && systemBridge.servicesWorst !== "ok")
+        lines.push("Services: " + systemBridge.servicesWorst)
+      if (systemBridge.failedServiceProviders.length > 0)
+        lines.push("Can't read: " + systemBridge.failedServiceProviders.map(function(provider) { return String(provider.id) }).join(", "))
+    }
+    return lines.join("\n")
   }
 
   function activeWidget() {
@@ -171,6 +186,16 @@ BarWidget {
       id: content
       anchors.centerIn: parent
       spacing: Style.space(10)
+
+      // While a services provider says something's busy, such as a backup
+      Text {
+        visible: root.busy
+        text: "\u{F051F}"
+        color: root.displayColor
+        font.family: button.fontFamily
+        font.pixelSize: button.fontSize
+        renderType: Text.NativeRendering
+      }
 
       Text {
         text: !root.systemBridge || !root.systemBridge.connected

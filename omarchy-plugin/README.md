@@ -1,9 +1,9 @@
 # System Bridge for Omarchy
 
 An Omarchy bar widget and panel for System Bridge. It shows CPU and memory
-usage in the bar. The panel has an overview of the system and a view for every
-module the web client has a page for, with audio, Bluetooth, desktop, Discord,
-display and media controls.
+usage in the bar, and what's busy. The panel has an overview of the system and a
+view for every module the web client has a page for, with audio, Bluetooth,
+desktop, Discord, display and media controls, and services actions.
 
 ## Requirements
 
@@ -48,6 +48,15 @@ desktop view focuses a window or workspace when you select it, switches the
 keyboard layout, and reloads Hyprland's config; the Discord view has mute,
 deafen and leave call; the displays view has brightness for each display that
 supports it; and the media view has previous, play or pause, and next.
+
+With a System Bridge that has the services module, the overview lists what's
+busy, providers that can't be read and items that failed. The Services view
+shows each item under its own heading with its health, summary, times, stats,
+notes and lists, and its actions: selecting one runs it and shows the result
+under the item. An action with a question shows the question first and runs
+when you select it again. While anything is busy, the bar widget shows an
+hourglass; it turns yellow for a warning and red for an item that failed or is
+missing.
 
 Select a section heading to collapse or expand it. Collapsed sections stay
 collapsed until you expand them again or the shell restarts, and filtering
@@ -110,10 +119,16 @@ System Bridge module:
 system-bridge client data watch --module desktop --module system ...
 ```
 
+Before it starts, it checks once with
+`system-bridge client data list --json` whether the installed System Bridge has
+the services module, and only watches it then.
+
 It reads System Bridge settings and its local owner key through the
 System Bridge client. Its buttons run `system-bridge client` commands to open
 the web client, control Bluetooth devices, the desktop, Discord, displays and
 media, run your allowlisted commands, and quit or start System Bridge. The
 System view lists those commands, read with
 `system-bridge client command list --json` every minute, and selecting one runs
-it with `system-bridge client command run`.
+it with `system-bridge client command run`. Selecting a services action runs
+`system-bridge client services act --json --yes` with its provider, item and
+action, after asking in the panel when the action has a question.

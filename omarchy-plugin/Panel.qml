@@ -19,8 +19,10 @@ Panel {
   readonly property color warningColor: "#e5c07b"
   readonly property color dangerColor: bar ? bar.urgent : Commons.Color.urgent
   readonly property var viewInfo: view === "" ? null : rowBuilder.moduleInfo(view)
+  // The service action row whose question is showing, run on a second select.
+  property string confirmingKey: ""
   readonly property var panelRows: !service ? []
-    : (view === "" ? rowBuilder.overview(service) : rowBuilder.moduleRows(service, view))
+    : (view === "" ? rowBuilder.overview(service) : rowBuilder.moduleRows(service, view, confirmingKey))
   readonly property bool filtering: filterController.filterText !== ""
   // Sections the user collapsed, by view, kept while the shell runs.
   property var collapsedSections: ({})
@@ -75,6 +77,7 @@ Panel {
 
   function showView(module) {
     view = module
+    confirmingKey = ""
     resetCursor()
     Qt.callLater(function() { panelFlick.contentY = 0 })
   }
@@ -117,8 +120,21 @@ Panel {
     } else if (entry.kind === "control") {
       // Stay open so the change shows when System Bridge reports it.
       if (root.connected) Util.execArgv(entry.target)
+    } else if (entry.kind === "service-action") {
+      if (!root.connected) return
+      // An action with a question asks it first, and runs on a second select
+      if (entry.confirm !== "" && root.confirmingKey !== entry.key) {
+        root.confirmingKey = entry.key
+        return
+      }
+      root.confirmingKey = ""
+      // Stay open so the result shows under the item
+      root.service.runServiceAction(entry.target.provider, entry.target.item, entry.target.action)
     }
   }
+
+  // Moving to another row drops a question that's showing
+  onCursorKeyChanged: if (confirmingKey !== "" && cursorKey !== confirmingKey) confirmingKey = ""
 
   function actionable(entry) {
     return !!entry && !entry.disabled && entry.kind !== ""
@@ -142,6 +158,7 @@ Panel {
 
   function open() {
     view = ""
+    confirmingKey = ""
     resetCursor()
     controller.show()
     Qt.callLater(function() {
