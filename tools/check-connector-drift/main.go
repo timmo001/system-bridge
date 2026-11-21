@@ -57,6 +57,12 @@ var unmodelled = map[string]string{
 	"Module": "the backend's wrapper for a module's data, never sent as is",
 }
 
+// Settings structs the backend never sends to clients, with why.
+var unsentSettings = map[string]string{
+	"SettingsServices":        "set only in the settings file, never sent to clients",
+	"SettingsServiceProvider": "set only in the settings file, never sent to clients",
+}
+
 // The connectors' models for each request and reply struct in the handlers.
 // An empty list means that connector sends a plain dict or object instead.
 type pairing struct {
@@ -126,6 +132,8 @@ var handlerPairs = map[string]pairing{
 var ignoredFields = map[string]string{
 	"Python.DirectoryInfo.name":        "derived from the key, as the backend sends none",
 	"Python.DirectoryInfo.description": "the model also holds GET_DIRECTORY's reply, which has one",
+	"TypeScript.Settings.services":     "set only in the settings file, never sent to clients",
+	"Python.Settings.services":         "set only in the settings file, never sent to clients",
 }
 
 // Python models that name the JSON fields in snake_case.
@@ -565,6 +573,9 @@ func main() {
 
 	var tsSettings, pySettings []string
 	for _, name := range sortedKeys(backend.structs["settings"]) {
+		if _, ok := unsentSettings[name]; ok {
+			continue
+		}
 		fields := backend.structs["settings"][name]
 		tsSettings = append(tsSettings, compareFields(ts, name, name, fields)...)
 		pySettings = append(pySettings, compareFields(py, pythonModel(name), name, fields)...)

@@ -123,6 +123,7 @@ export const ModuleName = Schema.Literals([
   "networks",
   "processes",
   "sensors",
+  "services",
   "system",
 ]);
 
@@ -143,6 +144,29 @@ export type PowerState = typeof PowerState.Type;
 export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
+
+export const ServiceHealth = Schema.Literals([
+  "failed",
+  "missing",
+  "inactive",
+  "stale",
+  "degraded",
+  "warning",
+  "running",
+  "paused",
+  "ok",
+]);
+
+export type ServiceHealth = typeof ServiceHealth.Type;
+
+export const ServiceStatKind = Schema.Literals([
+  "duration",
+  "size",
+  "timestamp",
+  "count",
+]);
+
+export type ServiceStatKind = typeof ServiceStatKind.Type;
 
 export const AudioApp = Schema.Struct({
   id: Schema.String,
@@ -1471,6 +1495,100 @@ export const SensorsData = Schema.Struct({
 
 export interface SensorsData extends Schema.Schema.Type<typeof SensorsData> {}
 
+export const ServiceAction = Schema.Struct({
+  id: Schema.String,
+  label: Schema.String,
+  confirm: Schema.NullOr(Schema.String),
+  disabled: Schema.NullOr(Schema.String),
+});
+
+export interface ServiceAction extends Schema.Schema.Type<
+  typeof ServiceAction
+> {}
+
+export const ServiceBusy = Schema.Struct({
+  provider: Schema.String,
+  item: Schema.String,
+  label: Schema.String,
+  since: Schema.NullOr(Schema.Finite),
+});
+
+export interface ServiceBusy extends Schema.Schema.Type<typeof ServiceBusy> {}
+
+export const ServiceError = Schema.Struct({
+  provider: Schema.String,
+  source: Schema.String,
+  message: Schema.String,
+});
+
+export interface ServiceError extends Schema.Schema.Type<typeof ServiceError> {}
+
+export const ServiceStat = Schema.Struct({
+  id: Schema.String,
+  label: Schema.String,
+  value: Schema.Unknown,
+  unit: Schema.NullOr(Schema.String),
+  kind: Schema.NullOr(ServiceStatKind),
+});
+
+export interface ServiceStat extends Schema.Schema.Type<typeof ServiceStat> {}
+
+export const ServiceListItem = Schema.Struct({
+  label: Schema.String,
+  value: Schema.String,
+});
+
+export interface ServiceListItem extends Schema.Schema.Type<
+  typeof ServiceListItem
+> {}
+
+export const ServiceList = Schema.Struct({
+  id: Schema.String,
+  label: Schema.String,
+  items: Schema.Array(ServiceListItem),
+});
+
+export interface ServiceList extends Schema.Schema.Type<typeof ServiceList> {}
+
+export const ServiceItem = Schema.Struct({
+  provider: Schema.String,
+  id: Schema.String,
+  label: Schema.String,
+  kind: Schema.String,
+  health: ServiceHealth,
+  summary: Schema.NullOr(Schema.String),
+  busy: Schema.Boolean,
+  last_run: Schema.NullOr(Schema.Finite),
+  last_success: Schema.NullOr(Schema.Finite),
+  next_run: Schema.NullOr(Schema.Finite),
+  progress: Schema.NullOr(Schema.Finite),
+  stats: Schema.Array(ServiceStat),
+  notes: Schema.Array(Schema.String),
+  lists: Schema.Array(ServiceList),
+  actions: Schema.Array(ServiceAction),
+});
+
+export interface ServiceItem extends Schema.Schema.Type<typeof ServiceItem> {}
+
+export const ServiceProvider = Schema.Struct({
+  id: Schema.String,
+  updated: Schema.NullOr(Schema.Finite),
+  error: Schema.NullOr(Schema.String),
+});
+
+export interface ServiceProvider extends Schema.Schema.Type<
+  typeof ServiceProvider
+> {}
+
+export const ServicesData = Schema.Struct({
+  providers: Schema.Array(ServiceProvider),
+  items: Schema.Array(ServiceItem),
+  busy: Schema.Array(ServiceBusy),
+  errors: Schema.Array(ServiceError),
+});
+
+export interface ServicesData extends Schema.Schema.Type<typeof ServicesData> {}
+
 export const SystemUser = Schema.Struct({
   name: Schema.String,
   active: Schema.Boolean,
@@ -1557,6 +1675,7 @@ export interface ModuleData {
   readonly networks: NetworksData;
   readonly processes: ProcessesData;
   readonly sensors: SensorsData;
+  readonly services: ServicesData;
   readonly system: SystemData;
 }
 
@@ -1580,6 +1699,7 @@ export const ModuleDataSchemas: ModuleDataSchemas = {
   networks: NetworksData,
   processes: ProcessesData,
   sensors: SensorsData,
+  services: ServicesData,
   system: SystemData,
 };
 
@@ -1599,6 +1719,7 @@ export const ModulesData = Schema.Struct({
   networks: Schema.optionalKey(NetworksData),
   processes: Schema.optionalKey(ProcessesData),
   sensors: Schema.optionalKey(SensorsData),
+  services: Schema.optionalKey(ServicesData),
   system: Schema.optionalKey(SystemData),
 });
 
@@ -1620,6 +1741,7 @@ export const ModuleDataUpdate = Schema.Union([
   Schema.Struct({ module: Schema.Literal("networks"), data: NetworksData }),
   Schema.Struct({ module: Schema.Literal("processes"), data: ProcessesData }),
   Schema.Struct({ module: Schema.Literal("sensors"), data: SensorsData }),
+  Schema.Struct({ module: Schema.Literal("services"), data: ServicesData }),
   Schema.Struct({ module: Schema.Literal("system"), data: SystemData }),
 ]);
 

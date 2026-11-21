@@ -67,6 +67,7 @@ func NewDataStore() (*DataStore, error) {
 		data_module.NetworkModule{},
 		data_module.ProcessModule{},
 		data_module.SensorModule{},
+		data_module.ServicesModule{},
 		data_module.SystemModule{},
 	}
 

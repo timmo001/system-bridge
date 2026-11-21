@@ -1,0 +1,107 @@
+{
+  "providers": [
+    { "id": "test", "updated": 1795288752110, "error": null },
+    {
+      "id": "missing",
+      "updated": null,
+      "error": "/usr/local/bin/does-not-exist not found"
+    }
+  ],
+  "items": [
+    {
+      "provider": "test",
+      "id": "kopia-offsite",
+      "label": "Off-site backup",
+      "kind": "timer",
+      "health": "running",
+      "summary": "Uploading to B2",
+      "busy": true,
+      "last_run": 1795288452000,
+      "last_success": 1795202352000,
+      "next_run": 1795375152000,
+      "progress": 0.4,
+      "stats": [
+        {
+          "id": "r2_used",
+          "label": "R2 used",
+          "value": 7.1,
+          "unit": "GB",
+          "kind": "size"
+        },
+        {
+          "id": "age",
+          "label": "Newest copy",
+          "value": 86400,
+          "unit": null,
+          "kind": "duration"
+        },
+        {
+          "id": "state",
+          "label": "State",
+          "value": "uploading",
+          "unit": null,
+          "kind": null
+        }
+      ],
+      "notes": ["B2 is capped at the free 10 GB"],
+      "lists": [
+        {
+          "id": "sources",
+          "label": "Sources",
+          "items": [
+            { "label": "Photos", "value": "02:27" },
+            { "label": "Documents", "value": "3" }
+          ]
+        }
+      ],
+      "actions": [
+        { "id": "start", "label": "Run now", "confirm": null, "disabled": null },
+        {
+          "id": "verify",
+          "label": "Verify",
+          "confirm": "Read back 10% of the files?",
+          "disabled": "Runs after the upload"
+        }
+      ]
+    },
+    {
+      "provider": "test",
+      "id": "syncthing-folders",
+      "label": "Syncthing folders",
+      "kind": "check",
+      "health": "warning",
+      "summary": "1 folder out of sync",
+      "busy": false,
+      "last_run": 1795288692000,
+      "last_success": null,
+      "next_run": null,
+      "progress": null,
+      "stats": [],
+      "notes": [],
+      "lists": [],
+      "actions": [
+        { "id": "rescan", "label": "Rescan", "confirm": null, "disabled": null }
+      ]
+    }
+  ],
+  "busy": [
+    {
+      "provider": "test",
+      "item": "kopia-offsite",
+      "label": "Off-site backup",
+      "since": 1795288452000
+    }
+  ],
+  "errors": [
+    {
+      "provider": "test",
+      "source": "services.d/foo.yml",
+      "message": "Unknown key busyy"
+    },
+    {
+      "provider": "test",
+      "source": "item bad",
+      "message": "has an unknown health \"fine\""
+    }
+  ]
+}

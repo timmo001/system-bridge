@@ -97,6 +97,23 @@ type SettingsCommands struct {
 	Allowlist []SettingsCommandDefinition `json:"allowlist" mapstructure:"allowlist"`
 }
 
+// SettingsServiceProvider is a command that reports a computer's services,
+// and one that runs their actions. Each is argv, run with no shell. They're
+// arbitrary commands, so only the settings file sets them: clients can't
+// read or change them.
+type SettingsServiceProvider struct {
+	ID string `json:"id" mapstructure:"id"`
+	// List prints the provider document
+	List []string `json:"list" mapstructure:"list"`
+	// Act runs an action, with the item and action appended. Without it the
+	// provider's items have no actions.
+	Act []string `json:"act" mapstructure:"act"`
+}
+
+type SettingsServices struct {
+	Providers []SettingsServiceProvider `json:"providers" mapstructure:"providers"`
+}
+
 type SettingsMediaDirectory struct {
 	Name string `json:"name" mapstructure:"name"`
 	Path string `json:"path" mapstructure:"path"`
@@ -134,6 +151,9 @@ type Settings struct {
 	Desktop    SettingsDesktop  `json:"desktop" mapstructure:"desktop"`
 	Disks      SettingsDisks    `json:"disks" mapstructure:"disks"`
 	Media      SettingsMedia    `json:"media" mapstructure:"media"`
+	// Services is set only in the settings file. UPDATE_SETTINGS doesn't
+	// change it and clients aren't sent it.
+	Services SettingsServices `json:"services" mapstructure:"services"`
 	// Theme is the web client's own theme, as its Groundwork theme document's
 	// JSON text, so every client of this host gets it. Empty when there's none.
 	Theme string `json:"theme" mapstructure:"theme"`
@@ -164,6 +184,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
+	viper.SetDefault("services.providers", []SettingsServiceProvider{})
 	viper.SetDefault("theme", "")
 
 	// Read the config file
@@ -266,7 +287,34 @@ func (cfg *Settings) Validate() error {
 		}
 	}
 
+	seenProviders := make(map[string]bool)
+	for i, provider := range cfg.Services.Providers {
+		if !validProviderID(provider.ID) {
+			return fmt.Errorf("services provider at index %d: needs an id of letters, digits, - and _", i)
+		}
+		if seenProviders[provider.ID] {
+			return fmt.Errorf("duplicate services provider id: %s", provider.ID)
+		}
+		seenProviders[provider.ID] = true
+		if len(provider.List) == 0 || provider.List[0] == "" {
+			return fmt.Errorf("services provider %s: needs a list command", provider.ID)
+		}
+	}
+
 	return nil
+}
+
+// validProviderID is a services provider id clients can send back safely
+func validProviderID(id string) bool {
+	if id == "" {
+		return false
+	}
+	for _, r := range id {
+		if (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9') && r != '-' && r != '_' {
+			return false
+		}
+	}
+	return true
 }
 
 func (cfg *Settings) Save() error {

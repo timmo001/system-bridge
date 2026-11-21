@@ -31,6 +31,7 @@ var knownModules = map[types.ModuleName]struct{}{
 	types.ModuleNetworks:  {},
 	types.ModuleProcesses: {},
 	types.ModuleSensors:   {},
+	types.ModuleServices:  {},
 	types.ModuleSystem:    {},
 }
 

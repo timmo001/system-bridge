@@ -74,6 +74,7 @@ var moduleDataTypes = map[string]string{
 	"networks":  "NetworksData",
 	"processes": "ProcessesData",
 	"sensors":   "SensorsData",
+	"services":  "ServicesData",
 	"system":    "SystemData",
 }
 

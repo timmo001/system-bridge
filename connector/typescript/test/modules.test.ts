@@ -16,6 +16,7 @@ import memory from "./fixtures/memory.json" with { type: "json" };
 import networks from "./fixtures/networks.json" with { type: "json" };
 import processes from "./fixtures/processes.json" with { type: "json" };
 import sensors from "./fixtures/sensors.json" with { type: "json" };
+import services from "./fixtures/services.json" with { type: "json" };
 import system from "./fixtures/system.json" with { type: "json" };
 
 const fixtures = {
@@ -34,6 +35,7 @@ const fixtures = {
   networks,
   processes,
   sensors,
+  services,
   system,
 };
 

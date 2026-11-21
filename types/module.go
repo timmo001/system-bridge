@@ -21,6 +21,7 @@ const (
 	ModuleNetworks  ModuleName = "networks"
 	ModuleProcesses ModuleName = "processes"
 	ModuleSensors   ModuleName = "sensors"
+	ModuleServices  ModuleName = "services"
 	ModuleSystem    ModuleName = "system"
 )
 
