@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -49,4 +50,20 @@ func Services(ctx context.Context) (types.ServicesData, error) {
 		return data, fmt.Errorf("decode services: %w", err)
 	}
 	return data, nil
+}
+
+// RunServiceAction runs one of an item's actions and waits for it to finish
+func RunServiceAction(ctx context.Context, provider, item, action string) (types.ServiceActionResult, error) {
+	raw, err := requestReply(ctx, commandRunTimeout, event.EventServiceAction,
+		map[string]any{"provider": provider, "item": item, "action": action},
+		event.ResponseTypeServiceActionCompleted)
+	if err != nil {
+		return types.ServiceActionResult{}, err
+	}
+
+	var result types.ServiceActionResult
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return types.ServiceActionResult{}, fmt.Errorf("decode service action result: %w", err)
+	}
+	return result, nil
 }

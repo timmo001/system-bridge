@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/timmo001/system-bridge/client"
@@ -14,7 +17,7 @@ import (
 func servicesCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "services",
-		Usage: "List and watch the services, timers and checks the services providers report",
+		Usage: "List, watch and run the actions of the services, timers and checks the services providers report",
 		Commands: []*cli.Command{
 			{
 				Name:  "list",
@@ -32,6 +35,47 @@ func servicesCommand() *cli.Command {
 				},
 			},
 			{
+				Name:      "act",
+				Usage:     "Run one of an item's actions, print its output and exit with 1 if it failed",
+				ArgsUsage: "<provider> <item> <action>",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "yes", Aliases: []string{"y"}, Usage: "Run it without asking, even when the action asks for confirmation"},
+					&cli.BoolFlag{Name: "json", Usage: "Output the result as JSON"},
+				},
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					args := cmd.Args().Slice()
+					if len(args) != 3 {
+						return fmt.Errorf("give the provider, the item and the action, as system-bridge client services list shows them")
+					}
+					provider, item, action := args[0], args[1], args[2]
+
+					if !cmd.Bool("yes") {
+						if err := confirmServiceAction(cmdCtx, cmd, provider, item, action); err != nil {
+							return err
+						}
+					}
+
+					result, err := client.RunServiceAction(cmdCtx, provider, item, action)
+					if err != nil {
+						return err
+					}
+					if cmd.Bool("json") {
+						if err := printJSON(cmd.Root().Writer, result); err != nil {
+							return err
+						}
+					} else {
+						_, _ = fmt.Fprint(cmd.Root().Writer, result.Output)
+						if result.Output != "" && !strings.HasSuffix(result.Output, "\n") {
+							_, _ = fmt.Fprintln(cmd.Root().Writer)
+						}
+					}
+					if !result.OK {
+						return cli.Exit(result.Summary, 1)
+					}
+					return nil
+				},
+			},
+			{
 				Name:  "watch",
 				Usage: "Print the services module's data as NDJSON whenever it changes",
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
@@ -43,6 +87,40 @@ func servicesCommand() *cli.Command {
 			},
 		},
 	}
+}
+
+// confirmServiceAction asks on the terminal before an action with a confirm
+// question, and refuses one when there's no terminal to ask on
+func confirmServiceAction(ctx context.Context, cmd *cli.Command, provider, item, action string) error {
+	data, err := client.Services(ctx)
+	if err != nil {
+		return err
+	}
+	var question *string
+	for _, i := range data.Items {
+		if i.Provider != provider || i.ID != item {
+			continue
+		}
+		for _, a := range i.Actions {
+			// A disabled action is refused with why, so there's nothing to ask
+			if a.ID == action && a.Disabled == nil {
+				question = a.Confirm
+			}
+		}
+	}
+	if question == nil {
+		return nil
+	}
+
+	if info, err := os.Stdin.Stat(); err != nil || info.Mode()&os.ModeCharDevice == 0 {
+		return fmt.Errorf("%s asks: %s Run it again with --yes to go ahead", action, *question)
+	}
+	_, _ = fmt.Fprintf(cmd.Root().Writer, "%s [y/N] ", *question)
+	answer, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	if answer = strings.ToLower(strings.TrimSpace(answer)); answer != "y" && answer != "yes" {
+		return cli.Exit("Not run", 1)
+	}
+	return nil
 }
 
 // printServices writes a table of the items, then the problems
