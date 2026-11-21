@@ -182,6 +182,14 @@ system-bridge client services watch
 
 `list` prints a table of each item's provider, ID, label, health, whether it's busy and its summary, then any provider that failed and the problems the providers reported. Add `--json` for the module's data on one line. `watch` prints the data as NDJSON each time it changes, like [`data watch`](#watch-modules).
 
+Run one of an item's [actions](/features/services/#running-actions) by its provider, item and action IDs:
+
+```bash
+system-bridge client services act dot kopia-offsite start
+```
+
+`act` waits for the action to finish, prints its output and exits with 1 if it failed. An action with a question asks it first, and refuses when there's no terminal to ask on; add `--yes` to run it without asking. Add `--json` for the result as JSON.
+
 ## Desktop
 
 Focus, close or change a window, show a workspace, or switch the keyboard layout:

@@ -1,6 +1,6 @@
 ---
 title: Services
-description: Show a computer's services, timers, backups and other checks, and what's busy, from a provider command.
+description: Show a computer's services, timers, backups and other checks, and what's busy, from a provider command, and run their actions.
 ---
 
 The services module shows what a computer is doing beyond its hardware: long-running services, timers and the jobs they start, and checks such as a backup's newest snapshot or a sync tool's folders. Each item has a health, a summary, whether it's busy, and its own stats, notes and lists.
@@ -27,7 +27,7 @@ Providers are set in the `services` section of `settings.json` in the [settings 
 
 - `id` is how clients refer to the provider: letters, digits, `-` and `_`.
 - `list` prints the provider document. It's required.
-- `act` runs an item's actions, and can be left out, in which case the provider's items have no actions.
+- `act` [runs an item's actions](#running-actions), and can be left out, in which case the provider's items have no actions.
 
 The program runs directly, not through a shell. A name without a path, such as `dot`, is looked up on the `PATH` System Bridge runs with, which for a service can be shorter than your shell's, so a full path is safer.
 
@@ -79,6 +79,23 @@ Each item, busy entry and error names its `provider`, as two providers can use t
 - **Web client**: the **Services** page shows each item with its health, summary, progress, stats, notes and lists, and any provider that failed. While anything is busy, a **Busy** chip in the header links to it.
 - **CLI**: `system-bridge client services list` prints a table of the items, then any errors; add `--json` for the module's data. `system-bridge client services watch` prints the data as NDJSON each time it changes. See [the CLI](/using/cli/#services).
 - **MCP**: an assistant can read them with [`system_bridge_list_services`](/api/mcp/#system_bridge_list_services).
+
+## Running actions
+
+An item's `actions` are what clients can ask its provider to do, such as starting a backup or verifying it. System Bridge runs one with the provider's `act` command, with the item's ID and the action's ID added to the end, so for the `dot` provider above, **Run now** on `kopia-offsite` runs `dot services act kopia-offsite start`.
+
+- Only an action in the latest data that isn't `disabled` runs, so a provider decides what can run. The provider should check the item and action again itself.
+- An action can run for up to 5 minutes. When it finishes, System Bridge tells every connected client how it went, whichever one ran it: whether it worked, a summary (the first line it printed, or why it failed) and its output, cut off at 64 KB. Then it reads the services again, so the change shows straight away.
+- An action with a `confirm` question asks it first in the web client and the CLI, and an assistant is told to ask you. System Bridge can't check a client asked.
+
+Run one from:
+
+- **Web client**: the item's buttons on the **Services** page. A disabled one says why when you hover over it. The last result, from any client, shows under them with its output.
+- **CLI**: `system-bridge client services act <provider> <item> <action>`, which prints the output and exits with 1 if it failed. It asks an action's question first, or runs it straight away with `--yes`.
+- **API**: send [`SERVICE_ACTION`](/api/websocket/system/#run-a-service-action).
+- **MCP**: [`system_bridge_run_service_action`](/api/mcp/#system_bridge_run_service_action), which waits for it to finish.
+
+Each run is logged at the `INFO` level with the command, and who asked for it.
 
 ## The provider document
 

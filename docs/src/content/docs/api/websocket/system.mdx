@@ -283,6 +283,45 @@ Send the `GET_COMMAND_PREFABS` event to list the [prefab commands](/features/com
 | `command`, `arguments` | What it would run, or empty when it isn't available. |
 | `reason` | Why it isn't available, such as which tool to install, or empty. |
 
+## Run a service action
+
+Run one of an item's actions from the [`services` module](/api/data/#services). Send the `SERVICE_ACTION` event with the item's `provider`, its `id` as `item`, and the action's `id` as `action`:
+
+```json title="Request"
+{
+    "id": "abc123",
+    "event": "SERVICE_ACTION",
+    "data": {
+        "provider": "dot",
+        "item": "kopia-offsite",
+        "action": "start"
+    }
+}
+```
+
+You receive a `SERVICE_ACTION_RUNNING` response straight away. Once the action finishes, every connected client receives `SERVICE_ACTION_COMPLETED` with the request's `id`, so the sender knows it's the answer to its request:
+
+```json title="Response data"
+{
+    "provider": "dot",
+    "item": "kopia-offsite",
+    "action": "start",
+    "ok": true,
+    "summary": "Started kopia-offsite.service",
+    "output": "Started kopia-offsite.service\n"
+}
+```
+
+| Key | Description |
+| --- | --- |
+| `ok` | The action exited with code 0. |
+| `summary` | The first line it printed, or why it failed, such as `Exited with code 1: repository locked`. |
+| `output` | What it printed, stdout then stderr, cut off at 64 KB. |
+
+:::caution
+Only an action listed in the latest data, and not `disabled`, runs. Any other returns an `ERROR` response with the `SERVICE_ACTION_NOT_FOUND` subtype, saying why. An action's `confirm` question is for clients to ask first: System Bridge can't check it was asked.
+:::
+
 ## Exit application
 
 Send the `EXIT_APPLICATION` event to shut down the backend. It takes empty `data`.

@@ -574,6 +574,16 @@ Example arguments:
 
 Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake. Locking is, with `system_bridge_lock`, as it loses nothing.
 
+### `system_bridge_run_service_action`
+
+Run one of an item's [actions](/features/services/#running-actions) from `system_bridge_list_services` and wait for it to finish, as the [`SERVICE_ACTION`](/api/websocket/system/#run-a-service-action) event does. Every connected client hears how it went.
+
+- `provider` (required): The item's provider ID.
+- `item` (required): The item's ID.
+- `action` (required): The action's ID.
+
+It returns the action's `ok`, `summary` and `output`. Only an action the provider lists and hasn't disabled runs. An action with a `confirm` question needs your say-so: the tool tells the assistant to ask you first.
+
 ### `system_bridge_send_notification`
 
 Send a desktop notification to the machine running System Bridge.
