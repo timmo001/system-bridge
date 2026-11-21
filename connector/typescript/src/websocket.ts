@@ -42,6 +42,7 @@ import {
   type ModuleName,
   ModulesData,
   PowerStateEvent,
+  ServiceActionResult,
 } from "./generated/modules.js";
 import {
   AudioControl,
@@ -106,6 +107,7 @@ import {
   PathRequest,
   PowerProfileRequest,
   type ResponseType,
+  ServiceActionRequest,
   Settings,
   SettingsCommandDefinition,
   ValidateDirectoryResult,
@@ -217,6 +219,12 @@ export interface Interface {
   readonly executeCommand: (
     commandID: string,
   ) => Effect.Effect<CommandResult, WebSocketError>;
+  /** Runs one of a services item's actions and waits for it to finish. */
+  readonly serviceAction: (
+    request: ServiceActionRequest,
+  ) => Effect.Effect<ServiceActionResult, WebSocketError>;
+  /** How every service action went, whichever client ran it. */
+  readonly serviceActionResults: Stream.Stream<ServiceActionResult>;
   readonly keyboardKeypress: (
     keypress: KeyboardKeypress,
   ) => Effect.Effect<void, WebSocketError>;
@@ -531,6 +539,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     Duration.seconds(125),
   );
 
+  // The backend allows 5 minutes for a service action, as for a command
+  const serviceActionTimeout = Duration.max(
+    requestTimeout,
+    Duration.seconds(315),
+  );
+
   const socket = yield* Socket.makeWebSocket(websocketUrl(options), {
     openTimeout: options.openTimeout ?? "10 seconds",
   });
@@ -570,6 +584,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   );
 
   const powerStateResponses = yield* Effect.acquireRelease(
+    PubSub.unbounded<WebSocketResponse>(),
+    PubSub.shutdown,
+  );
+
+  // Every client hears how a service action went
+  const serviceActionResponses = yield* Effect.acquireRelease(
     PubSub.unbounded<WebSocketResponse>(),
     PubSub.shutdown,
   );
@@ -656,6 +676,11 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
       yield* PubSub.publish(powerStateResponses, response);
 
       return;
+    }
+
+    // Also the sender's answer, under its request's id, so it settles below
+    if (response.type === "SERVICE_ACTION_COMPLETED") {
+      yield* PubSub.publish(serviceActionResponses, response);
     }
 
     const request = Option.flatMap(Option.fromUndefinedOr(response.id), (id) =>
@@ -830,6 +855,21 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
           Effect.catch((error) =>
             Effect.logWarning(
               "Skipping an unreadable notification event",
+              error.message,
+            ).pipe(Effect.as(Result.fail(response))),
+          ),
+        ),
+      ),
+    );
+
+  const serviceActionResults: Stream.Stream<ServiceActionResult> =
+    Stream.fromPubSub(serviceActionResponses).pipe(
+      Stream.filterMapEffect((response) =>
+        Schema.decodeUnknownEffect(ServiceActionResult)(response.data).pipe(
+          Effect.map(Result.succeed),
+          Effect.catch((error) =>
+            Effect.logWarning(
+              "Skipping an unreadable service action result",
               error.message,
             ).pipe(Effect.as(Result.fail(response))),
           ),
@@ -1108,6 +1148,19 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         CommandRequest,
         { commandID },
         CommandResult,
+      );
+    },
+  );
+
+  const serviceAction = Effect.fn("SystemBridgeWebSocket.serviceAction")(
+    function* (request: ServiceActionRequest) {
+      return yield* call(
+        "SERVICE_ACTION",
+        "SERVICE_ACTION_COMPLETED",
+        ServiceActionRequest,
+        request,
+        ServiceActionResult,
+        serviceActionTimeout,
       );
     },
   );
@@ -1761,6 +1814,8 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     removeCommand,
     getCommandPrefabs,
     executeCommand,
+    serviceAction,
+    serviceActionResults,
     keyboardKeypress,
     keyboardText,
     mouseMove,

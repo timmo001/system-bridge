@@ -81,6 +81,7 @@ export const EventType = Schema.Literals([
   "POWER_SLEEP",
   "PROCESS_KILL",
   "REGISTER_DATA_LISTENER",
+  "SERVICE_ACTION",
   "SYSTEM_SET_KEEP_AWAKE",
   "SYSTEM_SET_POWER_PROFILE",
   "UNREGISTER_DATA_LISTENER",
@@ -173,6 +174,8 @@ export const ResponseType = Schema.Literals([
   "POWER_SLEEPING",
   "POWER_STATE_CHANGED",
   "PROCESS_KILLED",
+  "SERVICE_ACTION_COMPLETED",
+  "SERVICE_ACTION_RUNNING",
   "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
@@ -206,6 +209,7 @@ export const ResponseSubtype = Schema.Literals([
   "MISSING_TOKEN",
   "MISSING_VALUE",
   "COMMAND_NOT_FOUND",
+  "SERVICE_ACTION_NOT_FOUND",
   "UNKNOWN_EVENT",
 ]);
 
@@ -393,6 +397,20 @@ export const CommandResult = Schema.Struct({
 
 export interface CommandResult extends Schema.Schema.Type<
   typeof CommandResult
+> {}
+
+/**
+ * One of a services item's actions to run: its provider, item and action ids
+ * from the services module.
+ */
+export const ServiceActionRequest = Schema.Struct({
+  provider: Schema.String,
+  item: Schema.String,
+  action: Schema.String,
+});
+
+export interface ServiceActionRequest extends Schema.Schema.Type<
+  typeof ServiceActionRequest
 > {}
 
 /** A button on a notification. Pressing it sends a `NOTIFICATION_ACTION` event with its `id`. */

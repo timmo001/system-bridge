@@ -107,6 +107,24 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           data: { commandID: "build", exitCode: 0, stdout: "ok", stderr: "" },
         },
       ];
+    case "SERVICE_ACTION":
+      return [
+        { id, type: "SERVICE_ACTION_RUNNING", subtype: "NONE" },
+        // The result goes to every client, under the sender's id
+        {
+          id,
+          type: "SERVICE_ACTION_COMPLETED",
+          subtype: "NONE",
+          data: {
+            provider: "dot",
+            item: "backup",
+            action: "start",
+            ok: true,
+            summary: "Started",
+            output: "Started\n",
+          },
+        },
+      ];
     case "GET_COMMAND_PREFABS":
       return [
         {
@@ -383,6 +401,33 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(result.stdout).toBe("ok");
+  });
+
+  test("answer a service action with its broadcast result, and stream it", async () => {
+    const [result, results] = await run(
+      SystemBridgeWebSocket.use((ws) =>
+        Effect.gen(function* () {
+          const collected = yield* ws.serviceActionResults.pipe(
+            Stream.take(1),
+            Stream.runCollect,
+            Effect.forkChild,
+          );
+
+          yield* Effect.yieldNow;
+
+          const answer = yield* ws.serviceAction({
+            provider: "dot",
+            item: "backup",
+            action: "start",
+          });
+
+          return [answer, yield* Fiber.join(collected)] as const;
+        }),
+      ),
+    );
+
+    expect(result.summary).toBe("Started");
+    expect(results).toEqual([result]);
   });
 
   test("decode the command prefabs", async () => {
