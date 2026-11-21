@@ -79,6 +79,7 @@ Each item, busy entry and error names its `provider`, as two providers can use t
 - **Web client**: the **Services** page shows each item with its health, summary, progress, stats, notes and lists, and any provider that failed. While anything is busy, a **Busy** chip in the header links to it.
 - **CLI**: `system-bridge client services list` prints a table of the items, then any errors; add `--json` for the module's data. `system-bridge client services watch` prints the data as NDJSON each time it changes. See [the CLI](/using/cli/#services).
 - **MCP**: an assistant can read them with [`system_bridge_list_services`](/api/mcp/#system_bridge_list_services).
+- **Omarchy**: the [plugin](/using/omarchy/)'s Services view, with what's busy and anything that failed on its overview, and an hourglass in the bar while anything is busy.
 
 ## Running actions
 
@@ -86,7 +87,7 @@ An item's `actions` are what clients can ask its provider to do, such as startin
 
 - Only an action in the latest data that isn't `disabled` runs, so a provider decides what can run. The provider should check the item and action again itself.
 - An action can run for up to 5 minutes. When it finishes, System Bridge tells every connected client how it went, whichever one ran it: whether it worked, a summary (the first line it printed, or why it failed) and its output, cut off at 64 KB. Then it reads the services again, so the change shows straight away.
-- An action with a `confirm` question asks it first in the web client and the CLI, and an assistant is told to ask you. System Bridge can't check a client asked.
+- An action with a `confirm` question asks it first in the web client, the CLI and the Omarchy plugin, and an assistant is told to ask you. System Bridge can't check a client asked.
 
 Run one from:
 
@@ -94,6 +95,7 @@ Run one from:
 - **CLI**: `system-bridge client services act <provider> <item> <action>`, which prints the output and exits with 1 if it failed. It asks an action's question first, or runs it straight away with `--yes`.
 - **API**: send [`SERVICE_ACTION`](/api/websocket/system/#run-a-service-action).
 - **MCP**: [`system_bridge_run_service_action`](/api/mcp/#system_bridge_run_service_action), which waits for it to finish.
+- **Omarchy**: select the action in the plugin's Services view. One with a question shows it first and runs when you select it again.
 
 Each run is logged at the `INFO` level with the command, and who asked for it.
 

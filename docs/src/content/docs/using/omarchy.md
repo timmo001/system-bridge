@@ -50,6 +50,15 @@ supports it; the media view has previous, play or pause, and next; and the
 system view lists your [commands](/features/commands/), running one when you
 select it.
 
+With a version of System Bridge that has the [services](/features/services/)
+module, the overview lists what's busy, providers that can't be read and items
+that failed, and the Services view shows each item under its own heading with
+its health, summary, times, stats, notes and lists. Selecting one of its actions
+runs it, and the result shows under the item. An action with a question shows
+the question first and runs when you select it again. While anything is busy,
+the bar widget shows an hourglass, and it turns yellow for a warning or red for
+an item that failed or is missing.
+
 Type to filter the rows, use Up and Down to move through them, and press Enter
 to select one. Backspace or the back button returns to the overview, and Escape
 clears the filter or closes the panel.
@@ -94,5 +103,7 @@ source before installing it.
 This plugin starts `system-bridge client data watch` and reads System Bridge's
 local settings and owner key through that client. Its buttons run
 `system-bridge client` commands to open the web client, control the desktop,
-media, Discord and displays, run your allowlisted commands, and quit or start
-System Bridge.
+media, Discord and displays, run your allowlisted commands and services
+actions, and quit or start System Bridge. It checks once with
+`system-bridge client data list --json` whether the installed System Bridge has
+the services module before watching it.
