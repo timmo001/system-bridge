@@ -23,6 +23,7 @@ import {
   type NotificationEvent,
   type OmarchyAction,
   type OpenTarget,
+  type ServiceActionResult,
   type Settings,
   type SettingsCommandDefinition,
   type SettingsMediaDirectory,
@@ -1083,6 +1084,46 @@ export const desktopFailures = Atom.family((ids: string) =>
       ),
   ]),
 );
+
+/**
+ * Runs one of a services item's actions, one atom per action. Takes the
+ * provider, item and action ids joined with newlines, so the family can
+ * cache it.
+ */
+export const serviceAction = Atom.family((key: string) =>
+  Atom.fn((_: undefined, get) => {
+    const [provider = "", item = "", action = ""] = key.split("\n");
+
+    return fnSocket(get).pipe(
+      Effect.flatMap((bridge) =>
+        bridge.serviceAction({ provider, item, action }),
+      ),
+    );
+  }),
+);
+
+/**
+ * How each services item's last action went, whichever client ran it, keyed
+ * by its provider and item ids joined with a newline.
+ */
+export const serviceActionResults = Atom.make((get) =>
+  Stream.unwrap(
+    socket(get).pipe(
+      Effect.map((bridge) =>
+        bridge.serviceActionResults.pipe(
+          Stream.scan(
+            (): ReadonlyMap<string, ServiceActionResult> => new Map(),
+            (results, result) =>
+              new Map(results).set(
+                `${result.provider}\n${result.item}`,
+                result,
+              ),
+          ),
+        ),
+      ),
+    ),
+  ),
+).pipe(Atom.keepAlive);
 
 /** Runs an allowlisted command, one atom per command. */
 export const executeCommand = Atom.family((commandID: string) =>

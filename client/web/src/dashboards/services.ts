@@ -10,6 +10,7 @@ import type {
 import { Option, Schema } from "effect";
 import { html, nothing } from "lit";
 
+import "~/components/sb-service-actions";
 import {
   formatAgo,
   formatBytes,
@@ -136,6 +137,7 @@ const itemCard = (item: ServiceItem) => {
           </ul>`
     }
     ${lists}
+    <sb-service-actions .item=${item}></sb-service-actions>
   </gw-card>`;
 };
 
