@@ -41,7 +41,7 @@
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
     "oxlint": "1.94.0",
-    "oxlint-tsgolint": "7.0.2007",
+    "oxlint-tsgolint": "7.0.2008",
     "prettier": "^3.8.3",
     "typescript": "7.0.2",
     "vite": "^8.0.10"
