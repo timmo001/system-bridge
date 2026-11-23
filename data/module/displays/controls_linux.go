@@ -91,13 +91,13 @@ func SetBrightness(ctx context.Context, id string, brightness float64) error {
 	if err != nil {
 		return err
 	}
-	out, err := ddcutil(ctx, "--bus", bus, "getvcp", "10", "--brief")
+	out, err := ddcutil(ctx, "--skip-ddc-checks", "--bus", bus, "getvcp", "10", "--brief")
 	_, maximum, ok := parseBrightness(out)
 	if !ok {
 		return fmt.Errorf("failed to read the brightness range of %s: %v", id, err)
 	}
 	raw := int(math.Round(brightness / 100 * maximum))
-	if _, err := ddcutil(ctx, "--bus", bus, "--noverify", "setvcp", "10", strconv.Itoa(raw)); err != nil {
+	if _, err := ddcutil(ctx, "--skip-ddc-checks", "--bus", bus, "--noverify", "setvcp", "10", strconv.Itoa(raw)); err != nil {
 		return fmt.Errorf("failed to set the brightness of %s: %v", id, err)
 	}
 	return nil
@@ -125,7 +125,7 @@ func SetPowerState(ctx context.Context, id string, state types.DisplayPowerState
 	if err != nil {
 		return err
 	}
-	if _, err := ddcutil(ctx, "--bus", bus, "--noverify", "setvcp", "D6", strconv.Itoa(value)); err != nil {
+	if _, err := ddcutil(ctx, "--skip-ddc-checks", "--bus", bus, "--noverify", "setvcp", "D6", strconv.Itoa(value)); err != nil {
 		return fmt.Errorf("failed to set the power state of %s: %v", id, err)
 	}
 	return nil
@@ -140,7 +140,8 @@ func ddcBus(ctx context.Context, id string) (string, error) {
 }
 
 // ddcBuses maps each DRM connector, such as HDMI-A-2, to the I2C bus number
-// of the monitor on it
+// of the monitor on it. Detect keeps its DDC checks, so a monitor whose bus
+// doesn't answer DDC/CI is left out and falls back to Hyprland.
 func ddcBuses(ctx context.Context) map[string]string {
 	buses := make(map[string]string)
 	if _, err := exec.LookPath("ddcutil"); err != nil {
@@ -154,12 +155,25 @@ func ddcBuses(ctx context.Context) map[string]string {
 	return parseDetect(out)
 }
 
+// parseDetect reads the buses of the displays ddcutil detect found. Only
+// blocks headed "Display N" passed the DDC/CI check; others, such as
+// "Invalid display", still list their bus.
 func parseDetect(out string) map[string]string {
 	buses := make(map[string]string)
 	var bus string
+	var valid bool
 	scanner := bufio.NewScanner(strings.NewReader(out))
 	for scanner.Scan() {
-		key, value, ok := strings.Cut(strings.TrimSpace(scanner.Text()), ":")
+		line := scanner.Text()
+		if line != "" && !strings.HasPrefix(line, " ") {
+			valid = strings.HasPrefix(line, "Display ")
+			bus = ""
+			continue
+		}
+		if !valid {
+			continue
+		}
+		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
 		if !ok {
 			continue
 		}
@@ -182,7 +196,7 @@ func parseDetect(out string) map[string]string {
 func readVCP(ctx context.Context, bus string) (*float64, *types.DisplayPowerState) {
 	// ddcutil exits non-zero when any feature fails, but still prints the
 	// others
-	out, err := ddcutil(ctx, "--bus", bus, "getvcp", "10", "D6", "--brief")
+	out, err := ddcutil(ctx, "--skip-ddc-checks", "--bus", bus, "getvcp", "10", "D6", "--brief")
 	var brightness *float64
 	if current, maximum, ok := parseBrightness(out); ok && maximum > 0 {
 		percent := math.Round(current / maximum * 100)
@@ -228,7 +242,7 @@ func parsePowerState(out string) *types.DisplayPowerState {
 func ddcutil(ctx context.Context, args ...string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, ddcTimeout)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, "ddcutil", append([]string{"--skip-ddc-checks"}, args...)...).Output()
+	out, err := exec.CommandContext(ctx, "ddcutil", args...).Output()
 	if err != nil {
 		if lines := strings.Split(strings.TrimSpace(string(out)), "\n"); lines[len(lines)-1] != "" {
 			return string(out), fmt.Errorf("%w: %s", err, lines[len(lines)-1])

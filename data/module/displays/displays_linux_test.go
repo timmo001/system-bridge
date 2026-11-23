@@ -113,6 +113,21 @@ Display 2
    Monitor:          GBT:AORUS FO32U2P:
 `
 	assert.Equal(t, map[string]string{"DP-1": "4", "HDMI-A-2": "5"}, parseDetect(out))
+
+	// A monitor whose bus doesn't answer DDC/CI falls back to Hyprland
+	out = `Invalid display
+   I2C bus:          /dev/i2c-4
+   DRM connector:    card1-DP-1
+   drm_connector_id: 833
+   Monitor:          SAM:LS28AG700N:H4ZRC00567
+
+Display 1
+   I2C bus:          /dev/i2c-5
+   DRM connector:    card1-HDMI-A-2
+   drm_connector_id: 837
+   Monitor:          GBT:AORUS FO32U2P:
+`
+	assert.Equal(t, map[string]string{"HDMI-A-2": "5"}, parseDetect(out))
 }
 
 func TestParseVCP(t *testing.T) {
