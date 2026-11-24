@@ -33,10 +33,9 @@ The boundary is a hard limit, not a starting point for discovery. Similarity, pr
 
 ## Reviews
 
-- Every finding must identify a problem introduced or worsened by the changeset. A pre-existing problem, even in a touched file, is not a finding unless the changeset makes its impact worse.
+- Every finding must identify a problem introduced or worsened by the changeset; unrelated cleanup, migration, redesign or consistency work is not a finding. A pre-existing problem, even in a touched file, is not a finding unless the changeset makes its impact worse.
 - Anchor each finding to a changed line and explain the concrete path from that line to the failure. If that trace cannot be made, omit the finding.
 - Apply every companion skill as criteria within this same boundary. Loading a type, framework, cleanup, security, or engineering-principles skill never expands finding scope.
-- Do not recommend unrelated cleanup, migration, redesign, or consistency work as review findings.
 - Do not inventory all violations of a loaded skill. Evaluate only changed code and changed behaviour against it.
 - Do not expand review scope to make a suggested fix more complete. Give the smallest fix direction that resolves the scoped problem.
 - Do not add praise, optional improvements, or nice-to-haves to fill out an otherwise empty review.
@@ -53,7 +52,6 @@ The boundary is a hard limit, not a starting point for discovery. Similarity, pr
 ## Diagnosis And Investigation
 
 - Investigate the scoped symptom or changed behaviour, not the health of the surrounding subsystem.
-- Trace dependencies and callers as evidence, but do not convert newly observed adjacent problems into work items.
 - Instrument or reproduce only as broadly as needed to distinguish causes of the scoped problem.
 - A root cause outside the initial files may enter scope only when evidence shows it causes the requested failure; stop once that causal path is corrected.
 

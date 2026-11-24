@@ -18,15 +18,6 @@ The frontend repository owns Home Assistant implementation conventions through i
 3. Treat those skills as authoritative for components, contexts, styling, testing, user-facing text, and review conventions. In custom cards and dashboards, the repository's own instructions win where they differ, for example on build tooling or public custom element APIs.
 4. Do not replace repository guidance with a global pattern or copy repository conventions into this skill.
 
-## When to Apply
-
-Inside a Home Assistant frontend checkout or a custom card or dashboard repository, when:
-
-- Editing or reviewing its files
-- Reviewing or writing `ha-*` prefixed Web Components
-- Working with HA dialogs, panels, Lovelace cards, or selectors
-- Applying HA localization, theming, or design token patterns
-
 ## Personal Overlay
 
 Layer these global skills over the repository guidance when their scopes apply:
@@ -62,7 +53,6 @@ The Home Assistant core, documentation, custom cards, custom dashboards, and cor
 
 ### Core (`../core`)
 
-- Read the Core repository instructions when the frontend change involves backend APIs, WebSocket commands, entity models, or integration data structures.
 - Reference core source (e.g. `homeassistant/components/<integration>/`) to understand data shapes, service schemas, and WebSocket API handlers before consuming them in frontend code.
 - When adding or modifying frontend calls to backend APIs, verify the API exists in core and match parameter names, types, and response shapes to the core implementation.
 - If asked to make changes that span both frontend and core (new WebSocket command, new entity feature), work in both repos and follow each repo's own `AGENTS.md` for its conventions.
@@ -81,4 +71,4 @@ The Home Assistant core, documentation, custom cards, custom dashboards, and cor
 - The blog at `/blog/` announces frontend and Core API changes. Use it to find what changed, then confirm in the frontend and Core source, which win where they differ.
 - Pages live in `src/content/docs/<area>/` and blog posts in `src/content/blog/`. Read them in the sibling checkout, or in `home-assistant/contributors.home-assistant.io` on GitHub when there is none. For the published site as an agent, start at `https://contributors.home-assistant.io/llms.txt` or `/<area>/llms.txt`, and add `index.md` to a page URL for its Markdown.
 - When creating or updating contributor documentation for custom card APIs, dashboard strategies, frontend development guides or design components, work in this repo.
-- Discover and follow that repository's `AGENTS.md` and repo-local skills (`.claude/skills/`) before making changes.
+- Discover and follow that repository's `AGENTS.md` and repo-local skills (`.github/skills/`) before making changes.

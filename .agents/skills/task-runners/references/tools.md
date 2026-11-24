@@ -8,7 +8,7 @@ Running:
 
 - `mise run a ::: b ::: c` runs several tasks at once, each with its own arguments after the task name. Quote it in YAML (`run: "mise run a ::: b"`): unquoted, the `:` followed by a space is read as a mapping.
 - Dependencies run in parallel, up to `--jobs` (`-j`, default 8). A dependency shared by several tasks runs once per invocation.
-- `mise run --affected` runs tasks only for monorepo projects changed in Git (`--affected-base <rev>` to compare against a branch).
+- `mise run --affected` runs only the tasks Git changes affect: under a monorepo root, the tasks in affected projects; otherwise the tasks whose `sources` or defining config include a changed file, plus tasks with no `sources`. `--affected-base <rev>` compares against a branch, and `--affected-explain` says why each task was picked.
 - `mise run -c` keeps going after a failure so one run reports every failing task.
 - `mise tasks deps <task>` prints the dependency tree; `mise run -n <task>` shows what would run.
 

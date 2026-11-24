@@ -25,12 +25,12 @@ The user's guidance on how much to change is authoritative. Do not treat this sk
 
 ## Workflow
 
-1. Establish the boundary with `changeset-scope`, then read the nearest project guidance and enough surrounding code to understand it.
+1. Read the nearest project guidance and enough surrounding code to understand the scoped change.
 2. Identify only the concrete ambiguities introduced, modified, or exposed by that scope: untrusted input, implicit dependencies, expected failures, invalid states, uncontrolled side effects, retry policy, resource lifetime, or concurrent workflows.
 3. Find the smallest existing seams that own them. Prefer function signatures, local unions, existing interfaces, adapters, parsers, platform primitives, or framework lifecycles already in use.
 4. Tighten the relevant seams together when scoped behaviour crosses them. Change callers outside the original files only when required to keep that behaviour correct; do not propagate the pattern further.
 5. Compare the result against the hard gate. Revert the idea if it adds more ceremony than truth.
-6. Apply `testing` and run the smallest reliable verification that proves the changed contract. Add tests when they protect important behaviour or catch a meaningful failure that existing checks miss.
+6. Apply `testing` and run the smallest reliable verification that proves the changed contract.
 
 ## Principles
 

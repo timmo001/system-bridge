@@ -6,8 +6,6 @@ description: Lit rendering and picker callback-shape guidance. Use when editing 
 
 # Lit Rendering
 
-Use this skill when reviewing or editing Lit rendering logic:
-
 - Preserve runtime behavior and public API shape unless the user asked otherwise.
 - Prefer render-local derived values for UI-only structures (`sections`, `options`, grouped labels, display rows).
 - Compute derived render data once per render and reuse it across template call sites.
@@ -19,4 +17,3 @@ Use this skill when reviewing or editing Lit rendering logic:
 - Do not add `@state` fields or `willUpdate` only to cache render-derived picker data.
 - Use lifecycle hooks for real update-phase behavior, not as a substitute for render-local composition.
 - When replacing a component's built-in header with a custom conditional header, preserve the original header/title behavior on every branch that does not render the custom header.
-- Do not add unnecessary comments or abstractions.

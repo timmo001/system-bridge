@@ -19,7 +19,7 @@ description: Choose tests for their concrete regression value, avoid low-value c
 - Do not add rendering tests for views, panels, or components. This includes assertions about text, CSS classes, styles, slots, option defaults, and templates that only display context or helper data.
 - Do not request new tests for visual components in review. For a clear visual change without screenshots or videos, suggest adding that evidence instead. Capturing it still requires the applicable browser permission.
 - Test meaningful logic behind a UI at its existing boundary rather than building a rendering harness around it.
-- A missing test is not a finding merely because code changed. Any test request must explain the meaningful failure left unprotected in the scoped change. Honour stricter repository prohibitions.
+- Any test request must explain the meaningful failure left unprotected in the scoped change. Honour stricter repository prohibitions.
 
 ## Verification
 
@@ -28,10 +28,9 @@ description: Choose tests for their concrete regression value, avoid low-value c
 - When a meaningful check would write, ask first and offer a safe target where the tool supports one: a throwaway directory, an overridden config or save location, or a separate profile or session. Use it only once the user agrees.
 - When you offer or ask about a real-world check of something visible or interactive, make it a `:::question-multi` that offers evidence captures fitting the surface, not just whether to run it. For a web UI, a screenshot, before and after screenshots, or a screencast (with `browser-access` permission). For a terminal or TUI, a screen capture or a recorded session or video through `terminal-control`. For a desktop app or shell widget, a screenshot or a screen recording. Offer only what the available tools can capture, and put what you capture in the Inbox report: screenshots and short recordings (mp4, webm, mov or m4v) in the text beside what they show (`![alt](path)`, which plays a recording in place), and anything else as attachments.
 - When you cannot run it yourself (hardware, a desktop session, credentials, or a running service you should not touch), tell the user exactly what to run or where to look and what they should see.
-- Repository instructions may add specific checks, such as browser testing against a dev server; follow them.
 - Run relevant existing checks and repository-required validation. Prefer the smallest reliable check or direct observation for the changed behaviour.
-- Run independent checks and builds together rather than one after another, and run steps that write files, such as formatters, first. Don't run a repository-wide aggregate such as `check` to cover a narrow change. `task-runners` covers the commands for each tool.
-- When checks and result collection form useful independent work and delegation is available, hand them to a smaller, lower-effort helper against a stable revision. Use a background shell for a known command that needs no interpretation. Test design and unexplained failures can require stronger reasoning; do not route all testing work to a smaller model or let a check runner weaken assertions.
+- `task-runners` covers how to run checks.
+- A delegated check runner must not weaken assertions.
 - Maintain an existing test when an intentional behaviour change makes it stale; that does not authorise extra cases or broader coverage. Do not delete or weaken tests just to obtain a pass.
 - Do not introduce test infrastructure, extract helpers, or redesign production code solely to make an optional test possible.
 - After checks pass, broaden or repeat them only for new changes, failures, or unresolved concerns. State verification limits plainly.
