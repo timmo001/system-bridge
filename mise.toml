@@ -9,7 +9,7 @@ node = "26.13.1"
 python = "3.14"
 uv = "0.13.9"
 # The linters the hk pre-push hook runs, matching the shared lint workflows.
-hk = "2.13.0"
+hk = "2.14.0"
 pkl = "0.33.1"
 "pipx:yamllint" = "1.38.0"
 "npm:markdownlint-cli2" = "0.24.2"
