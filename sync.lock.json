@@ -22,8 +22,8 @@
     },
     "client/android/shell/build.gradle.kts": {
       "item": "android-shell",
-      "sha": "cbc67a015c56111577bc25f24d8dd15fd47f7051",
-      "hash": "a3bc69e16b657e72e685228b31f405c4833734be25f11b45028a52126ab36754"
+      "sha": "130f00b7fe4cbbcc1f15af5ef9602c70bc413efb",
+      "hash": "afd8526b31df8f839fa79bd67c8e191937e2a6aadd8efaa2246ca4d353d6dc58"
     },
     "client/android/shell/consumer-rules.pro": {
       "item": "android-shell",

@@ -30,7 +30,7 @@ dependencies {
   implementation("androidx.camera:camera-camera2:1.6.2")
   implementation("androidx.camera:camera-lifecycle:1.6.2")
   implementation("androidx.camera:camera-view:1.6.2")
-  implementation("io.github.zxing-cpp:android:3.1.1")
+  implementation("io.github.zxing-cpp:android:3.2.0")
   implementation("org.unifiedpush.android:connector:3.3.6")
   implementation("org.unifiedpush.android:embedded-fcm-distributor:3.1.0")
 }
