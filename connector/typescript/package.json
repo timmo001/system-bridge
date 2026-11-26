@@ -58,7 +58,7 @@
     "@oxlint/plugins": "1.95.0",
     "@timmo001/oxlint-rules": "0.7.1",
     "@types/bun": "1.4.5",
-    "effect": "4.1.5",
+    "effect": "4.1.6",
     "oxlint": "1.95.0",
     "oxlint-tsgolint": "7.0.2008",
     "prettier": "3.10.1",

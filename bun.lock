@@ -15,7 +15,7 @@
         "@timmo001/groundwork-pwa": "0.51.1",
         "@timmo001/groundwork-tokens": "0.51.1",
         "@timmo001/groundwork-ui": "0.51.1",
-        "effect": "4.1.5",
+        "effect": "4.1.6",
       },
       "devDependencies": {
         "@oxlint/plugins": "1.95.0",
@@ -50,7 +50,7 @@
       "name": "web-client",
       "version": "0.0.0",
       "dependencies": {
-        "@effect/platform-browser": "4.1.5",
+        "@effect/platform-browser": "4.1.6",
         "@lit/context": "^1.1.6",
         "@mdi/js": "7.4.47",
         "@tanstack/charts": "1.5.0",
@@ -61,12 +61,12 @@
         "@timmo001/groundwork-pwa": "0.51.1",
         "@timmo001/groundwork-tokens": "0.51.1",
         "@timmo001/groundwork-ui": "0.51.1",
-        "effect": "4.1.5",
+        "effect": "4.1.6",
         "lit": "^3.3.2",
       },
       "devDependencies": {
         "@alchemy.run/cloudflare": "2.0.0-beta.87",
-        "@effect/platform-bun": "4.1.5",
+        "@effect/platform-bun": "4.1.6",
         "@oxlint/plugins": "1.95.0",
         "@timmo001/oxlint-rules": "0.7.1",
         "@types/node": "^26.0.0",
@@ -89,7 +89,7 @@
         "@oxlint/plugins": "1.95.0",
         "@timmo001/oxlint-rules": "0.7.1",
         "@types/bun": "1.4.5",
-        "effect": "4.1.5",
+        "effect": "4.1.6",
         "oxlint": "1.95.0",
         "oxlint-tsgolint": "7.0.2008",
         "prettier": "3.10.1",
@@ -113,11 +113,11 @@
       "devDependencies": {
         "@alchemy.run/cloudflare": "2.0.0-beta.87",
         "@alchemy.run/github": "2.0.0-beta.87",
-        "@effect/platform-bun": "4.1.5",
+        "@effect/platform-bun": "4.1.6",
         "@oxlint/plugins": "1.95.0",
         "@timmo001/oxlint-rules": "0.7.1",
         "alchemy": "2.0.0-beta.87",
-        "effect": "4.1.5",
+        "effect": "4.1.6",
         "oxlint": "1.95.0",
         "oxlint-tsgolint": "7.0.2008",
         "wrangler": "4.168.0",
@@ -147,7 +147,7 @@
     "@effect/tsgo",
   ],
   "overrides": {
-    "effect": "4.1.5",
+    "effect": "4.1.6",
   },
   "packages": {
     "@ai-sdk/gateway": ["@ai-sdk/gateway@4.0.154", "", { "dependencies": { "@ai-sdk/provider": "4.0.39", "@ai-sdk/provider-utils": "5.0.83", "@vercel/oidc": "3.2.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-7noB6L/iZ55MRey35rrcbB/J+rAeyRafhJP6G/+/CkOSHxrcdFeMEbtvdIuXTr5S+AAMMQpka+xnD4zVwn04Sw=="],
@@ -382,13 +382,13 @@
 
     "@effect/opentelemetry": ["@effect/opentelemetry@4.1.0", "", { "peerDependencies": { "@opentelemetry/api": ">=1.9.0 <2.0.0", "@opentelemetry/api-logs": ">=0.203.0 <0.300.0", "@opentelemetry/resources": ">=2.0.0 <3.0.0", "@opentelemetry/sdk-logs": ">=0.203.0 <0.300.0", "@opentelemetry/sdk-metrics": ">=2.0.0 <3.0.0", "@opentelemetry/sdk-trace-base": ">=2.0.0 <3.0.0", "@opentelemetry/sdk-trace-node": ">=2.0.0 <3.0.0", "@opentelemetry/sdk-trace-web": ">=2.0.0 <3.0.0", "@opentelemetry/semantic-conventions": ">=1.33.0 <2.0.0", "effect": "^4.1.0" }, "optionalPeers": ["@opentelemetry/api", "@opentelemetry/api-logs", "@opentelemetry/resources", "@opentelemetry/sdk-logs", "@opentelemetry/sdk-metrics", "@opentelemetry/sdk-trace-base", "@opentelemetry/sdk-trace-node", "@opentelemetry/sdk-trace-web"] }, "sha512-j9bNzQaoQvcnimBFMG0i3piEW20E8HjkXAQHTJN/XqG2e4uJ9zCv53/HCNzD7+ooFn5S4nwQy/BOXeNReMIe+A=="],
 
-    "@effect/platform-browser": ["@effect/platform-browser@4.1.5", "", { "peerDependencies": { "effect": "^4.1.5" } }, "sha512-48wRnowGMrUtcF8A0xlqPh6HY/01NTYoA9HNwqGRLNGUXbQHbN97zhr6+qvsxJ4seHipjLXazegSwMkUHarPdQ=="],
+    "@effect/platform-browser": ["@effect/platform-browser@4.1.6", "", { "peerDependencies": { "effect": "^4.1.6" } }, "sha512-zlQOKhapRUJjLX87RrVWEPizinYWxXwj8O34p4PqIzOVjNY7go64yVxC02hVZE0JAi55Pd9/aE8SLg+ldqzTMw=="],
 
-    "@effect/platform-bun": ["@effect/platform-bun@4.1.5", "", { "dependencies": { "@effect/platform-node-shared": "4.1.5" }, "peerDependencies": { "effect": "^4.1.5" } }, "sha512-VzUugWhIKQSWp/xtFrYIrCISDcUXWrCFfxSkqg8ul0DZgo23WRqfz+38Y3mJ2NenUv5kUj14FnjLohm2t8ZGCw=="],
+    "@effect/platform-bun": ["@effect/platform-bun@4.1.6", "", { "dependencies": { "@effect/platform-node-shared": "4.1.6" }, "peerDependencies": { "effect": "^4.1.6" } }, "sha512-5CINIx/JuIO/VTXbfFtKV+eCzEwXGPcUJD1nnuTQDxx7oYHPcc+g3gJylBt1oKxXrAqhwR3Gxq4oTs4n21OCRQ=="],
 
     "@effect/platform-node": ["@effect/platform-node@4.1.5", "", { "dependencies": { "@effect/platform-node-shared": "4.1.5", "undici": "^8.12.4" }, "peerDependencies": { "effect": "^4.1.5", "redis": ">=5.1.0 <7.0.0" } }, "sha512-tFnRvxF9EKc3oU17sDHj1JeLP+TL/IkaOEl3IUk2EjgMS0x7AWs0ioUXjdNKLb3Z1LdjVfMf/DxsNh9PW5FFAg=="],
 
-    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.1.5", "", { "dependencies": { "@types/ws": "^8.18.2", "ws": "^8.23.0" }, "peerDependencies": { "effect": "^4.1.5" } }, "sha512-JzlrYe4uKaBFTWihBRXo2pDjkUVB39kQpKdGfXdbp7Co5sKT8hbcjOmdB5pg/WOYESdGTddd3fxD4lwlZELbZQ=="],
+    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.1.6", "", { "dependencies": { "@types/ws": "^8.18.2", "ws": "^8.23.0" }, "peerDependencies": { "effect": "^4.1.6" } }, "sha512-RWKHX5TEZet2KC/NlBu5prBkZT30m6h8YTSWfJM0wIw0BNMkfEzCuH6N5HOw8mUudclWp5z1XTzsZ7xg0h+6Qw=="],
 
     "@effect/sql-d1": ["@effect/sql-d1@4.1.5", "", { "dependencies": { "@cloudflare/workers-types": "^5.20261114.1" }, "peerDependencies": { "effect": "^4.1.5" } }, "sha512-UBGAoDhy26GR2W0KvBtCASJRvYpM4Wadng1MaJbMEvwbasEbQ+KKiZpWICVe0JpSLp3vxbQTD+1l1JYzp30V2g=="],
 
@@ -1550,7 +1550,7 @@
 
     "ee-first": ["ee-first@1.1.1", "", {}, "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="],
 
-    "effect": ["effect@4.1.5", "", {}, "sha512-xyR20KhQI0vg2gD8ILUSQRTTESEYJ0JKdP+QD8J37xbwPTqXRxFM/l0+vUVD9fuSvoYruoTqyt33C4FZv1s4TQ=="],
+    "effect": ["effect@4.1.6", "", {}, "sha512-P3CxMsdcSCle/7/FnPILd9GJkNqGtduKam2LX9Xsb8LoOjmeQ9Kmsuh16JwtIthaxLyiTCOzUUt+PZsXIohl+A=="],
 
     "ejs": ["ejs@3.1.10", "", { "dependencies": { "jake": "^10.8.5" }, "bin": { "ejs": "bin/cli.js" } }, "sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA=="],
 
@@ -2687,6 +2687,8 @@
     "@cloudflare/workers-utils/chalk": ["chalk@5.3.0", "", {}, "sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w=="],
 
     "@cloudflare/workers-utils/dotenv": ["dotenv@16.3.1", "", {}, "sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ=="],
+
+    "@effect/platform-node/@effect/platform-node-shared": ["@effect/platform-node-shared@4.1.5", "", { "dependencies": { "@types/ws": "^8.18.2", "ws": "^8.23.0" }, "peerDependencies": { "effect": "^4.1.5" } }, "sha512-JzlrYe4uKaBFTWihBRXo2pDjkUVB39kQpKdGfXdbp7Co5sKT8hbcjOmdB5pg/WOYESdGTddd3fxD4lwlZELbZQ=="],
 
     "@effect/platform-node/undici": ["undici@8.13.1", "", {}, "sha512-Kt7EaPjh0s93lJH/PmW3d5rhkcpUa6fS3jqZ7+YGxNd9L7Xy/i827xe4C2uhhq+pJebM4tQOl5AgHmW11G5Skg=="],
 

@@ -15,7 +15,7 @@
     "@timmo001/groundwork-pwa": "0.51.1",
     "@timmo001/groundwork-tokens": "0.51.1",
     "@timmo001/groundwork-ui": "0.51.1",
-    "effect": "4.1.5"
+    "effect": "4.1.6"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.95.0",
