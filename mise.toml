@@ -7,7 +7,7 @@ golangci-lint = "2.15.0"
 node = "26.13.1"
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
-uv = "0.13.9"
+uv = "0.13.10"
 # The linters the hk pre-push hook runs, matching the shared lint workflows.
 hk = "2.14.0"
 pkl = "0.33.1"
