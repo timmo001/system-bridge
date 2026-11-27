@@ -60,7 +60,7 @@
     "@types/bun": "1.4.5",
     "effect": "4.1.7",
     "oxlint": "1.95.0",
-    "oxlint-tsgolint": "7.0.2008",
+    "oxlint-tsgolint": "7.0.2009",
     "prettier": "3.10.1",
     "typescript": "7.0.2"
   }
