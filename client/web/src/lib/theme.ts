@@ -17,13 +17,17 @@ import { themeOptions } from "./theme-options";
  * one. Loading waits for the first settings from the backend.
  */
 const hostStore: ThemeStore = {
+  // `pageTheme` loads straight away, while this module is still part of an
+  // import cycle with `./atoms` (through `./mobile`), so wait a tick for
+  // `registry` and `settings` to exist
   load: () =>
-    Effect.runPromise(AtomRegistry.getResult(registry, settings)).then(
-      (current) =>
+    Promise.resolve()
+      .then(() => Effect.runPromise(AtomRegistry.getResult(registry, settings)))
+      .then((current) =>
         current.theme === undefined || current.theme === ""
           ? null
           : current.theme,
-    ),
+      ),
   save: (text) => {
     registry.set(saveTheme, text);
 
