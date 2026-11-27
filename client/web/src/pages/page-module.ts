@@ -18,7 +18,7 @@ import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import "~/components/sb-timeseries";
 import { pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   audioDashboard,
   batteryDashboard,

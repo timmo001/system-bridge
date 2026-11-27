@@ -19,7 +19,7 @@ import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { connectionSettings, registry } from "~/lib/atoms";
 import { baseUrl } from "~/lib/backend";
 import { canInstall, install } from "~/lib/install";

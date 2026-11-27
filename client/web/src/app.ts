@@ -21,7 +21,7 @@ import { customElement, query } from "lit/decorators.js";
 import "./styles/tokens.css";
 import "./components/sb-share-dialog";
 import { icon, shared } from "./components/shared-styles";
-import { AtomController } from "./controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   connectionSettings,
   connectionStatus,

@@ -10,7 +10,7 @@ import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   cameraCapture,
   cameraCaptureSize,

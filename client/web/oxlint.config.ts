@@ -18,7 +18,13 @@ export default defineConfig({
     browser: true,
     es2021: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", "*.config.*"],
+  ignorePatterns: [
+    "dist/**",
+    "node_modules/**",
+    "*.config.*",
+    // Synced from Groundwork (sync.json), linted there; never edited here
+    "src/lit-effect/**",
+  ],
   rules: {
     "for-direction": "error",
     "no-async-promise-executor": "error",
@@ -194,14 +200,4 @@ export default defineConfig({
       { prefer: "type-imports", disallowTypeAnnotations: false },
     ],
   },
-  overrides: [
-    {
-      // The router's two casts: a route's name, params and search all come
-      // from the same entry of `routes`, which TypeScript can't correlate.
-      files: ["src/lib/router.ts"],
-      rules: {
-        "timmo/prefer-types-over-assertions": "off",
-      },
-    },
-  ],
 });

@@ -31,7 +31,7 @@ import "@timmo001/groundwork-ui/define/gw-range.ts";
 import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   actionResult,
   discordControl,

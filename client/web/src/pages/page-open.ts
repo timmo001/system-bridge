@@ -5,7 +5,7 @@ import { customElement, state } from "lit/decorators.js";
 
 import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, open, registry } from "~/lib/atoms";
 
 import { SbPage } from "./sb-page";

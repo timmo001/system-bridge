@@ -3,7 +3,7 @@ import { html, LitElement } from "lit";
 import { customElement } from "lit/decorators.js";
 
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { dashboardStyles } from "~/dashboards/shared";
 import { hyprlandEvents } from "~/lib/atoms";
 import { formatDateTime } from "~/lib/format";

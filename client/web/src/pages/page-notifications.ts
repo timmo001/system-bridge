@@ -8,7 +8,7 @@ import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import type { Segment } from "@timmo001/groundwork-ui/gw-segmented.ts";
 import "~/components/sb-recent-notifications";
 import { selectValue } from "~/lib/select";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, registry, sendNotification } from "~/lib/atoms";
 
 import { SbPage } from "./sb-page";

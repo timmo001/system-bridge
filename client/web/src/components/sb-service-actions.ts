@@ -13,7 +13,7 @@ import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-chip.ts";
 import "@timmo001/groundwork-ui/define/gw-dialog.ts";
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   registry,
   runAction,

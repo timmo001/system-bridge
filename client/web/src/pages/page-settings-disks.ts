@@ -12,7 +12,7 @@ import { customElement, state } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/define/gw-card.ts";
 import "@timmo001/groundwork-ui/define/gw-meter.ts";
 import { pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { diskMounts } from "~/lib/atoms";
 import { formatBytes } from "~/lib/format";
 

@@ -17,7 +17,7 @@ import { customElement, property } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/define/gw-menu-button.ts";
 import type { MenuItem } from "@timmo001/groundwork-ui/gw-menu-button.ts";
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   actionResult,
   registry,

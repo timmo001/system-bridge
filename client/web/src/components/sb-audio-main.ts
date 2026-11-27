@@ -16,7 +16,7 @@ import "@timmo001/groundwork-ui/define/gw-select.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
 import { icon, shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, audioControl, registry } from "~/lib/atoms";
 import { formatPercent } from "~/lib/format";
 

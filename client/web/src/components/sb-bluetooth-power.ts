@@ -5,7 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import { selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { registry, setBluetoothPower } from "~/lib/atoms";
 
 const powerOptions = [

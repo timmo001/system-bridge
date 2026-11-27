@@ -7,7 +7,7 @@ import { Schema } from "effect";
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { registry } from "~/lib/atoms";
 import type { Series } from "~/lib/history";
 import { HistoryRange, historyRange } from "~/lib/preferences";

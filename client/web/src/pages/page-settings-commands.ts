@@ -26,7 +26,7 @@ import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { GwSelect } from "@timmo001/groundwork-ui/gw-select.ts";
 import "~/components/sb-command-outcome";
 import { pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   actionResult,
   type CommandChange,

@@ -32,7 +32,7 @@ import "@timmo001/groundwork-ui/define/gw-select.ts";
 import type { OptionItem } from "@timmo001/groundwork-ui/gw-option-list.ts";
 import { selectValue } from "~/lib/select";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   actionResult,
   latestModuleData,

@@ -31,7 +31,7 @@ import "@timmo001/groundwork-ui/define/gw-copy.ts";
 import "~/components/sb-command-outcome";
 import "~/components/sb-trackpad";
 import { pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   actionResult,
   commandExecutions,

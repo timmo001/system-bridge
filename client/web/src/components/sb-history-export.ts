@@ -3,7 +3,7 @@ import type { ModuleName } from "@timmo001/effect-system-bridge";
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { registry } from "~/lib/atoms";
 import { exportHistory, historyModules } from "~/lib/history";
 import { moduleInfo } from "~/lib/navigation";

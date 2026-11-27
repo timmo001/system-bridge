@@ -15,7 +15,7 @@ import { customElement, state } from "lit/decorators.js";
 import "@timmo001/groundwork-ui/define/gw-button.ts";
 import "@timmo001/groundwork-ui/define/gw-card.ts";
 import { icon } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, addMediaDirectory, registry } from "~/lib/atoms";
 
 import { SbSettingsPage } from "./sb-settings-page";

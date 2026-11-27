@@ -3,7 +3,7 @@ import { Option } from "effect";
 import { AsyncResult } from "effect/reactivity";
 import type { PropertyValues } from "lit";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, registry, settings, updateSettings } from "~/lib/atoms";
 
 import { SbPage } from "./sb-page";

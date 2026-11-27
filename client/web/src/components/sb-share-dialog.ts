@@ -8,7 +8,7 @@ import { Match } from "effect";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, open, registry, setClipboard } from "~/lib/atoms";
 import {
   type Computer,

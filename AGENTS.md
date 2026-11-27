@@ -63,6 +63,7 @@ mise tasks
 
 - Uses the `~/` path alias and the `UIElement` mixin from `~/mixins`
 - Data comes from the `@timmo001/effect-system-bridge` connector, held in `effect/reactivity` Atoms (`src/lib/atoms.ts`) and read through `AtomController`; Effect Schema handles validation
+- `src/lit-effect/` (`AtomController`, the router and `@storage`) is synced from Groundwork's `lit-effect` item (`sync.json`) and left out of Oxlint; never edit it, change it in Groundwork and sync. The app's routes live in `src/lib/router.ts`
 - Checks: `cd client/web && bun run lint`, `bun run typecheck`, `bun run format:check`
 - Show what a deploy of the hosted copy would change with `mise run plan:client:web`. CI deploys it, so don't run `deploy:client:web` by hand unless asked
 

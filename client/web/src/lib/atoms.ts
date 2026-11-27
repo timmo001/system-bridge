@@ -45,6 +45,8 @@ import {
 } from "effect";
 import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
 
+import { defaultRegistry } from "~/lit-effect/atom-controller";
+
 import { needsExchange, ownKey, pairWithCode } from "./backend";
 import {
   type ConnectionSettings,
@@ -53,8 +55,11 @@ import {
   takePairCode,
 } from "./connection-settings";
 
-/** The registry every component reads its atoms from. */
-export const registry = AtomRegistry.make();
+/**
+ * The registry every component reads its atoms from: the one `AtomController`
+ * falls back to, as nothing provides another.
+ */
+export const registry = defaultRegistry;
 
 const MAX_RETRIES = 3;
 

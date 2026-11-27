@@ -13,7 +13,7 @@ import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
 import { pageStyles, shared } from "~/components/shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import {
   type ConnectionStatus,
   connectionStatus,

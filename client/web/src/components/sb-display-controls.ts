@@ -8,7 +8,7 @@ import "@timmo001/groundwork-ui/define/gw-range.ts";
 import "@timmo001/groundwork-ui/define/gw-segmented.ts";
 import { rangeTarget, selectValue } from "~/lib/select";
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { actionResult, displayControl, registry } from "~/lib/atoms";
 import { formatPercent } from "~/lib/format";
 

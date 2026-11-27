@@ -5,7 +5,7 @@ import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 import { registry } from "~/lib/atoms";
 import {
   linkReferences,

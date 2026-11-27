@@ -4,7 +4,7 @@ import { customElement, property } from "lit/decorators.js";
 import { Atom } from "effect/reactivity";
 
 import { shared } from "./shared-styles";
-import { AtomController } from "~/controllers/atom-controller";
+import { AtomController } from "~/lit-effect/atom-controller";
 
 /** Read until the alert has failures to watch. */
 const none = Atom.make((): readonly string[] => []);
