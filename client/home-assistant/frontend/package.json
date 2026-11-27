@@ -25,6 +25,6 @@
     "oxlint-tsgolint": "7.0.2008",
     "prettier": "3.10.1",
     "typescript": "7.0.2",
-    "vite": "8.3.8"
+    "vite": "8.4.0"
   }
 }
