@@ -13,10 +13,13 @@ Every route needs a [key](/api/#authentication), as `Authorization: Bearer`.
 | --- | --- |
 | `notifications` | System Bridge shows a notification, such as one sent with [`NOTIFICATION`](/api/websocket/control#send-notification). |
 | `updates` | A new System Bridge release is out. Checked every 6 hours, and pushed once for each release. Development builds never push this. |
+| `activity` | A [services](/features/services/) item is busy, such as a backup running, until it's done. |
 
 Each push carries its `kind`, which the Android app files it under. A notification's push also carries its `notification` id and its buttons as `actions`, each with an `id` and `label`, which the Android app shows and presses with [`NOTIFICATION_PRESS`](/api/websocket/control#press-a-notification-button). When the notification is closed on the computer, by hand or with [`NOTIFICATION_DISMISS`](/api/websocket/control#dismiss-notification), but not when it times out, Android clients are sent `{ "dismiss": "notification-47" }`, with no title, to clear it.
 
-A new subscription gets `updates` only; turn on `notifications` with the [preferences](#choose-what-a-client-gets). Each push's `link` opens a page of the web client, on the address the subscription was made from.
+An `activity` push is ongoing work, as Groundwork's push contract has it: `ongoing` carries an `id` (`service:` then the provider and item), a `status` (the item's summary, or `Running`), `started` (when it started, in Unix milliseconds, from the provider's busy list, or when System Bridge first saw it busy) and, when the item reports one, a `progress` of `{ "value": 40, "max": 100 }`. Phones show `started` as a timer counting up. Each push with the same `id` updates one notification, shown as a Live Update on Android 16. The last has `done: true` and a status of `Finished`, or `Failed` when the item's health is. A busy item is pushed again when its status changes or its progress moves 5 points, at most every 15 seconds.
+
+A new subscription gets `updates` and `activity`; turn on `notifications` with the [preferences](#choose-what-a-client-gets). Each push's `link` opens a page of the web client, on the address the subscription was made from.
 
 ## Get the VAPID key
 

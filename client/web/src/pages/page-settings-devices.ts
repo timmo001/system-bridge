@@ -50,6 +50,10 @@ const kindInfo: Readonly<
     heading: "Updates",
     description: "When a new System Bridge release is out",
   },
+  activity: {
+    heading: "Activity",
+    description: "Long-running work on this computer, such as a backup",
+  },
 };
 
 const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });

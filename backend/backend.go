@@ -36,6 +36,7 @@ import (
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/keys"
 	"github.com/timmo001/system-bridge/push"
+	"github.com/timmo001/system-bridge/services"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -170,6 +171,25 @@ func (b *Backend) Run(ctx context.Context) error {
 		slog.Warn("Failed to load push subscriptions, so nothing will be pushed", "error", err)
 	} else {
 		go push.WatchUpdates(ctx, pushStore)
+
+		// Busy services, such as a backup, show on the phones as ongoing
+		// work until they're done. Each update's pushes go out in order.
+		activity := push.NewActivity()
+		bus.GetInstance().Subscribe(bus.EventDataModuleUpdate, "push-activity", func(e bus.Event) {
+			module, ok := e.Data.(types.Module)
+			if !ok || module.Name != types.ModuleServices {
+				return
+			}
+			data, err := services.FromModuleData(module.Data)
+			if err != nil {
+				slog.Warn("Failed to read services data for activity pushes", "error", err)
+				return
+			}
+			for _, payload := range activity.Update(data) {
+				pushStore.Send(ctx, push.KindActivity, payload)
+			}
+		})
+		defer bus.GetInstance().Unsubscribe(bus.EventDataModuleUpdate, "push-activity")
 	}
 
 	// Every client hears when a notification System Bridge sent is sent,

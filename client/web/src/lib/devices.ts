@@ -16,7 +16,11 @@ export const PairingCode = Schema.Struct({
 
 export interface PairingCode extends Schema.Schema.Type<typeof PairingCode> {}
 
-export const PushKind = Schema.Literals(["notifications", "updates"]);
+export const PushKind = Schema.Literals([
+  "notifications",
+  "updates",
+  "activity",
+]);
 
 export type PushKind = Schema.Schema.Type<typeof PushKind>;
 

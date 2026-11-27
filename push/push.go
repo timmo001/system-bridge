@@ -30,14 +30,21 @@ const (
 	KindNotifications Kind = "notifications"
 	// KindUpdates says a new System Bridge release is out
 	KindUpdates Kind = "updates"
+	// KindActivity follows long-running work, such as a backup, as an
+	// ongoing notification
+	KindActivity Kind = "activity"
 )
 
 // Kinds is every kind
-var Kinds = []Kind{KindNotifications, KindUpdates}
+var Kinds = []Kind{KindNotifications, KindUpdates, KindActivity}
 
 // DefaultKinds is what a new subscription starts with: the computer's own
 // notifications are mirrored only once someone turns them on
-var DefaultKinds = []Kind{KindUpdates}
+var DefaultKinds = []Kind{KindUpdates, KindActivity}
+
+// offeredBefore is what every subscription was offered before push.json
+// kept track, so a kind someone turned off isn't turned on again
+var offeredBefore = []Kind{KindNotifications, KindUpdates}
 
 // ErrNotFound is returned for a client with no subscription
 var ErrNotFound = errors.New("no subscription for that client")
@@ -86,6 +93,26 @@ type Payload struct {
 	// Dismiss is the tag of a pushed notification to clear, as the one on
 	// the computer closed. A push with it has no title.
 	Dismiss string `json:"dismiss,omitempty"`
+	// Ongoing is work still running, which the push contract shows as one
+	// notification that each push with the same id updates, until it's done
+	Ongoing *Ongoing `json:"ongoing,omitempty"`
+}
+
+// Ongoing is the push contract's PushOngoing
+type Ongoing struct {
+	ID       string    `json:"id"`
+	Status   string    `json:"status"`
+	Progress *Progress `json:"progress,omitempty"`
+	// Started is when the work started, in Unix milliseconds, which phones
+	// show as a running timer
+	Started int64 `json:"started,omitempty"`
+	Done    bool  `json:"done,omitempty"`
+}
+
+// Progress is how far ongoing work has got, as value out of max
+type Progress struct {
+	Value float64 `json:"value"`
+	Max   float64 `json:"max"`
 }
 
 // Action is a button on a pushed notification
@@ -108,6 +135,9 @@ type state struct {
 	Subscriptions []Subscription `json:"subscriptions"`
 	// LastUpdate is the release last pushed, so each goes out once
 	LastUpdate string `json:"lastUpdate,omitempty"`
+	// Offered is every kind the subscriptions have been offered, so a new
+	// default kind is turned on for them once
+	Offered []Kind `json:"offered,omitempty"`
 }
 
 // Store keeps the subscriptions and VAPID keys in push.json
@@ -148,18 +178,49 @@ func open(path string) (*Store, error) {
 		})
 	}
 
+	changed := s.offerNewKinds()
+
 	if s.state.VAPID.Public == "" || s.state.VAPID.Private == "" {
 		private, public, err := webpush.GenerateVAPIDKeys()
 		if err != nil {
 			return nil, fmt.Errorf("could not make VAPID keys: %v", err)
 		}
 		s.state.VAPID = vapidKeys{Public: public, Private: private}
+		changed = true
+		slog.Info("Made the VAPID keys for push")
+	}
+
+	if changed {
 		if err := s.save(); err != nil {
 			return nil, err
 		}
-		slog.Info("Made the VAPID keys for push")
 	}
 	return s, nil
+}
+
+// offerNewKinds turns each default kind the subscriptions haven't been
+// offered yet on for them, once, and says whether anything changed
+func (s *Store) offerNewKinds() bool {
+	offered := s.state.Offered
+	if offered == nil {
+		offered = offeredBefore
+	}
+	if slices.Equal(offered, Kinds) {
+		return false
+	}
+	for _, kind := range DefaultKinds {
+		if slices.Contains(offered, kind) {
+			continue
+		}
+		for i := range s.state.Subscriptions {
+			if !slices.Contains(s.state.Subscriptions[i].Kinds, kind) {
+				s.state.Subscriptions[i].Kinds = append(s.state.Subscriptions[i].Kinds, kind)
+			}
+		}
+		slog.Info("Turned a new kind of push on for every phone", "kind", kind, "subscriptions", len(s.state.Subscriptions))
+	}
+	s.state.Offered = slices.Clone(Kinds)
+	return true
 }
 
 // save writes push.json; the caller holds mu, or nothing else has s yet
