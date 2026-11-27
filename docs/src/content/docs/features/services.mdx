@@ -197,3 +197,15 @@ Make it executable, then add it as a provider with no `act`:
   }
 }
 ```
+
+## Agent skill
+
+The optional `system-bridge-services` skill teaches a coding agent to do this for you. When the agent creates or changes a service, timer, scheduled job, backup, sync or check on a computer running System Bridge, it asks once whether you want it shown here, and adds nothing unless you say yes. You can also ask it straight out to show something here.
+
+It registers the item with a provider you already have where it can, or writes a small provider script. It always asks before changing `settings.json`, then checks the item shows up.
+
+Install it with the [Skills CLI](https://skills.sh):
+
+```bash
+npx skills add timmo001/system-bridge --skill system-bridge-services
+```
