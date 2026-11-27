@@ -52,8 +52,8 @@
     },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Notifications.kt": {
       "item": "android-shell",
-      "sha": "169983d6699e87804fa782dd80373958386f9db3",
-      "hash": "182ea323663048d17c61b86da7dae046a1b6e97b3006e2aad868706965102818"
+      "sha": "7206ac8440b4dd468e615671d0c898e2550d2711",
+      "hash": "4a0456d41a8fb68309fa8d97aad73638eb67fab12b6e45e0a7515c0348d86cac"
     },
     "client/android/shell/src/main/java/dev/timmo/groundwork/shell/Push.kt": {
       "item": "android-shell",

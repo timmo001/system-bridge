@@ -88,8 +88,10 @@ class Notifications(private val context: Context, private val config: ShellConfi
    * Ongoing work (`id`, `status`, `progress`, `started`, `done`): each call
    * with the same id updates one notification, promoted to a Live Update on
    * Android 16. With `started`, it shows a timer counting up from then.
+   * `subText` names where the work runs, such as which of several services
+   * it came from, beside the app's name.
    */
-  fun showOngoing(title: String, ongoing: JSONObject, link: String?): Boolean {
+  fun showOngoing(title: String, ongoing: JSONObject, link: String?, subText: String? = null): Boolean {
     if (!allowed) return false
 
     val id = ongoing.optString("id").ifEmpty { return false }
@@ -105,6 +107,7 @@ class Notifications(private val context: Context, private val config: ShellConfi
         .setColor(accent)
         .setContentTitle(title)
         .setContentText(status)
+        .apply { subText?.let(::setSubText) }
         .setContentIntent(tapIntent(link, id))
         .setOngoing(!done)
         .setAutoCancel(done)
