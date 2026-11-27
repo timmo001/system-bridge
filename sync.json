@@ -4,6 +4,7 @@
     "panel-flickable": "omarchy-plugin",
     "panel-header": "omarchy-plugin",
     "section-heading": "omarchy-plugin",
-    "android-shell": "client/android/shell"
+    "android-shell": "client/android/shell",
+    "lit-effect": "client/web/src/lit-effect"
   }
 }

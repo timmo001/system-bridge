@@ -114,6 +114,21 @@
       "item": "android-shell",
       "sha": "4dc3e278d686a7619ed217a07bc877b662e1414a",
       "hash": "5b88489e1ec02b22d4b4251d4be3a2875e48b8eaff9429d18470a1633ca33036"
+    },
+    "client/web/src/lit-effect/atom-controller.ts": {
+      "item": "lit-effect",
+      "sha": "dd855809377cfeda97077b0637456e4890d0b889",
+      "hash": "508923aa148a177c46fb47f3887063866aea561fbc1b63e013e2578888210f68"
+    },
+    "client/web/src/lit-effect/router.ts": {
+      "item": "lit-effect",
+      "sha": "dd855809377cfeda97077b0637456e4890d0b889",
+      "hash": "0eb61fbe994bfc5a661d93e31fe2aa2dde06ef9570834d991e9966cfd50146a9"
+    },
+    "client/web/src/lit-effect/storage.ts": {
+      "item": "lit-effect",
+      "sha": "dd855809377cfeda97077b0637456e4890d0b889",
+      "hash": "6f2f3fa47ca98c8b2fa07325e7245eb7570e33327eb91b4975082b49adbe5925"
     }
   }
 }
