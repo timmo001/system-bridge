@@ -2,7 +2,7 @@ import type { ModulesData } from "@timmo001/effect-system-bridge";
 
 import { css, html, nothing, type TemplateResult } from "lit";
 
-import type { DataTableState } from "~/components/sb-data-table";
+import { SbTable } from "~/components/sb-table";
 import type { TimeSeries } from "~/components/sb-timeseries";
 import { gpuHistory, type MetricHistory, type Series } from "~/lib/history";
 import { type LocationOf, type ModuleSearch, updateSearch } from "~/lib/router";
@@ -320,49 +320,41 @@ export const noData = (what: string) =>
     </gw-empty-state>
   </gw-card>`;
 
-/** A table's state from the page's URL, with defaults for what's missing. */
-export const tableState = (
+/** A table's sort and search from the page's URL, with defaults for what's missing. */
+export const tableView = (
   search: ModuleSearch,
   defaults: {
     readonly sort: string;
     readonly descending: boolean;
   },
-): DataTableState => ({
-  filter: search.q ?? "",
+) => ({
+  query: search.q ?? "",
   sort: search.sort ?? defaults.sort,
   descending:
     search.order === undefined ? defaults.descending : search.order === "desc",
-  page: search.page ?? 1,
-  pageSize: search.size,
 });
 
 /**
- * Keeps a table's changes in the URL, so a reload or a shared link shows the
- * same rows. Typing in the search replaces the history entry instead of
- * adding one for every key.
+ * Keeps a table's sort and search in the URL, so a reload or a shared link
+ * shows the same rows. Typing in the search replaces the history entry
+ * instead of adding one for every key.
  */
 export const onTableChange =
-  (location: LocationOf<"module">) =>
-  (event: CustomEvent<Partial<DataTableState>>) => {
-    const { filter, sort, descending, page, pageSize } = event.detail;
+  (location: LocationOf<"module">) => (event: Event) => {
+    const table = event.currentTarget;
+
+    if (!(table instanceof SbTable)) return;
+
     const current = location.search;
 
-    // Unchanged parts keep their value; an empty search or the first page
-    // drops out of the URL
+    // An empty search drops out of the URL
     updateSearch(
       location,
       {
-        q: filter === undefined ? current.q : filter || undefined,
-        sort: sort ?? current.sort,
-        order:
-          descending === undefined
-            ? current.order
-            : descending
-              ? "desc"
-              : "asc",
-        page: page === undefined ? current.page : page === 1 ? undefined : page,
-        size: pageSize ?? current.size,
+        q: table.query || undefined,
+        sort: table.sort || undefined,
+        order: table.descending ? "desc" : "asc",
       },
-      { replace: filter !== undefined },
+      { replace: table.query !== (current.q ?? "") },
     );
   };

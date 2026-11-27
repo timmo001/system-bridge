@@ -45,6 +45,7 @@ import type {
   Process,
   SystemFailedUnit,
 } from "@timmo001/effect-system-bridge";
+import type { TableColumn } from "@timmo001/groundwork-ui/gw-table.ts";
 import { Match } from "effect";
 import { html, nothing, type TemplateResult } from "lit";
 
@@ -56,11 +57,11 @@ import "~/components/sb-hyprland-option";
 import "@timmo001/groundwork-ui/define/gw-select.ts";
 import { selectValue } from "~/lib/select";
 import "~/components/sb-system-power";
-import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-omarchy-actions";
 import "~/components/sb-process-actions";
 import "~/components/sb-window-actions";
 import "~/components/sb-workspace-actions";
+import { cell } from "~/components/sb-table";
 import { icon } from "~/components/shared-styles";
 import {
   closeOmarchyMenu,
@@ -95,7 +96,7 @@ import {
   onTableChange,
   powerSeries,
   stat,
-  tableState,
+  tableView,
   yesNo,
 } from "./shared";
 
@@ -319,16 +320,13 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               ${
                 failedUnits.length === 0
                   ? html`<p class="muted small">Nothing has failed.</p>`
-                  : html`<sb-data-table
-                      local
+                  : html`<sb-table
                       label="Failed units"
-                      search-placeholder="Search failed units"
+                      search-label="Search failed units"
+                      sort="name"
                       .columns=${failedUnitColumns}
-                      .data=${failedUnits}
-                      .rowId=${failedUnitId}
-                      .wide=${["description"]}
-                      .state=${failedUnitTableState}
-                    ></sb-data-table>`
+                      .rows=${failedUnits}
+                    ></sb-table>`
               }
             </gw-card>`
       }
@@ -336,45 +334,27 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
   `;
 };
 
-const failedUnitColumns = (() => {
-  const column = dataTableColumns<SystemFailedUnit>();
+/** Text in the code font, such as a unit's or a bind's name. */
+const mono = (text: string) =>
+  cell(html`<span class="mono xsmall">${text}</span>`);
 
-  return column.columns([
-    column.accessor("name", {
-      header: "Unit",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.accessor("description", { header: "Description" }),
-    column.accessor("scope", {
-      header: "Scope",
-      cell: ({ getValue }) => (getValue() === "user" ? "User" : "System"),
-    }),
-    column.accessor((row) => row.result ?? "", {
-      id: "result",
-      header: "Result",
-    }),
-    column.accessor((row) => row.since ?? 0, {
-      id: "since",
-      header: "Failed",
-      cell: ({ getValue }) => {
-        const since = getValue();
-
-        return since === 0 ? "" : formatAgo(since * 1000);
-      },
-    }),
-  ]);
-})();
-
-const failedUnitId = (unit: SystemFailedUnit) => `${unit.scope}:${unit.name}`;
-
-const failedUnitTableState = {
-  filter: "",
-  sort: "name",
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
+const failedUnitColumns: readonly TableColumn<SystemFailedUnit>[] = [
+  { id: "name", header: "Unit", cell: (row) => mono(row.name) },
+  { id: "description", header: "Description", wide: true },
+  {
+    id: "scope",
+    header: "Scope",
+    cell: (row) => (row.scope === "user" ? "User" : "System"),
+  },
+  { id: "result", header: "Result", value: (row) => row.result ?? "" },
+  {
+    id: "since",
+    header: "Failed",
+    value: (row) => row.since ?? 0,
+    cell: (row) =>
+      row.since === null || row.since === 0 ? "" : formatAgo(row.since * 1000),
+  },
+];
 
 /**
  * A process's usage as a percentage. CPU usage already is one, but the
@@ -385,50 +365,42 @@ export const usage = (process: Process, key: "cpu_usage" | "memory_usage") =>
     ? (process.memory_usage ?? 0) * 100
     : (process.cpu_usage ?? 0);
 
-const processColumns = (() => {
-  const column = dataTableColumns<Process>();
-
-  return column.columns([
-    column.accessor((row) => row.name ?? "", {
-      id: "name",
-      header: "Name",
-      cell: ({ getValue, row }) =>
-        html`<span title=${row.original.path ?? ""}>${getValue()}</span>`,
-    }),
-    column.accessor("id", { header: "PID", sortDescFirst: false }),
-    column.accessor((row) => row.cpu_usage ?? 0, {
-      id: "cpu",
-      header: "CPU",
-      sortDescFirst: true,
-      cell: ({ getValue }) => formatPercent(getValue(), 1),
-    }),
-    column.accessor((row) => usage(row, "memory_usage"), {
-      id: "memory",
-      header: "Memory",
-      sortDescFirst: true,
-      cell: ({ getValue }) => formatPercent(getValue(), 1),
-    }),
-    column.accessor((row) => row.status ?? "", {
-      id: "status",
-      header: "Status",
-    }),
-    column.accessor((row) => row.username ?? "", {
-      id: "user",
-      header: "User",
-    }),
-    column.accessor((row) => row.path ?? "", { id: "path", header: "Path" }),
-    column.display({
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) =>
-        html`<sb-process-actions
-          .process=${row.original}
-        ></sb-process-actions>`,
-    }),
-  ]);
-})();
-
-const processId = (row: Process) => String(row.id);
+const processColumns: readonly TableColumn<Process>[] = [
+  {
+    id: "name",
+    header: "Name",
+    value: (row) => row.name ?? "",
+    cell: (row) =>
+      cell(html`<span title=${row.path ?? ""}>${row.name ?? ""}</span>`),
+  },
+  { id: "id", header: "PID", numeric: true },
+  {
+    id: "cpu",
+    header: "CPU",
+    numeric: true,
+    value: (row) => row.cpu_usage ?? 0,
+    cell: (row) => formatPercent(row.cpu_usage ?? 0, 1),
+  },
+  {
+    id: "memory",
+    header: "Memory",
+    numeric: true,
+    value: (row) => usage(row, "memory_usage"),
+    cell: (row) => formatPercent(usage(row, "memory_usage"), 1),
+  },
+  { id: "status", header: "Status", value: (row) => row.status ?? "" },
+  { id: "user", header: "User", value: (row) => row.username ?? "" },
+  { id: "path", header: "Path", wide: true, value: (row) => row.path ?? "" },
+  {
+    id: "actions",
+    header: "Actions",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (row) =>
+      cell(html`<sb-process-actions .process=${row}></sb-process-actions>`),
+  },
+];
 
 export const top = (
   processes: readonly Process[],
@@ -444,6 +416,8 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
   const processes = data.processes;
 
   if (processes === undefined) return noData("processes");
+
+  const view = tableView(location.search, { sort: "cpu", descending: true });
 
   const topList = (key: "cpu_usage" | "memory_usage") => {
     const busiest = top(processes, key);
@@ -478,20 +452,17 @@ export const processesDashboard = ({ data, location }: DashboardContext) => {
         heading="All processes"
         description="${processes.length} running"
       >
-        <sb-data-table
+        <sb-table
           label="Processes"
-          search-placeholder="Search processes"
+          search-label="Search processes"
+          row-key="id"
           .columns=${processColumns}
-          .data=${processes}
-          .rowId=${processId}
-          .numeric=${["id", "cpu", "memory"]}
-          .wide=${["path"]}
-          .state=${tableState(location.search, {
-            sort: "cpu",
-            descending: true,
-          })}
-          @table-state-change=${onTableChange(location)}
-        ></sb-data-table>
+          .rows=${processes}
+          .sort=${view.sort}
+          .descending=${view.descending}
+          .query=${view.query}
+          @change=${onTableChange(location)}
+        ></sb-table>
       </gw-card>
     </div>
   `;
@@ -594,6 +565,8 @@ const windowStates = (window: DesktopWindow, extra?: HyprlandWindow) => {
 };
 
 interface WindowRow {
+  /** The window's, which the table keeps each row's place by. */
+  readonly id: string;
   readonly window: DesktopWindow;
   readonly workspace: string;
   readonly extra: HyprlandWindow | undefined;
@@ -601,66 +574,82 @@ interface WindowRow {
   readonly workspaces: readonly DesktopWorkspace[];
 }
 
-const windowColumns = (() => {
-  const column = dataTableColumns<WindowRow>();
-
-  return column.columns([
-    column.accessor((row) => row.window.app ?? "", {
-      id: "app",
-      header: "App",
-      cell: ({ getValue, row }) =>
+const windowColumns: readonly TableColumn<WindowRow>[] = [
+  {
+    id: "app",
+    header: "App",
+    value: (row) => row.window.app ?? "",
+    cell: (row) =>
+      cell(
         html`<span class="row">
-          ${getValue()}
-          ${row.original.window.focused ? html`<gw-chip size="small" tone="accent">Focused</gw-chip>` : nothing}
+          ${row.window.app ?? ""}
+          ${row.window.focused ? html`<gw-chip size="small" tone="accent">Focused</gw-chip>` : nothing}
         </span>`,
-    }),
-    column.accessor((row) => row.window.title ?? "", {
-      id: "title",
-      header: "Title",
-      cell: ({ row }) => row.original.window.title ?? hiddenTitle,
-    }),
-    column.accessor("workspace", { header: "Workspace" }),
-    column.accessor((row) => row.window.display ?? "", {
-      id: "display",
-      header: "Display",
-    }),
-    column.accessor(
-      (row) =>
-        row.window.width === null || row.window.height === null
-          ? ""
-          : `${row.window.width} × ${row.window.height}`,
-      { id: "size", header: "Size", enableSorting: false },
-    ),
-    column.accessor((row) => row.window.pid ?? 0, {
-      id: "pid",
-      header: "PID",
-      cell: ({ getValue }) => getValue() || "",
-    }),
-    column.display({
-      id: "state",
-      header: "State",
-      cell: ({ row }) =>
+      ),
+  },
+  {
+    id: "title",
+    header: "Title",
+    wide: true,
+    value: (row) => row.window.title ?? "",
+    cell: (row) => cell(row.window.title ?? hiddenTitle),
+  },
+  { id: "workspace", header: "Workspace" },
+  {
+    id: "display",
+    header: "Display",
+    value: (row) => row.window.display ?? "",
+  },
+  {
+    id: "size",
+    header: "Size",
+    sortable: false,
+    value: (row) =>
+      row.window.width === null || row.window.height === null
+        ? ""
+        : `${row.window.width} × ${row.window.height}`,
+  },
+  {
+    id: "pid",
+    header: "PID",
+    numeric: true,
+    value: (row) => row.window.pid ?? 0,
+    cell: (row) => (row.window.pid ? String(row.window.pid) : ""),
+  },
+  {
+    id: "state",
+    header: "State",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (row) =>
+      cell(
         html`<span class="row wrap"
-          >${windowStates(row.original.window, row.original.extra)}</span
+          >${windowStates(row.window, row.extra)}</span
         >`,
-    }),
-    column.display({
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) =>
+      ),
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (row) =>
+      cell(
         html`<sb-window-actions
-          .window=${row.original.window}
-          .extra=${row.original.extra}
-          .compositor=${row.original.compositor}
-          .workspaces=${row.original.workspaces}
+          .window=${row.window}
+          .extra=${row.extra}
+          .compositor=${row.compositor}
+          .workspaces=${row.workspaces}
         ></sb-window-actions>`,
-    }),
-  ]);
-})();
-
-const windowId = (row: WindowRow) => row.window.id;
+      ),
+  },
+];
 
 interface WorkspaceRow {
+  /** The workspace's, which the table keeps each row's place by. */
+  readonly id: string;
   readonly workspace: DesktopWorkspace;
   readonly extra: HyprlandWorkspace | undefined;
   /** The app of the window last focused on it, on Hyprland. */
@@ -670,72 +659,65 @@ interface WorkspaceRow {
   readonly displays: readonly string[];
 }
 
-const workspaceColumns = (() => {
-  const column = dataTableColumns<WorkspaceRow>();
-
-  return column.columns([
-    column.accessor((row) => row.workspace.name ?? row.workspace.id, {
-      id: "name",
-      header: "Name",
-      cell: ({ getValue, row }) => {
-        const { workspace } = row.original;
-
-        return html`<span class="row">
-          ${getValue()}
+const workspaceColumns: readonly TableColumn<WorkspaceRow>[] = [
+  {
+    id: "name",
+    header: "Name",
+    value: (row) => row.workspace.name ?? row.workspace.id,
+    cell: ({ workspace }) =>
+      cell(
+        html`<span class="row">
+          ${workspace.name ?? workspace.id}
           ${workspace.focused ? html`<gw-chip size="small" tone="accent">Focused</gw-chip>` : workspace.active ? html`<gw-chip size="small">Shown</gw-chip>` : nothing}
-        </span>`;
-      },
-    }),
-    column.accessor((row) => row.workspace.display ?? "", {
-      id: "display",
-      header: "Display",
-    }),
-    column.accessor((row) => row.workspace.windows ?? 0, {
-      id: "windows",
-      header: "Windows",
-      cell: ({ row }) => row.original.workspace.windows ?? "",
-    }),
-    column.accessor((row) => row.extra?.layout ?? "", {
-      id: "layout",
-      header: "Layout",
-    }),
-    column.accessor("lastApp", { header: "Last window" }),
-    column.display({
-      id: "state",
-      header: "State",
-      cell: ({ row }) => {
-        const { workspace, extra } = row.original;
-
-        return html`<span class="row wrap">
+        </span>`,
+      ),
+  },
+  {
+    id: "display",
+    header: "Display",
+    value: (row) => row.workspace.display ?? "",
+  },
+  {
+    id: "windows",
+    header: "Windows",
+    numeric: true,
+    value: (row) => row.workspace.windows ?? 0,
+    cell: (row) =>
+      row.workspace.windows === null ? "" : String(row.workspace.windows),
+  },
+  { id: "layout", header: "Layout", value: (row) => row.extra?.layout ?? "" },
+  { id: "lastApp", header: "Last window" },
+  {
+    id: "state",
+    header: "State",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: ({ workspace, extra }) =>
+      cell(
+        html`<span class="row wrap">
           ${workspace.special ? html`<gw-chip size="small">Special</gw-chip>` : nothing}
           ${workspace.fullscreen ? html`<gw-chip size="small">Fullscreen</gw-chip>` : nothing}
           ${extra?.persistent ? html`<gw-chip size="small">Persistent</gw-chip>` : nothing}
-        </span>`;
-      },
-    }),
-    column.display({
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) =>
+        </span>`,
+      ),
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (row) =>
+      cell(
         html`<sb-workspace-actions
-          .workspace=${row.original.workspace}
-          .compositor=${row.original.compositor}
-          .displays=${row.original.displays}
+          .workspace=${row.workspace}
+          .compositor=${row.compositor}
+          .displays=${row.displays}
         ></sb-workspace-actions>`,
-    }),
-  ]);
-})();
-
-const workspaceId = (row: WorkspaceRow) => row.workspace.id;
-
-// Unsorted, so workspaces keep their ID order
-const workspaceTableState = {
-  filter: "",
-  sort: undefined,
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
+      ),
+  },
+];
 
 const reserved = (edges: HyprlandReserved) =>
   (
@@ -764,63 +746,64 @@ interface DisplayRow {
   readonly display: HyprlandDisplay;
 }
 
-const displayColumns = (() => {
-  const column = dataTableColumns<DisplayRow>();
-
-  return column.columns([
-    column.accessor("id", { header: "Display" }),
-    column.accessor((row) => row.display.scale, {
-      id: "scale",
-      header: "Scale",
-      cell: ({ getValue }) => `${formatNumber(getValue())}×`,
-    }),
-    column.accessor((row) => transformName(row.display.transform), {
-      id: "transform",
-      header: "Transform",
-    }),
-    column.accessor((row) => row.display.format ?? "", {
-      id: "format",
-      header: "Format",
-    }),
-    column.accessor((row) => row.display.colour_preset ?? "", {
-      id: "colour",
-      header: "Colour",
-    }),
-    column.accessor((row) => reserved(row.display.reserved), {
-      id: "reserved",
-      header: "Reserved",
-      enableSorting: false,
-    }),
-    column.accessor(
-      (row) =>
-        [
-          ...row.display.layers.background,
-          ...row.display.layers.bottom,
-          ...row.display.layers.top,
-          ...row.display.layers.overlay,
-        ].join(", "),
-      { id: "layers", header: "Layers", enableSorting: false },
-    ),
-    column.display({
-      id: "state",
-      header: "State",
-      cell: ({ row }) => {
-        const { display } = row.original;
-
-        return html`<span class="row wrap">
+const displayColumns: readonly TableColumn<DisplayRow>[] = [
+  { id: "id", header: "Display" },
+  {
+    id: "scale",
+    header: "Scale",
+    numeric: true,
+    value: (row) => row.display.scale,
+    cell: (row) => `${formatNumber(row.display.scale)}×`,
+  },
+  {
+    id: "transform",
+    header: "Transform",
+    value: (row) => transformName(row.display.transform),
+  },
+  { id: "format", header: "Format", value: (row) => row.display.format ?? "" },
+  {
+    id: "colour",
+    header: "Colour",
+    value: (row) => row.display.colour_preset ?? "",
+  },
+  {
+    id: "reserved",
+    header: "Reserved",
+    sortable: false,
+    value: (row) => reserved(row.display.reserved),
+  },
+  {
+    id: "layers",
+    header: "Layers",
+    sortable: false,
+    wide: true,
+    value: (row) =>
+      [
+        ...row.display.layers.background,
+        ...row.display.layers.bottom,
+        ...row.display.layers.top,
+        ...row.display.layers.overlay,
+      ].join(", "),
+  },
+  {
+    id: "state",
+    header: "State",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: ({ display }) =>
+      cell(
+        html`<span class="row wrap">
           ${display.dpms ? nothing : html`<gw-chip size="small">Off</gw-chip>`}
           ${display.vrr ? html`<gw-chip size="small">VRR</gw-chip>` : nothing}
           ${display.tearing ? html`<gw-chip size="small">Tearing</gw-chip>` : nothing}
           ${display.direct_scanout ? html`<gw-chip size="small">Direct scanout</gw-chip>` : nothing}
           ${display.mirror_of === null ? nothing : html`<gw-chip size="small">Mirrors ${display.mirror_of}</gw-chip>`}
           ${display.special_workspace === null ? nothing : html`<gw-chip size="small">Special workspace shown</gw-chip>`}
-        </span>`;
-      },
-    }),
-  ]);
-})();
-
-const displayId = (row: DisplayRow) => row.id;
+        </span>`,
+      ),
+  },
+];
 
 interface InputRow {
   readonly name: string;
@@ -829,27 +812,22 @@ interface InputRow {
   readonly main: boolean;
 }
 
-const inputColumns = (() => {
-  const column = dataTableColumns<InputRow>();
-
-  return column.columns([
-    column.accessor("name", {
-      header: "Name",
-      cell: ({ getValue, row }) =>
+const inputColumns: readonly TableColumn<InputRow>[] = [
+  {
+    id: "name",
+    header: "Name",
+    wide: true,
+    cell: (row) =>
+      cell(
         html`<span class="row">
-          <span class="mono xsmall">${getValue()}</span>
-          ${row.original.main ? html`<gw-chip size="small" tone="accent">Last used</gw-chip>` : nothing}
+          <span class="mono xsmall">${row.name}</span>
+          ${row.main ? html`<gw-chip size="small" tone="accent">Last used</gw-chip>` : nothing}
         </span>`,
-    }),
-    column.accessor("type", { header: "Type" }),
-    column.accessor("details", {
-      header: "Details",
-      enableSorting: false,
-    }),
-  ]);
-})();
-
-const inputId = (row: InputRow) => `${row.type}:${row.name}`;
+      ),
+  },
+  { id: "type", header: "Type" },
+  { id: "details", header: "Details", sortable: false, wide: true },
+];
 
 const inputRows = (hyprland: HyprlandData): InputRow[] => [
   ...hyprland.keyboards.map((keyboard) => ({
@@ -912,88 +890,79 @@ const mouseButtons = new Map([
 const bindKeys = (bind: HyprlandBind) =>
   [...bind.modifiers, mouseButtons.get(bind.key) ?? bind.key].join(" + ");
 
-const bindColumns = (() => {
-  const column = dataTableColumns<HyprlandBind>();
+/** What a bind does, such as `exec kitty`, or Lua for a Lua bind. */
+const bindAction = (bind: HyprlandBind) =>
+  bind.dispatcher === null
+    ? "Lua"
+    : [bind.dispatcher, bind.argument].filter(Boolean).join(" ");
 
-  return column.columns([
-    column.accessor(bindKeys, {
-      id: "keys",
-      header: "Keys",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.accessor((bind) => bind.description ?? "", {
-      id: "description",
-      header: "Description",
-    }),
-    column.accessor(
-      (bind) =>
-        bind.dispatcher === null
-          ? "Lua"
-          : [bind.dispatcher, bind.argument].filter(Boolean).join(" "),
-      {
-        id: "action",
-        header: "Action",
-        cell: ({ getValue }) =>
-          html`<span class="mono xsmall">${getValue()}</span>`,
-      },
-    ),
-    column.accessor((bind) => bind.submap ?? "", {
-      id: "submap",
-      header: "Submap",
-    }),
-    column.display({
-      id: "flags",
-      header: "Flags",
-      cell: ({ row }) => {
-        const bind = row.original;
-
-        return html`<span class="row wrap">
+const bindColumns: readonly TableColumn<HyprlandBind>[] = [
+  {
+    id: "keys",
+    header: "Keys",
+    value: bindKeys,
+    cell: (bind) => mono(bindKeys(bind)),
+  },
+  {
+    id: "description",
+    header: "Description",
+    wide: true,
+    value: (bind) => bind.description ?? "",
+  },
+  {
+    id: "action",
+    header: "Action",
+    wide: true,
+    value: bindAction,
+    cell: (bind) => mono(bindAction(bind)),
+  },
+  { id: "submap", header: "Submap", value: (bind) => bind.submap ?? "" },
+  {
+    id: "flags",
+    header: "Flags",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (bind) =>
+      cell(
+        html`<span class="row wrap">
           ${bind.locked ? html`<gw-chip size="small">Lock screen</gw-chip>` : nothing}
           ${bind.release ? html`<gw-chip size="small">On release</gw-chip>` : nothing}
           ${bind.repeat ? html`<gw-chip size="small">Repeats</gw-chip>` : nothing}
           ${bind.long_press ? html`<gw-chip size="small">Long press</gw-chip>` : nothing}
           ${bind.non_consuming ? html`<gw-chip size="small">Passes through</gw-chip>` : nothing}
-        </span>`;
-      },
-    }),
-  ]);
-})();
-
-const bindId = (bind: HyprlandBind, index: number) =>
-  `${bind.submap ?? ""}:${bindKeys(bind)}:${index}`;
+        </span>`,
+      ),
+  },
+];
 
 interface ShortcutRow {
   readonly shortcut: HyprlandGlobalShortcut;
   readonly keys: string;
 }
 
-const shortcutColumns = (() => {
-  const column = dataTableColumns<ShortcutRow>();
-
-  return column.columns([
-    column.accessor((row) => row.shortcut.description, {
-      id: "description",
-      header: "Description",
-    }),
-    column.accessor((row) => row.shortcut.name, {
-      id: "name",
-      header: "Name",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.accessor("keys", {
-      header: "Keys",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.display({
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) => {
-        const { shortcut } = row.original;
-
-        return html`<gw-action-button
+const shortcutColumns: readonly TableColumn<ShortcutRow>[] = [
+  {
+    id: "description",
+    header: "Description",
+    value: (row) => row.shortcut.description,
+  },
+  {
+    id: "name",
+    header: "Name",
+    value: (row) => row.shortcut.name,
+    cell: (row) => mono(row.shortcut.name),
+  },
+  { id: "keys", header: "Keys", cell: (row) => mono(row.keys) },
+  {
+    id: "actions",
+    header: "Action",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: ({ shortcut }) =>
+      cell(
+        html`<gw-action-button
           variant="neutral"
           appearance="plain"
           size="small"
@@ -1001,13 +970,10 @@ const shortcutColumns = (() => {
           icon=${mdiPlay}
           .action=${runAction(runGlobalShortcut(shortcut.name))}
           >${shortcut.description || shortcut.name}</gw-action-button
-        >`;
-      },
-    }),
-  ]);
-})();
-
-const shortcutId = (row: ShortcutRow) => row.shortcut.name;
+        >`,
+      ),
+  },
+];
 
 /**
  * Each shortcut with the keys bound to it. Only binds that use the global
@@ -1024,40 +990,6 @@ const shortcutRows = (hyprland: HyprlandData): ShortcutRow[] =>
       .map(bindKeys)
       .join(", "),
   }));
-
-// Where the tables below start; they keep their own changes
-const displayTableState = {
-  filter: "",
-  sort: "id",
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
-
-const inputTableState = {
-  filter: "",
-  sort: "type",
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
-
-const shortcutTableState = {
-  filter: "",
-  sort: "description",
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
-
-// Unsorted, so binds keep the config's order
-const bindTableState = {
-  filter: "",
-  sort: undefined,
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
 
 const directionIcons = [
   ["left", "Left", mdiArrowLeft],
@@ -1148,55 +1080,50 @@ const dispatcherCard = () => {
   `;
 };
 
-const omarchyMenuColumns = (() => {
-  const column = dataTableColumns<OmarchyMenu>();
-
-  return column.columns([
-    column.accessor("name", { header: "Name" }),
-    column.accessor("id", {
-      header: "Route",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.accessor((menu) => menu.aliases.join(", "), {
-      id: "aliases",
-      header: "Aliases",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.display({
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) =>
+const omarchyMenuColumns: readonly TableColumn<OmarchyMenu>[] = [
+  { id: "name", header: "Name" },
+  { id: "id", header: "Route", cell: (menu) => mono(menu.id) },
+  {
+    id: "aliases",
+    header: "Aliases",
+    wide: true,
+    value: (menu) => menu.aliases.join(", "),
+    cell: (menu) => mono(menu.aliases.join(", ")),
+  },
+  {
+    id: "actions",
+    header: "Action",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (menu) =>
+      cell(
         html`<sb-omarchy-actions
           kind="menu"
-          .item=${row.original}
+          .item=${menu}
         ></sb-omarchy-actions>`,
-    }),
-  ]);
-})();
+      ),
+  },
+];
 
-const omarchyPanelColumns = (() => {
-  const column = dataTableColumns<OmarchyPanel>();
-
-  return column.columns([
-    column.accessor("name", { header: "Name" }),
-    column.accessor("id", {
-      header: "ID",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.display({
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) =>
+const omarchyPanelColumns: readonly TableColumn<OmarchyPanel>[] = [
+  { id: "name", header: "Name" },
+  { id: "id", header: "ID", cell: (panel) => mono(panel.id) },
+  {
+    id: "actions",
+    header: "Action",
+    sortable: false,
+    searchable: false,
+    value: () => null,
+    cell: (panel) =>
+      cell(
         html`<sb-omarchy-actions
           kind="panel"
-          .item=${row.original}
+          .item=${panel}
         ></sb-omarchy-actions>`,
-    }),
-  ]);
-})();
+      ),
+  },
+];
 
 /** How a function is called, such as `seek(seconds: int): void`. */
 const omarchySignature = (fn: OmarchyFunction) =>
@@ -1204,40 +1131,20 @@ const omarchySignature = (fn: OmarchyFunction) =>
     .map((argument) => `${argument.name}: ${argument.type}`)
     .join(", ")}): ${fn.returns}`;
 
-const omarchyTargetColumns = (() => {
-  const column = dataTableColumns<OmarchyTarget>();
+/** A target's functions, as they're called. */
+const omarchyFunctions = (target: OmarchyTarget) =>
+  target.functions.map(omarchySignature).join(", ");
 
-  return column.columns([
-    column.accessor("name", {
-      header: "Target",
-      cell: ({ getValue }) =>
-        html`<span class="mono xsmall">${getValue()}</span>`,
-    }),
-    column.accessor(
-      (target) => target.functions.map(omarchySignature).join(", "),
-      {
-        id: "functions",
-        header: "Functions",
-        cell: ({ getValue }) =>
-          html`<span class="mono xsmall">${getValue()}</span>`,
-      },
-    ),
-  ]);
-})();
-
-const omarchyId = (item: OmarchyMenu | OmarchyPanel | OmarchyTarget) =>
-  "id" in item ? item.id : item.name;
-
-const omarchyTableState = {
-  filter: "",
-  sort: "name",
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
-
-// By route, which groups them by where they sit in the menu
-const omarchyMenuTableState = { ...omarchyTableState, sort: "id" };
+const omarchyTargetColumns: readonly TableColumn<OmarchyTarget>[] = [
+  { id: "name", header: "Target", cell: (target) => mono(target.name) },
+  {
+    id: "functions",
+    header: "Functions",
+    wide: true,
+    value: omarchyFunctions,
+    cell: (target) => mono(omarchyFunctions(target)),
+  },
+];
 
 /**
  * Cards only one desktop has, under their own heading, so the cards every
@@ -1280,42 +1187,38 @@ const omarchyCards = (omarchy: OmarchyData) => html`
       .action=${runAction(closeOmarchyMenu)}
       >Close menu</gw-action-button
     >
-    <sb-data-table
-      local
+    <!-- By route, which groups them by where they sit in the menu -->
+    <sb-table
       label="Omarchy menus"
-      search-placeholder="Search menus"
+      search-label="Search menus"
+      sort="id"
+      row-key="id"
       .columns=${omarchyMenuColumns}
-      .data=${omarchy.menus}
-      .rowId=${omarchyId}
-      .wide=${["aliases"]}
-      .state=${omarchyMenuTableState}
-    ></sb-data-table>
+      .rows=${omarchy.menus}
+    ></sb-table>
   </gw-card>
   <gw-card
     heading="Panels"
     description="${omarchy.panels.length} from enabled plugins"
   >
-    <sb-data-table
-      local
+    <sb-table
       label="Omarchy panels"
-      search-placeholder="Search panels"
+      search-label="Search panels"
+      sort="name"
+      row-key="id"
       .columns=${omarchyPanelColumns}
-      .data=${omarchy.panels}
-      .rowId=${omarchyId}
-      .state=${omarchyTableState}
-    ></sb-data-table>
+      .rows=${omarchy.panels}
+    ></sb-table>
   </gw-card>
   <gw-card heading="Shell IPC" description="${omarchy.targets.length} targets">
-    <sb-data-table
-      local
+    <sb-table
       label="Omarchy shell IPC targets"
-      search-placeholder="Search targets"
+      search-label="Search targets"
+      sort="name"
+      row-key="name"
       .columns=${omarchyTargetColumns}
-      .data=${omarchy.targets}
-      .rowId=${omarchyId}
-      .wide=${["functions"]}
-      .state=${omarchyTableState}
-    ></sb-data-table>
+      .rows=${omarchy.targets}
+    ></sb-table>
   </gw-card>
 `;
 
@@ -1397,55 +1300,44 @@ const hyprlandCards = (hyprland: HyprlandData) => {
       <sb-hyprland-tools></sb-hyprland-tools>
     </gw-card>
     <gw-card heading="Displays" description="As Hyprland sees them">
-      <sb-data-table
-        local
+      <sb-table
         label="Displays"
-        search-placeholder="Search displays"
+        search-label="Search displays"
+        sort="id"
+        row-key="id"
         .columns=${displayColumns}
-        .data=${displays}
-        .rowId=${displayId}
-        .numeric=${["scale"]}
-        .wide=${["layers"]}
-        .state=${displayTableState}
-      ></sb-data-table>
+        .rows=${displays}
+      ></sb-table>
     </gw-card>
     <gw-card heading="Global shortcuts" description="Registered by apps">
-      <sb-data-table
-        local
+      <sb-table
         label="Global shortcuts"
-        search-placeholder="Search shortcuts"
+        search-label="Search shortcuts"
+        sort="description"
         .columns=${shortcutColumns}
-        .data=${shortcuts}
-        .rowId=${shortcutId}
-        .state=${shortcutTableState}
-      ></sb-data-table>
+        .rows=${shortcuts}
+      ></sb-table>
     </gw-card>
     <gw-card heading="Input devices" description="${inputs.length} connected">
-      <sb-data-table
-        local
+      <sb-table
         label="Input devices"
-        search-placeholder="Search input devices"
+        search-label="Search input devices"
+        sort="type"
         .columns=${inputColumns}
-        .data=${inputs}
-        .rowId=${inputId}
-        .wide=${["details", "name"]}
-        .state=${inputTableState}
-      ></sb-data-table>
+        .rows=${inputs}
+      ></sb-table>
     </gw-card>
     <gw-card
       heading="Key bindings"
       description="${hyprland.binds.length} in the config"
     >
-      <sb-data-table
-        local
+      <!-- Unsorted, so binds keep the config's order -->
+      <sb-table
         label="Key bindings"
-        search-placeholder="Search key bindings"
+        search-label="Search key bindings"
         .columns=${bindColumns}
-        .data=${hyprland.binds}
-        .rowId=${bindId}
-        .wide=${["action", "description"]}
-        .state=${bindTableState}
-      ></sb-data-table>
+        .rows=${hyprland.binds}
+      ></sb-table>
     </gw-card>
   `;
 };
@@ -1488,7 +1380,13 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     (window) => window.id === desktop.focused_window,
   );
 
+  const windowView = tableView(location.search, {
+    sort: "app",
+    descending: false,
+  });
+
   const rows = desktop.windows.map((window): WindowRow => ({
+    id: window.id,
     window,
     workspace:
       window.workspace === null
@@ -1521,6 +1419,7 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     const extra = hyprland?.workspaces[workspace.id];
 
     return {
+      id: workspace.id,
       workspace,
       extra,
       lastApp: apps.get(extra?.last_window ?? "") ?? "",
@@ -1615,35 +1514,30 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
         </div>
       </gw-card>
       <gw-card heading="Windows" description="${desktop.windows.length} open">
-        <sb-data-table
+        <sb-table
           label="Windows"
-          search-placeholder="Search windows"
+          search-label="Search windows"
+          row-key="id"
           .columns=${windowColumns}
-          .data=${rows}
-          .rowId=${windowId}
-          .numeric=${["pid"]}
-          .wide=${["title"]}
-          .state=${tableState(location.search, {
-            sort: "app",
-            descending: false,
-          })}
-          @table-state-change=${onTableChange(location)}
-        ></sb-data-table>
+          .rows=${rows}
+          .sort=${windowView.sort}
+          .descending=${windowView.descending}
+          .query=${windowView.query}
+          @change=${onTableChange(location)}
+        ></sb-table>
       </gw-card>
       ${
         desktop.workspaces.length === 0
           ? nothing
           : html`<gw-card heading="Workspaces">
-              <sb-data-table
-                local
+              <!-- Unsorted, so workspaces keep their ID order -->
+              <sb-table
                 label="Workspaces"
-                search-placeholder="Search workspaces"
+                search-label="Search workspaces"
+                row-key="id"
                 .columns=${workspaceColumns}
-                .data=${workspaces}
-                .rowId=${workspaceId}
-                .numeric=${["windows"]}
-                .state=${workspaceTableState}
-              ></sb-data-table>
+                .rows=${workspaces}
+              ></sb-table>
             </gw-card>`
       }
       <gw-card class="half" heading="Keyboard layout">

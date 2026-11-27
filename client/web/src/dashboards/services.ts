@@ -8,11 +8,12 @@ import type {
   ServiceProvider,
   ServiceStat,
 } from "@timmo001/effect-system-bridge";
+import type { TableColumn } from "@timmo001/groundwork-ui/gw-table.ts";
 import { Option, Schema } from "effect";
 import { html, nothing } from "lit";
 
-import { dataTableColumns } from "~/components/sb-data-table";
 import "~/components/sb-service-actions";
+import "~/components/sb-table";
 import {
   formatAgo,
   formatBytes,
@@ -95,37 +96,22 @@ const statValue = (item: ServiceStat): string =>
       (item.unit === null ? `${value}` : `${value} ${item.unit}`),
   });
 
-const listColumns = (() => {
-  const column = dataTableColumns<ServiceListItem>();
-
-  return column.columns([
-    column.accessor("label", { header: "Name" }),
-    column.accessor("value", { header: "Value" }),
-  ]);
-})();
+const listColumns: readonly TableColumn<ServiceListItem>[] = [
+  { id: "label", header: "Name", wide: true },
+  { id: "value", header: "Value" },
+];
 
 // In the order the provider sent the rows until someone sorts them
-const listTableState = {
-  filter: "",
-  sort: undefined,
-  descending: false,
-  page: 1,
-  pageSize: undefined,
-};
-
 const listSection = (item: ServiceItem, list: ServiceList) => {
   const heading = list.label || list.id;
 
   return html`<h3 class="small">${heading}</h3>
-    <sb-data-table
-      local
+    <sb-table
       label="${item.label} ${heading}"
-      search-placeholder="Search ${heading.toLowerCase()}"
+      search-label="Search ${heading.toLowerCase()}"
       .columns=${listColumns}
-      .data=${list.items}
-      .wide=${["label"]}
-      .state=${listTableState}
-    ></sb-data-table>`;
+      .rows=${list.items}
+    ></sb-table>`;
 };
 
 const itemCard = (item: ServiceItem) => {

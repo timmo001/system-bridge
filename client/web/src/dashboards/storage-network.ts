@@ -20,12 +20,13 @@ import type {
   BluetoothDevice,
   NetworkConnection,
 } from "@timmo001/effect-system-bridge";
+import type { TableColumn } from "@timmo001/groundwork-ui/gw-table.ts";
 import { html, nothing } from "lit";
 
 import "~/components/sb-action-alert";
 import "~/components/sb-bluetooth-actions";
 import "~/components/sb-bluetooth-power";
-import { dataTableColumns } from "~/components/sb-data-table";
+import "~/components/sb-table";
 import { icon } from "~/components/shared-styles";
 import { bluetoothFailures } from "~/lib/atoms";
 import {
@@ -44,7 +45,7 @@ import {
   noData,
   onTableChange,
   stat,
-  tableState,
+  tableView,
 } from "./shared";
 
 const lastValue = (samples: readonly { readonly value: number }[]) =>
@@ -242,33 +243,18 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
   `;
 };
 
-const connectionColumns = (() => {
-  const column = dataTableColumns<NetworkConnection>();
-
-  return column.columns([
-    column.accessor((row) => row.laddr ?? "", {
-      id: "local",
-      header: "Local address",
-    }),
-    column.accessor((row) => row.raddr ?? "", {
-      id: "remote",
-      header: "Remote address",
-    }),
-    column.accessor((row) => row.status ?? "", {
-      id: "status",
-      header: "Status",
-    }),
-    column.accessor((row) => row.pid ?? -1, {
-      id: "pid",
-      header: "PID",
-      cell: ({ getValue }) => (getValue() < 0 ? "-" : String(getValue())),
-    }),
-  ]);
-})();
-
-/** Connections have no ID, so this combines what tells them apart. */
-const connectionId = (row: NetworkConnection, index: number) =>
-  `${row.fd ?? ""}-${row.laddr ?? ""}-${row.raddr ?? ""}-${index}`;
+const connectionColumns: readonly TableColumn<NetworkConnection>[] = [
+  { id: "local", header: "Local address", value: (row) => row.laddr ?? "" },
+  { id: "remote", header: "Remote address", value: (row) => row.raddr ?? "" },
+  { id: "status", header: "Status", value: (row) => row.status ?? "" },
+  {
+    id: "pid",
+    header: "PID",
+    numeric: true,
+    value: (row) => row.pid ?? -1,
+    cell: (row) => (row.pid === null || row.pid < 0 ? "-" : String(row.pid)),
+  },
+];
 
 export const networksDashboard = ({
   data,
@@ -280,6 +266,11 @@ export const networksDashboard = ({
   if (networks === undefined) return noData("networks");
 
   const io = networks.io;
+
+  const connectionView = tableView(location.search, {
+    sort: "status",
+    descending: false,
+  });
 
   // A rate with its direction's arrow, once there are two readings to give one
   const rate = (
@@ -388,19 +379,16 @@ export const networksDashboard = ({
         heading="Connections"
         description="${networks.connections.length} open"
       >
-        <sb-data-table
+        <sb-table
           label="Network connections"
-          search-placeholder="Search connections"
+          search-label="Search connections"
           .columns=${connectionColumns}
-          .data=${networks.connections}
-          .rowId=${connectionId}
-          .numeric=${["pid"]}
-          .state=${tableState(location.search, {
-            sort: "status",
-            descending: false,
-          })}
-          @table-state-change=${onTableChange(location)}
-        ></sb-data-table>
+          .rows=${networks.connections}
+          .sort=${connectionView.sort}
+          .descending=${connectionView.descending}
+          .query=${connectionView.query}
+          @change=${onTableChange(location)}
+        ></sb-table>
       </gw-card>
     </div>
   `;

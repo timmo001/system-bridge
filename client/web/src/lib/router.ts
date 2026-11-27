@@ -21,12 +21,7 @@ export const SortOrder = Schema.Literals(["asc", "desc"]);
 
 export type SortOrder = typeof SortOrder.Type;
 
-const PageNumber = Schema.NumberFromString.check(
-  Schema.isInt(),
-  Schema.isGreaterThanOrEqualTo(1),
-);
-
-/** A module page: its view, and the state of any table it shows. */
+/** A module page: its view, and the sort and search of any table it shows. */
 export const ModuleSearch = Schema.Struct({
   view: Schema.optional(DataView),
   /** Filters a table's rows. */
@@ -34,8 +29,6 @@ export const ModuleSearch = Schema.Struct({
   /** The column a table is sorted by. */
   sort: Schema.optional(Schema.String),
   order: Schema.optional(SortOrder),
-  page: Schema.optional(PageNumber),
-  size: Schema.optional(PageNumber),
 });
 
 export interface ModuleSearch extends Schema.Schema.Type<typeof ModuleSearch> {}
