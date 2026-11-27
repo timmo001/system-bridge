@@ -2,8 +2,9 @@
  * System Bridge's pushes. The shell shows a push as a plain notification;
  * the app shows a paired computer's own: named for the computer it came
  * from, in that computer's category for its kind, with its buttons, and
- * cleared when the one on the computer closes.
- * Anything else, such as ongoing work, goes to the shell.
+ * cleared when the one on the computer closes. Ongoing work, such as a
+ * backup, shows through the shell, named for its computer and kept apart
+ * from the same work on another one. Anything else goes to the shell.
  */
 package dev.timmo.systembridge
 
@@ -26,8 +27,24 @@ class PushService : ShellPushService() {
     val payload = runCatching { JSONObject(message.content.decodeToString()) }.getOrNull()
     val server = Servers.forPush(this, instance)
 
-    if (!message.decrypted || payload == null || server == null || payload.has("ongoing")) {
+    if (!message.decrypted || payload == null || server == null) {
       super.onMessage(message, instance)
+      return
+    }
+
+    // Every computer can report the same work, such as the same provider's
+    // backup, so its id is made the computer's own
+    payload.optJSONObject("ongoing")?.let { ongoing ->
+      val title = payload.optString("title").ifEmpty { return }
+      val id = ongoing.optString("id").ifEmpty { return }
+
+      Notifications(this, ShellConfig.load(this))
+        .showOngoing(
+          title,
+          JSONObject(ongoing.toString()).put("id", "${server.id}:$id"),
+          payload.optString("link").ifEmpty { null },
+          server.name,
+        )
       return
     }
 
