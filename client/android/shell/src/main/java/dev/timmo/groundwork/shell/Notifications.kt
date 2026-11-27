@@ -85,8 +85,9 @@ class Notifications(private val context: Context, private val config: ShellConfi
   }
 
   /**
-   * Ongoing work (`id`, `status`, `progress`, `done`): each call with the
-   * same id updates one notification, promoted to a Live Update on Android 16.
+   * Ongoing work (`id`, `status`, `progress`, `started`, `done`): each call
+   * with the same id updates one notification, promoted to a Live Update on
+   * Android 16. With `started`, it shows a timer counting up from then.
    */
   fun showOngoing(title: String, ongoing: JSONObject, link: String?): Boolean {
     if (!allowed) return false
@@ -97,6 +98,7 @@ class Notifications(private val context: Context, private val config: ShellConfi
     val progress = ongoing.optJSONObject("progress")
     val value = progress?.optInt("value") ?: 0
     val max = progress?.optInt("max") ?: 0
+    val started = ongoing.optLong("started", 0L)
     val builder =
       Notification.Builder(context, CHANNEL_ONGOING)
         .setSmallIcon(R.drawable.gw_notification_icon)
@@ -107,6 +109,11 @@ class Notifications(private val context: Context, private val config: ShellConfi
         .setOngoing(!done)
         .setAutoCancel(done)
         .setOnlyAlertOnce(true)
+
+    // The system ticks the timer itself, so it needs no push to stay right
+    if (started > 0 && !done) {
+      builder.setWhen(started).setShowWhen(true).setUsesChronometer(true)
+    }
 
     if (!done && Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
       val style = Notification.ProgressStyle().setProgressIndeterminate(progress == null)
